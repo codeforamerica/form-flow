@@ -1,7 +1,7 @@
 package formflow.library.config;
 
+import formflow.library.FormFlowProperties;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -14,13 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfiguration>> {
+  private final FormFlowProperties properties;
 
-  @Value("${form-flow.path:flows-config.yaml}")
-  String configPath;
+//  @Value("${form-flow.path:flows-config.yaml}")
+//  String configPath;
+
+
+  public FlowsConfigurationFactory(FormFlowProperties properties) {
+    this.properties = properties;
+  }
+
+  public void getConfigPath() {
+    System.out.println("drumroll please... " + properties.getPath());
+  }
 
   @Override
   public List<FlowConfiguration> getObject() {
-    ClassPathResource classPathResource = new ClassPathResource(configPath);
+    System.out.println("what is this... " + properties.getPath());
+    ClassPathResource classPathResource = new ClassPathResource(properties.getPath());
 
     LoaderOptions loaderOptions = new LoaderOptions();
     loaderOptions.setAllowDuplicateKeys(false);
