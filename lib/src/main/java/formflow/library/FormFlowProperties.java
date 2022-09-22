@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "form-flow")
+@ConfigurationProperties("form-flow")
 @Getter
 @Setter
 public class FormFlowProperties {
