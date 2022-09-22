@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
-@EnableConfigurationProperties(FormFlowProperties.class)
 public class FlowsConfigurationFactoryConfig {
     @Autowired
     private FormFlowProperties properties;
