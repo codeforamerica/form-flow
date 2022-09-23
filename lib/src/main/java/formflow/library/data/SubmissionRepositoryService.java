@@ -12,7 +12,6 @@ import java.util.Optional;
 @Transactional
 public class SubmissionRepositoryService {
 
-  @Autowired
   SubmissionRepository repository;
 
   public void save(Submission submission) {
