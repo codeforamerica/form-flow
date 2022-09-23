@@ -1,8 +1,7 @@
 package formflow.library.config;
 
-import lombok.Value;
+import formflow.library.data.Submission;
 
-@Value
-public class Condition {
-  private String name;
+public abstract class Condition {
+  public abstract Boolean runCondition(Submission submission);
 }

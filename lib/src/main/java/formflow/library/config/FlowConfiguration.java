@@ -12,6 +12,6 @@ public class FlowConfiguration {
   private HashMap<String, SubflowConfiguration> subflows;
 
   public ScreenNavigationConfiguration getScreenNavigation(String screenName) {
-    return this.flow.get(screenName);
+    return flow.get(screenName);
   }
 }

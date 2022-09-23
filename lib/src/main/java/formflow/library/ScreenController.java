@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class ScreenController {
 
 	private final List<FlowConfiguration> flowConfigurations;
-	private final ConditionHandler conditionHandler;
 	private final SubmissionRepositoryService submissionRepositoryService;
 	private final ValidationService validationService;
 	private final SubmissionHandler submissionHandler;
@@ -37,12 +36,10 @@ public class ScreenController {
 	public ScreenController(
 			List<FlowConfiguration> flowConfigurations,
 			SubmissionRepositoryService submissionRepositoryService,
-			ConditionHandler conditionHandler,
 			ValidationService validationService,
 			SubmissionHandler submissionHandler) {
 		this.flowConfigurations = flowConfigurations;
 		this.submissionRepositoryService = submissionRepositoryService;
-		this.conditionHandler = conditionHandler;
 		this.validationService = validationService;
 		this.submissionHandler = submissionHandler;
 	}
@@ -377,9 +374,10 @@ public class ScreenController {
 	private String getNextScreenName(HttpSession httpSession,
 			ScreenNavigationConfiguration currentScreen) {
 		NextScreen nextScreen;
-		if (isConditionalNavigation(currentScreen)
-				&& getConditionalNextScreen(currentScreen, httpSession).size() > 0) {
-			nextScreen = getConditionalNextScreen(currentScreen, httpSession).get(0);
+		List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen,httpSession);
+
+		if (isConditionalNavigation(currentScreen) && nextScreens.size() > 0) {
+			nextScreen = nextScreens.get(0);
 		} else {
 			// TODO this needs to throw an error if there are more than 1 next screen that don't have a condition or more than one evaluate to true
 			nextScreen = getNonConditionalNextScreen(currentScreen);
@@ -405,25 +403,20 @@ public class ScreenController {
 				.anyMatch(nextScreen -> nextScreen.getCondition() != null);
 	}
 
+	/**
+	 * Returns a list of possible next screens, the ones whose conditions pass
+	 * @param currentScreen
+	 * @param httpSession
+	 * @return
+	 */
 	private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
 			HttpSession httpSession) {
 		var submission = getSubmission(httpSession);
-		List<NextScreen> screensWithConditionalNavigation =
-				currentScreen.getNextScreens().stream()
-						.filter(nextScreen -> nextScreen.getCondition() != null).toList();
 
-		return screensWithConditionalNavigation.stream().filter(nextScreen -> {
-			String conditionName = nextScreen.getCondition().getName();
-			try {
-				conditionHandler.setSubmission(submission);
-				return conditionHandler.handleCondition(conditionName).equals(true);
-			} catch (NoSuchMethodException | InvocationTargetException e) {
-				System.out.println("No such method could be found in the ConditionDefinitions class.");
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-			return false;
-		}).toList();
+		return currentScreen.getNextScreens().stream()
+						.filter(nextScreen -> nextScreen.getCondition() != null)
+						.filter(nextScreen -> nextScreen.getConditionObject().runCondition(submission))
+						.toList();
 	}
 
 	private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {

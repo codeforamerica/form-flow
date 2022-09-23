@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.jetbrains:annotations:23.0.0'
     implementation 'com.vladmihalcea:hibernate-types-55:2.19.2'
+    implementation 'javax.persistence:javax.persistence-api:2.2'
 
     compileOnly 'org.projectlombok:lombok'
 
