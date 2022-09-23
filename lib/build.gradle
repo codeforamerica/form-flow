@@ -13,6 +13,12 @@ plugins {
     id 'java-library'
 }
 
+task webjar(type: Jar, dependsOn: "jar") {
+    from(fileTree("dist")) {
+        into "META-INF/resources"
+    }
+}
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
