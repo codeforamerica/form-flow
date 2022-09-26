@@ -4,6 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import lombok.Data;
 
+/**
+ * Screen navigation configuration class used to store navigation information about a
+ * specific screen.
+ */
 @Data
 public class ScreenNavigationConfiguration {
   private List<NextScreen> nextScreens = Collections.emptyList();

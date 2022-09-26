@@ -5,6 +5,9 @@ import formflow.library.data.Submission;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * TODO - this my not belong in the form flow lib?
+ */
 public class SubmissionActions {
     public static void clearIncomeAmountsBeforeSaving(Submission submission, String uuid) {
         //grab the current household members incometypes
