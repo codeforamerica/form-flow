@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block
+    th:fragment="checkboxInSet"
+    th:with="
+      hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
+      hasIcon=${!#strings.isEmpty(checkboxIcon)},
+      name=${inputName} + '[]',
+      checked=${T(org.codeforamerica.formflowstarter.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(name, ''), value)}"
+    th:assert="
+      ${!#strings.isEmpty(inputName)},
+      ${!#strings.isEmpty(value)},
+      ${!#strings.isEmpty(label)}">
+  <style>
+    /* TODO: add to honeycrisp? */
+    .checkbox {
+      display: flex;
+    }
+  </style>
+  <label th:for="${inputName} + '-' + ${value}"
+         th:id="${inputName} + '-' + ${value} + '-label'"
+         class="checkbox display-flex">
+    <input type="checkbox"
+           th:id="${inputName} + '-' + ${value}"
+           th:value="${value}"
+           th:name="${name}"
+           th:checked="${checked}"
+           th:attr="
+            aria-invalid=${hasError},
+            data-follow-up=${followUpId}">
+    <div th:if="${hasIcon}">
+      <i th:class="${'icon-' + checkboxIcon}" style="margin-right: 0.5rem"></i>
+    </div>
+    <div>
+      <span th:text="${label}"></span>
+      <p th:if="${hasHelpText}"
+         th:id="${inputName} + '-' + ${value} + '-help-text'"
+         th:text="${checkboxHelpText}"
+         class="text--help with-no-padding"></p>
+    </div>
+  </label>
+</th:block>
+</body>
+</html>

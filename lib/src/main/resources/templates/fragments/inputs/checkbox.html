@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block
+    th:fragment="checkbox"
+    th:with="
+      hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
+      hasIcon=${!#strings.isEmpty(checkboxIcon)},
+      hasError=${
+        errorMessages != null &&
+        errorMessages.get(inputName) != null &&
+        (#arrays.length(errorMessages.get(inputName)) > 0) }"
+    th:assert="
+      ${!#strings.isEmpty(inputName)},
+      ${!#strings.isEmpty(value)},
+      ${!#strings.isEmpty(label)}">
+  <style>
+    /* TODO: add to honeycrisp? */
+    .checkbox {
+      display: flex;
+    }
+  </style>
+  <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
+    <label th:for="${inputName} + '-' + ${value}"
+           th:id="${inputName} + '-' + ${value} + '-label'"
+           class="checkbox display-flex">
+      <input type="checkbox"
+             th:id="${inputName} + '-' + ${value}"
+             th:value="${value}"
+             th:name="${inputName}"
+             th:with="checked=${T(org.codeforamerica.formflowstarter.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(inputName, ''), value)}"
+             th:checked="${checked}"
+             th:attr="
+              aria-invalid=${hasError},
+              data-follow-up=${followUpId}">
+      <div th:if="${hasIcon}">
+        <i th:class="${'icon-' + checkboxIcon}" style="margin-right: 0.5rem"></i>
+      </div>
+      <div>
+        <span th:text="${label}"></span>
+        <p th:if="${hasHelpText}"
+           th:id="${inputName} + '-' + ${value} + '-help-text'"
+           th:text="${checkboxHelpText}"
+           class="text--help with-no-padding"></p>
+      </div>
+    </label>
+    <th:block
+        th:replace="fragments/inputError :: validationError(inputName=${inputName})"></th:block>
+  </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block
+    th:fragment="selectOptionPlaceholder"
+    th:assert="${!#strings.isEmpty(optionText)}">
+  <option value="" disabled selected th:text="${optionText}"></option>
+</th:block>
+</body>
+</html>

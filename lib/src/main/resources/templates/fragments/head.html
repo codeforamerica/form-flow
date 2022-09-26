@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head" th:assert="${!#strings.isEmpty(title)}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="format-detection" content="telephone=no">
+  <meta th:if="${@environment.getProperty('demo')}" name="robots" content="noindex, nofollow">
+  <title th:text="${title}"></title>
+  <link href="/assets/css/honeycrisp.min.css" rel="preload" as="style"/>
+  <link href="/assets/css/honeycrisp.min.css" rel="stylesheet"/>
+  <link href="/assets/css/custom.css" rel="preload" as="style"/>
+  <link href="/assets/css/custom.css" rel="stylesheet"/>
+  <link rel="preload" href="/assets/fonts/MaterialIcons-Regular.eot?ia7soh" as="font" crossorigin="anonymous"/>
+  <link rel="preload" href="/assets/fonts/MaterialIcons-Regular.ttf?ia7soh" as="font" crossorigin="anonymous"/>
+  <link rel="preload" href="/assets/js/honeycrisp.min.js" as="script">
+  <script src="/assets/js/honeycrisp.min.js"></script>
+</head>
+</html>
