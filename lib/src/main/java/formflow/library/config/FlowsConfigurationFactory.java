@@ -1,6 +1,5 @@
 package formflow.library.config;
 
-import formflow.library.FormFlowProperties;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
