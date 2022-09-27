@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Validator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -21,7 +22,8 @@ import org.springframework.util.StringUtils;
 public class ValidationService {
 
   private final Validator validator;
-
+  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
+  private String inputConfigPath;
   /**
    * Autoconfigured constructor.
    *
@@ -40,11 +42,11 @@ public class ValidationService {
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
   public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
+    System.out.println("inputs config path is: " + inputConfigPath);
     Class<?> clazz;
     try {
       // TODO - figure out how to rewire this, as we will not know the class path.
-      clazz = Class.forName(
-              "org.codeforamerica.formflowstarter.app.inputs." + StringUtils.capitalize(flowName));
+      clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }
