@@ -1,5 +1,6 @@
 package formflow.library.config;
 
+import formflow.library.config.submission.Condition;
 import lombok.Data;
 import java.lang.reflect.Constructor;
 import javax.naming.ConfigurationException;
