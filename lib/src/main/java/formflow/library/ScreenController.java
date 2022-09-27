@@ -2,7 +2,8 @@ package formflow.library;
 
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.NextScreen;
-import formflow.library.config.*;
+import formflow.library.config.ScreenNavigationConfiguration;
+import formflow.library.config.SubflowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import org.jetbrains.annotations.NotNull;
@@ -20,10 +21,14 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 /**
  * A controller to render any screen in flows, including subflows.
@@ -33,18 +38,16 @@ public class ScreenController {
 
 	private final List<FlowConfiguration> flowConfigurations;
 	private final SubmissionRepositoryService submissionRepositoryService;
+
 	private final ValidationService validationService;
-	private final SubmissionHandler submissionHandler;
 
 	public ScreenController(
 			List<FlowConfiguration> flowConfigurations,
 			SubmissionRepositoryService submissionRepositoryService,
-			ValidationService validationService,
-			SubmissionHandler submissionHandler) {
+			ValidationService validationService) {
 		this.flowConfigurations = flowConfigurations;
 		this.submissionRepositoryService = submissionRepositoryService;
 		this.validationService = validationService;
-		this.submissionHandler = submissionHandler;
 	}
 
 	/**
@@ -537,14 +540,13 @@ public class ScreenController {
 
 		return currentScreen.getNextScreens().stream()
 						.filter(nextScreen -> nextScreen.getCondition() != null)
-						.filter(nextScreen -> nextScreen.getConditionObject().runCondition(submission))
+						.filter(nextScreen -> nextScreen.getConditionObject().run(submission))
 						.toList();
 	}
 
 	private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 		if (currentScreen.getBeforeSave() != null) {
-			var beforeSaveAction = currentScreen.getBeforeSave();
-			submissionHandler.handleSubmission(beforeSaveAction, submission, uuid);
+			currentScreen.getBeforeSaveAction().run(submission, uuid);
 		}
 	}
 

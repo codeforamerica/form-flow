@@ -1,15 +1,15 @@
-package formflow.library.config;
+package formflow.library.config.submission;
 
 import formflow.library.data.Submission;
 
 /**
- * An abstract class that defines a function to run a Condition
+ * An interface that defines a function to run a Condition
  *
  * <p>
  *     Conditions are applied to screen flow, so each screen may have a condition (or multiple) attached to it.
  * </p>
  */
-public abstract class Condition {
+public interface Condition {
 
   /**
    * Runs a condition check.
@@ -17,5 +17,5 @@ public abstract class Condition {
    * @param submission submission object the condition is associated with, not null
    * @return true if the condition check passes, else false
    */
-  public abstract Boolean runCondition(Submission submission);
+  public Boolean run(Submission submission);
 }
