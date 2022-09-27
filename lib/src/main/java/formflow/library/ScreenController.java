@@ -462,37 +462,6 @@ public class ScreenController {
 	}
 
 	/**
-	 *  TODO: This is currently unused; decide if we need this going forward.
-	 *
-	 * @param formData
-	 * @param flow
-	 * @param screen
-	 * @param httpSession
-	 * @return
-	 */
-	@PostMapping("{flow}/{screen}/submit")
-	ModelAndView submit(
-			@RequestParam(required = false) MultiValueMap<String, String> formData,
-			@PathVariable String flow,
-			@PathVariable String screen,
-			HttpSession httpSession
-	) {
-		Long id = (Long) httpSession.getAttribute("id");
-		if (id != null) {
-			Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
-			if (submissionOptional.isPresent()) {
-				Submission submission = submissionOptional.get();
-				var formDataSubmission = removeEmptyValuesAndFlatten(formData);
-				Submission.mergeFormDataWithSubmissionData(submission, formDataSubmission);
-				submission.setSubmittedAt(Date.from(Instant.now()));
-				saveToRepository(submission);
-			}
-		}
-		// Fire async events: send email, generate PDF, send to API, etc...
-		return new ModelAndView(String.format("redirect:/%s/%s/navigation", flow, screen));
-	}
-
-	/**
 	 * Chooses the next screen template and model to render based on what is next in the flow.
 	 *
 	 * @param flow        The current flow name, not null

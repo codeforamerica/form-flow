@@ -126,6 +126,7 @@ public class Submission {
   /**
    * Removes any data in an interation that has "iterationIsComplete" set to "false" and has a {@code uuid} not equal to the
    * {@code currentUuid} provided.
+   *
    * @param submission existing submission we are checking the iteration data in, not null
    * @param subflowName subflow that we are checking the iteration data for, not null
    * @param currentUuid The current uuid being worked on, not null. The data associated with this uuid will not be deleted.
