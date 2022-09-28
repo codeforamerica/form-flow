@@ -8,6 +8,7 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -34,6 +35,7 @@ import java.util.UUID;
  * A controller to render any screen in flows, including subflows.
  */
 @Controller
+@EnableAutoConfiguration
 public class ScreenController {
 
 	private final List<FlowConfiguration> flowConfigurations;

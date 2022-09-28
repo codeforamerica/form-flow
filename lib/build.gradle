@@ -47,13 +47,14 @@ dependencies {
     api 'org.apache.commons:commons-math3:3.6.1'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    api 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'com.google.guava:guava:31.1-jre'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.jetbrains:annotations:23.0.0'
     implementation 'com.vladmihalcea:hibernate-types-55:2.19.2'
     implementation 'javax.persistence:javax.persistence-api:2.2'
+    implementation 'org.flywaydb:flyway-core'
 
     compileOnly 'org.projectlombok:lombok'
 
