@@ -42,7 +42,6 @@ public class ValidationService {
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
   public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
-    System.out.println("inputs config path is: " + inputConfigPath);
     Class<?> clazz;
     try {
       // TODO - figure out how to rewire this, as we will not know the class path.

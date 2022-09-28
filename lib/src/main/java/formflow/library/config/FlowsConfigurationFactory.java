@@ -23,7 +23,6 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
 
   @Override
   public List<FlowConfiguration> getObject() {
-    System.out.println("Configuration file is: " + configPath);
     ClassPathResource classPathResource = new ClassPathResource(configPath);
 
     LoaderOptions loaderOptions = new LoaderOptions();
