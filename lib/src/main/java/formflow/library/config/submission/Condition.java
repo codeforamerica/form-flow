@@ -17,5 +17,11 @@ public interface Condition {
    * @param submission submission object the condition is associated with, not null
    * @return true if the condition check passes, else false
    */
-  public Boolean run(Submission submission);
+  public default Boolean run(Submission submission) {
+    return null;
+  }
+
+  public default Boolean run(Submission submission, String uuid) {
+    return null;
+  }
 }
