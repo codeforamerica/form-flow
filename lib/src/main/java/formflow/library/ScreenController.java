@@ -4,6 +4,7 @@ import formflow.library.config.FlowConfiguration;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
+import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,6 @@ public class ScreenController {
 
 	private final List<FlowConfiguration> flowConfigurations;
 	private final SubmissionRepositoryService submissionRepositoryService;
-
 	private final ValidationService validationService;
 
 	public ScreenController(
@@ -50,6 +50,11 @@ public class ScreenController {
 		this.flowConfigurations = flowConfigurations;
 		this.submissionRepositoryService = submissionRepositoryService;
 		this.validationService = validationService;
+
+		this.flowConfigurations.forEach(f -> {
+			TemplateManager tm = new TemplateManager(f.getConditionsPath(), f.getActionsPath());
+			f.setTemplateManager(tm);
+		});
 	}
 
 	/**
@@ -588,8 +593,14 @@ public class ScreenController {
 
 	private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission) {
 		Map<String, Object> model = new HashMap<>();
+		FlowConfiguration flowConfig  = getFlowConfigurationByName(flow);
+		TemplateManager templateManager = flowConfig.getTemplateManager();
 		model.put("flow", flow);
 		model.put("screen", screen);
+
+		if (templateManager != null) {
+			model.put("templateManager", templateManager);
+		}
 
 		// Put subflow on model if on subflow delete confirmation screen
 		HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();

@@ -1,6 +1,7 @@
 package formflow.library.config;
 
 import java.util.HashMap;
+
 import lombok.Data;
 
 /**
@@ -14,6 +15,12 @@ public class FlowConfiguration {
   private HashMap<String, ScreenNavigationConfiguration> flow;
 
   private HashMap<String, SubflowConfiguration> subflows;
+
+  private String conditionsPath;
+
+  private String actionsPath;
+
+  private TemplateManager templateManager;
 
   /**
    * Returns the screen navigation for a particular screen.
