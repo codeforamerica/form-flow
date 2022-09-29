@@ -11,7 +11,18 @@ public interface Action {
      * Runs an action on a submission to potentially manipulate the data.
      *
      * @param submission submission object the action is associated with, not null
+     */
+    public default void run(Submission submission) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    /**
+     * Runs an action on a submission to potentially manipulate the data.
+     *
+     * @param submission submission object the action is associated with, not null
      * @param uuid id for the iteration
      */
-    public void run(Submission submission, String uuid);
+    public default void run(Submission submission, String data) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 }
