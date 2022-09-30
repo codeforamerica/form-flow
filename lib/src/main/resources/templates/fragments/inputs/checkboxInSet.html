@@ -7,7 +7,7 @@
       hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
       name=${inputName} + '[]',
-      checked=${T(org.codeforamerica.formflowstarter.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(name, ''), value)}"
+      checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(name, ''), value)}"
     th:assert="
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},

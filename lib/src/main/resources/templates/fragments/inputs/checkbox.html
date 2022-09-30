@@ -28,7 +28,7 @@
              th:id="${inputName} + '-' + ${value}"
              th:value="${value}"
              th:name="${inputName}"
-             th:with="checked=${T(org.codeforamerica.formflowstarter.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(inputName, ''), value)}"
+             th:with="checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(inputName, ''), value)}"
              th:checked="${checked}"
              th:attr="
               aria-invalid=${hasError},
