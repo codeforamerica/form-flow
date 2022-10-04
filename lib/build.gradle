@@ -12,6 +12,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java-library'
     id 'maven-publish'
+    id 'java'
 }
 
 targetCompatibility = 17
