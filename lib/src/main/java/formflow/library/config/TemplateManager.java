@@ -87,7 +87,7 @@ public class TemplateManager {
     }
 
     public Boolean runCondition(String conditionName, Submission submission, String uuid) {
-        System.out.println("Running condition " + conditionName + " uuid: " + uuid);
+        System.out.println("Running condition " + conditionName + " data: " + uuid);
          Condition condition = conditions.get(conditionName);
         if (condition == null) {
             System.out.println("Condition not found: " + conditionName);
