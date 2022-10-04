@@ -28,6 +28,10 @@ jar {
     }
 }
 
+bootJar {
+    enabled = false
+}
+
 task webjar(type: Jar, dependsOn: "jar") {
     from(fileTree("dist")) {
         into "META-INF/resources"
