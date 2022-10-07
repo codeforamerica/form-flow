@@ -18,6 +18,9 @@ plugins {
 targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
+def props = new Properties()
+file(".env").withInputStream { props.load(it) }
+
 jar {
     manifest {
         attributes "Main-Class": "formflow.library.ScreenController"
@@ -74,14 +77,18 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/codeforamerica/form-flow")
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+                username = project.findProperty("gpr.user") ?: props.getProperty("USERNAME")
+                password = project.findProperty("gpr.key") ?: props.getProperty("TOKEN")
             }
         }
     }
     publications {
         gpr(MavenPublication) {
             from(components.java)
+            // eventually this should probably be org.codeforamerica.form-flow ...?
+            group = "form-flow"
+            artifactId = "form-flow-library"
+            version = "0.0-SNAPSHOT"
         }
     }
 }
