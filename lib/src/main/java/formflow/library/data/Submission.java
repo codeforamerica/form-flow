@@ -1,13 +1,12 @@
 package formflow.library.data;
 
-import com.vladmihalcea.hibernate.type.json.JsonType;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import formflow.library.utils.HashMapConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +22,6 @@ import static javax.persistence.TemporalType.TIMESTAMP;
  *     This class also provides a few static functions to work with Submissions.
  * </p>
  */
-@TypeDef(
-    name = "json", typeClass = JsonType.class
-)
 @Entity
 @Table(name = "submissions")
 @Data
@@ -42,7 +38,7 @@ public class Submission {
   @Column(name = "flow")
   private String flow;
 
-  @Type(type = "json")
+  @Convert(converter = HashMapConverter.class)
   @Column(name = "input_data", columnDefinition = "jsonb")
   private Map<String, Object> inputData = new HashMap<>();
 
