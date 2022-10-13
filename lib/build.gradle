@@ -19,7 +19,9 @@ targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
 def props = new Properties()
-file(".env").withInputStream { props.load(it) }
+if (file('.env').isFile()) {
+    file(".env").withInputStream { props.load(it) }
+}
 
 jar {
     manifest {
