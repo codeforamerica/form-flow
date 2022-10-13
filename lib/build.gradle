@@ -19,7 +19,7 @@ targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
 def props = new Properties()
-if (file('.env').isFile()) {
+if (file(".env").isFile()) {
     file(".env").withInputStream { props.load(it) }
 }
 
@@ -76,8 +76,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/codeforamerica/form-flow")
             credentials {
-                username = project.findProperty("gpr.user") ?: props.getProperty("USERNAME")
-                password = project.findProperty("gpr.key") ?: props.getProperty("TOKEN")
+                username = props.getProperty("USERNAME") ?: System.getenv("USERNAME")
+                password = props.getProperty("TOKEN") ?: System.getenv("TOKEN")
             }
         }
     }
