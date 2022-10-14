@@ -322,7 +322,7 @@ public class ScreenController {
 			entryToDelete.ifPresent(entry -> httpSession.setAttribute("entryToDelete", entry));
 		}
 
-		return new RedirectView(String.format("/%s/" + deleteConfirmationScreen + "?uuid=" + uuid, flow));
+		return new RedirectView(String.format("%s/" + deleteConfirmationScreen + "?uuid=" + uuid, flow));
 	}
 
 	/**
@@ -406,7 +406,7 @@ public class ScreenController {
 			var entryToEdit = subflowArr.stream()
 					.filter(entry -> entry.get("uuid").equals(uuid)).findFirst();
 			entryToEdit.ifPresent(stringObjectMap -> model.put("inputData", stringObjectMap));
-			model.put("formAction", String.format("/%s/%s/%s/edit", flow, screen, uuid));
+			model.put("formAction", String.format("%s/%s/%s/edit", flow, screen, uuid));
 		} else {
 			return new ModelAndView("error", HttpStatus.BAD_REQUEST);
 		}
@@ -493,7 +493,7 @@ public class ScreenController {
 		String nextScreen = getNextScreenName(httpSession,
 				currentScreen);
 
-		return new RedirectView("/%s/%s".formatted(flow, nextScreen));
+		return new RedirectView("%s/%s".formatted(flow, nextScreen));
 	}
 
 	private String getNextScreenName(HttpSession httpSession,
@@ -588,7 +588,7 @@ public class ScreenController {
 
 	private String createFormActionString(String flow, String screen) {
 		return isIterationStartScreen(flow, screen) ?
-				"/%s/%s/new".formatted(flow, screen) : "/%s/%s".formatted(flow, screen);
+				"%s/%s/new".formatted(flow, screen) : "%s/%s".formatted(flow, screen);
 	}
 
 	private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission) {
