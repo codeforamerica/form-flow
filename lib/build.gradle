@@ -87,7 +87,7 @@ publishing {
             // eventually this should probably be org.codeforamerica.form-flow ...?
             group = "form-flow"
             artifactId = "form-flow-library"
-            version = "0.0.1-SNAPSHOT-TEST"
+            version = "0.0.1-SNAPSHOT"
         }
     }
 }
