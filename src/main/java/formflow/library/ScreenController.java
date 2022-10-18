@@ -68,7 +68,7 @@ public class ScreenController {
 	 * @param httpSession The current httpSession, not null
 	 * @return the screen template with model data
 	 */
-	@GetMapping("{flow:(?!actuator).*}/{screen}")
+	@GetMapping("{flow}/{screen}")
 	ModelAndView getScreen(
 			@PathVariable String flow,
 			@PathVariable String screen,
