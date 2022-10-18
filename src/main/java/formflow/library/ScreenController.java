@@ -68,16 +68,17 @@ public class ScreenController {
 	 * @param httpSession The current httpSession, not null
 	 * @return the screen template with model data
 	 */
-	@GetMapping("{flow}/{screen}")
+	@GetMapping("{flow:(?!actuator).*}/{screen}")
 	ModelAndView getScreen(
 			@PathVariable String flow,
 			@PathVariable String screen,
 			@RequestParam(value = "uuid", required = false) String uuid,
 			HttpSession httpSession
 	) {
+		System.out.println(String.format("%s/%s 🚀", flow, screen));
+		System.out.println("getScreen: flow: " + flow + ", screen: " + screen);
 		var currentScreen = getScreenConfig(flow, screen);
 		var submission = getSubmission(httpSession);
-		System.out.println("getScreen: flow: " + flow + ", screen: " + screen);
 		if (currentScreen == null) {
 			return new ModelAndView("redirect:/error");
 		}

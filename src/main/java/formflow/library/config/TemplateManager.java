@@ -22,6 +22,9 @@ public class TemplateManager {
         this.conditions = new HashMap<>();
         this.actions = new HashMap<>();
 
+        System.out.println(String.format("In template manager and loading: \n\tConditions: %s\n\tActions: %s)",
+                conditionsClassPath, actionsClassPath));
+
         try {
             // get all the conditions located in conditions, load them
             List<ClassPath.ClassInfo> classes =
