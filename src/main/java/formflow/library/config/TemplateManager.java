@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
+@Slf4j
 public class TemplateManager {
 
   private HashMap<String, Condition> conditions = new HashMap<>();
@@ -19,7 +21,7 @@ public class TemplateManager {
 
   public TemplateManager(String conditionsClassPath, String actionsClassPath) {
 
-    System.out.printf("In template manager and loading: \n\tConditions: %s\n\tActions: %s%n",
+    log.info("In template manager and loading: \n\tConditions: {}\n\tActions: {}%n",
         conditionsClassPath, actionsClassPath);
 
     if (conditionsClassPath != null && !conditionsClassPath.isEmpty()) {
@@ -34,12 +36,12 @@ public class TemplateManager {
 
         classes.forEach(clazz -> {
           try {
-            System.out.println("Loading Condition: " + clazz.getSimpleName());
+            log.info("Loading Condition: " + clazz.getSimpleName());
             Constructor<?> ctor = Class.forName(clazz.getName().replace("BOOT-INF.classes.", "")).getConstructor();
             Condition condition = (Condition) ctor.newInstance();
             this.conditions.put(clazz.getSimpleName(), condition);
           } catch (Exception e) {
-            System.out.printf("Encountered %s exception when creating %s Condition: %s%n",
+            log.info("Encountered {} exception when creating {} Condition: {}%n",
                 e.getClass(), clazz.getName(), e.getMessage());
           }
         });
@@ -48,7 +50,7 @@ public class TemplateManager {
           System.out.print("No conditions classes \uD83D\uDE1E%n");
         }
       } catch (IOException e) {
-        System.out.println("Caught IOException while loading Conditions: " + e.getMessage());
+        log.info("Caught IOException while loading Conditions: " + e.getMessage());
       }
     }
 
@@ -64,12 +66,12 @@ public class TemplateManager {
 
         classes.forEach(clazz -> {
           try {
-            System.out.println("Loading Action: " + clazz.getSimpleName());
+            log.info("Loading Action: " + clazz.getSimpleName());
             Constructor<?> ctor = Class.forName(clazz.getName().replace("BOOT-INF.classes.", "")).getConstructor();
             Action action = (Action) ctor.newInstance();
             this.actions.put(clazz.getSimpleName(), action);
           } catch (Exception e) {
-            System.out.printf("Encountered %s exception when creating %s Action: %s%n",
+            log.info("Encountered {} exception when creating {} Action: {}%n",
                 e.getClass(), clazz.getName(), e.getMessage());
           }
         });
@@ -78,16 +80,16 @@ public class TemplateManager {
           System.out.print("No action classes \uD83D\uDE1E%n");
         }
       } catch (IOException e) {
-        System.out.println("Caught IOException while loading Actions: " + e.getMessage());
+        log.info("Caught IOException while loading Actions: " + e.getMessage());
       }
     }
   }
 
   public Boolean runCondition(String conditionName, Submission submission) {
-    System.out.println("Running condition " + conditionName);
+    log.info("Running condition " + conditionName);
     Condition condition = conditions.get(conditionName);
     if (condition == null) {
-      System.out.println("Condition not found: " + conditionName);
+      log.info("Condition not found: " + conditionName);
       // TODO throw error?
       return null;
     }
@@ -95,10 +97,10 @@ public class TemplateManager {
   }
 
   public Boolean runCondition(String conditionName, Submission submission, String uuid) {
-    System.out.println("Running condition " + conditionName + " data: " + uuid);
+    log.info("Running condition " + conditionName + " data: " + uuid);
     Condition condition = conditions.get(conditionName);
     if (condition == null) {
-      System.out.println("Condition not found: " + conditionName);
+      log.info("Condition not found: " + conditionName);
       // TODO throw error?
       return null;
     }

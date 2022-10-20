@@ -7,6 +7,7 @@ import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -37,6 +38,7 @@ import java.util.UUID;
  */
 @Controller
 @EnableAutoConfiguration
+@Slf4j
 public class ScreenController {
 
   private final List<FlowConfiguration> flowConfigurations;
@@ -51,9 +53,9 @@ public class ScreenController {
     this.submissionRepositoryService = submissionRepositoryService;
     this.validationService = validationService;
 
-    System.out.println("Screen Controller Created!");
+    log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
-      System.out.println("Creating TemplateManager for flow: " + f.getName());
+      log.info("Creating TemplateManager for flow: " + f.getName());
       TemplateManager tm = new TemplateManager(f.getConditionsPath(), f.getActionsPath());
       f.setTemplateManager(tm);
     });
@@ -75,8 +77,8 @@ public class ScreenController {
       @RequestParam(value = "uuid", required = false) String uuid,
       HttpSession httpSession
   ) {
-    System.out.println(String.format("%s/%s 🚀", flow, screen));
-    System.out.println("getScreen: flow: " + flow + ", screen: " + screen);
+    log.info(String.format("%s/%s 🚀", flow, screen));
+    log.info("getScreen: flow: " + flow + ", screen: " + screen);
     var currentScreen = getScreenConfig(flow, screen);
     var submission = getSubmission(httpSession);
     if (currentScreen == null) {
@@ -91,7 +93,7 @@ public class ScreenController {
         return nothingToDeleteModelAndView;
       }
     }
-    System.out.println("getScreen: flow: " + flow + ", screen: " + screen);
+    log.info("getScreen: flow: " + flow + ", screen: " + screen);
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
 
@@ -118,7 +120,7 @@ public class ScreenController {
       @PathVariable String screen,
       HttpSession httpSession
   ) {
-    System.out.println("postScreen: flow: " + flow + ", screen: " + screen);
+    log.info("postScreen: flow: " + flow + ", screen: " + screen);
     var formDataSubmission = removeEmptyValuesAndFlatten(formData);
     var submission = getSubmission(httpSession);
     var errorMessages = validationService.validate(flow, formDataSubmission);
@@ -169,7 +171,7 @@ public class ScreenController {
       HttpSession httpSession
   ) {
 //    Copy from OG /post request
-    System.out.println("postScreen: flow: " + flow + ", screen: " + screen);
+    log.info("postScreen: flow: " + flow + ", screen: " + screen);
     var formDataSubmission = removeEmptyValuesAndFlatten(formData);
     var submission = getSubmission(httpSession);
     var currentScreen = getScreenConfig(flow, screen);
@@ -262,7 +264,7 @@ public class ScreenController {
       @PathVariable String uuid,
       HttpSession httpSession
   ) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    System.out.println("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
+    log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
     Long id = (Long) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     Map<String, Object> formDataSubmission = removeEmptyValuesAndFlatten(formData);
@@ -492,13 +494,13 @@ public class ScreenController {
       HttpSession httpSession
   ) {
     var currentScreen = getScreenConfig(flow, screen);
-    System.out.println("navigation: flow: " + flow + ", screen: " + screen);
+    log.info("navigation: flow: " + flow + ", screen: " + screen);
     if (currentScreen == null) {
       return new RedirectView("/error");
     }
     String nextScreen = getNextScreenName(httpSession, currentScreen);
 
-    System.out.println("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
+    log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new RedirectView("/%s/%s".formatted(flow, nextScreen));
   }
 
@@ -515,7 +517,7 @@ public class ScreenController {
       nextScreen = getNonConditionalNextScreen(currentScreen);
     }
 
-    System.out.println("getNextScreenName: currentScreen:" + currentScreen.toString() + ", nextScreen: " + nextScreen.getName());
+    log.info("getNextScreenName: currentScreen:" + currentScreen.toString() + ", nextScreen: " + nextScreen.getName());
     // TODO throw a better error if the next screen doesn't exist (incorrect name / name is not in flow config)
     return nextScreen.getName();
   }

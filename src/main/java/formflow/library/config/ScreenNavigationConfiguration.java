@@ -8,11 +8,13 @@ import formflow.library.config.submission.Action;
 import lombok.Data;
 
 import javax.naming.ConfigurationException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Screen navigation configuration class used to store navigation information about a specific screen.
  */
 @Data
+@Slf4j
 public class ScreenNavigationConfiguration {
 
   private List<NextScreen> nextScreens = Collections.emptyList();
@@ -25,7 +27,7 @@ public class ScreenNavigationConfiguration {
   public void setBeforeSave(String beforeSave) throws ConfigurationException {
     try {
       this.beforeSave = beforeSave;
-      System.out.println("beforeSave is set to: " + beforeSave);
+      log.info("beforeSave is set to: " + beforeSave);
       Class<?> clazz = Class.forName(beforeSave);
       Constructor<?> ctor = clazz.getConstructor();
       beforeSaveAction = (Action) ctor.newInstance();
