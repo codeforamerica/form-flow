@@ -22,50 +22,49 @@ import org.springframework.util.StringUtils;
 @Service
 public class ValidationService {
 
-    private final Validator validator;
-    @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
-    private String inputConfigPath;
+  private final Validator validator;
+  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
+  private String inputConfigPath;
 
-    /**
-     * Autoconfigured constructor.
-     *
-     * @param validator Validator from javax package.
-     */
-    public ValidationService(Validator validator) {
-        this.validator = validator;
+  /**
+   * Autoconfigured constructor.
+   *
+   * @param validator Validator from javax package.
+   */
+  public ValidationService(Validator validator) {
+    this.validator = validator;
+  }
+
+  /**
+   * Validates client inputs with java bean validation based on input definition.
+   *
+   * @param flowName           The name of the current flow, not null
+   * @param formDataSubmission The input data from a form as a map of field name to field value(s), not null
+   * @return a HashMap of field to list of error messages, will be empty if no field violations
+   */
+  public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
+    Class<?> clazz;
+    try {
+      // TODO - figure out how to rewire this, as we will not know the class path.
+      clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
     }
 
-    /**
-     * Validates client inputs with java bean validation based on input definition.
-     *
-     * @param flowName           The name of the current flow, not null
-     * @param formDataSubmission The input data from a form as a map of field name to field value(s),
-     *                           not null
-     * @return a HashMap of field to list of error messages, will be empty if no field violations
-     */
-    public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
-        Class<?> clazz;
-        try {
-            // TODO - figure out how to rewire this, as we will not know the class path.
-            clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+    Class<?> flowClass = clazz;
+    HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
+    formDataSubmission.forEach((key, value) -> {
+      var messages = new ArrayList<String>();
+      if (key.contains("[]")) {
+        key = key.replace("[]", "");
+      }
+      validator.validateValue(flowClass, key, value)
+          .forEach(violation -> messages.add(violation.getMessage()));
+      if (!messages.isEmpty()) {
+        validationMessages.put(key, messages);
+      }
+    });
 
-        Class<?> flowClass = clazz;
-        HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
-        formDataSubmission.forEach((key, value) -> {
-            var messages = new ArrayList<String>();
-            if (key.contains("[]")) {
-                key = key.replace("[]", "");
-            }
-            validator.validateValue(flowClass, key, value)
-                    .forEach(violation -> messages.add(violation.getMessage()));
-            if (!messages.isEmpty()) {
-                validationMessages.put(key, messages);
-            }
-        });
-
-        return validationMessages;
-    }
+    return validationMessages;
+  }
 }
