@@ -10,13 +10,14 @@ import org.thymeleaf.templatemode.TemplateMode;
  */
 @Configuration
 public class ThymeleafConfiguration {
+
   /**
-   * Creates a new SpringResourceTemplateResolver and configures it so it knows where to locate the templates and
-   * how to read them.
+   * Creates a new SpringResourceTemplateResolver and configures it so it knows where to locate the templates and how to read
+   * them.
    *
    * <p>
-   *     The resolver will be configured to look in the {@code templates/} directory for {@code .html} files.
-   *     The assumed encoding will be {@code UTF-8}.  The templates will not be cached.
+   * The resolver will be configured to look in the {@code templates/} directory for {@code .html} files. The assumed encoding
+   * will be {@code UTF-8}.  The templates will not be cached.
    * </p>
    *
    * @return a new resolver configured to work with templates

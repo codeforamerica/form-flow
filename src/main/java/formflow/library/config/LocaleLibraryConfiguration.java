@@ -6,14 +6,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
- * A locale configuration so that messages can be automatically read from the library and
- * Spring Boot apps.
+ * A locale configuration so that messages can be automatically read from the library and Spring Boot apps.
  */
 @Configuration
 public class LocaleLibraryConfiguration {
+
   /**
-   * A bean to set message source locations both in this library and in the
-   * default path of Spring Boot apps.
+   * A bean to set message source locations both in this library and in the default path of Spring Boot apps.
    *
    * <p>setBasenames() will do three things:</p>
    * <ol>

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -24,6 +25,7 @@ public class ValidationService {
   private final Validator validator;
   @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
+
   /**
    * Autoconfigured constructor.
    *
@@ -37,8 +39,7 @@ public class ValidationService {
    * Validates client inputs with java bean validation based on input definition.
    *
    * @param flowName           The name of the current flow, not null
-   * @param formDataSubmission The input data from a form as a map of field name to field value(s),
-   *                           not null
+   * @param formDataSubmission The input data from a form as a map of field name to field value(s), not null
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
   public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
@@ -58,7 +59,7 @@ public class ValidationService {
         key = key.replace("[]", "");
       }
       validator.validateValue(flowClass, key, value)
-              .forEach(violation -> messages.add(violation.getMessage()));
+          .forEach(violation -> messages.add(violation.getMessage()));
       if (!messages.isEmpty()) {
         validationMessages.put(key, messages);
       }

@@ -10,23 +10,24 @@ import java.util.List;
  */
 @Configuration
 public class FlowsConfigurationFactoryConfig {
-    /**
-     * Bean to get a FlowsConfigurationFactory object.
-     *
-     * @return flow configuration factory
-     */
-    @Bean
-    public FlowsConfigurationFactory flowsConfigurationFactory() {
-        return new FlowsConfigurationFactory();
-    }
 
-    /**
-     * Bean to get a list of FlowConfiguration objects.
-     *
-     * @return list of flow configuration objects
-     */
-    @Bean
-    public List<FlowConfiguration> flowsConfiguration() {
-        return flowsConfigurationFactory().getObject();
-    }
+  /**
+   * Bean to get a FlowsConfigurationFactory object.
+   *
+   * @return flow configuration factory
+   */
+  @Bean
+  public FlowsConfigurationFactory flowsConfigurationFactory() {
+    return new FlowsConfigurationFactory();
+  }
+
+  /**
+   * Bean to get a list of FlowConfiguration objects.
+   *
+   * @return list of flow configuration objects
+   */
+  @Bean
+  public List<FlowConfiguration> flowsConfiguration() {
+    return flowsConfigurationFactory().getObject();
+  }
 }

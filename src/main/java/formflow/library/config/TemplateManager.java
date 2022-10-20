@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class TemplateManager {
@@ -27,11 +26,11 @@ public class TemplateManager {
       try {
         // get all the conditions located in conditions, load them
         List<ClassPath.ClassInfo> classes =
-                ClassPath.from(ClassLoader.getSystemClassLoader())
-                        .getAllClasses()
-                        .stream()
-                        .filter(clazz -> clazz.getPackageName().toLowerCase().contains(conditionsClassPath.toLowerCase()))
-                        .toList();
+            ClassPath.from(ClassLoader.getSystemClassLoader())
+                .getAllClasses()
+                .stream()
+                .filter(clazz -> clazz.getPackageName().toLowerCase().contains(conditionsClassPath.toLowerCase()))
+                .toList();
 
         classes.forEach(clazz -> {
           try {
@@ -41,7 +40,7 @@ public class TemplateManager {
             this.conditions.put(clazz.getSimpleName(), condition);
           } catch (Exception e) {
             System.out.printf("Encountered %s exception when creating %s Condition: %s%n",
-                    e.getClass(), clazz.getName(), e.getMessage());
+                e.getClass(), clazz.getName(), e.getMessage());
           }
         });
 
@@ -57,11 +56,11 @@ public class TemplateManager {
       try {
         // get all the conditions located in conditions, load them
         List<ClassPath.ClassInfo> classes =
-                ClassPath.from(ClassLoader.getSystemClassLoader())
-                        .getAllClasses()
-                        .stream()
-                        .filter(clazz -> clazz.getPackageName().toLowerCase().contains(actionsClassPath.toLowerCase()))
-                        .toList();
+            ClassPath.from(ClassLoader.getSystemClassLoader())
+                .getAllClasses()
+                .stream()
+                .filter(clazz -> clazz.getPackageName().toLowerCase().contains(actionsClassPath.toLowerCase()))
+                .toList();
 
         classes.forEach(clazz -> {
           try {
@@ -71,7 +70,7 @@ public class TemplateManager {
             this.actions.put(clazz.getSimpleName(), action);
           } catch (Exception e) {
             System.out.printf("Encountered %s exception when creating %s Action: %s%n",
-                    e.getClass(), clazz.getName(), e.getMessage());
+                e.getClass(), clazz.getName(), e.getMessage());
           }
         });
 

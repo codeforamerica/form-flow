@@ -8,7 +8,7 @@
   <!DOCTYPE html>
   <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="fragments/head :: head(title=${title})"></head>
-  <body >
+  <body>
   <div class="page-wrapper">
     <div th:replace="fragments/toolbar :: toolbar"></div>
     <section class="slab">
@@ -24,7 +24,8 @@
                 <th:block th:replace="${inputContent}"/>
               </div>
               <div class="form-card__footer">
-                <th:block th:replace="fragments/inputs/submitButton :: submitButton(text=${buttonLabel != null ? buttonLabel : 'Submit'})" />
+                <th:block
+                    th:replace="fragments/inputs/submitButton :: submitButton(text=${buttonLabel != null ? buttonLabel : 'Submit'})"/>
               </div>
             </th:block>
           </th:block>

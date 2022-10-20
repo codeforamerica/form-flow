@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <div th:fragment="demoBanner" th:if="${@environment.getProperty('demo')}" class="demo-banner">
-    This site is for example purposes only. If you need to submit an application, apply on <a class="link--subtle" href="https://mnbenefits.mn.gov/">MNbenefits</a>.
-  </div>
+<div th:fragment="demoBanner" th:if="${@environment.getProperty('demo')}" class="demo-banner">
+  This site is for example purposes only. If you need to submit an application, apply on <a
+    class="link--subtle"
+    href="https://mnbenefits.mn.gov/">MNbenefits</a>.
+</div>
 </body>
 </html>

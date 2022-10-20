@@ -51,10 +51,10 @@ public class SubmissionRepositoryService {
   /**
    * Removes the CSRF from a particular Submission's Subflow's iteration data, if found.
    * <p>
-   *     This will remove the CSRF from all the iterations in the subflow.
+   * This will remove the CSRF from all the iterations in the subflow.
    * </p>
    *
-   * @param submission submission to look for subflows in, not null
+   * @param submission  submission to look for subflows in, not null
    * @param subflowName the subflow to remove the CSRF from, not null
    */
   public void removeSubflowCSRF(Submission submission, String subflowName) {
