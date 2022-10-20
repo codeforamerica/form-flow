@@ -2,6 +2,7 @@ package formflow.library.config;
 
 import formflow.library.config.submission.Condition;
 import lombok.Data;
+
 import java.lang.reflect.Constructor;
 import javax.naming.ConfigurationException;
 
@@ -12,33 +13,33 @@ import javax.naming.ConfigurationException;
  */
 @Data
 public class NextScreen {
-  private String name;
-  private String condition;
-  private Condition conditionObject;
+    private String name;
+    private String condition;
+    private Condition conditionObject;
 
-  /**
-   * Sets the condition name that should be associated with this (next) screen.
-   *
-   * This will use the name to find the proper condition class and create the condition object to be
-   * used to test this condition.
-   *
-   * @param condition string name of the condition
-   * @throws ConfigurationException
-   */
-  public void setCondition(String condition) throws ConfigurationException {
-    try {
-      this.condition = condition;
-      Class<?> clazz = Class.forName(condition);
-      Constructor<?> ctor = clazz.getConstructor();
-      conditionObject = (Condition) ctor.newInstance();
-    } catch (Exception e) {
-      throw new ConfigurationException(
-              String.format("Unable to setup condition %s for screen %s: %s",
-                      condition,
-                      name,
-                      e.getMessage()
-              )
-      );
+    /**
+     * Sets the condition name that should be associated with this (next) screen.
+     * <p>
+     * This will use the name to find the proper condition class and create the condition object to be
+     * used to test this condition.
+     *
+     * @param condition string name of the condition
+     * @throws ConfigurationException
+     */
+    public void setCondition(String condition) throws ConfigurationException {
+        try {
+            this.condition = condition;
+            Class<?> clazz = Class.forName(condition);
+            Constructor<?> ctor = clazz.getConstructor();
+            conditionObject = (Condition) ctor.newInstance();
+        } catch (Exception e) {
+            throw new ConfigurationException(
+                    String.format("Unable to setup condition %s for screen %s: %s",
+                            condition,
+                            name,
+                            e.getMessage()
+                    )
+            );
+        }
     }
-  }
 }

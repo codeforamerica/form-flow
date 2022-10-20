@@ -1,41 +1,41 @@
 <div th:fragment="localeSelect" class="form-group" th:with="lang=${#locale.toString()}">
-  <label th:text="#{language-preferences.title}" class="sr-only" for="locales"></label>
-  <div class="select">
-    <select class="select__element" name="locales" id="locales">
-      <option class="language-selector-option" lang="en" value="en"
-              th:selected="${lang.equals('en')}" th:text="#{language-preferences.english}"></option>
-      <option class="language-selector-option" lang="es" value="es"
-              th:selected="${lang.equals('es')}" th:text="#{language-preferences.spanish}"></option>
-    </select>
-  </div>
-  <script>
-    $(document).ready(function () {
-      $("#locales").change(function () {
-        if ($("#locales").val() !== '') {
-          window.location.replace('?lang=' + $("#locales").val());
-        }
-      });
+    <label th:text="#{language-preferences.title}" class="sr-only" for="locales"></label>
+    <div class="select">
+        <select class="select__element" name="locales" id="locales">
+            <option class="language-selector-option" lang="en" value="en"
+                    th:selected="${lang.equals('en')}" th:text="#{language-preferences.english}"></option>
+            <option class="language-selector-option" lang="es" value="es"
+                    th:selected="${lang.equals('es')}" th:text="#{language-preferences.spanish}"></option>
+        </select>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("#locales").change(function () {
+                if ($("#locales").val() !== '') {
+                    window.location.replace('?lang=' + $("#locales").val());
+                }
+            });
 
-      // language preferences
-      var writtenLanguage = $("#writtenLanguage");
-      if (writtenLanguage) {
-        var localeToLanguage = {'es': 'SPANISH', 'en': 'ENGLISH'}
-        var languageToLocale = {'SPANISH': 'es', 'ENGLISH': 'en'}
-        var localeLang = localeToLanguage[$("#locales").val()]
-        if (localeLang) {
-          $('#writtenLanguage option[value="' + localeLang + '"]').prop('selected', true)
-        }
+            // language preferences
+            var writtenLanguage = $("#writtenLanguage");
+            if (writtenLanguage) {
+                var localeToLanguage = {'es': 'SPANISH', 'en': 'ENGLISH'}
+                var languageToLocale = {'SPANISH': 'es', 'ENGLISH': 'en'}
+                var localeLang = localeToLanguage[$("#locales").val()]
+                if (localeLang) {
+                    $('#writtenLanguage option[value="' + localeLang + '"]').prop('selected', true)
+                }
 
-        writtenLanguage.change(function () {
-          var writtenLanguageSelected = $("#writtenLanguage option:selected");
-          var languagePreference = languageToLocale[writtenLanguageSelected.val()]
-          if (languagePreference) {
-            window.location.replace('?lang=' + languagePreference + '')
-          } else if ($("#locales").val() !== 'en') {
-            window.location.replace('?lang=en')
-          }
+                writtenLanguage.change(function () {
+                    var writtenLanguageSelected = $("#writtenLanguage option:selected");
+                    var languagePreference = languageToLocale[writtenLanguageSelected.val()]
+                    if (languagePreference) {
+                        window.location.replace('?lang=' + languagePreference + '')
+                    } else if ($("#locales").val() !== 'en') {
+                        window.location.replace('?lang=en')
+                    }
+                });
+            }
         });
-      }
-    });
-  </script>
+    </script>
 </div>

@@ -2,8 +2,8 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-    th:fragment="textArea"
-    th:with="
+        th:fragment="textArea"
+        th:with="
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
@@ -13,27 +13,27 @@
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
         (#arrays.length(errorMessages.get(inputName)) > 0) }"
-    th:assert="${!#strings.isEmpty(inputName)}, ${hasLabel || hasAriaLabel}">
-  <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
-    <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}" class="form-question"/>
-    <p class="text--help"
-       th:if="${hasHelpText}"
-       th:id="${inputName + '-help-text'}"
-       th:text="${helpText}"></p>
-    <textarea th:fragment="textArea"
-              type="textarea"
-              class="textarea spacing-below-0"
-              th:attr="
+        th:assert="${!#strings.isEmpty(inputName)}, ${hasLabel || hasAriaLabel}">
+    <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
+        <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}" class="form-question"/>
+        <p class="text--help"
+           th:if="${hasHelpText}"
+           th:id="${inputName + '-help-text'}"
+           th:text="${helpText}"></p>
+        <textarea th:fragment="textArea"
+                  type="textarea"
+                  class="textarea spacing-below-0"
+                  th:attr="
                 aria-describedby=${hasHelpText ? inputName + '-help-message' : ''},
                 aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
                 rows=${rows},
                 maxlength=${maxLength},
                 aria-invalid=${hasError}"
-              th:id="${inputName}"
-              th:name="${inputName}">[[${inputData.getOrDefault(inputName, '')}]]</textarea>
-    <th:block
-        th:replace="fragments/inputError :: validationError(inputName=${inputName})"></th:block>
-  </div>
+                  th:id="${inputName}"
+                  th:name="${inputName}">[[${inputData.getOrDefault(inputName, '')}]]</textarea>
+        <th:block
+                th:replace="fragments/inputError :: validationError(inputName=${inputName})"></th:block>
+    </div>
 </th:block>
 </body>
 </html>

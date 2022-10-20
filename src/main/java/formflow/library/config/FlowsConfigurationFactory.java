@@ -18,40 +18,40 @@ import java.util.List;
  */
 public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfiguration>> {
 
-  @Value("${form-flow.path:flows-config.yaml}")
-  String configPath;
+    @Value("${form-flow.path:flows-config.yaml}")
+    String configPath;
 
-  @Override
-  public List<FlowConfiguration> getObject() {
-    ClassPathResource classPathResource = new ClassPathResource(configPath);
+    @Override
+    public List<FlowConfiguration> getObject() {
+        ClassPathResource classPathResource = new ClassPathResource(configPath);
 
-    LoaderOptions loaderOptions = new LoaderOptions();
-    loaderOptions.setAllowDuplicateKeys(false);
-    loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
-    loaderOptions.setAllowRecursiveKeys(true);
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setAllowDuplicateKeys(false);
+        loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
+        loaderOptions.setAllowRecursiveKeys(true);
 
-    Yaml yaml = new Yaml(new Constructor(FlowConfiguration.class), new Representer(),
-        new DumperOptions(), loaderOptions);
-    List<FlowConfiguration> appConfigs = new ArrayList<>();
-    try {
-      Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
-      appConfigsIterable.forEach(appConfig -> {
-        appConfigs.add((FlowConfiguration) appConfig);
-      });
-    } catch (IOException e) {
-      e.printStackTrace();
+        Yaml yaml = new Yaml(new Constructor(FlowConfiguration.class), new Representer(),
+                new DumperOptions(), loaderOptions);
+        List<FlowConfiguration> appConfigs = new ArrayList<>();
+        try {
+            Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
+            appConfigsIterable.forEach(appConfig -> {
+                appConfigs.add((FlowConfiguration) appConfig);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return appConfigs;
     }
 
-    return appConfigs;
-  }
+    @Override
+    public Class<?> getObjectType() {
+        return FlowConfiguration.class;
+    }
 
-  @Override
-  public Class<?> getObjectType() {
-    return FlowConfiguration.class;
-  }
-
-  @Override
-  public boolean isSingleton() {
-    return false;
-  }
+    @Override
+    public boolean isSingleton() {
+        return false;
+    }
 }

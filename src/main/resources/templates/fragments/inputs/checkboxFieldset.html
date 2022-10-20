@@ -2,8 +2,8 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-    th:fragment="checkboxFieldset"
-    th:with="
+        th:fragment="checkboxFieldset"
+        th:with="
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
@@ -11,36 +11,36 @@
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
         (#arrays.length(errorMessages.get(inputName)) > 0) }"
-    th:assert="
+        th:assert="
       ${!#strings.isEmpty(inputName)},
       ${hasLabel || hasAriaLabel},
       ${content != null}">
-  <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
-    <style>
-      /* TODO: add to honeycrisp? */
-      .text--normal {
-        font-weight: 400;
-      }
-    </style>
-    <fieldset th:attr="
+    <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
+        <style>
+            /* TODO: add to honeycrisp? */
+            .text--normal {
+                font-weight: 400;
+            }
+        </style>
+        <fieldset th:attr="
       aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
       aria-labelledby=${hasAriaLabel ? ariaLabel : ''}">
-      <legend class="form-question"
-              th:if="${hasLabel}"
-              th:id="${inputName + '-legend'}"
-              th:inline="text">
-        [[${label}]]
-        <p class="text--help spacing-below-0 text--normal"
-           th:if="${hasHelpText}"
-           th:id="${inputName + '-help-text'}"
-           th:text="${fieldsetHelpText}"></p>
-      </legend>
-      <input type="hidden" th:id="${inputName} + 'Hidden'" th:name="${inputName} + '[]'" value="">
-      <th:block th:replace="${content}"/>
-      <th:block
-          th:replace="fragments/inputError :: validationError(inputName=${inputName})"></th:block>
-    </fieldset>
-  </div>
+            <legend class="form-question"
+                    th:if="${hasLabel}"
+                    th:id="${inputName + '-legend'}"
+                    th:inline="text">
+                [[${label}]]
+                <p class="text--help spacing-below-0 text--normal"
+                   th:if="${hasHelpText}"
+                   th:id="${inputName + '-help-text'}"
+                   th:text="${fieldsetHelpText}"></p>
+            </legend>
+            <input type="hidden" th:id="${inputName} + 'Hidden'" th:name="${inputName} + '[]'" value="">
+            <th:block th:replace="${content}"/>
+            <th:block
+                    th:replace="fragments/inputError :: validationError(inputName=${inputName})"></th:block>
+        </fieldset>
+    </div>
 </th:block>
 </body>
 </html>

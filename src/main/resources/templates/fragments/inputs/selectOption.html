@@ -2,14 +2,14 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-    th:fragment="selectOption"
-    th:assert="
+        th:fragment="selectOption"
+        th:assert="
       ${value != null},
       ${!#strings.isEmpty(optionText)}">
-  <option
-      th:value="${value}"
-      th:selected="${inputData.getOrDefault(inputName, '').equals(value)}"
-      th:text="${optionText}"></option>
+    <option
+            th:value="${value}"
+            th:selected="${inputData.getOrDefault(inputName, '').equals(value)}"
+            th:text="${optionText}"></option>
 </th:block>
 </body>
 </html>
