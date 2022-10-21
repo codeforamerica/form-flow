@@ -132,7 +132,7 @@ public class ScreenController {
 
     // if there's already a session
     if (submission.getId() != null) {
-      Submission.mergeFormDataWithSubmissionData(submission, formDataSubmission);
+      submission.mergeFormDataWithSubmissionData(formDataSubmission);
       saveToRepository(submission);
     } else {
       submission.setFlow(flow);
@@ -278,15 +278,14 @@ public class ScreenController {
 
     if (submissionOptional.isPresent()) {
       Submission submission = submissionOptional.get();
-      var iterationToEdit = Submission.getSubflowEntryByUuid(subflowName, uuid, submission);
+      var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
       if (iterationToEdit != null) {
         Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen);
         formDataSubmission.put("iterationIsComplete", iterationIsComplete);
-        var updatedSubmission = Submission.mergeFormDataWithSubflowIterationData(submission, subflowName, iterationToEdit,
-            formDataSubmission);
-        Submission.removeIncompleteIterations(updatedSubmission, subflowName, uuid);
-        handleBeforeSaveAction(currentScreen, updatedSubmission, uuid);
-        saveToRepository(updatedSubmission, subflowName);
+        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formDataSubmission);
+        submission.removeIncompleteIterations(subflowName, uuid);
+        handleBeforeSaveAction(currentScreen, submission, uuid);
+        saveToRepository(submission, subflowName);
       }
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
@@ -462,12 +461,11 @@ public class ScreenController {
 
     if (submissionOptional.isPresent()) {
       Submission submission = submissionOptional.get();
-      var iterationToEdit = Submission.getSubflowEntryByUuid(subflowName, uuid, submission);
+      var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
       if (iterationToEdit != null) {
-        var updatedSubmission = Submission.mergeFormDataWithSubflowIterationData(submission, subflowName, iterationToEdit,
-            formDataSubmission);
-        handleBeforeSaveAction(currentScreen, updatedSubmission, uuid);
-        saveToRepository(updatedSubmission, subflowName);
+        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formDataSubmission);
+        handleBeforeSaveAction(currentScreen, submission, uuid);
+        saveToRepository(submission, subflowName);
       }
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
@@ -635,14 +633,12 @@ public class ScreenController {
 
     // If there are errors, merge form data that was submitted, with already existing inputData
     if (httpSession.getAttribute("formDataSubmission") != null) {
-      Submission.mergeFormDataWithSubmissionData(submission,
-          (Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
-      model.put("submission", submission);
-      model.put("inputData", submission.getInputData());
-    } else {
-      model.put("submission", submission);
-      model.put("inputData", submission.getInputData());
+      submission.mergeFormDataWithSubmissionData((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
     }
+
+    model.put("submission", submission);
+    model.put("inputData", submission.getInputData());
+
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
     return model;
   }
