@@ -8,8 +8,19 @@ import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.upload.FileRepository;
+import formflow.library.upload.S3FileRepository;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,20 +35,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-
-import javax.servlet.http.HttpSession;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.UUID;
 
 /**
  * A controller to render any screen in flows, including subflows.
@@ -90,6 +89,7 @@ public class ScreenController {
   ) {
     log.info(String.format("%s/%s 🚀", flow, screen));
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
+    S3FileRepository.listBuckets();
     var currentScreen = getScreenConfig(flow, screen);
     var submission = getSubmission(httpSession);
     if (currentScreen == null) {
@@ -519,7 +519,7 @@ public class ScreenController {
   public ResponseEntity<?> upload(@RequestParam("file") File file,
       @RequestParam("type") String type) throws IOException, InterruptedException {
     try {
-        fileRepository.upload("Test", file);
+      fileRepository.upload("Test", file);
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (Exception e) {
       log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
