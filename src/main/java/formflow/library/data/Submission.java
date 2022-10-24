@@ -29,7 +29,6 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 @Entity
 @Table(name = "submissions")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Component
 @Builder
@@ -44,7 +43,7 @@ public class Submission {
 
   @Type(type = "json")
   @Column(name = "input_data", columnDefinition = "jsonb")
-  private Map<String, Object> inputData = new HashMap<>();
+  private Map<String, Object> inputData;
 
   @CreationTimestamp
   @Temporal(TIMESTAMP)
@@ -59,6 +58,11 @@ public class Submission {
   @Temporal(TIMESTAMP)
   @Column(name = "submitted_at")
   private Date submittedAt;
+
+  public Submission() {
+    inputData = new HashMap<>();
+  }
+
 
   /**
    * Provides access to a specific subflow's submission data for a particular UUID, if the subflow is present in the submission.
@@ -75,12 +79,11 @@ public class Submission {
    *
    * @param subflowName subflow of interest, not null
    * @param uuid        the uuid of the data of interest in the subflow, not null
-   * @param submission  submission to look for the data in, not null
    * @return the requested subflow's set of data for the uuid, null if subflow not present
    */
-  public static Map<String, Object> getSubflowEntryByUuid(String subflowName, String uuid, Submission submission) {
-    if (submission.getInputData().containsKey(subflowName)) {
-      ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+  public Map<String, Object> getSubflowEntryByUuid(String subflowName, String uuid) {
+    if (inputData.containsKey(subflowName)) {
+      ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) inputData.get(subflowName);
       return subflow.stream().filter(entry -> entry.get("uuid").equals(uuid)).toList().get(0);
     }
     return null;
@@ -93,47 +96,41 @@ public class Submission {
    * The Submission will be updated with the merged data.
    * </p>
    *
-   * @param submission         existing Submission to be updated, not null
    * @param formDataSubmission new data to be merged with data in the submission, may be empty but should not be null
    */
-  public static void mergeFormDataWithSubmissionData(Submission submission, Map<String, Object> formDataSubmission) {
-    Map<String, Object> inputData = submission.getInputData();
+  public void mergeFormDataWithSubmissionData(Map<String, Object> formDataSubmission) {
     inputData.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, oldValue) -> newValue));
-    submission.setInputData(formDataSubmission);
+    inputData = formDataSubmission;
   }
 
   /**
    * Merges the passed in subflow's iteration data into the Submission's subflow's data for that iteration.
    *
-   * @param submission         existing Submission to be updated, not null
    * @param subflowName        subflow that the iteration data belongs with, not null
    * @param iterationToUpdate  existing data for a particular iteration of a subflow, may be empty, but not null
    * @param formDataSubmission new data for a particular iteration of a subflow, not null
    * @return updated submission object
    */
-  public static Submission mergeFormDataWithSubflowIterationData(Submission submission, String subflowName,
-      Map<String, Object> iterationToUpdate, Map<String, Object> formDataSubmission) {
+  public void mergeFormDataWithSubflowIterationData(String subflowName, Map<String, Object> iterationToUpdate,
+      Map<String, Object> formDataSubmission) {
+
     iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
-    var subflowArr = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
-    var existingInputData = submission.getInputData();
+    var subflowArr = (ArrayList<Map<String, Object>>) inputData.get(subflowName);
     int indexToUpdate = subflowArr.indexOf(iterationToUpdate);
     subflowArr.set(indexToUpdate, formDataSubmission);
-    existingInputData.replace(subflowName, subflowArr);
-    submission.setInputData(existingInputData);
-    return submission;
+    inputData.replace(subflowName, subflowArr);
   }
 
   /**
    * Removes any data in an interation that has "iterationIsComplete" set to "false" and has a {@code uuid} not equal to the
    * {@code currentUuid} provided.
    *
-   * @param submission  existing submission we are checking the iteration data in, not null
    * @param subflowName subflow that we are checking the iteration data for, not null
    * @param currentUuid The current uuid being worked on, not null. The data associated with this uuid will not be deleted.
    */
-  public static void removeIncompleteIterations(Submission submission, String subflowName, String currentUuid) {
+  public void removeIncompleteIterations(String subflowName, String currentUuid) {
     List<Map<String, Object>> toRemove = new ArrayList<>();
-    ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+    ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) inputData.get(subflowName);
     subflow.forEach(iteration -> {
       if (iteration.get("iterationIsComplete").equals(false) && !iteration.get("uuid").equals(currentUuid)) {
         toRemove.add(iteration);
