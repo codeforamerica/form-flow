@@ -7,11 +7,15 @@ import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.upload.FileRepository;
+import java.io.File;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -45,13 +51,18 @@ public class ScreenController {
   private final SubmissionRepositoryService submissionRepositoryService;
   private final ValidationService validationService;
 
+  private final FileRepository fileRepository;
+
+
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
       SubmissionRepositoryService submissionRepositoryService,
-      ValidationService validationService) {
+      ValidationService validationService,
+      FileRepository fileRepository) {
     this.flowConfigurations = flowConfigurations;
     this.submissionRepositoryService = submissionRepositoryService;
     this.validationService = validationService;
+    this.fileRepository = fileRepository;
 
     log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
@@ -500,6 +511,20 @@ public class ScreenController {
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new RedirectView("/%s/%s".formatted(flow, nextScreen));
+  }
+
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  @PostMapping("/file-upload")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<?> upload(@RequestParam("file") File file,
+      @RequestParam("type") String type) throws IOException, InterruptedException {
+    try {
+        fileRepository.upload("Test", file);
+      return new ResponseEntity<>(HttpStatus.OK);
+    } catch (Exception e) {
+      log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   private String getNextScreenName(HttpSession httpSession,

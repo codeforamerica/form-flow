@@ -1,6 +1,22 @@
 package formflow.library.upload;
 
-import java.io.IOException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.util.IOUtils;
+import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,18 +24,19 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @Slf4j
 public class S3FileRepository implements FileRepository {
-  private final AWSCredentials credentials = new BasicAWSCredentials(π)
+
   private final String bucketName;
   private final AmazonS3 s3Client;
 
-  public S3DocumentRepository() {
+  public S3FileRepository(String bucketName, AmazonS3 s3Client) {
+    AWSCredentials credentials = new BasicAWSCredentials(System.getenv("AWS_ACCESS_KEY"),
+        System.getenv("AWS_SECRET_KEY"));
     this.s3Client = AmazonS3ClientBuilder
         .standard()
         .withCredentials(new AWSStaticCredentialsProvider(credentials))
         .withRegion(Regions.US_EAST_2)
         .build();
     this.bucketName = System.getenv("S3_BUCKET");
-    this.transferManager = transferManager;
   }
 
   public byte[] get(String filepath) {
@@ -34,18 +51,18 @@ public class S3FileRepository implements FileRepository {
     }
   }
 
-  public void upload(String filepath, MultipartFile file) {
-    log.info("Uploading file {} to S3 at filepath {}", file.getOriginalFilename(), filepath);
-    ObjectMetadata metadata = new ObjectMetadata();
-    metadata.setContentLength(file.getSize());
+  public void upload(String filepath, File file) {
+    TransferManager transferManager = TransferManagerBuilder.standard().build();
     try {
-      transferManager
-          .upload(bucketName, filepath, file.getInputStream(), metadata)
-          .waitForCompletion();
-      log.info("finished uploading");
-    } catch (IOException | InterruptedException e) {
+      Upload upload = transferManager.upload(bucketName, filepath, file);
+      upload.waitForCompletion();
+    } catch (AmazonServiceException e) {
+      System.err.println(e.getErrorMessage());
+      System.exit(1);
+    } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
+    transferManager.shutdownNow();
   }
 
   public void upload(String filepath, String fileContent) {
@@ -54,6 +71,6 @@ public class S3FileRepository implements FileRepository {
 
   public void delete(String filepath) throws SdkClientException {
     log.info("Deleting file at filepath {} from S3", filepath);
-    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
+//    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
   }
 }
