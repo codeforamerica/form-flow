@@ -9,8 +9,11 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.upload.FileRepository;
 import formflow.library.upload.S3FileRepository;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +38,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -89,7 +93,6 @@ public class ScreenController {
   ) {
     log.info(String.format("%s/%s 🚀", flow, screen));
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
-    S3FileRepository.listBuckets();
     var currentScreen = getScreenConfig(flow, screen);
     var submission = getSubmission(httpSession);
     if (currentScreen == null) {
@@ -516,10 +519,12 @@ public class ScreenController {
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @PostMapping("/file-upload")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<?> upload(@RequestParam("file") File file,
+  public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
       @RequestParam("type") String type) throws IOException, InterruptedException {
     try {
-      fileRepository.upload("Test", file);
+      log.info("You are in file upload endpoint");
+      log.info("The file name is " + file.getOriginalFilename());
+      fileRepository.upload(file);
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (Exception e) {
       log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
