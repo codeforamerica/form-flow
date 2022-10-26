@@ -1,6 +1,7 @@
 package formflow.library.upload;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -18,13 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Slf4j
-public class S3FileRepository implements FileRepository {
+public class S3CloudFileRepository implements CloudFileRepository {
 
   private final String bucketName;
 
   private final TransferManager transferManager;
 
-  public S3FileRepository() {
+  public S3CloudFileRepository() {
     AWSCredentials credentials = new BasicAWSCredentials(System.getenv("AWS_ACCESS_KEY"),
         System.getenv("AWS_SECRET_KEY"));
     this.bucketName = System.getenv("S3_BUCKET");
@@ -48,14 +49,14 @@ public class S3FileRepository implements FileRepository {
 //    }
 //  }
 
-  public void upload(MultipartFile file) {
+  public void upload(String filePath, MultipartFile file) {
     try {
       log.info("Inside the S3 File Repository Upload Call");
       ObjectMetadata objectMetadata = new ObjectMetadata();
       objectMetadata.setContentType(file.getContentType());
       objectMetadata.setContentLength(file.getSize());
       log.info("Upload Metadata Set");
-      Upload upload = transferManager.upload(bucketName, file.getOriginalFilename(), file.getInputStream(), objectMetadata);
+      Upload upload = transferManager.upload(bucketName, filePath, file.getInputStream(), objectMetadata);
       log.info("Upload Called");
       upload.waitForCompletion();
       log.info("Upload complete");
@@ -73,8 +74,8 @@ public class S3FileRepository implements FileRepository {
 //
 //  }
 //
-//  public void delete(String filepath) throws SdkClientException {
-//    log.info("Deleting file at filepath {} from S3", filepath);
-////    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
-//  }
+  public void delete(String filepath) throws SdkClientException {
+    log.info("Deleting file at filepath {} from S3", filepath);
+//    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
+  }
 }

@@ -1,20 +1,27 @@
 package formflow.library.data;
 
+import static javax.persistence.TemporalType.TIMESTAMP;
+
 import com.vladmihalcea.hibernate.type.json.JsonType;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
-
-import javax.persistence.*;
-import java.util.*;
-
-import static javax.persistence.TemporalType.TIMESTAMP;
 
 /**
  * A class representing what a submission of the form flow looks like in the database.
@@ -31,7 +38,6 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 @Data
 @AllArgsConstructor
 @Component
-@Builder
 public class Submission {
 
   @Id
