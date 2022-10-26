@@ -46,9 +46,10 @@ Table of Contents
 A java library that provide a framework for developing *form-flow* based applications. The library
 includes tooling for:
 
-- Conditions
-    - Conditions for the flow of screens
-    - Revealing of elements on a screen
+- Conditions and Actions
+- Conditions for the flow of screens
+- Revealing of elements on a screen
+
 - Subflows
     - Repeating sections of screen(s) that build a collection of information (ex. ask for
       information about all members of a household) before returning to the main flow
@@ -57,11 +58,11 @@ includes tooling for:
 - Template fragments
     - A set
       of [Thymeleaf fragments](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/fragments)
-      that create a library of reusable HTML components such as for Inputs, Screens, Forms, etc.
+      (old work)
+
+      that create a library of reusable HTML components for Inputs, Screens, Forms, etc.
 - Data Persistence
 - File Uploads
-
-(old work)
 
 # Form Flow Library
 
@@ -97,7 +98,8 @@ erDiagram
 
 ## Web/Fat Jar
 
-TODO: why is this a web/fat jar?
+This is created as a Web/Fat jar to include all the items this class depends on. Specifically it's
+created this way to ensure that all the resources are included in the distribution.
 
 ## Defining Flows
 
@@ -115,8 +117,7 @@ accessed from the Spring Boot app.
 #### Thymeleaf Model Data
 
 We provide some data to the model for ease of use access in Thymeleaf templates. Below are the data
-types
-we pass and when they are available.
+types we pass and when they are available.
 
 | Name              | Type                    | Availability                                                                     | Description                                                                                                                                                         |
 |-------------------|-------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -132,7 +133,8 @@ we pass and when they are available.
 | `subflowIsEmpty`  | Boolean                 | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Indicates that the subflow being accessed no longer has entries.                                                                                                    |
 | `entryScreen`     | String                  | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Name of the entry screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                            |
 
-[For more information on the T Operator see section 6.5.8 here.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html)
+There are spots in the templates where the `T` operator is used.
+[For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html)
 
 #### Icon reference
 
@@ -141,11 +143,58 @@ available [icon fragments](src/main/resources/templates/fragments/icons.html)
 
 ## Defining Inputs
 
-Inputs are defined in two places - the template in which they are rendered, and in a separate class
-for validation.
-The inputs class is defined in `/src/main/java/app/inputs/<nameOfFlowAsNameOfInputsClass>`
+Inputs to the application are defined in two places - the template in which they are rendered,
+and in a separate class for validation.
 
-[When defining inputs we have provided a suite of input based Live Templates, more on that here.](#about-intellij-live-templates)
+### Input Class
+
+The inputs class's location is defined by the application using this library. The application using
+this library will need a field in its `application.yaml` that shows the location of the input
+class(es). It should look like this:
+
+```yaml
+form-flow:
+  inputs: 'org.formflowstartertemplate.app.inputs.'
+```
+
+The library will expect a class that matches the name of the flow there. So if the flow name, as
+defined in the application's `flows-config.yaml` configuration, is `ubi` we will expect a class by
+the name of `Ubi` to be located at the specified input path.
+
+An example inputs class can be seen below, with example validations.
+
+Please note that for single value inputs the type when defining the input is String. However, for
+input types that can contain more than one value, the type is ArrayList<String>.
+
+```java
+class ApplicationInformation {
+
+  @NotBlank(message = "{personal-info.provide-first-name}")
+  String firstName;
+
+  @NotBlank(message = "{personal-info.provide-last-name}")
+  String lastName;
+
+  String emailAddress;
+
+  String phoneNumber;
+
+  @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
+  ArrayList<String> gender;
+}
+```
+
+Validations for inputs use the JSR-303 bean validation paradigm, more specifically, Hibernate
+validations. For a list of validation decorators,
+see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+
+### Templates
+
+The templates will contain the HTML which drive how the pages that run the flow are rendered.
+The application using this library will have a set of templates to gather input with.
+
+We have provided a suite of input based Live Templates, more
+on [live templates here](#about-intellij-live-templates).
 
 Live templates are provided for the following input types:
 
@@ -164,35 +213,6 @@ Live templates are provided for the following input types:
 - `YesOrNo`
 - `Submit`
 - `FileUpload` (TBD)
-
-An example inputs class can be seen below, with example validations.
-
-Please note that for single value inputs the type when defining the input is String. However, for
-input types
-that can contain more than one value, the type is ArrayList<String>.
-
-```java
-class Apply {
-
-  @NotBlank(message = "{personal-info.provide-first-name}")
-  String firstName;
-
-  @NotBlank(message = "{personal-info.provide-last-name}")
-  String lastName;
-
-  String emailAddress;
-
-  String phoneNumber;
-
-  @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
-  ArrayList<String> gender;
-}
-```
-
-Validations for inputs use the JSR-303 bean validation paradigm, more specifically, Hibernate
-validations. For a list of validation
-decorators,
-see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
 
 ## About Submissions
 
@@ -224,11 +244,9 @@ class Submission {
 }
 ```
 
-The `inputData` field is a JSON object that stores input data from the inputs as a given
-flow progresses. It can be used for defining conditions.
-
-An instance variable `currentSubmission` is available for use in the `ScreenController` and
-`inputData` is placed on the Thymeleaf model.
+The `inputData` field is a JSON object that stores data from the user's input as a given
+flow progresses. This field is placed in the model handed to the Thymeleaf templates, so each page
+should have access to it.
 
 ## Subflows
 
@@ -257,36 +275,29 @@ subflow:
 
 This screen represents the entry point to a subflow, it is usually the point at which a user makes a
 decision to enter the subflow or not. Example: a screen that asks "Would you like to add household
-members?"
-could be the entry screen for a household based subflow.
+members?" could be the entry screen for a household based subflow.
 
-The entry screen is not part of the repeating
-set of pages internal to the subflow and as such does not need to be demarked
-with `subflow: subflowName`
-in the `flows-config.yaml`.
+The entry screen is not part of the repeating set of pages internal to the subflow and as such does
+not need to be demarked with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Iteration Start Screen
 
 This screen is the first screen in a subflows set of repeating screens. When this screen is
-submitted,
-it creates a new iteration which is then saved to the subflow array within the Submission object.
+submitted, it creates a new iteration which is then saved to the subflow array within the Submission
+object.
 
 Because this screen is part of the repeating screens within the subfow, it **should** be denoted
-with
-`subflow: subflowName` in the `flows-config.yaml`.
+with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Review Screen
 
 This is the last screen in a subflow. This screen lists each iteration completed within a subflow,
-and provides options to edit or delete
-a single iteration.
+and provides options to edit or delete a single iteration.
 
-This screen does not need to be demarked with `subflow: subflowName`
-in the `flows-config.yaml`. It is not technically part of the repeating screens within a subflow,
-however,
+This screen does not need to be demarked with `subflow: subflowName` in the `flows-config.yaml`. It
+is not technically part of the repeating screens within a subflow, however,
 you do visit this screen at the end of each iteration to show iterations completed so far and ask
-the
-user if they would like to add another?
+the user if they would like to add another?
 
 #### Delete Confirmation Screen
 
@@ -490,19 +501,20 @@ From the project root invoke
 You can run tests directly in IntelliJ by running tests from test folder (via right click
 or `ctrl + shift + r`).
 
-## About IntelliJ Live Templates
+## Intellij
+
+### Live Templates
 
 As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
 the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
-quickly build
-Thymeleaf templates.
+quickly build Thymeleaf templates.
 
 Support for importing/exporting these Live Templates is
 a [buggy process](https://youtrack.jetbrains.com/issue/IDEA-184753) that can sometimes wipe away all
 of your previous
 settings. So we're going to use a copy/paste approach.
 
-### Applying Live Templates to your IntelliJ IDE
+#### Applying Live Templates to your IntelliJ IDE
 
 1. Open the [intellij-live-templates/CfA.xml](intellij-live-templates/CfA.xml) from the root of
    this repo
@@ -513,13 +525,12 @@ settings. So we're going to use a copy/paste approach.
 5. Highlight the template group "CfA", right click and "Paste"
 6. You should now see Live templates with the prefix "cfa:" populated in the template group
 
-### Using Live Templates
+#### Using Live Templates
 
 Once you have Live Templates installed on your IntelliJ IDE, in (`.html`, `.java`) files you can use
-our
-Live Templates by typing `cfa:` and a list of templates to autofill will show itself.
+our Live Templates by typing `cfa:` and a list of templates to autofill will show itself.
 
-### Contribute new Live Templates
+#### Contribute new Live Templates
 
 1. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
 2. Find the Live Template you want to contribute
@@ -528,5 +539,27 @@ Live Templates by typing `cfa:` and a list of templates to autofill will show it
 5. Paste at the bottom of the file
 6. Commit to GitHub
 7. Now others can copy/paste your Live Templates
+
+![IntelliJ JSON Schema Mappings menu](readme-assets/intellij-json-schema-mappings.png)
+
+### flows config schema with IntelliJ IDE
+
+We use [JSON schema](https://json-schema.org/understanding-json-schema/index.html) to autocomplete
+and validate the `flows-config.yaml` file.
+
+You must manually connect the schema to the local file in your instance of IntelliJ IDE.
+
+1. Open IntelliJ preferences (`Cmd + ,` on mac)
+2. Navigate to "JSON Schema Mappings"
+3. Select the "+" in the top left to add a new mapping
+4. Name can be anything (I use "flow config")
+5. "Schema file or URL" needs to be set to the `src/main/resources/flows-config-schema.json`
+6. "Schema version" set to "JSON Schema version 7"
+7. Use the "+" under schema version to add:
+    - a new file and connect to `src/main/resources/flows-config.yaml`
+    - a folder and connect to `src/test/resources/flows-config`
+
+To confirm that the connection is work, go into `flows-config.yaml` and see if autocomplete is
+appearing for you.
 
 ![IntelliJ JSON Schema Mappings menu](readme-assets/intellij-json-schema-mappings.png)
