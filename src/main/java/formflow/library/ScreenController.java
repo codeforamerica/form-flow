@@ -516,7 +516,6 @@ public class ScreenController {
     return new RedirectView("/%s/%s".formatted(flow, nextScreen));
   }
 
-  @SuppressWarnings("ResultOfMethodCallIgnored")
   @PostMapping("/file-upload")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,

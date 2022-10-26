@@ -7,14 +7,11 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,24 +21,26 @@ import org.springframework.web.multipart.MultipartFile;
 public class S3FileRepository implements FileRepository {
 
   private final String bucketName;
-  private static AmazonS3 s3Client;
+
+  private final TransferManager transferManager;
 
   public S3FileRepository() {
     AWSCredentials credentials = new BasicAWSCredentials(System.getenv("AWS_ACCESS_KEY"),
         System.getenv("AWS_SECRET_KEY"));
     this.bucketName = System.getenv("S3_BUCKET");
-    this.s3Client = AmazonS3ClientBuilder
+    AmazonS3 s3Client = AmazonS3ClientBuilder
         .standard()
         .withRegion(Regions.US_WEST_1)
         .withCredentials(new AWSStaticCredentialsProvider(credentials))
         .build();
+    this.transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
   }
 
 //  public byte[] get(String filepath) {
 //    try {
 //      S3Object obj = s3Client.getObject(bucketName, filepath);
 //      S3ObjectInputStream stream = obj.getObjectContent();
-//      byte[] content = IOUtils.toByteArray(stream);
+//      byte[] content = IOUtils.oByteArray(stream);
 //      obj.close();
 //      return content;
 //    } catch (Exception e) {
@@ -50,7 +49,6 @@ public class S3FileRepository implements FileRepository {
 //  }
 
   public void upload(MultipartFile file) {
-    TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
     try {
       log.info("Inside the S3 File Repository Upload Call");
       ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -61,7 +59,6 @@ public class S3FileRepository implements FileRepository {
       log.info("Upload Called");
       upload.waitForCompletion();
       log.info("Upload complete");
-      transferManager.shutdownNow(false);
     } catch (AmazonServiceException e) {
       System.err.println(e.getErrorMessage());
       System.exit(1);
@@ -70,7 +67,6 @@ public class S3FileRepository implements FileRepository {
       log.info(e.getMessage());
       throw new RuntimeException(e);
     }
-    transferManager.shutdownNow();
   }
 
 //  public void upload(String filepath, String fileContent) {
