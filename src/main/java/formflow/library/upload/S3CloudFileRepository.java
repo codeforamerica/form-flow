@@ -5,7 +5,6 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -14,6 +13,7 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,16 +22,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class S3CloudFileRepository implements CloudFileRepository {
 
   private final String bucketName;
-
   private final TransferManager transferManager;
 
-  public S3CloudFileRepository() {
-    AWSCredentials credentials = new BasicAWSCredentials(System.getenv("AWS_ACCESS_KEY"),
-        System.getenv("AWS_SECRET_KEY"));
-    this.bucketName = System.getenv("S3_BUCKET");
+  public S3CloudFileRepository(@Value("${form-flow.aws.access_key}") String accessKey,
+      @Value("${form-flow.aws.secret_key}") String secretKey,
+      @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,
+      @Value("${form-flow.aws.region}") String region) {
+    AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+    this.bucketName = s3BucketName;
     AmazonS3 s3Client = AmazonS3ClientBuilder
         .standard()
-        .withRegion(Regions.US_WEST_1)
+        .withRegion(region)
         .withCredentials(new AWSStaticCredentialsProvider(credentials))
         .build();
     this.transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
@@ -70,7 +71,7 @@ public class S3CloudFileRepository implements CloudFileRepository {
     }
   }
 
-//  public void upload(String filepath, String fileContent) {
+  //  public void upload(String filepath, String fileContent) {
 //
 //  }
 //
