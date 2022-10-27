@@ -1,9 +1,9 @@
 package formflow.library;
 
+import formflow.library.data.Submission;
+import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UploadedFileRepositoryService;
 import formflow.library.upload.CloudFileRepository;
-import java.io.IOException;
-import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -21,32 +21,34 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadController {
 
   private final UploadedFileRepositoryService uploadedFileRepositoryService;
-
   private final CloudFileRepository cloudFileRepository;
+  private final SubmissionRepositoryService submissionRepositoryService;
 
   public UploadController(
       UploadedFileRepositoryService uploadedFileRepositoryService,
-      CloudFileRepository cloudFileRepository
+      CloudFileRepository cloudFileRepository,
+      SubmissionRepositoryService submissionRepositoryService
   ) {
     this.uploadedFileRepositoryService = uploadedFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
+    this.submissionRepositoryService = submissionRepositoryService;
   }
 
   @PostMapping("/file-upload")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
       @RequestParam("file") MultipartFile file,
-      @RequestParam("type") String type,
       HttpSession httpSession
-  ) throws IOException, InterruptedException {
+  ) {
     try {
       log.info("You are in file upload endpoint");
       log.info("The file name is " + file.getOriginalFilename());
-      Long id = (Long) httpSession.getAttribute("id");
-      UUID uuid = UUID.randomUUID();
-      String s3FilePath = String.format("%s/%s", httpSession.getAttribute("id"), uuid);
-      cloudFileRepository.upload(s3FilePath, file);
-//      submissionRepositoryService.findById(id);
+      Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+//      UUID userFileId = UUID.randomUUID();
+//      TODO: UserFileFactory.generate(file), then call userFile.getId() below
+//      TODO: upload thumbnail.. maybe generatedid-thumbnail?
+      String uploadLocation = String.format("%s/%s", submission.getId(), userFileId);
+      cloudFileRepository.upload(uploadLocation, file);
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (Exception e) {
       log.error("Error Occurred while uploading File " + e.getLocalizedMessage());

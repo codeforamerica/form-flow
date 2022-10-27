@@ -1,0 +1,9 @@
+-- CREATE TABLE IF NOT EXISTS user_files
+-- (
+--     file_id SERIAL PRIMARY KEY ,
+--     submission_id REFERENCES submissions(id),
+--     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+--     original_name VARCHAR NOT NULL,
+--     repository_path VARCHAR NOT NULL,
+--     extension VARCHAR NOT NULL
+-- );
