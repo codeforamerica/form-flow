@@ -7,7 +7,6 @@ import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +41,6 @@ public class ScreenController {
 
   private final List<FlowConfiguration> flowConfigurations;
   private final SubmissionRepositoryService submissionRepositoryService;
-
   private final ValidationService validationService;
 
   public ScreenController(
@@ -79,7 +77,7 @@ public class ScreenController {
     log.info(String.format("%s/%s 🚀", flow, screen));
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
     var currentScreen = getScreenConfig(flow, screen);
-    var submission = getSubmission(httpSession);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     if (currentScreen == null) {
       return new ModelAndView("redirect:/error");
     }
@@ -121,7 +119,7 @@ public class ScreenController {
   ) {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
     var formDataSubmission = removeEmptyValuesAndFlatten(formData);
-    var submission = getSubmission(httpSession);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var errorMessages = validationService.validate(flow, formDataSubmission);
     handleErrors(httpSession, errorMessages, formDataSubmission);
 
@@ -172,7 +170,7 @@ public class ScreenController {
 //    Copy from OG /post request
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
     var formDataSubmission = removeEmptyValuesAndFlatten(formData);
-    var submission = getSubmission(httpSession);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var currentScreen = getScreenConfig(flow, screen);
     HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     String subflowName = subflows.entrySet().stream().filter(subflow ->
@@ -228,7 +226,7 @@ public class ScreenController {
       @PathVariable String uuid,
       HttpSession httpSession
   ) {
-    Submission submission = getSubmission(httpSession);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
     model.put("formAction", String.format("/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
@@ -251,9 +249,6 @@ public class ScreenController {
    * @param uuid        Unique id associated with the subflow's data, not null
    * @param httpSession The HTTP session if it exists, not null
    * @return a redirect to next screen
-   * @throws InvocationTargetException
-   * @throws NoSuchMethodException
-   * @throws IllegalAccessException
    */
   @PostMapping("{flow:(?!assets).*}/{screen}/{uuid}")
   ModelAndView addToIteration(
@@ -262,7 +257,7 @@ public class ScreenController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+  ) {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
     Long id = (Long) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
@@ -314,9 +309,6 @@ public class ScreenController {
     String deleteConfirmationScreen = getFlowConfigurationByName(flow)
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
     Long id = (Long) httpSession.getAttribute("id");
-    if (id == null) {
-      // we should throw an error here?
-    }
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
 
     if (submissionOptional.isPresent()) {
@@ -435,9 +427,6 @@ public class ScreenController {
    * @param uuid        Unique id associated with the subflow's data, not null
    * @param httpSession The HTTP session if it exists, not null
    * @return a redirect to next screen
-   * @throws InvocationTargetException
-   * @throws NoSuchMethodException
-   * @throws IllegalAccessException
    */
   @PostMapping("{flow}/{screen}/{uuid}/edit")
   ModelAndView edit(
@@ -446,7 +435,7 @@ public class ScreenController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+  ) {
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
     Long id = (Long) httpSession.getAttribute("id");
@@ -487,7 +476,6 @@ public class ScreenController {
   RedirectView navigation(
       @PathVariable String flow,
       @PathVariable String screen,
-      @RequestParam(required = false, defaultValue = "0") Integer option,
       HttpSession httpSession
   ) {
     var currentScreen = getScreenConfig(flow, screen);
@@ -514,7 +502,7 @@ public class ScreenController {
       nextScreen = getNonConditionalNextScreen(currentScreen);
     }
 
-    log.info("getNextScreenName: currentScreen:" + currentScreen.toString() + ", nextScreen: " + nextScreen.getName());
+    log.info("getNextScreenName: currentScreen:" + currentScreen + ", nextScreen: " + nextScreen.getName());
     // TODO throw a better error if the next screen doesn't exist (incorrect name / name is not in flow config)
     return nextScreen.getName();
   }
@@ -545,22 +533,19 @@ public class ScreenController {
   /**
    * Returns a list of possible next screens, the ones whose conditions pass
    *
-   * @param currentScreen
-   * @param httpSession
-   * @return
+   * @param currentScreen screen you're on
+   * @param httpSession   session
+   * @return List<NextScreen> list of next screens
    */
   private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
       HttpSession httpSession) {
-    var submission = getSubmission(httpSession);
-
     return currentScreen.getNextScreens().stream()
         .filter(nextScreen -> nextScreen.getCondition() != null)
-        .filter(nextScreen -> nextScreen.getConditionObject().run(submission))
+        .filter(nextScreen -> nextScreen.getConditionObject().run(submissionRepositoryService.findOrCreate(httpSession)))
         .toList();
   }
 
-  private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+  private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     if (currentScreen.getBeforeSave() != null) {
       currentScreen.getBeforeSaveAction().run(submission, uuid);
     }
@@ -569,16 +554,6 @@ public class ScreenController {
   private NextScreen getNonConditionalNextScreen(ScreenNavigationConfiguration currentScreen) {
     return currentScreen.getNextScreens().stream()
         .filter(nxtScreen -> nxtScreen.getCondition() == null).toList().get(0);
-  }
-
-  private Submission getSubmission(HttpSession httpSession) {
-    var id = (Long) httpSession.getAttribute("id");
-    if (id != null) {
-      Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
-      return submissionOptional.orElseGet(Submission::new);
-    } else {
-      return new Submission();
-    }
   }
 
   private Boolean isIterationStartScreen(String flow, String screen) {
@@ -656,7 +631,7 @@ public class ScreenController {
   @NotNull
   private Map<String, Object> removeEmptyValuesAndFlatten(MultiValueMap<String, String> formData) {
     return formData.entrySet().stream()
-        .map(entry -> {
+        .peek(entry -> {
           // An empty checkboxSet has a hidden value of "" which needs to be removed
           if (entry.getKey().contains("[]") && entry.getValue().size() == 1) {
             entry.setValue(new ArrayList<>());
@@ -664,7 +639,6 @@ public class ScreenController {
           if (entry.getValue().size() > 1 && entry.getValue().get(0).equals("")) {
             entry.getValue().remove(0);
           }
-          return entry;
         })
         // Flatten arrays to be single values if the array contains one item
         .collect(Collectors.toMap(

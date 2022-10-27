@@ -1,11 +1,11 @@
 package formflow.library.data;
 
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
 /**
  * Service to retrieve and store Submission objects in the database.
@@ -64,6 +64,22 @@ public class SubmissionRepositoryService {
       for (var entry : subflowArr) {
         entry.remove("_csrf");
       }
+    }
+  }
+
+  /**
+   * If the submission exists in the session, find it in the db. If not or can't be found, create a new one.
+   *
+   * @param httpSession submission
+   * @return Submission
+   */
+  public Submission findOrCreate(HttpSession httpSession) {
+    var id = (Long) httpSession.getAttribute("id");
+    if (id != null) {
+      Optional<Submission> submissionOptional = findById(id);
+      return submissionOptional.orElseGet(Submission::new);
+    } else {
+      return new Submission();
     }
   }
 }
