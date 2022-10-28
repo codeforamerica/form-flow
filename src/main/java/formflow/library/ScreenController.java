@@ -37,19 +37,20 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 @EnableAutoConfiguration
 @Slf4j
-public class ScreenController {
+public class ScreenController extends FormFlowController {
 
   private final List<FlowConfiguration> flowConfigurations;
-  private final SubmissionRepositoryService submissionRepositoryService;
   private final ValidationService validationService;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
       SubmissionRepositoryService submissionRepositoryService,
       ValidationService validationService) {
+
+    super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
-    this.submissionRepositoryService = submissionRepositoryService;
     this.validationService = validationService;
+
     log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
       log.info("Creating TemplateManager for flow: " + f.getName());
@@ -676,16 +677,5 @@ public class ScreenController {
       return new ModelAndView("%s/%s".formatted(flow, screen), model);
     }
     return null;
-  }
-
-  private void saveToRepository(Submission submission) {
-    submissionRepositoryService.removeFlowCSRF(submission);
-    submissionRepositoryService.save(submission);
-  }
-
-  private void saveToRepository(Submission submission, String subflowName) {
-    submissionRepositoryService.removeFlowCSRF(submission);
-    submissionRepositoryService.removeSubflowCSRF(submission, subflowName);
-    submissionRepositoryService.save(submission);
   }
 }
