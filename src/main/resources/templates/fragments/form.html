@@ -4,6 +4,7 @@
 <form th:fragment="form"
       th:assert="${!#strings.isEmpty(action)}, ${!#strings.isEmpty(content)}"
       th:action="@{${action}}"
+      th:enctype="${enctype}"
       autocomplete="off"
       method="post">
   <th:block th:replace="${content}"/>
