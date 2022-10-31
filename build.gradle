@@ -9,7 +9,7 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'org.springframework.boot' version '2.7.5'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java-library'
     id 'maven-publish'
     id 'java'
@@ -56,6 +56,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -63,6 +64,10 @@ dependencies {
     implementation 'com.vladmihalcea:hibernate-types-55:2.20.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.flywaydb:flyway-core'
+//    implementation 'io.awspring.cloud:spring-cloud-aws-context:2.3.1'
+//    implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.328'
+//    implementation 'io.awspring.cloud:spring-cloud-aws-autoconfigure:2.3.1'
 
     compileOnly 'org.projectlombok:lombok'
 
