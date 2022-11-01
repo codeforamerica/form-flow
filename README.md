@@ -413,8 +413,10 @@ on Windows as well._
 #### Java Development Kit
 
 ```
-brew install openjdk
+brew install openjdk@17
 ```
+
+Make sure that you follow the instructions printed for `Caveats` inside your terminal when the installation completes.
 
 #### Set up jenv to manage your jdk versions
 
