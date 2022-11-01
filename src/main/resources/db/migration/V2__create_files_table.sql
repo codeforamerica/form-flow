@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS user_files
      created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
      original_name VARCHAR NOT NULL,
      repository_path VARCHAR NOT NULL,
-     extension VARCHAR NOT NULL
+     extension VARCHAR NOT NULL,
+     filesize REAL NOT NULL
  );
 
 CREATE INDEX idx_submission_id on user_files (submission_id);
