@@ -11,7 +11,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,7 @@ public class S3CloudFileRepository implements CloudFileRepository {
       log.info("Upload Called");
       upload.waitForCompletion();
       log.info("Upload complete");
+      System.out.println("Upload complete");
     } catch (AmazonServiceException e) {
       System.err.println(e.getErrorMessage());
       System.exit(1);
@@ -69,6 +72,15 @@ public class S3CloudFileRepository implements CloudFileRepository {
       log.info(e.getMessage());
       throw new RuntimeException(e);
     }
+  }
+
+  public void upload(String filePath, String dataURL) {
+    byte[] fileContentBytes = dataURL.getBytes(StandardCharsets.UTF_8);
+    var byteArrayInputStream = new ByteArrayInputStream(fileContentBytes);
+    ObjectMetadata objectMetadata = new ObjectMetadata();
+    objectMetadata.setContentType("text/plain");
+    objectMetadata.setContentLength(dataURL.getBytes(StandardCharsets.UTF_8).length);
+    transferManager.upload(bucketName, filePath, byteArrayInputStream, objectMetadata);
   }
 
   //  public void upload(String filepath, String fileContent) {

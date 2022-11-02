@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
  * Repository interface for the SubmissionRepository.
  */
 @Repository
-public interface UploadedFileRepository extends JpaRepository<UploadedFile, Long> {
+public interface UploadedFileRepository extends JpaRepository<UserFile, Long> {
 
 }
