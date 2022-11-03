@@ -52,6 +52,12 @@ public class S3CloudFileRepository implements CloudFileRepository {
 //    }
 //  }
 
+  /**
+   * Takes a filepath and Multipart file to to upload the multipart file to AWS S3 where the filepath acts as the path to the file
+   * in S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a folder.
+   * @param filePath File path representing a folder structure and path to the file in S3.
+   * @param file The multipart file to be uploaded to S3.
+   */
   public void upload(String filePath, MultipartFile file) {
     try {
       log.info("Inside the S3 File Repository Upload Call");
@@ -74,6 +80,13 @@ public class S3CloudFileRepository implements CloudFileRepository {
     }
   }
 
+  /**
+   * Takes a filepath and an image as a base64 encoded string representing a thumbnail. The base64 encoded thumbnail will be uploaded
+   * alongside full size images to AWS S3. The filepath acts as the path to the file in S3 where file paths that include "/"
+   * will create a folder structure where each string prior to the "/" will represent a folder.
+   * @param filePath File path representing a folder structure and path to the file in S3.
+   * @param dataURL a base64 encoded string containing the data for a thumnbnail image to be uploaded alongside full size image uploads.
+   */
   public void upload(String filePath, String dataURL) {
     byte[] fileContentBytes = dataURL.getBytes(StandardCharsets.UTF_8);
     var byteArrayInputStream = new ByteArrayInputStream(fileContentBytes);
@@ -83,10 +96,6 @@ public class S3CloudFileRepository implements CloudFileRepository {
     transferManager.upload(bucketName, filePath, byteArrayInputStream, objectMetadata);
   }
 
-  //  public void upload(String filepath, String fileContent) {
-//
-//  }
-//
   public void delete(String filepath) throws SdkClientException {
     log.info("Deleting file at filepath {} from S3", filepath);
 //    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));

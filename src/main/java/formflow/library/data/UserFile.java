@@ -42,9 +42,9 @@ public class UserFile {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long file_id;
 
-  @ManyToOne(targetEntity = Submission.class)
-  @JoinColumn(name = "submission_id", referencedColumnName = "id")
-  private Long submission_id;
+  @ManyToOne
+  @JoinColumn(name = "submission_id")
+  private Submission submission_id;
 
   @CreationTimestamp
   @Temporal(TIMESTAMP)

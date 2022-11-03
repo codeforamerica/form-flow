@@ -43,8 +43,6 @@ public class UploadController extends FormFlowController {
       HttpSession httpSession
   ) {
     try {
-      log.info("You are in file upload endpoint");
-      log.info("The file name is " + file.getOriginalFilename());
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
 
@@ -70,6 +68,7 @@ public class UploadController extends FormFlowController {
       }
 
       uploadedFileRepositoryService.save(UserFile.builder()
+          .submission_id(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize(UserFile.calculateFilesizeInMb(file))
