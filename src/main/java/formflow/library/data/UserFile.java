@@ -5,6 +5,7 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,8 +17,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.stereotype.Component;
@@ -31,7 +36,10 @@ import org.springframework.web.multipart.MultipartFile;
 )
 @Entity
 @Table(name = "user_files")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
 @Component
@@ -67,5 +75,25 @@ public class UserFile {
     DecimalFormat df = new DecimalFormat("0.00");
     Float unroundedMb = Float.valueOf(String.valueOf(file.getSize() / (1024.0 * 1024.0)));
     return Float.valueOf(df.format(unroundedMb));
+  }
+
+
+  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
+    }
+    UserFile userFile = (UserFile) o;
+    return file_id != null && Objects.equals(file_id, userFile.file_id);
+  }
+
+  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
   }
 }

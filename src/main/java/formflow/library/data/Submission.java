@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,7 +17,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -35,7 +39,9 @@ import org.springframework.stereotype.Component;
 )
 @Entity
 @Table(name = "submissions")
-@Data
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
 @Component
 public class Submission {
@@ -115,7 +121,6 @@ public class Submission {
    * @param subflowName        subflow that the iteration data belongs with, not null
    * @param iterationToUpdate  existing data for a particular iteration of a subflow, may be empty, but not null
    * @param formDataSubmission new data for a particular iteration of a subflow, not null
-   * @return updated submission object
    */
   public void mergeFormDataWithSubflowIterationData(String subflowName, Map<String, Object> iterationToUpdate,
       Map<String, Object> formDataSubmission) {
@@ -143,5 +148,24 @@ public class Submission {
       }
     });
     subflow.removeAll(toRemove);
+  }
+
+  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
+    }
+    Submission that = (Submission) o;
+    return id != null && Objects.equals(id, that.id);
+  }
+
+  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
   }
 }
