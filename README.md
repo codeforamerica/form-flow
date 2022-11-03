@@ -39,52 +39,119 @@ Table of Contents
         * [Contribute new Live Templates](#contribute-new-live-templates)
     * [Connect flows config schema with IntelliJ IDE](#connect-flows-config-schema-with-intellij-ide)
 
-(new work)
+## Library Description
 
+## What is a form flow?
 
-Table of Contents
-=================
+## Form Flow Diagram
 
-* [Form-Flow-Library Overview](#form-flow-library-overview)
-* [Form Flow Library](#form-flow-library)
-    * [Form Flow Concepts](#form-flow-concepts)
-    * [Web/Fat Jar](#webfat-jar)
-    * [Defining Flows](#defining-flows)
-    * [Defining Screens](#defining-screens)
-        * [Thymeleaf Model Data](#thymeleaf-model-data)
-        * [Icon reference](#icon-reference)
-    * [Defining Inputs](#defining-inputs)
-        * [Input Class](#input-class)
-        * [Templates](#templates)
-    * [About Submissions](#about-submissions)
-    * [Subflows](#subflows)
-        * [Dedicated Subflow Screens](#dedicated-subflow-screens)
-            * [Entry Screen](#entry-screen)
-            * [Iteration Start Screen](#iteration-start-screen)
-            * [Review Screen](#review-screen)
-            * [Delete Confirmation Screen](#delete-confirmation-screen)
-        * [Defining Subflows](#defining-subflows)
-        * [Example flow-config.yaml with a docs subflow](#example-flow-configyaml-with-a-docs-subflow)
-        * [When do you need to define subflow on a screen?](#when-do-you-need-to-define-subflow-on-a-screen)
-    * [Defining Conditions](#defining-conditions)
-        * [Using conditions in templates](#using-conditions-in-templates)
-    * [Defining Static Pages](#defining-static-pages)
-    * [Development setup](#development-setup)
-        * [Install the following system dependencies:](#install-the-following-system-dependencies)
-            * [Java Development Kit](#java-development-kit)
-            * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
-            * [Gradle](#gradle)
-        * [Build Web/Fat Jar](#build-webfat-jar)
-        * [Setup IntelliJ for the project:](#setup-intellij-for-the-project)
-        * [Test:](#test)
-            * [Terminal](#terminal)
-            * [IntelliJ](#intellij)
-    * [Intellij](#intellij-1)
-        * [Live Templates](#live-templates)
-            * [Applying Live Templates to your IntelliJ IDE](#applying-live-templates-to-your-intellij-ide)
-            * [Using Live Templates](#using-live-templates)
-            * [Contribute new Live Templates](#contribute-new-live-templates)
-        * [flows config schema with IntelliJ IDE](#flows-config-schema-with-intellij-ide)
+## Concepts
+
+### Flow
+
+### Screen
+
+### Subflows
+
+#### Dedicated Subflow Screens
+
+##### Entry
+
+##### Iteration Start
+
+##### Review
+
+##### Delete Confirmation
+
+#### Conditions and Actions
+
+#### Submission Object
+
+## General Information
+
+### Model Data
+
+### Icon Reference
+
+### Thymeleaf
+
+#### Using Thymeleaf
+
+#### Templates
+
+#### Static Pages
+
+#### Fragments
+
+#### Inputs
+
+#### Accessing Conditions
+
+#### Accessing Submission Object
+
+### Document Upload
+
+## How to use
+
+#### Configuration Details
+
+##### Environment Variables
+
+##### Flow and Subflow Configuration
+
+###### form-flow.yaml
+
+##### Application Configuration: application.yaml
+
+##### Conditions / Actions
+
+###### Creating them
+
+#### Document Upload
+
+##### Cloud Configuration
+
+###### AWS S3
+
+#### Library Details
+
+##### Publishing
+
+###### Github repo
+
+###### Maven
+
+##### How to pull in the library
+
+###### Credential Information
+
+##### Versioning Information
+
+###### Version / Release plan
+
+##### Building Fat Jars
+
+## Help
+
+### IntelliJ Live Templates
+
+#### Applying them
+
+#### Using them
+
+#### Contributing new ones
+
+## How to contribute
+
+### Maintainer information
+
+### Developer Setup
+
+#### IntelliJ setup
+
+#### Testing
+
+(end new work)
 
 # Form-Flow-Library Overview
 
