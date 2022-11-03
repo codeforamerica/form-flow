@@ -59,7 +59,7 @@ public class UploadController extends FormFlowController {
       }
 
       log.info("submission " + submission);
-      String uploadLocation = String.format("%s/%s", submission.getId(), userFileId);
+      String uploadLocation = String.format("%s/%s.%s", submission.getId(), userFileId);
       String thumbLocation = String.format("%s/%s-thumbnail", submission.getId(), userFileId);
       String thumbDataURL = Thumbnail.generate(file);
       cloudFileRepository.upload(uploadLocation, file);
