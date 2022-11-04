@@ -72,7 +72,7 @@ public class UploadController extends FormFlowController {
       String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), dropZoneInstanceName, userFileId);
 
       cloudFileRepository.upload(uploadLocation, file);
-
+      // TODO we need a way to figure out if this is the default image. Maybe just compare strings?
       if (file.getContentType() != null && UserFile.isSupportedImage(file.getContentType())) {
         cloudFileRepository.upload(thumbLocation, thumbDataUrl);
       }
