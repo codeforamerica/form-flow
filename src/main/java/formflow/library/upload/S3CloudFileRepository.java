@@ -69,7 +69,6 @@ public class S3CloudFileRepository implements CloudFileRepository {
       log.info("Upload Called");
       upload.waitForCompletion();
       log.info("Upload complete");
-      System.out.println("Upload complete");
     } catch (AmazonServiceException e) {
       System.err.println(e.getErrorMessage());
       System.exit(1);
