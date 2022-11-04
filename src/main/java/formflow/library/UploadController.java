@@ -59,7 +59,7 @@ public class UploadController extends FormFlowController {
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
       String uploadLocation = String.format("%s/%s-%s.%s", submission.getId(), formData.get("inputName"), userFileId,
           fileExtension);
-      String thumbLocation = String.format("%s/%s-%s-thumbnail.png", submission.getId(), formData.get("inputName"), userFileId);
+      String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), formData.get("inputName"), userFileId);
       cloudFileRepository.upload(uploadLocation, file);
       if (file.getContentType() != null && file.getContentType().contains("image")) {
         // TODO can we rely on dropzone for thumb instead?
