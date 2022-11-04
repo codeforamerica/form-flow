@@ -76,7 +76,6 @@ public class UserFile {
   }
 
 
-  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -89,7 +88,6 @@ public class UserFile {
     return file_id != null && Objects.equals(file_id, userFile.file_id);
   }
 
-  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
   @Override
   public int hashCode() {
     return getClass().hashCode();

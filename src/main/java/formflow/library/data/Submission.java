@@ -150,7 +150,6 @@ public class Submission {
     subflow.removeAll(toRemove);
   }
 
-  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -163,7 +162,6 @@ public class Submission {
     return id != null && Objects.equals(id, that.id);
   }
 
-  // TODO this was created by a lombok refactor suggestion because Lombok does not recommend using @Data with JPA. Not sure how best to Javadoc?
   @Override
   public int hashCode() {
     return getClass().hashCode();

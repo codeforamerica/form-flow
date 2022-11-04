@@ -56,10 +56,11 @@ public class UploadController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
+      String dropZoneInstanceName = formData.getFirst("inputName");
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
-      String uploadLocation = String.format("%s/%s-%s.%s", submission.getId(), formData.get("inputName"), userFileId,
+      String uploadLocation = String.format("%s/%s-%s.%s", submission.getId(), dropZoneInstanceName, userFileId,
           fileExtension);
-      String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), formData.get("inputName"), userFileId);
+      String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), dropZoneInstanceName, userFileId);
       cloudFileRepository.upload(uploadLocation, file);
       if (file.getContentType() != null && file.getContentType().contains("image")) {
         // TODO can we rely on dropzone for thumb instead?
@@ -75,16 +76,14 @@ public class UploadController extends FormFlowController {
 
       uploadedFileRepositoryService.save(uploadedFile);
       // TODO: update input_data and save updated submission object
-      if (submission.getInputData().containsKey(formData.getFirst("inputName"))) {
-        ArrayList<Long> userFiles = (ArrayList<Long>) submission.getInputData().get(formData.getFirst("inputName"));
+      if (submission.getInputData().containsKey(dropZoneInstanceName)) {
+        ArrayList<Long> userFiles = (ArrayList<Long>) submission.getInputData().get(dropZoneInstanceName);
         userFiles.add(uploadedFile.getFile_id());
-        submissionRepositoryService.save(submission);
       } else {
         submission.getInputData()
-            .put(formData.getFirst("inputName"), new ArrayList<Long>(Arrays.asList(uploadedFile.getFile_id())));
-        submissionRepositoryService.save(submission);
+            .put(dropZoneInstanceName, new ArrayList<Long>(Arrays.asList(uploadedFile.getFile_id())));
       }
-
+      submissionRepositoryService.save(submission);
       // Once we merge code: we will need a unique identifier for the dropzone input widget to associated this with in the JSON
       // TODO: pass back new file id in response body
       //
