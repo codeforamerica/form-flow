@@ -20,10 +20,10 @@ public class UploadedFileRepositoryService {
   /**
    * Saves the UploadedFile in the database.
    *
-   * @param uploadedFile the uploadedFile to save, not null
+   * @param userFile the uploadedFile to save, not null
    */
-  public void save(UploadedFile uploadedFile) {
-    repository.save(uploadedFile);
+  public void save(UserFile userFile) {
+    repository.save(userFile);
   }
 
   /**
@@ -32,7 +32,7 @@ public class UploadedFileRepositoryService {
    * @param id id of submission to look for, not null
    * @return Optional containing Submission if found, else empty
    */
-  public Optional<UploadedFile> findById(Long id) {
+  public Optional<UserFile> findById(Long id) {
     return repository.findById(id);
   }
 }

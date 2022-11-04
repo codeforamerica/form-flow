@@ -1,9 +1,15 @@
 package formflow.library;
 
+import com.google.common.io.Files;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UploadedFileRepositoryService;
+import formflow.library.data.UserFile;
 import formflow.library.upload.CloudFileRepository;
+import formflow.library.utils.Thumbnail;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +17,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,8 +34,7 @@ public class UploadController extends FormFlowController {
   public UploadController(
       UploadedFileRepositoryService uploadedFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      SubmissionRepositoryService submissionRepositoryService
-  ) {
+      SubmissionRepositoryService submissionRepositoryService) {
     super(submissionRepositoryService);
     this.uploadedFileRepositoryService = uploadedFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
@@ -38,33 +44,47 @@ public class UploadController extends FormFlowController {
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
       @RequestParam("file") MultipartFile file,
+      @RequestParam(required = false) MultiValueMap<String, String> formData,
       @RequestParam("flow") String flow,
       HttpSession httpSession
   ) {
     try {
-      log.info("You are in file upload endpoint");
-      log.info("The file name is " + file.getOriginalFilename());
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
-//      TODO: UserFileFactory.generate(file), then call userFile.getId() below
-//      TODO: upload thumbnail.. maybe generatedid-thumbnail?
-
-      // `submission` may not have been saved yet. If that's the case, the submission.getId() will return null.
-      // If it's null, then save it to the db, so that we can get the submission's id to use in the
-      // file object's path
       if (submission.getId() == null) {
         submission.setFlow(flow);
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-
-      log.info("submission " + submission);
-      String uploadLocation = String.format("%s/%s", submission.getId(), userFileId);
+      String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+      String uploadLocation = String.format("%s/%s-%s.%s", submission.getId(), formData.get("inputName"), userFileId,
+          fileExtension);
+      String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), formData.get("inputName"), userFileId);
       cloudFileRepository.upload(uploadLocation, file);
+      if (file.getContentType() != null && file.getContentType().contains("image")) {
+        // TODO can we rely on dropzone for thumb instead?
+        String thumbDataURL = Thumbnail.generate(file);
+        cloudFileRepository.upload(thumbLocation, thumbDataURL);
+      }
+      UserFile uploadedFile = UserFile.builder()
+          .submission_id(submission)
+          .originalName(file.getOriginalFilename())
+          .repositoryPath(uploadLocation)
+          .filesize(UserFile.calculateFilesizeInMb(file))
+          .extension(file.getContentType()).build();
 
-      //
-      // TODO: save to user_files table
+      uploadedFileRepositoryService.save(uploadedFile);
       // TODO: update input_data and save updated submission object
+      if (submission.getInputData().containsKey(formData.getFirst("inputName"))) {
+        ArrayList<Long> userFiles = (ArrayList<Long>) submission.getInputData().get(formData.getFirst("inputName"));
+        userFiles.add(uploadedFile.getFile_id());
+        submissionRepositoryService.save(submission);
+      } else {
+        submission.getInputData()
+            .put(formData.getFirst("inputName"), new ArrayList<Long>(Arrays.asList(uploadedFile.getFile_id())));
+        submissionRepositoryService.save(submission);
+      }
+
       // Once we merge code: we will need a unique identifier for the dropzone input widget to associated this with in the JSON
       // TODO: pass back new file id in response body
       //
@@ -74,4 +94,6 @@ public class UploadController extends FormFlowController {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+
 }
