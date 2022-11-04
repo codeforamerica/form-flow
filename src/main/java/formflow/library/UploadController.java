@@ -9,6 +9,7 @@ import formflow.library.upload.CloudFileRepository;
 import formflow.library.utils.Thumbnail;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
@@ -44,11 +45,12 @@ public class UploadController extends FormFlowController {
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
       @RequestParam("file") MultipartFile file,
-      @RequestParam(required = false) MultiValueMap<String, String> formData,
+      @RequestParam(required = false) Map<String, String> formData,
       @RequestParam("flow") String flow,
       HttpSession httpSession
   ) {
     try {
+      String thumbDataUrl = formData.get("thumbDataURL");
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
@@ -56,16 +58,16 @@ public class UploadController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-      String dropZoneInstanceName = formData.getFirst("inputName");
+      String dropZoneInstanceName = formData.get("inputName");
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
       String uploadLocation = String.format("%s/%s-%s.%s", submission.getId(), dropZoneInstanceName, userFileId,
           fileExtension);
       String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), dropZoneInstanceName, userFileId);
       cloudFileRepository.upload(uploadLocation, file);
+
+      // TODO we need a way to figure out if this is the default image. Maybe just compare strings?
       if (file.getContentType() != null && file.getContentType().contains("image")) {
-        // TODO can we rely on dropzone for thumb instead?
-        String thumbDataURL = Thumbnail.generate(file);
-        cloudFileRepository.upload(thumbLocation, thumbDataURL);
+        cloudFileRepository.upload(thumbLocation, thumbDataUrl);
       }
       UserFile uploadedFile = UserFile.builder()
           .submission_id(submission)
