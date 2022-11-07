@@ -341,13 +341,23 @@ Live templates are provided for the following input types:
 ### Static Pages
 
 Unlike Screens, Static Pages are HTML content not part of a flow. Examples include the home page,
-privacy policy, or FAQ. This starter app contains a home page (`index.html`) and FAQ (`faq.html`)
+privacy policy, or FAQ.
+
+This starter app contains a home page (`index.html`) and FAQ (`faq.html`)
 as examples in the `resources/templates` folder.
 
-To add a new Static Page:
+Generally your application would have a static page controller (named something like
+StaticPageController.java) file. At a minimum, it would handle the routing to your home
+page (`index.html`) and FAQ (`faq.html`).
 
-1. Add an annotated method (`@GetMapping`) to the `StaticPageController`
-2. Create a page template in `src/resources/templates`.
+The [Form Flow Starter App's StaticPageController.java](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/StaticPageController.java)
+is a good example of what a basic static page controller might look like.
+
+To add a new Static Page to your application:
+
+1. If you don't already have a StaticPageController.java file in your application, create one.
+2. Add an annotated method (`@GetMapping`) to the `StaticPageController`
+3. Create a page template in `src/resources/templates`.
 
 The template HTML can look like:
 
