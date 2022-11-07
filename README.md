@@ -3,8 +3,6 @@
 Table of Contents
 =================
 
-* [Form Flow Library](#form-flow-library)
-* [Table of Contents](#table-of-contents)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
@@ -15,10 +13,10 @@ Table of Contents
             * [Iteration Start Screen](#iteration-start-screen)
             * [Review Screen](#review-screen)
             * [Delete Confirmation Screen](#delete-confirmation-screen)
-        * [Conditions and Actions](#conditions-and-actions)
-            * [Defining Conditions](#defining-conditions)
-            * [Using conditions in templates](#using-conditions-in-templates)
-        * [Submission Object](#submission-object)
+    * [Conditions and Actions](#conditions-and-actions)
+        * [Defining Conditions](#defining-conditions)
+        * [Using conditions in templates](#using-conditions-in-templates)
+    * [Submission Object](#submission-object)
     * [Defining Inputs](#defining-inputs)
         * [Input Class](#input-class)
 * [General Information](#general-information)
@@ -194,9 +192,9 @@ This page is not technically part of the subflow and as such, does not need to b
 with `subflow: subflowName`
 in the `flows-config.yaml`.
 
-### Conditions and Actions
+## Conditions and Actions
 
-#### Defining Conditions
+### Defining Conditions
 
 Conditions are defined in Java as methods, and can read from the `currentSubmission` object. When
 defining new conditions as methods, the instance variable `inputData` is accessible.
@@ -211,7 +209,7 @@ public class ApplyConditions extends FlowConditions {
 } 
 ```
 
-#### Using conditions in templates
+### Using conditions in templates
 
 ```html
 
@@ -221,7 +219,7 @@ public class ApplyConditions extends FlowConditions {
 </div>
 ```
 
-### Submission Object
+## Submission Object
 
 Submission data is stored in the `Submission` object, persisted to PostgreSQL via the Hibernate ORM.
 
