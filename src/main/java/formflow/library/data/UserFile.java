@@ -5,6 +5,7 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,6 +45,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public class UserFile {
 
+  public static final List<String> SUPPORTS_THUMBNAIL = List.of("image/jpeg", "image/jpg", "image/png", "image/bmp", "image/gif");
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long file_id;
@@ -75,6 +78,9 @@ public class UserFile {
     return Float.valueOf(df.format(unroundedMb));
   }
 
+  public static boolean isSupportedImage(String mimeType) {
+    return UserFile.SUPPORTS_THUMBNAIL.stream().anyMatch(supportedType -> supportedType.equals(mimeType));
+  }
 
   @Override
   public boolean equals(Object o) {

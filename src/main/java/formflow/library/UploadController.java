@@ -7,7 +7,7 @@ import formflow.library.data.UploadedFileRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.upload.CloudFileRepository;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -64,7 +64,7 @@ public class UploadController extends FormFlowController {
       cloudFileRepository.upload(uploadLocation, file);
 
       // TODO we need a way to figure out if this is the default image. Maybe just compare strings?
-      if (file.getContentType() != null && file.getContentType().contains("image")) {
+      if (file.getContentType() != null && UserFile.isSupportedImage(file.getContentType())) {
         cloudFileRepository.upload(thumbLocation, thumbDataUrl);
       }
       UserFile uploadedFile = UserFile.builder()
@@ -81,7 +81,7 @@ public class UploadController extends FormFlowController {
         userFiles.add(uploadedFile.getFile_id());
       } else {
         submission.getInputData()
-            .put(dropZoneInstanceName, new ArrayList<Long>(Arrays.asList(uploadedFile.getFile_id())));
+            .put(dropZoneInstanceName, new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
       }
       submissionRepositoryService.save(submission);
       // Once we merge code: we will need a unique identifier for the dropzone input widget to associated this with in the JSON
