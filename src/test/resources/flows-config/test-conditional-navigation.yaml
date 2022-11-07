@@ -1,0 +1,16 @@
+name: testFlow
+flow:
+  first:
+    nextScreens:
+      - name: other
+      - name: second
+        condition: nameIsTestyMcTesterson
+  second:
+    nextScreens:
+      - name: other
+      - name: last
+  other:
+    nextScreens:
+      - name: last
+  last:
+    nextScreens:

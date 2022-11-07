@@ -71,7 +71,7 @@ public class UploadController extends FormFlowController {
           .submission_id(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
-          .filesize(UserFile.calculateFilesizeInMb(file))
+          .filesize(UserFile.calculateFilesizeInMb(file.getSize()))
           .extension(file.getContentType()).build();
 
       uploadedFileRepositoryService.save(uploadedFile);

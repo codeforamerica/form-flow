@@ -26,7 +26,6 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * A class representing what an uploaded file which can be saved in either S3 or Azure
@@ -72,14 +71,14 @@ public class UserFile {
   @Column
   private Float filesize;
 
-  public static Float calculateFilesizeInMb(MultipartFile file) {
+  public static Float calculateFilesizeInMb(Long fileSize) {
     DecimalFormat df = new DecimalFormat("0.00");
-    Float unroundedMb = Float.valueOf(String.valueOf(file.getSize() / (1024.0 * 1024.0)));
+    Float unroundedMb = Float.valueOf(String.valueOf(fileSize / (1024.0 * 1024.0)));
     return Float.valueOf(df.format(unroundedMb));
   }
 
   public static boolean isSupportedImage(String mimeType) {
-    return UserFile.SUPPORTS_THUMBNAIL.stream().anyMatch(supportedType -> supportedType.equals(mimeType));
+    return UserFile.SUPPORTS_THUMBNAIL.contains(mimeType);
   }
 
   @Override

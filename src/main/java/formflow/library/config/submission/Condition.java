@@ -25,7 +25,7 @@ public interface Condition {
    * Runs a condition check on a submission's subflow iteration.
    *
    * @param submission submission object the condition is associated with, not null
-   * @param uuid       uuid of the subflow iteration this should operate on
+   * @param data       uuid of the subflow iteration this should operate on
    * @return true if the condition check passes, else false
    */
   public default Boolean run(Submission submission, String data) {

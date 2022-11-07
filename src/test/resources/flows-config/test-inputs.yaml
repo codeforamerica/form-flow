@@ -1,0 +1,16 @@
+name: testFlow
+flow:
+  inputs:
+    nextScreens:
+      - name: test
+  test:
+    nextScreens:
+      - name: success
+  success:
+    nextScreens:
+subflows:
+  testSubflow:
+    entryScreen: testEntryScreen
+    iterationStartScreen: testIterationStartScreen
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen
