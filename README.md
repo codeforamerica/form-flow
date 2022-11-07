@@ -3,13 +3,15 @@
 Table of Contents
 =================
 
+* [Form Flow Library](#form-flow-library)
+* [Table of Contents](#table-of-contents)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
     * [Screen](#screen)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
-            * [Entry](#entry)
+            * [Entry Screen](#entry-screen)
             * [Iteration Start Screen](#iteration-start-screen)
             * [Review Screen](#review-screen)
             * [Delete Confirmation Screen](#delete-confirmation-screen)
@@ -33,28 +35,28 @@ Table of Contents
     * [Document Upload](#document-upload)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
-    * [Environment Variables](#environment-variables)
-    * [Application Configuration: application.yaml](#application-configuration-applicationyaml)
-    * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
-    * [form-flow.yaml basic configuration](#form-flowyaml-basic-configuration)
-    * [Screens](#screens)
-    * [Defining Subflows](#defining-subflows)
-    * [When do you need to define subflow on a screen?](#when-do-you-need-to-define-subflow-on-a-screen)
-    * [Thymeleaf Model Data](#thymeleaf-model-data)
-    * [Conditions / Actions](#conditions--actions)
-    * [Creating them](#creating-them)
-    * [Document Upload](#document-upload-1)
-    * [Cloud Configuration](#cloud-configuration)
-    * [AWS S3](#aws-s3)
-    * [Library Details](#library-details)
-    * [Publishing](#publishing)
-    * [Github Packaging Repository](#github-packaging-repository)
-    * [Maven Central](#maven-central)
-    * [How to pull in the library](#how-to-pull-in-the-library)
-    * [Credential Information](#credential-information)
-    * [Versioning Information](#versioning-information)
-    * [Version / Release plan](#version--release-plan)
-    * [Building Fat Jars](#building-fat-jars)
+        * [Environment Variables](#environment-variables)
+        * [Application Configuration: application.yaml](#application-configuration-applicationyaml)
+        * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
+            * [form-flow.yaml basic configuration](#form-flowyaml-basic-configuration)
+        * [Screens](#screens)
+        * [Defining Subflows](#defining-subflows)
+            * [When do you need to define subflow on a screen?](#when-do-you-need-to-define-subflow-on-a-screen)
+        * [Thymeleaf Model Data](#thymeleaf-model-data)
+        * [Conditions / Actions](#conditions--actions)
+            * [Creating them](#creating-them)
+        * [Document Upload](#document-upload-1)
+            * [Cloud Configuration](#cloud-configuration)
+                * [AWS S3](#aws-s3)
+        * [Library Details](#library-details)
+            * [Publishing](#publishing)
+                * [Github Packaging Repository](#github-packaging-repository)
+                * [Maven Central](#maven-central)
+            * [How to pull in the library](#how-to-pull-in-the-library)
+                * [Credential Information](#credential-information)
+            * [Versioning Information](#versioning-information)
+                * [Version / Release plan](#version--release-plan)
+            * [Building Fat Jars](#building-fat-jars)
 * [Help](#help)
     * [IntelliJ Live Templates](#intellij-live-templates)
         * [Applying them](#applying-them)
@@ -62,13 +64,12 @@ Table of Contents
         * [Contributing new ones](#contributing-new-ones)
     * [Icons](#icons)
 * [Developer Setup](#developer-setup)
-    * [Install the following system dependencies:](#install-the-following-system-dependencies)
-        * [Java Development Kit](#java-development-kit)
-        * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
-        * [Gradle](#gradle)
-            * [Build Web/Fat Jar#](#build-webfat-jar)
-        * [IntelliJ setup](#intellij-setup)
-            * [flows config schema with IntelliJ IDE](#flows-config-schema-with-intellij-ide)
+    * [Java Development Kit](#java-development-kit)
+    * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
+    * [Gradle](#gradle)
+        * [Build Web/Fat Jar#](#build-webfat-jar)
+    * [IntelliJ setup](#intellij-setup)
+        * [flows config schema with IntelliJ IDE](#flows-config-schema-with-intellij-ide)
         * [Testing](#testing)
             * [Terminal](#terminal)
             * [IntelliJ](#intellij)
@@ -388,9 +389,9 @@ The IntelliJ Live Template for the above example can be generated with `cfa:stat
 
 # How to use
 
-### Configuration Details
+## Configuration Details
 
-#### Environment Variables
+### Environment Variables
 
 When configuring your application, the form-flow library will expect to find your secret
 information in the environment. One way to do this is by creating an `.env` file that is a copy
@@ -404,7 +405,7 @@ form-flow library.
 You can also tell Intellij to load environment information from this file, too, by using this
 [plugin][.(https://plugins.jetbrains.com/plugin/7861-envfile/).
 
-#### Application Configuration: application.yaml
+### Application Configuration: application.yaml
 
 The main configuration file for any Spring Boot application is the `application.yaml` file.
 For general information about the file, please see
@@ -438,7 +439,7 @@ We've chosen to use a yaml version of the application file, but you could also s
 inputs line would look like this: `form-flow.path='flows-config.yaml'. Throughout this document,
 when we reference a configuration from this file, we will write it as dot separated parameters.
 
-#### Flow and Subflow Configuration
+### Flow and Subflow Configuration
 
 Flows are defined in a file specified in the `application.yaml` file. The library will look for
 the `form-flow.path` property. If that property is not set, the default file it will look for is
@@ -454,7 +455,7 @@ At it's base a flow as defined in yaml has a name, a flow object, and a collecti
 their next screens, any conditions for navigation between those screens, and optionally one or
 more subflows.
 
-##### form-flow.yaml basic configuration
+#### form-flow.yaml basic configuration
 
 A basic flow configuration could look like this:
 
@@ -485,7 +486,7 @@ flow:
 
 [You can have autocomplete and validation for flows-config by connecting your intelliJ to the flows-config-schema.json](#connect-flows-config-schema-with-intellij-ide)
 
-##### Screens
+### Screens
 
 Screens are the actual form that will be displayed to the user. Screens are specified as steps
 in the form flow.
@@ -495,7 +496,7 @@ Screens are defined in the Spring Boot `flows-config.yaml`, along with template 
 This library [defines Thymeleaf fragments](lib/src/main/resources/templates/fragments) that can be
 accessed from the Spring Boot app.
 
-##### Defining Subflows
+### Defining Subflows
 
 What do you need to do to create a subflow?
 
@@ -554,11 +555,11 @@ subflow:
     deleteConfirmationScreen: docsDeleteConfirmation
 ```
 
-##### When do you need to define `subflow` on a screen?
+#### When do you need to define `subflow` on a screen?
 
 ![Diagram showing screens that are in iteration loops to have the subflow key](readme-assets/subflow-stickies.png)
 
-##### Thymeleaf Model Data
+### Thymeleaf Model Data
 
 We provide some data to the model for ease of use access in Thymeleaf templates. Below are the data
 types we pass and when they are available.
@@ -580,9 +581,9 @@ types we pass and when they are available.
 There are spots in the templates where the `T` operator is used.
 [For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html)
 
-#### Conditions / Actions
+### Conditions / Actions
 
-##### Creating them
+#### Creating them
 
 ### Document Upload
 
@@ -658,12 +659,10 @@ that can provide a display of all available icons for use.
 
 # Developer Setup
 
-## Install the following system dependencies:
-
 _Note: these instructions are specific to macOS, but the same dependencies do need to be installed
 on Windows as well._
 
-### Java Development Kit
+## Java Development Kit
 
 ```
 brew install openjdk@17
@@ -672,7 +671,7 @@ brew install openjdk@17
 Make sure that you follow the instructions printed for `Caveats` inside your terminal when the
 installation completes.
 
-### Set up jenv to manage your jdk versions
+## Set up jenv to manage your jdk versions
 
 First run `brew install jenv`.
 
@@ -689,25 +688,24 @@ Reload your terminal, then finally run this from the repo's root directory:
 jenv add /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home/
 ```
 
-### Gradle
+## Gradle
 
 `brew install gradle`
 
-#### Build Web/Fat Jar#
+### Build Web/Fat Jar#
 
 Go into `lib/build.gradle` and run the `webjar` task with IntelliJ. This will generate a build file
 that can be used for local development
 
-### IntelliJ setup
+## IntelliJ setup
 
 - Enable annotation processing
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
 - Set the Gradle JVM version to 17
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
 - Set the Project SDK to Java 17 in `File > Project Structure`
-- Run the application using the `FormflowstarterApplication` configuration
 
-#### flows config schema with IntelliJ IDE
+### flows config schema with IntelliJ IDE
 
 We use [JSON schema](https://json-schema.org/understanding-json-schema/index.html) to autocomplete
 and validate the `flows-config.yaml` file.
