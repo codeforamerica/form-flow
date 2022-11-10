@@ -5,6 +5,7 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,7 +26,6 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * A class representing what an uploaded file which can be saved in either S3 or Azure
@@ -43,6 +43,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 @Builder
 public class UserFile {
+
+  public static final List<String> SUPPORTS_THUMBNAIL = List.of("image/jpeg", "image/jpg", "image/png", "image/bmp", "image/gif");
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,12 +71,15 @@ public class UserFile {
   @Column
   private Float filesize;
 
-  public static Float calculateFilesizeInMb(MultipartFile file) {
+  public static Float calculateFilesizeInMb(Long fileSize) {
     DecimalFormat df = new DecimalFormat("0.00");
-    Float unroundedMb = Float.valueOf(String.valueOf(file.getSize() / (1024.0 * 1024.0)));
+    Float unroundedMb = Float.valueOf(String.valueOf(fileSize / (1024.0 * 1024.0)));
     return Float.valueOf(df.format(unroundedMb));
   }
 
+  public static boolean isSupportedImage(String mimeType) {
+    return UserFile.SUPPORTS_THUMBNAIL.contains(mimeType);
+  }
 
   @Override
   public boolean equals(Object o) {
