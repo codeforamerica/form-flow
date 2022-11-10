@@ -66,7 +66,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     // TODO do we want to use this thumbnail library? Shiba uses it. --> https://github.com/coobird/thumbnailator
     implementation 'net.coobird:thumbnailator:0.4.18'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.335'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.339'
 
     compileOnly 'org.projectlombok:lombok'
 
