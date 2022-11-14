@@ -300,11 +300,11 @@ Validations for inputs use the JSR-303 bean validation paradigm, more specifical
 validations. For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
 
+### Input Data JSON Structure
+
+TODO add info about the input data JSON structure here
+
 # General Information
-
-## Model Data
-
-## Icon Reference
 
 ## Thymeleaf
 
@@ -395,6 +395,58 @@ The IntelliJ Live Template for the above example can be generated with `cfa:stat
 
 ## Document Upload
 
+The library provides a file upload feature using the client side JavaScript
+library [Dropzone JS](https://www.dropzone.dev/).
+File uploads need a configured AWS S3 Bucket to upload to and provide functionality for uploading,
+retrieving and deleting files.
+
+### AWS S3
+
+You will need a registered AWS account to set up an S3 bucket. Once you have registered your AWS
+account you
+can [follow the instructions here to create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
+.
+
+Make sure to note your buckets name and region as well as your AWS access and secret keys as you
+will need these for configuring file uploads
+in the library. The bucket and region are configured in your `application.yaml`. See the section on
+[application.yaml configuration.](#application-configuration-application.yaml)
+
+Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
+Variables](#environment-variables) section below.
+
+# TODO update this section on naming convention
+
+Filename convention will be this:
+flow_name is always set, input_name is always unique
+`submission_id/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…}`
+`submission_id/{{flow_name}}_{{input_name}}_UUID-thumbnail.txt`
+
+Examples (widget name is `input_name`):
+
+42/input_name_1c43c9da-126e-41c5-960e-08d84e3984bd.jpg
+42/input_name_1c43c9da-126e-41c5-960e-08d84e3984bd-thumbnail.txt
+
+This should place the file and its thumbnail next to each other in the bucket.
+
+### File Upload Widget
+
+A file upload thymeleaf fragment has been provided for uploading files. You can add it to a screen
+using our handy `cfa:fileUploader` live template. More information
+about [Live Templates here.](#intellij-live-templates)
+
+The live template will prompt you to enter an input name for the file uploader fragment. This input
+name will be the key under which uploaded files for this fragment are stored in the databases JSON
+structure.
+
+The file upload widget allows for single or multiple file uploads and will provide a list of
+uploaded
+files along with thumbnails for image files or a default icon for documents. The list of uploaded
+files
+will include a thumbnail, the original file name, file size and links for canceling or deleting the
+upload. The cancel link will only be present before the file has finished uploading, once the upload
+is complete it will become a delete link.
+
 # How to use
 
 ## Configuration Details
@@ -410,8 +462,8 @@ From there you can add your information and source the file into your environmen
 `source .env`. Now the information will be loaded into your environment and available to the
 form-flow library.
 
-You can also tell Intellij to load environment information from this file, too, by using this
-[plugin][.(https://plugins.jetbrains.com/plugin/7861-envfile/).
+You can also tell Intellij to load environment information from this file, too, by using
+the [Env File Plugin](https://plugins.jetbrains.com/plugin/7861-envfile/).
 
 ### Application Configuration: application.yaml
 
@@ -432,7 +484,6 @@ file.
 ```yaml
 form-flow:
   inputs: 'org.formflowstartertemplate.app.inputs.'
-  path: 'flows-config.yaml'
   aws:
     region: 'us-west-1'
     s3_bucket_name: 'form-flow'
@@ -441,11 +492,21 @@ form-flow:
 ```
 
 Note that the two AWS keys above are set in the `.env` file above.
+Also note that if you change the name of your `flows-config.yaml` file to anything else you will
+need
+to add it to your `application.yaml` like such:
+
+```yaml
+form-flow:
+  path: 'name-of-file.yaml'
+```
 
 We've chosen to use a yaml version of the application file, but you could also store this as a
 `application.properties` file. In that file, the hierarchy would be all in one line, where the
 inputs line would look like this: `form-flow.path='flows-config.yaml'. Throughout this document,
 when we reference a configuration from this file, we will write it as dot separated parameters.
+
+### flows-config.yaml file
 
 ### Flow and Subflow Configuration
 
@@ -592,12 +653,6 @@ There are spots in the templates where the `T` operator is used.
 ### Conditions / Actions
 
 #### Creating them
-
-### Document Upload
-
-#### Cloud Configuration
-
-##### AWS S3
 
 ### Library Details
 
