@@ -1,0 +1,13 @@
+name: testFlow
+flow:
+  first:
+    nextScreens:
+      - name: pageWithMultipleValidationInput
+  pageWithMultipleValidationInput:
+    nextScreens:
+      - name: pageWithCheckboxSetInput
+  pageWithCheckboxSetInput:
+    nextScreens:
+      - name: last
+  last:
+    nextScreens:

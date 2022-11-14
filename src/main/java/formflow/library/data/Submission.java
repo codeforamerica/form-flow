@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Component;
 @ToString
 @AllArgsConstructor
 @Component
+@Builder
 public class Submission {
 
   @Id
