@@ -2,13 +2,11 @@ name: Run tests
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
 
 jobs:
-  name: Run unit tests
+  name: Run library tests
   test:
-    name: Run unit tests
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
