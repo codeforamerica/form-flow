@@ -2,12 +2,13 @@ package formflow.library;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Validator;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -45,7 +46,6 @@ public class ValidationService {
   public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
     Class<?> clazz;
     try {
-      // TODO - figure out how to rewire this, as we will not know the class path.
       clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
@@ -64,6 +64,22 @@ public class ValidationService {
         validationMessages.put(key, messages);
       }
     });
+
+    return validationMessages;
+  }
+
+  public HashMap<String, List<String>> validate(String flowName, String inputName, MultipartFile file) {
+    Class<?> clazz;
+    try {
+      clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+
+    Class<?> flowClass = clazz;
+    HashMap<String, List<String>> validationMessages = new HashMap<>();
+    validator.validateValue(flowClass, inputName, file)
+        .forEach(violation -> validationMessages.put(inputName, List.of(violation.getMessage())));
 
     return validationMessages;
   }
