@@ -700,10 +700,17 @@ jenv add /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home/
 
 `brew install gradle`
 
-### Build Web/Fat Jar#
+### Build Web/Fat Jar
 
 Go into `lib/build.gradle` and run the `webjar` task with IntelliJ. This will generate a build file
 that can be used for local development
+
+## Setup Platform Flavored Google Styles for Java
+
+In intelliJ go to `Preferences --> Editor --> Code Style --> Java` and next to Scheme hit the
+cogwheel
+and `Import Scheme --> IntelliJ Code Style XML` with
+[intellij-settings/PlatformFlavoredGoogleStyle.xml](intellij-settings/PlatformFlavoredGoogleStyle.xml)
 
 ## IntelliJ setup
 
@@ -713,7 +720,7 @@ that can be used for local development
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
 - Set the Project SDK to Java 17 in `File > Project Structure`
 
-### flows config schema with IntelliJ IDE
+### Connect flows config schema with IntelliJ IDE
 
 We use [JSON schema](https://json-schema.org/understanding-json-schema/index.html) to autocomplete
 and validate the `flows-config.yaml` file.
