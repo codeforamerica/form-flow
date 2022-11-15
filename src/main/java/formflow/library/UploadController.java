@@ -9,6 +9,7 @@ import formflow.library.upload.CloudFileRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,13 +34,16 @@ public class UploadController extends FormFlowController {
 
   private final String USER_FILE_IDS_STRING = "userFileIds";
 
+  private final ValidationService validationService;
+
   public UploadController(
       UploadedFileRepositoryService uploadedFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      SubmissionRepositoryService submissionRepositoryService) {
+      SubmissionRepositoryService submissionRepositoryService, ValidationService validationService) {
     super(submissionRepositoryService);
     this.uploadedFileRepositoryService = uploadedFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
+    this.validationService = validationService;
   }
 
   @PostMapping("/file-upload")
@@ -51,6 +55,8 @@ public class UploadController extends FormFlowController {
       HttpSession httpSession
   ) {
     try {
+      // TODO This is not validating anything right now other than that you included the inputName in the corresponding inputs file
+      HashMap<String, List<String>> errorMessages = validationService.validate(flow, formData.get("inputName"), file);
       String thumbDataUrl = formData.get("thumbDataURL");
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
