@@ -55,8 +55,8 @@ public class UploadController extends FormFlowController {
       HttpSession httpSession
   ) {
     try {
+      // TODO This is not validating anything right now other than that you included the inputName in the corresponding inputs file
       HashMap<String, List<String>> errorMessages = validationService.validate(flow, formData.get("inputName"), file);
-
       String thumbDataUrl = formData.get("thumbDataURL");
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
