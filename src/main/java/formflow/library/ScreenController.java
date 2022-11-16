@@ -579,12 +579,15 @@ public class ScreenController extends FormFlowController {
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission) {
     Map<String, Object> model = new HashMap<>();
     FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
-    TemplateManager templateManager = flowConfig.getTemplateManager();
     model.put("flow", flow);
     model.put("screen", screen);
 
-    if (templateManager != null) {
-      model.put("templateManager", templateManager);
+    if (flowConfig.getTemplateManager() != null) {
+      model.put("templateManager", flowConfig.getTemplateManager());
+    }
+
+    if (flowConfig.getFlow().get(screen).getSubflow() != null) {
+      model.put("subflow", flowConfig.getFlow().get(screen).getSubflow());
     }
 
     // Put subflow on model if on subflow delete confirmation screen

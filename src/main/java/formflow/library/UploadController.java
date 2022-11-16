@@ -31,9 +31,6 @@ public class UploadController extends FormFlowController {
 
   private final UploadedFileRepositoryService uploadedFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
-
-  private final String USER_FILE_IDS_STRING = "userFileIds";
-
   private final ValidationService validationService;
 
   public UploadController(
@@ -72,7 +69,6 @@ public class UploadController extends FormFlowController {
       String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), dropZoneInstanceName, userFileId);
 
       cloudFileRepository.upload(uploadLocation, file);
-
       if (file.getContentType() != null && UserFile.isSupportedImage(file.getContentType())) {
         cloudFileRepository.upload(thumbLocation, thumbDataUrl);
       }
@@ -85,16 +81,17 @@ public class UploadController extends FormFlowController {
           .extension(file.getContentType()).build();
 
       uploadedFileRepositoryService.save(uploadedFile);
-      // TODO: update input_data and save updated submission object
+
+      // are there files already associated with this submission?
       if (submission.getInputData().containsKey(dropZoneInstanceName)) {
         // yes, there are already files, add this one on
         HashMap<String, ArrayList<Long>> userFiles = (HashMap<String, ArrayList<Long>>) submission.getInputData()
             .get(dropZoneInstanceName);
-        userFiles.get(USER_FILE_IDS_STRING).add(uploadedFile.getFile_id());
+        userFiles.get("userFileIds").add(uploadedFile.getFile_id());
       } else {
         // no, there are no files, create the array and add this as the first one
         HashMap<String, ArrayList<Long>> userFiles = new HashMap<>();
-        userFiles.put(USER_FILE_IDS_STRING, new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
+        userFiles.put("userFileIds", new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
         submission.getInputData().put(dropZoneInstanceName, userFiles);
       }
       submissionRepositoryService.save(submission);
