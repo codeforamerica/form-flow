@@ -33,6 +33,8 @@ public class UploadController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final ValidationService validationService;
 
+  private final String USER_FILE_ID_KEY = "userFileIds";
+
   public UploadController(
       UploadedFileRepositoryService uploadedFileRepositoryService,
       CloudFileRepository cloudFileRepository,
@@ -49,6 +51,7 @@ public class UploadController extends FormFlowController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(required = false) Map<String, String> formData,
       @RequestParam("flow") String flow,
+      @RequestParam(name = "subflow", required = false) String subflow,
       HttpSession httpSession
   ) {
     try {
@@ -82,19 +85,54 @@ public class UploadController extends FormFlowController {
 
       uploadedFileRepositoryService.save(uploadedFile);
 
-      // are there files already associated with this submission?
-      if (submission.getInputData().containsKey(dropZoneInstanceName)) {
-        // yes, there are already files, add this one on
-        HashMap<String, ArrayList<Long>> userFiles = (HashMap<String, ArrayList<Long>>) submission.getInputData()
-            .get(dropZoneInstanceName);
-        userFiles.get("userFileIds").add(uploadedFile.getFile_id());
+      // 1. is in a subflow
+      //   2.  Does inputName already exist in submission?
+      //   3. inputName doesn't exist, put file
+      // 2. not in a subflow
+      //   3. inputName doesn't exist, put file
+      // 4. inputName doesn't exist in subflow, put file
+
+      Map<String, Object> inputData = submission.getInputData();
+
+      if (subflow != null) {
+        if (inputData.containsKey(subflow)) {
+          Map<String, Object> subflowData = (Map<String, Object>) inputData.get(subflow);
+          if (subflowData.containsKey(dropZoneInstanceName)) {
+
+            HashMap<String, ArrayList<Long>> userFiles = (HashMap<String, ArrayList<Long>>) subflowData
+                .get(dropZoneInstanceName);
+            userFiles.get(USER_FILE_ID_KEY).add(uploadedFile.getFile_id());
+          } else {
+            HashMap<String, ArrayList<Long>> userFiles = new HashMap<>();
+            userFiles.put(USER_FILE_ID_KEY, new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
+            subflowData.put(dropZoneInstanceName, userFiles);
+          }
+        } else {
+          // add subflow... in the case of the first screen of a subflow
+          HashMap<String, ArrayList<Long>> userFiles = new HashMap<>();
+          userFiles.put(USER_FILE_ID_KEY, new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
+
+          HashMap<String, Object> newSubflowWithFiles = new HashMap<>();
+          newSubflowWithFiles.put(dropZoneInstanceName, userFiles);
+          inputData.put(subflow, newSubflowWithFiles);
+        }
       } else {
-        // no, there are no files, create the array and add this as the first one
-        HashMap<String, ArrayList<Long>> userFiles = new HashMap<>();
-        userFiles.put("userFileIds", new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
-        submission.getInputData().put(dropZoneInstanceName, userFiles);
+        // are there files already associated with this submission?
+        if (submission.getInputData().containsKey(dropZoneInstanceName)) {
+          // yes, there are already files, add this one on
+          HashMap<String, ArrayList<Long>> userFiles = (HashMap<String, ArrayList<Long>>) submission.getInputData()
+              .get(dropZoneInstanceName);
+          userFiles.get(USER_FILE_ID_KEY).add(uploadedFile.getFile_id());
+        } else {
+          // no, there are no files, create the array and add this as the first one
+          HashMap<String, ArrayList<Long>> userFiles = new HashMap<>();
+          userFiles.put(USER_FILE_ID_KEY, new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
+          submission.getInputData().put(dropZoneInstanceName, userFiles);
+        }
       }
+
       submissionRepositoryService.save(submission);
+
       // Once we merge code: we will need a unique identifier for the dropzone input widget to associated this with in the JSON
       // TODO: pass back new file id in response body
       //
