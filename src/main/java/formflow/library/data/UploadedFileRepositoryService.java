@@ -22,8 +22,8 @@ public class UploadedFileRepositoryService {
    *
    * @param userFile the uploadedFile to save, not null
    */
-  public void save(UserFile userFile) {
-    repository.save(userFile);
+  public Long save(UserFile userFile) {
+    return repository.save(userFile).getFile_id();
   }
 
   /**
