@@ -6,8 +6,7 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UploadedFileRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.upload.CloudFileRepository;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,8 @@ public class UploadController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final ValidationService validationService;
 
+  private final String USER_FILE_ID_KEY = "userFileIds";
+
   public UploadController(
       UploadedFileRepositoryService uploadedFileRepositoryService,
       CloudFileRepository cloudFileRepository,
@@ -49,6 +50,7 @@ public class UploadController extends FormFlowController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(required = false) Map<String, String> formData,
       @RequestParam("flow") String flow,
+      @RequestParam(name = "subflow", required = false) String subflow,
       HttpSession httpSession
   ) {
     try {
@@ -64,9 +66,10 @@ public class UploadController extends FormFlowController {
       }
       String dropZoneInstanceName = formData.get("inputName");
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
-      String uploadLocation = String.format("%s/%s-%s.%s", submission.getId(), dropZoneInstanceName, userFileId,
+      String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, dropZoneInstanceName, userFileId,
           fileExtension);
-      String thumbLocation = String.format("%s/%s-%s-thumbnail.txt", submission.getId(), dropZoneInstanceName, userFileId);
+      String thumbLocation = String.format("%s/%s_%s_%s-thumbnail.txt", submission.getId(), flow, dropZoneInstanceName,
+          userFileId);
 
       cloudFileRepository.upload(uploadLocation, file);
       if (file.getContentType() != null && UserFile.isSupportedImage(file.getContentType())) {
@@ -80,25 +83,10 @@ public class UploadController extends FormFlowController {
           .filesize(UserFile.calculateFilesizeInMb(file.getSize()))
           .extension(file.getContentType()).build();
 
-      uploadedFileRepositoryService.save(uploadedFile);
+      Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
 
-      // are there files already associated with this submission?
-      if (submission.getInputData().containsKey(dropZoneInstanceName)) {
-        // yes, there are already files, add this one on
-        HashMap<String, ArrayList<Long>> userFiles = (HashMap<String, ArrayList<Long>>) submission.getInputData()
-            .get(dropZoneInstanceName);
-        userFiles.get("userFileIds").add(uploadedFile.getFile_id());
-      } else {
-        // no, there are no files, create the array and add this as the first one
-        HashMap<String, ArrayList<Long>> userFiles = new HashMap<>();
-        userFiles.put("userFileIds", new ArrayList<>(Collections.singletonList(uploadedFile.getFile_id())));
-        submission.getInputData().put(dropZoneInstanceName, userFiles);
-      }
-      submissionRepositoryService.save(submission);
-      // Once we merge code: we will need a unique identifier for the dropzone input widget to associated this with in the JSON
-      // TODO: pass back new file id in response body
-      //
-      return new ResponseEntity<>(HttpStatus.OK);
+      log.info("Created new file with id: " + newFileId);
+      return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
       log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
