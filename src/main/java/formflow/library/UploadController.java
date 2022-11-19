@@ -6,7 +6,7 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UploadedFileRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.upload.CloudFileRepository;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,8 +84,28 @@ public class UploadController extends FormFlowController {
           .extension(file.getContentType()).build();
 
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
-
       log.info("Created new file with id: " + newFileId);
+
+      // User Files doesn't exist yet in session
+      if (httpSession.getAttribute("userFiles") == null) {
+        ArrayList<Long> userFileArr = new ArrayList<>();
+        userFileArr.add(uploadedFile.getFile_id());
+        httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileArr));
+      } else {
+        // User files exists, and it already has a key for this dropzone instance
+        Map<String, ArrayList<Long>> userFilesMap = (Map<String, ArrayList<Long>>) httpSession.getAttribute("userFiles");
+        if (userFilesMap.containsKey(dropZoneInstanceName)) {
+          ArrayList<Long> existingUserFiles = userFilesMap.get(dropZoneInstanceName);
+          existingUserFiles.add(uploadedFile.getFile_id());
+          httpSession.setAttribute("userFiles", userFilesMap);
+        } else {
+          // User files exists, but it doesn't have the dropzone instance yet
+          ArrayList<Long> userFileArr = new ArrayList<>();
+          userFileArr.add(uploadedFile.getFile_id());
+          httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileArr));
+        }
+      }
+
       return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
       log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
