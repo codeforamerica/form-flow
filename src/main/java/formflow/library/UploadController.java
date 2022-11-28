@@ -86,23 +86,55 @@ public class UploadController extends FormFlowController {
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
+      // put the file information into the session, so the page can have it between refreshes
+      // add in URL of thumbnail, size of file and original file name
       // User Files doesn't exist yet in session
-      if (httpSession.getAttribute("userFiles") == null) {
-        ArrayList<Long> userFileArr = new ArrayList<>();
-        userFileArr.add(uploadedFile.getFile_id());
-        httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileArr));
+
+      // HTTP Session contains a field:
+      //  "userFiles" ->  HashMap of String -> HashMap <Long, HashMap<String,String>
+      //      DropzoneInstanceName ->  Hash Map of <Long, HashMap<String, String>
+      //         File Id (Long)  ->  Hash Map of <String, String>
+      //              filesize -> size
+      //              original file name -> name
+      //              tb path -> path
+      //
+      //
+      // "userFiles" ->
+      //      "dropZoneInstanceOne" ->
+      //           55  ->
+      //               "filesize" -> ".24"
+      //               "originalFileName" -> "mySpiffyFile.jpg"
+      //               "thumbnailUrl" -> "/some/path/here.txt"
+      //
+
+      Map<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+          (Map<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+
+      if (dzFilesMap == null) {
+        HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
+        HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbLocation);
+
+        userFileMap.put(uploadedFile.getFile_id(), fileInfo);
+        // create the dz map here
+        httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileMap));
       } else {
-        // User files exists, and it already has a key for this dropzone instance
-        Map<String, ArrayList<Long>> userFilesMap = (Map<String, ArrayList<Long>>) httpSession.getAttribute("userFiles");
-        if (userFilesMap.containsKey(dropZoneInstanceName)) {
-          ArrayList<Long> existingUserFiles = userFilesMap.get(dropZoneInstanceName);
-          existingUserFiles.add(uploadedFile.getFile_id());
-          httpSession.setAttribute("userFiles", userFilesMap);
+        if (dzFilesMap.containsKey(dropZoneInstanceName)) {
+          // User files exists, and it already has a key for this dropzone instance
+          HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
+          HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbLocation);
+
+          userFileMap.put(uploadedFile.getFile_id(), fileInfo);
+          //should be already updated, as we grabbed the object above and operated on it
+          //httpSession.setAttribute("userFiles", userFilesMap);
         } else {
           // User files exists, but it doesn't have the dropzone instance yet
-          ArrayList<Long> userFileArr = new ArrayList<>();
-          userFileArr.add(uploadedFile.getFile_id());
-          httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileArr));
+          HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
+          HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbLocation);
+
+          userFileMap.put(uploadedFile.getFile_id(), fileInfo);
+          dzFilesMap.put(dropZoneInstanceName, userFileMap);
+          // don't have to update the session as the dzFilesMap is already in it
+          //httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileArr));
         }
       }
 
@@ -111,5 +143,14 @@ public class UploadController extends FormFlowController {
       log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  private HashMap<String, String> createFileInfo(UserFile userFile, String thumbLocation) {
+    HashMap<String, String> fileInfo = new HashMap<>();
+    fileInfo.put("originalFilename", userFile.getOriginalName());
+    fileInfo.put("filesize", userFile.getFilesize().toString());
+    // this or the thumbnail data itself?  thumbDataUrl?
+    fileInfo.put("thumbnailUrl", thumbLocation);
+    return fileInfo;
   }
 }

@@ -169,7 +169,7 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) {
 //    Copy from OG /post request
-    log.info("postScreen: flow: " + flow + ", screen: " + screen);
+    log.info("postScreen new subflow: flow: " + flow + ", screen: " + screen);
     var formDataSubmission = removeEmptyValuesAndFlatten(formData);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var currentScreen = getScreenConfig(flow, screen);
