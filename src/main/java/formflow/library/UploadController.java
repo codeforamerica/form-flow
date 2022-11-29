@@ -6,7 +6,6 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UploadedFileRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.upload.CloudFileRepository;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +80,7 @@ public class UploadController extends FormFlowController {
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize(UserFile.calculateFilesizeInMb(file.getSize()))
+          .mimeType(file.getContentType())
           .extension(file.getContentType()).build();
 
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
@@ -112,7 +112,7 @@ public class UploadController extends FormFlowController {
 
       if (dzFilesMap == null) {
         HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
-        HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbLocation);
+        HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
 
         userFileMap.put(uploadedFile.getFile_id(), fileInfo);
         // create the dz map here
@@ -121,7 +121,7 @@ public class UploadController extends FormFlowController {
         if (dzFilesMap.containsKey(dropZoneInstanceName)) {
           // User files exists, and it already has a key for this dropzone instance
           HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
-          HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbLocation);
+          HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
 
           userFileMap.put(uploadedFile.getFile_id(), fileInfo);
           //should be already updated, as we grabbed the object above and operated on it
@@ -129,7 +129,7 @@ public class UploadController extends FormFlowController {
         } else {
           // User files exists, but it doesn't have the dropzone instance yet
           HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
-          HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbLocation);
+          HashMap<String, String> fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
 
           userFileMap.put(uploadedFile.getFile_id(), fileInfo);
           dzFilesMap.put(dropZoneInstanceName, userFileMap);
@@ -145,12 +145,13 @@ public class UploadController extends FormFlowController {
     }
   }
 
-  private HashMap<String, String> createFileInfo(UserFile userFile, String thumbLocation) {
+  private HashMap<String, String> createFileInfo(UserFile userFile, String thumbBase64String) {
     HashMap<String, String> fileInfo = new HashMap<>();
     fileInfo.put("originalFilename", userFile.getOriginalName());
     fileInfo.put("filesize", userFile.getFilesize().toString());
     // this or the thumbnail data itself?  thumbDataUrl?
-    fileInfo.put("thumbnailUrl", thumbLocation);
+    fileInfo.put("thumbnailUrl", thumbBase64String);
+    fileInfo.put("type", userFile.getMimeType());
     return fileInfo;
   }
 }
