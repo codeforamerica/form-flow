@@ -18,9 +18,9 @@ plugins {
 targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
-def props = new Properties()
+def localEnv = new Properties()
 if (file(".env").isFile()) {
-    file(".env").withInputStream { props.load(it) }
+    file(".env").withInputStream { localEnv.load(it) }
 }
 
 jar {
@@ -89,16 +89,16 @@ publishing {
 //            name = "GitHubPackages"
 //            url = uri("https://flatDir.pkg.github.com/codeforamerica/form-flow")
 //            credentials {
-//                username = props.getProperty("USERNAME") ?: System.getenv("USERNAME")
-//                password = props.getProperty("TOKEN") ?: System.getenv("TOKEN")
+//                username = localEnv.getProperty("USERNAME") ?: System.getenv("USERNAME")
+//                password = localEnv.getProperty("TOKEN") ?: System.getenv("TOKEN")
 //            }
 //        }
         maven {
             name = "MavenCentral"
             url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
             credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+                username = localEnv.getProperty("MAVEN_USERNAME")
+                password = localEnv.getProperty("MAVEN_PASSWORD")
             }
         }
     }
