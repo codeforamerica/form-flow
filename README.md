@@ -2,14 +2,12 @@
 
 Table of Contents
 =================
-<!-- Update this section when you update sections now. This is not 
-     automatically generated. 
-     Please don't go more than three layers, so we can keep the TOC
+<!-- Update this section when you update sections now. 
+    **  This is not automatically generated. **
+     Please don't go more than three layers deep, so we can keep the TOC
      a reasonable size 
 -->
 
-* [Form Flow Library](#form-flow-library)
-* [Table of Contents](#table-of-contents)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
@@ -465,18 +463,47 @@ Variables](#environment-variables) section below.
 
 ### File Naming conventions
 
-Filename convention will be this:
-flow_name is always set, input_name is always unique
-`{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…}`
-`{{submission_id}}/{{flow_name}}_{{input_name}}_UUID-thumbnail.txt`
+Before a file is uploaded to S3, we give it a normalized filename. It consists of the flow name,
+input field the file was uploaded from, and a UUID. Then we store it in S3, organized by
+which submission it is a part of, like so:
 
-Examples (flow name is `ubi` and widget name is `homedoc`):
+```
+   `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
+```
 
-42/ubi_homedoc-126e-41c5-960e-08d84e3984bd.jpg
-42/ubi_homedoc_1c43c9da-126e-41c5-960e-08d84e3984bd-thumbnail.txt
+If the file has an extension of .jpg, .png, .bmp or .gif, we will also create a thumbnail for that
+image. It will be a base64 encoded PNG and will end up with a `.txt` extension. The thumbnail will
+share the same generated filename as the original, though we remove the extension and tack on
+a `-thumbnail.txt` to distinguish it from the original file. This thumbnail is stored in S3 along
+with the original document.
 
-This should place the file and its thumbnail next to each other in the bucket. The thumbnail is a
-base64 encoded PNG file, hence it having a `.txt` extension.
+For files with extensions other than the ones listed, we do not create a thumbnail. We use a
+default image for those thumbnails, so there is no need to save a thumbnail.
+
+The two files end up looking like this:
+
+```
+   `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
+   `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID-thumbnail.txt`
+```
+
+The `flow_name` is the current flow the user is in and the `input_name` is the name of the
+file upload widget that uploaded the file. If there are multiple files uploaded via the same widget,
+then there will be many files with the same `flow_name` and `input_name`, though the UUID will be
+unique for each file.
+
+Here is an example of what two files uploaded via the same input will look like in S3 (flow name
+is `ubi` and widget name
+is `homedoc`):
+
+```java
+    42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd.jpg
+    42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd-thumbnail.txt
+    42/ubi_homedoc_d612bc77-11de-419f-b7cc-71e4ab2ad571.jpg
+    42/ubi_homedoc_d612bc77-11de-419f-b7cc-71e4ab2ad571-thumbnail.txt
+```
+
+This naming scheme should place the file and its thumbnail next to each other in the bucket.
 
 ### File Upload Widget
 
@@ -507,7 +534,7 @@ Example JSON:
 ```
 
 This indicates that there were two files uploaded via the `license_upload` widget. Their file ids
-are 34 and 47, and can be looked up in the `user_files` database table using those ids.
+are `34` and `47`, and can be looked up in the `user_files` database table using those ids.
 
 # How to use
 
