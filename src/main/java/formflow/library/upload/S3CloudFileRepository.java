@@ -11,9 +11,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,23 +38,13 @@ public class S3CloudFileRepository implements CloudFileRepository {
     this.transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
   }
 
-//  public byte[] get(String filepath) {
-//    try {
-//      S3Object obj = s3Client.getObject(bucketName, filepath);
-//      S3ObjectInputStream stream = obj.getObjectContent();
-//      byte[] content = IOUtils.oByteArray(stream);
-//      obj.close();
-//      return content;
-//    } catch (Exception e) {
-//      return null;
-//    }
-//  }
-
   /**
    * Takes a filepath and Multipart file to to upload the multipart file to AWS S3 where the filepath acts as the path to the file
-   * in S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a folder.
+   * in S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a
+   * folder.
+   *
    * @param filePath File path representing a folder structure and path to the file in S3.
-   * @param file The multipart file to be uploaded to S3.
+   * @param file     The multipart file to be uploaded to S3.
    */
   public void upload(String filePath, MultipartFile file) {
     try {
@@ -77,22 +65,6 @@ public class S3CloudFileRepository implements CloudFileRepository {
       log.info(e.getMessage());
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Takes a filepath and an image as a base64 encoded string representing a thumbnail. The base64 encoded thumbnail will be uploaded
-   * alongside full size images to AWS S3. The filepath acts as the path to the file in S3 where file paths that include "/"
-   * will create a folder structure where each string prior to the "/" will represent a folder.
-   * @param filePath File path representing a folder structure and path to the file in S3.
-   * @param dataURL a base64 encoded string containing the data for a thumnbnail image to be uploaded alongside full size image uploads.
-   */
-  public void upload(String filePath, String dataURL) {
-    byte[] fileContentBytes = dataURL.getBytes(StandardCharsets.UTF_8);
-    var byteArrayInputStream = new ByteArrayInputStream(fileContentBytes);
-    ObjectMetadata objectMetadata = new ObjectMetadata();
-    objectMetadata.setContentType("text/plain");
-    objectMetadata.setContentLength(dataURL.getBytes(StandardCharsets.UTF_8).length);
-    transferManager.upload(bucketName, filePath, byteArrayInputStream, objectMetadata);
   }
 
   public void delete(String filepath) throws SdkClientException {
