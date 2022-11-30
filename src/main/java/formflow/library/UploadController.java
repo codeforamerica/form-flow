@@ -17,10 +17,12 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @EnableAutoConfiguration
@@ -101,8 +103,37 @@ public class UploadController extends FormFlowController {
 
       return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
-      log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
+      log.error("Error occurred while uploading file " + e.getLocalizedMessage());
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @PostMapping("/file-delete")
+  RedirectView delete(
+      @RequestParam("id") String fileId,
+      @RequestParam("returnPath") String returnPath,
+      HttpSession httpSession
+  ) {
+    try {
+      log.info("\uD83D\uDD25 Try to delete: " + fileId);
+      // TODO: get file from userFiles db
+
+      // TODO: check that submission_id is same as id in session?
+
+      // TODO: if not, error
+
+      // TODO: delete from cloud
+
+      // TODO: delete thumbnail if exists
+
+      // TODO: delete from db
+
+      // TODO: delete from session?
+
+      return new RedirectView(returnPath);
+    } catch (Exception e) {
+      log.error("Error occurred while deleting file " + e.getLocalizedMessage());
+      return new RedirectView("/error");
     }
   }
 
