@@ -31,8 +31,6 @@ public class UploadController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final ValidationService validationService;
 
-  private final String USER_FILE_ID_KEY = "userFileIds";
-
   public UploadController(
       UploadedFileRepositoryService uploadedFileRepositoryService,
       CloudFileRepository cloudFileRepository,
@@ -49,7 +47,6 @@ public class UploadController extends FormFlowController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(required = false) Map<String, String> formData,
       @RequestParam("flow") String flow,
-      @RequestParam(name = "subflow", required = false) String subflow,
       HttpSession httpSession
   ) {
     try {
@@ -80,7 +77,6 @@ public class UploadController extends FormFlowController {
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize(UserFile.calculateFilesizeInMb(file.getSize()))
-          .mimeType(file.getContentType())
           .extension(file.getContentType()).build();
 
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
@@ -151,7 +147,7 @@ public class UploadController extends FormFlowController {
     fileInfo.put("filesize", userFile.getFilesize().toString());
     // this or the thumbnail data itself?  thumbDataUrl?
     fileInfo.put("thumbnailUrl", thumbBase64String);
-    fileInfo.put("type", userFile.getMimeType());
+    fileInfo.put("type", userFile.getExtension());
     return fileInfo;
   }
 }

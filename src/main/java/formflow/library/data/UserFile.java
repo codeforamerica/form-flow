@@ -68,9 +68,6 @@ public class UserFile {
   @Column(name = "extension")
   private String extension;
 
-  @Column(name = "mime_type")
-  private String mimeType;
-
   @Column
   private Float filesize;
 
