@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -110,25 +111,44 @@ public class UploadController extends FormFlowController {
 
   @PostMapping("/file-delete")
   RedirectView delete(
-      @RequestParam("id") String fileId,
+      @RequestParam("id") Long fileId,
       @RequestParam("returnPath") String returnPath,
       HttpSession httpSession
   ) {
     try {
       log.info("\uD83D\uDD25 Try to delete: " + fileId);
-      // TODO: get file from userFiles db
 
-      // TODO: check that submission_id is same as id in session?
+      Long id = (Long) httpSession.getAttribute("id");
+      Optional<Submission> maybeSubmission = submissionRepositoryService.findById(id);
+      if (maybeSubmission.isPresent()) {
+        Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
 
-      // TODO: if not, error
+        if (maybeFile.isPresent()) {
+          UserFile file = maybeFile.get();
+          if (id.equals(file.getSubmission_id().getId())) {
+            cloudFileRepository.delete(file.getRepositoryPath());
+            if (file.getExtension() != null && UserFile.isSupportedImage(file.getExtension())) {
+              // TODO: delete thumbnail if exists
+              // TODO: manipulate repository path to
+              // - remove things after .ext
+              // - have '-thumbnail' before the .txt
+              // - add txt as extension
+              cloudFileRepository.delete(file.getRepositoryPath());
+            }
 
-      // TODO: delete from cloud
 
-      // TODO: delete thumbnail if exists
+            // TODO: delete from db
 
-      // TODO: delete from db
-
-      // TODO: delete from session?
+            // TODO: delete from session?
+          } else {
+            log.error(String.format("Submission %d does not match file %d's submission id %d", id, fileId, file.getSubmission_id().getId()));
+            return new RedirectView("/error");
+          }
+        }
+      } else {
+        log.error(String.format("Session %d does not exist", id));
+        return new RedirectView("/error");
+      }
 
       return new RedirectView(returnPath);
     } catch (Exception e) {
