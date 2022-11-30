@@ -2,26 +2,28 @@
 
 Table of Contents
 =================
+<!-- Update this section when you update sections now. This is not 
+     automatically generated. 
+     Please don't go more than three layers, so we can keep the TOC
+     a reasonable size 
+-->
 
+* [Form Flow Library](#form-flow-library)
+* [Table of Contents](#table-of-contents)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
     * [Screen](#screen)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
-            * [Entry Screen](#entry-screen)
-            * [Iteration Start Screen](#iteration-start-screen)
-            * [Review Screen](#review-screen)
-            * [Delete Confirmation Screen](#delete-confirmation-screen)
     * [Conditions and Actions](#conditions-and-actions)
         * [Defining Conditions](#defining-conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
     * [Submission Object](#submission-object)
     * [Defining Inputs](#defining-inputs)
         * [Input Class](#input-class)
+        * [Input Data JSON Structure](#input-data-json-structure)
 * [General Information](#general-information)
-    * [Model Data](#model-data)
-    * [Icon Reference](#icon-reference)
     * [Thymeleaf](#thymeleaf)
         * [Using Thymeleaf](#using-thymeleaf)
         * [Templates](#templates)
@@ -31,30 +33,20 @@ Table of Contents
         * [Accessing Conditions](#accessing-conditions)
         * [Accessing Submission Object](#accessing-submission-object)
     * [Document Upload](#document-upload)
+        * [AWS S3](#aws-s3)
+* [TODO update this section on naming convention](#todo-update-this-section-on-naming-convention)
+    * [File Upload Widget](#file-upload-widget)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
         * [Application Configuration: application.yaml](#application-configuration-applicationyaml)
+        * [flows-config.yaml file](#flows-configyaml-file)
         * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
-            * [form-flow.yaml basic configuration](#form-flowyaml-basic-configuration)
         * [Screens](#screens)
         * [Defining Subflows](#defining-subflows)
-            * [When do you need to define subflow on a screen?](#when-do-you-need-to-define-subflow-on-a-screen)
         * [Thymeleaf Model Data](#thymeleaf-model-data)
         * [Conditions / Actions](#conditions--actions)
-            * [Creating them](#creating-them)
-        * [Document Upload](#document-upload-1)
-            * [Cloud Configuration](#cloud-configuration)
-                * [AWS S3](#aws-s3)
         * [Library Details](#library-details)
-            * [Publishing](#publishing)
-                * [Github Packaging Repository](#github-packaging-repository)
-                * [Maven Central](#maven-central)
-            * [How to pull in the library](#how-to-pull-in-the-library)
-                * [Credential Information](#credential-information)
-            * [Versioning Information](#versioning-information)
-                * [Version / Release plan](#version--release-plan)
-            * [Building Fat Jars](#building-fat-jars)
 * [Help](#help)
     * [IntelliJ Live Templates](#intellij-live-templates)
         * [Applying them](#applying-them)
@@ -65,12 +57,11 @@ Table of Contents
     * [Java Development Kit](#java-development-kit)
     * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
     * [Gradle](#gradle)
-        * [Build Web/Fat Jar#](#build-webfat-jar)
+        * [Build Web/Fat Jar](#build-webfat-jar)
+    * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
     * [IntelliJ setup](#intellij-setup)
-        * [flows config schema with IntelliJ IDE](#flows-config-schema-with-intellij-ide)
+        * [Connect flows config schema with IntelliJ IDE](#connect-flows-config-schema-with-intellij-ide)
         * [Testing](#testing)
-            * [Terminal](#terminal)
-            * [IntelliJ](#intellij)
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
@@ -302,7 +293,64 @@ see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validat
 
 ### Input Data JSON Structure
 
-TODO add info about the input data JSON structure here
+As the end user walks through the flow entering data, their input data will get stored as
+JSON in the database. It is stored in a column named `inputData` on the `submissions` table.
+
+* The organization of the data is based on the form flow setup and the field names on the forms.
+* The input fields on pages that are not part of a subflow will be stored in the main part of the
+  JSON data. The keys will be the input fields name.
+* The input fields that are part of a subflow will be stored in an array under a key that is the
+  name of the subflow.
+* Field names are used as keys. We use them directly as they are and therefore they must
+  be unique across a whole flow to avoid naming collisions. The example applies a prefix to the
+  fields, but that's just for ease of being clear in the example. The system does not apply
+  prefixes.
+
+For example, for the docs subflow configuration described above in
+the [Defining Subflows](#defining-subflows) section, the resulting data might be organized as
+follows.
+
+In the example below the following assumptions are applied:
+
+* Each screen has some fields, named input1, input2, and so on. Below they are prefixed with their
+  page so that they have a unique name. All fields across a particular flow must have a unique name.
+* Some screens may not have any input fields, as they are pages displaying text to the user.
+
+```JSON
+{
+  "first_input1": "some value",
+  "first_input2": "some value",
+  "second_input1": "abcd",
+  "docsStart_input1": "some doc info",
+  "doc": [
+    {
+      "uuid": "31259552-e0bc-4efe-bbc7-b5e63d2b5407",
+      "doc_input1": "some data",
+      "doc_input2": "other data",
+      "doc_fileIds": "[2,3,5]"
+    },
+    {
+      "uuid": "d612bc77-11de-419f-b7cc-71e4ab2ad571",
+      "doc_input1": "some data",
+      "doc_input2": "other data",
+      "doc_fileIds": "[7]"
+    },
+    {
+      "uuid": "e88c6602-9abf-4bfa-b4c8-5a77c44d5ab4",
+      "doc_input1": "some data",
+      "doc_input2": "other data",
+      "doc_fileIds": "[8,12]"
+    }
+  ]
+}
+```
+
+So the resulting JSON stored in the database has input fields as key values, and for subflow the
+subflow name is the key value.
+
+Note that the subflows are an array of repeating entries - one for each iteration a user did
+of the subflow. Each iteration has a unique UUID associated with it so we can have a way of working
+with a specific iteration's data.
 
 # General Information
 
@@ -415,19 +463,20 @@ in the library. The bucket and region are configured in your `application.yaml`.
 Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
 Variables](#environment-variables) section below.
 
-# TODO update this section on naming convention
+### File Naming conventions
 
 Filename convention will be this:
 flow_name is always set, input_name is always unique
-`submission_id/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…}`
-`submission_id/{{flow_name}}_{{input_name}}_UUID-thumbnail.txt`
+`{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…}`
+`{{submission_id}}/{{flow_name}}_{{input_name}}_UUID-thumbnail.txt`
 
-Examples (widget name is `input_name`):
+Examples (flow name is `ubi` and widget name is `homedoc`):
 
-42/input_name_1c43c9da-126e-41c5-960e-08d84e3984bd.jpg
-42/input_name_1c43c9da-126e-41c5-960e-08d84e3984bd-thumbnail.txt
+42/ubi_homedoc-126e-41c5-960e-08d84e3984bd.jpg
+42/ubi_homedoc_1c43c9da-126e-41c5-960e-08d84e3984bd-thumbnail.txt
 
-This should place the file and its thumbnail next to each other in the bucket.
+This should place the file and its thumbnail next to each other in the bucket. The thumbnail is a
+base64 encoded PNG file, hence it having a `.txt` extension.
 
 ### File Upload Widget
 
@@ -440,12 +489,25 @@ name will be the key under which uploaded files for this fragment are stored in 
 structure.
 
 The file upload widget allows for single or multiple file uploads and will provide a list of
-uploaded
-files along with thumbnails for image files or a default icon for documents. The list of uploaded
-files
-will include a thumbnail, the original file name, file size and links for canceling or deleting the
-upload. The cancel link will only be present before the file has finished uploading, once the upload
-is complete it will become a delete link.
+uploaded files along with thumbnails for image files or a default icon for documents. The list of
+uploaded files will include a thumbnail, the original file name, file size and links for canceling
+or deleting the upload. The cancel link will only be present before the file has finished uploading,
+once the upload is complete it will become a delete link.
+
+The resulting file information will be stored in the saved JSON with the field name being the key.
+
+Example JSON:
+
+```JSON
+{
+  /* other content */
+  "license_upload": "[34,47]"
+  /* other content */
+}
+```
+
+This indicates that there were two files uploaded via the `license_upload` widget. Their file ids
+are 34 and 47, and can be looked up in the `user_files` database table using those ids.
 
 # How to use
 
