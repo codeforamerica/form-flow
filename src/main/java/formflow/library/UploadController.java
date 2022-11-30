@@ -133,7 +133,9 @@ public class UploadController extends FormFlowController {
               // - remove things after .ext
               // - have '-thumbnail' before the .txt
               // - add txt as extension
-              cloudFileRepository.delete(file.getRepositoryPath());
+              String thumbnailPath = file.getRepositoryPath().replace("\\..*$", "-thumbnail.txt");
+              log.info("\uD83D\uDEE4️ Thumbnail path: {}", thumbnailPath);
+              cloudFileRepository.delete(thumbnailPath);
             }
 
 
