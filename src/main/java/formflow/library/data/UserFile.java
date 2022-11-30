@@ -3,7 +3,6 @@ package formflow.library.data;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -70,12 +69,6 @@ public class UserFile {
 
   @Column
   private Float filesize;
-
-  public static Float calculateFilesizeInMb(Long fileSize) {
-    DecimalFormat df = new DecimalFormat("0.00");
-    Float unroundedMb = Float.valueOf(String.valueOf(fileSize / (1024.0 * 1024.0)));
-    return Float.valueOf(df.format(unroundedMb));
-  }
 
   public static boolean isSupportedImage(String mimeType) {
     return UserFile.SUPPORTS_THUMBNAIL.contains(mimeType);
