@@ -10,8 +10,6 @@ public interface CloudFileRepository {
 
   void upload(String filePath, MultipartFile file) throws IOException, InterruptedException;
 
-  void upload(String filepath, String dataURL) throws IOException, InterruptedException;
-
   void delete(String filepath);
 
 //  default String getThumbnail(UploadedFile uploadedFile) {
