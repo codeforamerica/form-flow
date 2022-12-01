@@ -134,7 +134,7 @@ public class UploadController extends FormFlowController {
               // - have '-thumbnail' before the .txt
               // - add txt as extension
               // TODO - maybe this should be replaceLast, so if there are other '.' in the string we don't run into issues?
-              String thumbnailPath = file.getRepositoryPath().replace("\\..*$", "-thumbnail.txt");
+              String thumbnailPath = file.getRepositoryPath().replaceFirst("\\..*$", "-thumbnail.txt");
               log.info("\uD83D\uDEE4️ Thumbnail path: {}", thumbnailPath);
               cloudFileRepository.delete(thumbnailPath);
             }
