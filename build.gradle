@@ -144,9 +144,14 @@ publishing {
                         email = 'agonzalez@codeforamerica.org'
                     }
                     developer {
-                        id = ''
+                        id = 'cenyia'
                         name = 'Chibuisi Enyia'
                         email = 'cenyia@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'rcastillo'
+                        name = 'Rapi Castillo'
+                        email = 'rcastillo@codeforamerica.org'
                     }
                     developer {
                         id = 'bethany'
