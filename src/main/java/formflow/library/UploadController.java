@@ -133,17 +133,19 @@ public class UploadController extends FormFlowController {
               // - remove things after .ext
               // - have '-thumbnail' before the .txt
               // - add txt as extension
+              // TODO - maybe this should be replaceLast, so if there are other '.' in the string we don't run into issues?
               String thumbnailPath = file.getRepositoryPath().replace("\\..*$", "-thumbnail.txt");
               log.info("\uD83D\uDEE4️ Thumbnail path: {}", thumbnailPath);
               cloudFileRepository.delete(thumbnailPath);
             }
 
-
             // TODO: delete from db
+            uploadedFileRepositoryService.deleteById(file.getFile_id());
 
             // TODO: delete from session?
           } else {
-            log.error(String.format("Submission %d does not match file %d's submission id %d", id, fileId, file.getSubmission_id().getId()));
+            log.error(String.format("Submission %d does not match file %d's submission id %d", id, fileId,
+                file.getSubmission_id().getId()));
             return new RedirectView("/error");
           }
         }
