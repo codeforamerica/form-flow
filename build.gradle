@@ -95,7 +95,10 @@ publishing {
 //        }
         maven {
             name = "MavenCentral"
-            url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
+            //url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
+            // since we have an older account (created 2013) we are on the old servers
+            // see https://issues.sonatype.org/browse/OSSRH-85469
+            url = "https://oss.sonatype.org/content/repositories/snapshots"
             credentials {
                 username = localEnv.getProperty("MAVEN_USERNAME")
                 password = localEnv.getProperty("MAVEN_PASSWORD")
@@ -111,7 +114,7 @@ publishing {
                 url = "https://github.com/codeforamerica/form-flow/"
                 group = "org.codeforamerica.platform"
                 artifactId = "form-flow"
-                version = "0.0-SNAPSHOT"
+                version = "0.0.1-SNAPSHOT"
 
                 licenses {
                     license {
