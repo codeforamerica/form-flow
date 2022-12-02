@@ -126,23 +126,21 @@ public class UploadController extends FormFlowController {
         if (maybeFile.isPresent()) {
           UserFile file = maybeFile.get();
           if (id.equals(file.getSubmission_id().getId())) {
+            log.info("Delete file {} from cloud storage", fileId);
             cloudFileRepository.delete(file.getRepositoryPath());
+
             if (file.getExtension() != null && UserFile.isSupportedImage(file.getExtension())) {
-              // TODO: delete thumbnail if exists
-              // TODO: manipulate repository path to
-              // - remove things after .ext
-              // - have '-thumbnail' before the .txt
-              // - add txt as extension
-              // TODO - maybe this should be replaceLast, so if there are other '.' in the string we don't run into issues?
               String thumbnailPath = file.getRepositoryPath().replaceFirst("\\..*$", "-thumbnail.txt");
-              log.info("\uD83D\uDEE4️ Thumbnail path: {}", thumbnailPath);
+              log.info("Delete thumbnail for {} from cloud storage", fileId);
               cloudFileRepository.delete(thumbnailPath);
             }
 
-            // TODO: delete from db
             uploadedFileRepositoryService.deleteById(file.getFile_id());
 
-            // TODO: delete from session?
+            // TODO: delete from session
+            // TODO: will need field name (dropZoneInstanceName) to be able to delete from session
+            // TODO: will need to handle both the remove of one file from the array or removing the last item in the array, thus removing the array
+            // httpSession.getAttribute("userFiles").get(inputName)
           } else {
             log.error(String.format("Submission %d does not match file %d's submission id %d", id, fileId,
                 file.getSubmission_id().getId()));
