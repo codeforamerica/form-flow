@@ -32,8 +32,8 @@ Table of Contents
         * [Accessing Submission Object](#accessing-submission-object)
     * [Document Upload](#document-upload)
         * [AWS S3](#aws-s3)
-* [TODO update this section on naming convention](#todo-update-this-section-on-naming-convention)
-    * [File Upload Widget](#file-upload-widget)
+        * [File Naming Conventions](#file-naming-conventions)
+        * [File Upload Widget](#file-upload-widget)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -458,7 +458,7 @@ in the library. The bucket and region are configured in your `application.yaml`.
 Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
 Variables](#environment-variables) section below.
 
-### File Naming conventions
+### File Naming Conventions
 
 Before a file is uploaded to S3, we give it a normalized filename. It consists of the flow name,
 input field the file was uploaded from, and a UUID. Then we store it in S3, organized by
