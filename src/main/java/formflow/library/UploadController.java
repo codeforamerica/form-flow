@@ -18,7 +18,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -113,6 +112,7 @@ public class UploadController extends FormFlowController {
   RedirectView delete(
       @RequestParam("id") Long fileId,
       @RequestParam("returnPath") String returnPath,
+      @RequestParam("inputName") String dropZoneInstanceName,
       HttpSession httpSession
   ) {
     try {
@@ -128,15 +128,19 @@ public class UploadController extends FormFlowController {
           if (id.equals(file.getSubmission_id().getId())) {
             log.info("Delete file {} from cloud storage", fileId);
             cloudFileRepository.delete(file.getRepositoryPath());
-
-            if (file.getExtension() != null && UserFile.isSupportedImage(file.getExtension())) {
-              String thumbnailPath = file.getRepositoryPath().replaceFirst("\\..*$", "-thumbnail.txt");
-              log.info("Delete thumbnail for {} from cloud storage", fileId);
-              cloudFileRepository.delete(thumbnailPath);
-            }
-
             uploadedFileRepositoryService.deleteById(file.getFile_id());
-
+            Map<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+                (Map<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+            HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
+            if (userFileMap.containsKey(fileId)) {
+              userFileMap.remove(fileId);
+              if (userFileMap.isEmpty()) {
+                dzFilesMap.remove(dropZoneInstanceName);
+              }
+            } else {
+              log.error("Could not find file id {} in the session.", fileId);
+              return new RedirectView("/error");
+            }
             // TODO: delete from session
             // TODO: will need field name (dropZoneInstanceName) to be able to delete from session
             // TODO: will need to handle both the remove of one file from the array or removing the last item in the array, thus removing the array
