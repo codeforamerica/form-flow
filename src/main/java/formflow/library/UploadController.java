@@ -79,14 +79,16 @@ public class UploadController extends FormFlowController {
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
-      Map<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
-          (Map<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+      HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+          (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
       HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
       HashMap<String, String> fileInfo;
 
       if (dzFilesMap == null) {
         fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
-        httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileMap));
+        HashMap<String, HashMap<Long, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
+        dropzoneInstanceMap.put(dropZoneInstanceName, userFileMap);
+        httpSession.setAttribute("userFiles", dropzoneInstanceMap);
       } else {
         if (dzFilesMap.containsKey(dropZoneInstanceName)) {
           // User files exists, and it already has a key for this dropzone instance
@@ -129,8 +131,8 @@ public class UploadController extends FormFlowController {
             log.info("Delete file {} from cloud storage", fileId);
             cloudFileRepository.delete(file.getRepositoryPath());
             uploadedFileRepositoryService.deleteById(file.getFile_id());
-            Map<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
-                (Map<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+            HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+                (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
             HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
             if (userFileMap.containsKey(fileId)) {
               userFileMap.remove(fileId);
@@ -168,8 +170,8 @@ public class UploadController extends FormFlowController {
    * size, thumbnail and mime type) which we add to the session for persisting user file uploads when a user refreshes the page or
    * navigates away.
    *
-   * @param userFile
-   * @param thumbBase64String
+   * @param userFile          class representing the file the that was uploaded by the user
+   * @param thumbBase64String base64 encoded thumbnail of the file the user uploaded
    * @return Hashmap representation of a user file that includes original file name, file size, thumbnail as base64 encoded
    * string, and mime type.
    */
