@@ -85,19 +85,11 @@ test {
 
 publishing {
     repositories {
-//        maven {
-//            name = "GitHubPackages"
-//            url = uri("https://flatDir.pkg.github.com/codeforamerica/form-flow")
-//            credentials {
-//                username = localEnv.getProperty("USERNAME") ?: System.getenv("USERNAME")
-//                password = localEnv.getProperty("TOKEN") ?: System.getenv("TOKEN")
-//            }
-//        }
         maven {
             name = "MavenCentral"
-            //url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
-            // since we have an older account (created 2013) we are on the old servers
-            // see https://issues.sonatype.org/browse/OSSRH-85469
+            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW 
+            // sonatype url, but we need the old one since we have an older account 
+            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
             url = "https://oss.sonatype.org/content/repositories/snapshots"
             credentials {
                 username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
@@ -161,12 +153,5 @@ publishing {
                 }
             }
         }
-//        gpr(MavenPublication) {
-//            from(components.java)
-//            // eventually this should probably be org.codeforamerica.form-flow ...?
-//            group = "form-flow"
-//            artifactId = "form-flow-library"
-//            version = "0.0.1-SNAPSHOT"
-//        }
     }
 }
