@@ -100,8 +100,8 @@ publishing {
             // see https://issues.sonatype.org/browse/OSSRH-85469
             url = "https://oss.sonatype.org/content/repositories/snapshots"
             credentials {
-                username = localEnv.getProperty("MAVEN_USERNAME")
-                password = localEnv.getProperty("MAVEN_PASSWORD")
+                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
             }
         }
     }
