@@ -9,13 +9,11 @@ name: Publish Package to Github & Maven Central
 
 on:
   push:
-    branches:
-      - 'maven-publish'
-#  workflow_run:
-#    workflows: [ "Run tests" ]
-#    branches: [ main ]
-#    types:
-#      - completed
+  workflow_run:
+    workflows: [ "Run tests" ]
+    branches: [ main ]
+    types:
+      - completed
 
 jobs:
   build:
@@ -37,13 +35,6 @@ jobs:
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: build
-      #      - name: Publish to GitHub Packages
-      #        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      #        with:
-      #          arguments: publish
-      #        env:
-      #          USERNAME: ${{ github.actor }}
-      #          TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to Maven Central
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
