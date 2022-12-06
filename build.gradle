@@ -18,9 +18,9 @@ plugins {
 targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
-def props = new Properties()
+def localEnv = new Properties()
 if (file(".env").isFile()) {
-    file(".env").withInputStream { props.load(it) }
+    file(".env").withInputStream { localEnv.load(it) }
 }
 
 jar {
@@ -86,21 +86,72 @@ test {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/codeforamerica/form-flow")
+            name = "MavenCentral"
+            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW 
+            // sonatype url, but we need the old one since we have an older account 
+            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
+            url = "https://oss.sonatype.org/content/repositories/snapshots"
             credentials {
-                username = props.getProperty("USERNAME") ?: System.getenv("USERNAME")
-                password = props.getProperty("TOKEN") ?: System.getenv("TOKEN")
+                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
             }
         }
     }
     publications {
-        gpr(MavenPublication) {
-            from(components.java)
-            // eventually this should probably be org.codeforamerica.form-flow ...?
-            group = "form-flow"
-            artifactId = "form-flow-library"
-            version = "0.0.1-SNAPSHOT"
+        mavenJava(MavenPublication) {
+            pom {
+                from(components.java)
+                name = "Form Flow Builder"
+                description = "A Java library placed in a Spring Boot app to generate form flows."
+                url = "https://github.com/codeforamerica/form-flow/"
+                group = "org.codeforamerica.platform"
+                artifactId = "form-flow"
+                version = "0.0.1-SNAPSHOT"
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://raw.githubusercontent.com/git/git-scm.com/main/MIT-LICENSE.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'bencalegari'
+                        name = 'Ben Calegari'
+                        email = 'bcalegari@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'cy-cfa'
+                        name = 'Cypress Borg'
+                        email = 'cborg@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'luigi'
+                        name = 'Luigi Ray-Montañez'
+                        email = 'luigi@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'birdprsn'
+                        name = 'Alex Gonzalez'
+                        email = 'agonzalez@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'cenyia'
+                        name = 'Chibuisi Enyia'
+                        email = 'cenyia@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'rcastillo'
+                        name = 'Rapi Castillo'
+                        email = 'rcastillo@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'bethany'
+                        name = 'Bethany Seeger'
+                        email = 'bseeger@codeforamerica.org'
+                    }
+                }
+            }
         }
     }
 }
