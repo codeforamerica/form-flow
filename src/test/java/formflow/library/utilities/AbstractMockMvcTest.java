@@ -48,7 +48,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(webEnvironment = MOCK)
 @AutoConfigureMockMvc
 @ContextConfiguration
-public class AbstractMockMvcTest {
+public abstract class AbstractMockMvcTest {
 
   @MockBean
   protected Clock clock;
@@ -196,12 +196,6 @@ public class AbstractMockMvcTest {
       throws Exception {
     var page = new FormScreen(getPage(pageName));
     assertThat(page.getElementById(elementId)).isNull();
-  }
-
-  protected void postExpectingNextPageTitle(String pageName, String nextPageTitle)
-      throws Exception {
-    var nextPage = postAndFollowRedirect(pageName);
-    assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
   }
 
   protected void postExpectingNextPageTitle(String pageName,

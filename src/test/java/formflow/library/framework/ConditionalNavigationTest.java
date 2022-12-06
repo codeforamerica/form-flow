@@ -9,12 +9,12 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldGoToPageWhoseConditionIsSatisfied() throws Exception {
-    postExpectingNextPageTitle("first", "Second Page");
+    continueExpectingNextPageTitle("first", "Second Page");
   }
 
   @Test
   void shouldNotGoToPageWhoseConditionIsNotSatisfied() throws Exception {
-    postExpectingNextPageTitle("second", "Last Page");
+    continueExpectingNextPageTitle("second", "Last Page");
   }
 
   @Test

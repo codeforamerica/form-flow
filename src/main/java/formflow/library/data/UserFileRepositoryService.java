@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Transactional
-public class UploadedFileRepositoryService {
+public class UserFileRepositoryService {
 
-  UploadedFileRepository repository;
+  UserFileRepository repository;
 
-  public UploadedFileRepositoryService(UploadedFileRepository repository) {
+  public UserFileRepositoryService(UserFileRepository repository) {
     this.repository = repository;
   }
 

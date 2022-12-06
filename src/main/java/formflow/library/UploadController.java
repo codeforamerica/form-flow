@@ -3,7 +3,7 @@ package formflow.library;
 import com.google.common.io.Files;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.data.UploadedFileRepositoryService;
+import formflow.library.data.UserFileRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.upload.CloudFileRepository;
 import java.util.HashMap;
@@ -29,16 +29,16 @@ import org.springframework.web.servlet.view.RedirectView;
 @Slf4j
 public class UploadController extends FormFlowController {
 
-  private final UploadedFileRepositoryService uploadedFileRepositoryService;
+  private final UserFileRepositoryService uploadedFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
   private final ValidationService validationService;
 
   public UploadController(
-      UploadedFileRepositoryService uploadedFileRepositoryService,
+      UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService, ValidationService validationService) {
     super(submissionRepositoryService);
-    this.uploadedFileRepositoryService = uploadedFileRepositoryService;
+    this.uploadedFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.validationService = validationService;
   }
