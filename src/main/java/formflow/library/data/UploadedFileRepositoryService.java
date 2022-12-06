@@ -27,12 +27,21 @@ public class UploadedFileRepositoryService {
   }
 
   /**
-   * Searches for a particular Submission by its {@code id}
+   * Searches for a particular UserFile by its {@code id}
    *
-   * @param id id of submission to look for, not null
-   * @return Optional containing Submission if found, else empty
+   * @param id id of the UserFile to look for, not null
+   * @return Optional containing UserFile if found, else empty
    */
   public Optional<UserFile> findById(Long id) {
     return repository.findById(id);
+  }
+
+  /**
+   * Removes a particular UserFile based on passed in {@code id}
+   *
+   * @param id id of UserFile to remove, not null
+   */
+  public void deleteById(Long id) {
+    repository.deleteById(id);
   }
 }

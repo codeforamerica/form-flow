@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @EnableAutoConfiguration
@@ -77,14 +79,16 @@ public class UploadController extends FormFlowController {
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
-      Map<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
-          (Map<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+      HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+          (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
       HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
       HashMap<String, String> fileInfo;
 
       if (dzFilesMap == null) {
         fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
-        httpSession.setAttribute("userFiles", Map.of(dropZoneInstanceName, userFileMap));
+        HashMap<String, HashMap<Long, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
+        dropzoneInstanceMap.put(dropZoneInstanceName, userFileMap);
+        httpSession.setAttribute("userFiles", dropzoneInstanceMap);
       } else {
         if (dzFilesMap.containsKey(dropZoneInstanceName)) {
           // User files exists, and it already has a key for this dropzone instance
@@ -101,8 +105,63 @@ public class UploadController extends FormFlowController {
 
       return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
-      log.error("Error Occurred while uploading File " + e.getLocalizedMessage());
+      log.error("Error occurred while uploading file " + e.getLocalizedMessage());
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @PostMapping("/file-delete")
+  RedirectView delete(
+      @RequestParam("id") Long fileId,
+      @RequestParam("returnPath") String returnPath,
+      @RequestParam("inputName") String dropZoneInstanceName,
+      HttpSession httpSession
+  ) {
+    try {
+      log.info("\uD83D\uDD25 Try to delete: " + fileId);
+
+      Long id = (Long) httpSession.getAttribute("id");
+      Optional<Submission> maybeSubmission = submissionRepositoryService.findById(id);
+      if (maybeSubmission.isPresent()) {
+        Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
+
+        if (maybeFile.isPresent()) {
+          UserFile file = maybeFile.get();
+          if (id.equals(file.getSubmission_id().getId())) {
+            log.info("Delete file {} from cloud storage", fileId);
+            cloudFileRepository.delete(file.getRepositoryPath());
+            uploadedFileRepositoryService.deleteById(file.getFile_id());
+            HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+                (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+            HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
+            if (userFileMap.containsKey(fileId)) {
+              userFileMap.remove(fileId);
+              if (userFileMap.isEmpty()) {
+                dzFilesMap.remove(dropZoneInstanceName);
+              }
+            } else {
+              log.error("Could not find file id {} in the session.", fileId);
+              return new RedirectView("/error");
+            }
+            // TODO: delete from session
+            // TODO: will need field name (dropZoneInstanceName) to be able to delete from session
+            // TODO: will need to handle both the remove of one file from the array or removing the last item in the array, thus removing the array
+            // httpSession.getAttribute("userFiles").get(inputName)
+          } else {
+            log.error(String.format("Submission %d does not match file %d's submission id %d", id, fileId,
+                file.getSubmission_id().getId()));
+            return new RedirectView("/error");
+          }
+        }
+      } else {
+        log.error(String.format("Session %d does not exist", id));
+        return new RedirectView("/error");
+      }
+
+      return new RedirectView(returnPath);
+    } catch (Exception e) {
+      log.error("Error occurred while deleting file " + e.getLocalizedMessage());
+      return new RedirectView("/error");
     }
   }
 
@@ -111,8 +170,8 @@ public class UploadController extends FormFlowController {
    * size, thumbnail and mime type) which we add to the session for persisting user file uploads when a user refreshes the page or
    * navigates away.
    *
-   * @param userFile
-   * @param thumbBase64String
+   * @param userFile          class representing the file the that was uploaded by the user
+   * @param thumbBase64String base64 encoded thumbnail of the file the user uploaded
    * @return Hashmap representation of a user file that includes original file name, file size, thumbnail as base64 encoded
    * string, and mime type.
    */

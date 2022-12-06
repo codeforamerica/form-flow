@@ -7,6 +7,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class S3CloudFileRepository implements CloudFileRepository {
 
   private final String bucketName;
+  private final AmazonS3 s3Client;
   private final TransferManager transferManager;
 
   public S3CloudFileRepository(@Value("${form-flow.aws.access_key}") String accessKey,
@@ -29,13 +31,13 @@ public class S3CloudFileRepository implements CloudFileRepository {
       @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,
       @Value("${form-flow.aws.region}") String region) {
     AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-    this.bucketName = s3BucketName;
-    AmazonS3 s3Client = AmazonS3ClientBuilder
+    bucketName = s3BucketName;
+    s3Client = AmazonS3ClientBuilder
         .standard()
         .withRegion(region)
         .withCredentials(new AWSStaticCredentialsProvider(credentials))
         .build();
-    this.transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
+    transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
   }
 
   /**
@@ -69,6 +71,6 @@ public class S3CloudFileRepository implements CloudFileRepository {
 
   public void delete(String filepath) throws SdkClientException {
     log.info("Deleting file at filepath {} from S3", filepath);
-//    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
+    s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
   }
 }
