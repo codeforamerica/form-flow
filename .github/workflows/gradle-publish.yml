@@ -8,12 +8,10 @@
 name: Publish Package to Github & Maven Central
 
 on:
-  push:
   workflow_run:
-    workflows: [ "Run tests" ]
-    branches: [ main ]
-    types:
-      - completed
+    workflows: ["Run tests"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   build:
