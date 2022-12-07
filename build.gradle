@@ -51,7 +51,6 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
@@ -64,6 +63,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'net.coobird:thumbnailator:0.4.18'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.353'
+    implementation 'org.webjars.npm:dropzone:5.9.3'
 
     compileOnly 'org.projectlombok:lombok'
 
