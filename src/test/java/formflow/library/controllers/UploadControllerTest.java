@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -53,9 +52,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
 
   @Test
   public void testFileUpload() throws Exception {
-    MockHttpSession mockHttpSession = new MockHttpSession();
+
     when(userFileRepositoryService.save(any())).thenReturn(1L);
-//    when(session.getAttribute(anyString())).thenReturn(1L);
     doNothing().when(s3CloudFileRepository).upload(any(), any());
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
@@ -63,7 +61,6 @@ public class UploadControllerTest extends AbstractMockMvcTest {
             .file(testImage)
             .param("inputName", "file")
             .param("flow", "testFlow")
-            .sessionAttr("id", "1")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().is(200));
     verify(s3CloudFileRepository, times(1)).upload(any(), any());
@@ -79,8 +76,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
             .param("returnPath", "foo")
             .param("inputName", "bar")
-            .param("id", "1"))
-//            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .param("id", "1")
+            .sessionAttr("id", 1L))
         .andExpect(status().is(302));
     verify(s3CloudFileRepository, times(1)).delete(any());
   }
