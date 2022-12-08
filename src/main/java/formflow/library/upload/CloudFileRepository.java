@@ -6,18 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface CloudFileRepository {
 
-//  byte[] get(String filepath);
-
   void upload(String filePath, MultipartFile file) throws IOException, InterruptedException;
 
   void delete(String filepath);
-
-//  default String getThumbnail(UploadedFile uploadedFile) {
-//    try {
-//      var thumbnailBytes = get(uploadedFile.getThumbnailFilepath());
-//      return new String(thumbnailBytes, UTF_8);
-//    } catch (Exception e) {
-//      return "";
-//    }
-//  }
 }

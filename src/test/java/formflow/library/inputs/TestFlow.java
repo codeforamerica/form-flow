@@ -7,6 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.web.multipart.MultipartFile;
 
 @TestConfiguration
 @SuppressWarnings("unused")
@@ -43,4 +44,5 @@ public class TestFlow {
   String householdMemberLastName;
   String householdMemberRelationship;
   String householdMemberRecentlyMovedToUS;
+  MultipartFile file;
 }
