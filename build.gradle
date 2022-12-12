@@ -63,7 +63,7 @@ dependencies {
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.flywaydb:flyway-core'
     implementation 'net.coobird:thumbnailator:0.4.18'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.360'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.362'
 
     compileOnly 'org.projectlombok:lombok'
 
