@@ -47,14 +47,14 @@ public class UploadController extends FormFlowController {
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
       @RequestParam("file") MultipartFile file,
-      @RequestParam(required = false) Map<String, String> formData,
       @RequestParam("flow") String flow,
+      @RequestParam("inputName") String inputName,
+      @RequestParam("thumbDataURL") String thumbDataUrl,
       HttpSession httpSession
   ) {
     try {
       // TODO This is not validating anything right now other than that you included the inputName in the corresponding inputs file
-      HashMap<String, List<String>> errorMessages = validationService.validate(flow, formData.get("inputName"), file);
-      String thumbDataUrl = formData.get("thumbDataURL");
+      HashMap<String, List<String>> errorMessages = validationService.validate(flow, inputName, file);
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
@@ -62,7 +62,7 @@ public class UploadController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-      String dropZoneInstanceName = formData.get("inputName");
+      String dropZoneInstanceName = inputName;
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, dropZoneInstanceName, userFileId,
           fileExtension);
@@ -79,6 +79,7 @@ public class UploadController extends FormFlowController {
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
+      //TODO: change userFiles special string to constant to be referenced in thymeleaf
       HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
           (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
       HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();

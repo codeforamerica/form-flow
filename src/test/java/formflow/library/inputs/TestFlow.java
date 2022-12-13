@@ -44,5 +44,5 @@ public class TestFlow {
   String householdMemberLastName;
   String householdMemberRelationship;
   String householdMemberRecentlyMovedToUS;
-  MultipartFile file;
+  MultipartFile testFile;
 }
