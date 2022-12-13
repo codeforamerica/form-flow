@@ -57,13 +57,13 @@ dependencies {
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.jetbrains:annotations:23.0.0'
+    implementation 'org.jetbrains:annotations:23.1.0'
     implementation 'com.vladmihalcea:hibernate-types-55:2.20.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.flywaydb:flyway-core'
     implementation 'net.coobird:thumbnailator:0.4.18'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.353'
     implementation 'org.webjars.npm:dropzone:5.9.3'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.362'
 
     compileOnly 'org.projectlombok:lombok'
 
