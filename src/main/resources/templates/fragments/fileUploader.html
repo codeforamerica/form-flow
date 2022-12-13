@@ -8,7 +8,7 @@
     <div class="dropzone needsclick" th:id="${'document-upload-' + inputName}">
       <div th:id="${'max-files-reached-' + inputName}">
         <div class='max-files spacing-below-35' id="max-files"
-             th:text='#{upload-documents.maximum-number-of-files}'></div>
+             th:text='#{general.files.maximum-number-of-files}'></div>
       </div>
       <div th:id="${'drag-and-drop-box-' + inputName}"
            class="drag-and-drop-box spacing-below-35 spacing-above-35 grid"
@@ -16,12 +16,12 @@
            ondragleave="removeDragBorder()">
         <h2 th:id="${'vertical-header-desktop-' + inputName}"
             class="blue-label text--centered hide-on-mobile narrow-centered-text"
-            th:text="#{upload-documents.add-your-files}"></h2>
+            th:text="#{general.files.add-your-files}"></h2>
         <h2 th:id="${'vertical-header-mobile-' + inputName}"
             class="blue-label text--centered hide-on-desktop"
-            th:text="#{upload-documents.add-your-files}"></h2>
+            th:text="#{general.files.add-your-files}"></h2>
         <div th:id="${'upload-button-' + inputName}" class="dz-message text--centered">
-          <button th:aria-label="#{upload-documents.add-your-files}" type="button"
+          <button th:aria-label="#{general.files.add-your-files}" type="button"
                   th:id="${'upload-button-inner-' + inputName}"
                   class="button dz-button upload-button-inner">
             <svg xmlns="http://www.w3.org/2000/svg" height="60px" viewBox="0 0 24 24"
@@ -34,10 +34,10 @@
         <div class="grid--item width-two-thirds">
           <h2 th:id="${'horizontal-header-desktop-' + inputName}"
               class="blue-label hide-on-mobile hidden spacing-below-5"
-              th:text="#{upload-documents.add-your-files}"></h2>
+              th:text="#{general.files.add-your-files}"></h2>
           <h2 th:id="${'horizontal-header-mobile-' + inputName}"
               class="blue-label hide-on-desktop hidden spacing-below-5 spacing-above-15"
-              th:text="#{upload-documents.add-your-files}"></h2>
+              th:text="#{general.files.add-your-files}"></h2>
           <div th:id="${'number-of-uploaded-files-' + inputName}" class="body-gray">
           </div>
         </div>
@@ -173,19 +173,22 @@
       inputEl.value = JSON.stringify(window['userFileIds' + [[${inputName}]]]);
     }
 
-    function deleteCancelledFiles(file, response) {
+    function removeFileFromDropzone(file, id) {
+      window['myDropZone' + [[${inputName}]]].removeFile(file);
+      let toDeleteIdx = window['userFileIds' + [[${inputName}]]].indexOf(id);
+      if (toDeleteIdx !== -1) {
+        window['userFileIds' + [[${inputName}]]].splice(toDeleteIdx, 1)
+      }
+      showNumberOfAddedFiles();
+    }
+
+    function deleteCancelledFiles(file, id) {
       let filesToDelete = window['cancelledFiles' + [[${inputName}]]];
       filesToDelete.forEach(fTD => {
         if (fTD.name === file.name) {
-          window['myDropZone' + [[${inputName}]]].removeFile(file);
-          let toDeleteIdx = window['userFileIds' + [[${inputName}]]].indexOf(response);
-          if (toDeleteIdx !== -1) {
-            window['userFileIds' + [[${inputName}]]].splice(toDeleteIdx, 1)
-          }
-          showNumberOfAddedFiles();
-          sendDeleteXhrRequest(file, response);
+          removeFileFromDropzone(file, id);
+          sendDeleteXhrRequest(id);
         }
-        ;
       })
     }
 
@@ -318,31 +321,32 @@
           showMaxFileMessage();
         });
 
-        this.on('success', function (file, response) {
+        this.on('success', function (file, id) {
           var removeLink = file.previewElement.getElementsByClassName("dz-remove")[0];
           var thumbnail = file.previewElement.getElementsByClassName("dz-thumb")[0];
           var progressBar = file.previewElement.getElementsByClassName("dz-progress")[0];
           var fileName = file.name;
-          window['userFileIds' + [[${inputName}]]].push(response);
+          window['userFileIds' + [[${inputName}]]].push(id);
           updateFileInputValue();
 
           if (file.type.includes("heic") || file.type.includes("tif")) {
             setDefaultThumbnail(file);
           }
 
-          removeLink.onclick = undefined;
-          // TODO: update href
-          removeLink.setAttribute('href',
-              '/' + [[${flow}]] +
-              '/fileDeleteConfirmation?filename=' + encodeURIComponent(fileName)
-              + '&inputName=' + [[${inputName}]]
-              + '&id=' + response
-              + '&returnPath=' + window.location.pathname);
+          removeLink.onclick = function () {
+            let confirmation = confirm(
+                [[#{general.files.confirm-delete}]] + fileName + '. '
+                + [[#{general.files.confirm-delete-ok}]])
+            if (confirmation) {
+              sendDeleteXhrRequest(id);
+              removeFileFromDropzone(file, id);
+            }
+          }
           removeLink.innerText = [[#{general.delete}]].toLowerCase();
           thumbnail.classList.remove("hidden");
           progressBar.classList.add("hidden");
           $('#submit-my-documents-' + [[${inputName}]]).removeClass("disabled");
-          deleteCancelledFiles(file, response);
+          deleteCancelledFiles(file, id);
         });
 
         // This lets dropzone know to process the queue after each file has completed
