@@ -3,12 +3,11 @@ package formflow.library;
 import com.google.common.io.Files;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.data.UserFileRepositoryService;
 import formflow.library.data.UserFile;
+import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFileRepository;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,9 +61,8 @@ public class UploadController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-      String dropZoneInstanceName = inputName;
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
-      String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, dropZoneInstanceName, userFileId,
+      String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
       cloudFileRepository.upload(uploadLocation, file);
@@ -86,20 +84,20 @@ public class UploadController extends FormFlowController {
       HashMap<String, String> fileInfo;
 
       if (dzFilesMap == null) {
-        fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
+        fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
         HashMap<String, HashMap<Long, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
-        dropzoneInstanceMap.put(dropZoneInstanceName, userFileMap);
+        dropzoneInstanceMap.put(inputName, userFileMap);
         httpSession.setAttribute("userFiles", dropzoneInstanceMap);
       } else {
-        if (dzFilesMap.containsKey(dropZoneInstanceName)) {
+        if (dzFilesMap.containsKey(inputName)) {
           // User files exists, and it already has a key for this dropzone instance
-          userFileMap = dzFilesMap.get(dropZoneInstanceName);
-          fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
+          userFileMap = dzFilesMap.get(inputName);
+          fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
         } else {
           // User files exists, but it doesn't have the dropzone instance yet
           userFileMap = new HashMap<>();
-          fileInfo = createFileInfo(uploadedFile, thumbDataUrl);
-          dzFilesMap.put(dropZoneInstanceName, userFileMap);
+          fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
+          dzFilesMap.put(inputName, userFileMap);
         }
       }
       userFileMap.put(uploadedFile.getFile_id(), fileInfo);
@@ -121,42 +119,36 @@ public class UploadController extends FormFlowController {
     try {
       log.info("\uD83D\uDD25 Try to delete: " + fileId);
 
-      Long id = (Long) httpSession.getAttribute("id");
-      Optional<Submission> maybeSubmission = submissionRepositoryService.findById(id);
-      if (maybeSubmission.isPresent()) {
-        Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
-
-        if (maybeFile.isPresent()) {
-          UserFile file = maybeFile.get();
-          if (id.equals(file.getSubmission_id().getId())) {
-            log.info("Delete file {} from cloud storage", fileId);
-            cloudFileRepository.delete(file.getRepositoryPath());
-            uploadedFileRepositoryService.deleteById(file.getFile_id());
-            HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
-                (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
-            HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
-            if (userFileMap.containsKey(fileId)) {
-              userFileMap.remove(fileId);
-              if (userFileMap.isEmpty()) {
-                dzFilesMap.remove(dropZoneInstanceName);
-              }
-            } else {
-              log.error("Could not find file id {} in the session.", fileId);
-              return new RedirectView("/error");
-            }
-            // TODO: delete from session
-            // TODO: will need field name (dropZoneInstanceName) to be able to delete from session
-            // TODO: will need to handle both the remove of one file from the array or removing the last item in the array, thus removing the array
-            // httpSession.getAttribute("userFiles").get(inputName)
-          } else {
-            log.error(String.format("Submission %d does not match file %d's submission id %d", id, fileId,
-                file.getSubmission_id().getId()));
-            return new RedirectView("/error");
-          }
-        }
-      } else {
-        log.error(String.format("Session %d does not exist", id));
+      Long submissionId = (Long) httpSession.getAttribute("id");
+      Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
+      if (maybeSubmission.isEmpty()) {
+        log.error(String.format("Session %d does not exist", submissionId));
         return new RedirectView("/error");
+      }
+
+      Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
+      if (maybeFile.isEmpty()) {
+        log.error(String.format("File with id %d may have already been deleted",fileId));
+        return new RedirectView("/error");
+      }
+
+      UserFile file = maybeFile.get();
+      if (!submissionId.equals(file.getSubmission_id().getId())) {
+        log.error(String.format("Submission %d does not match file %d's submission id %d", submissionId, fileId,
+                file.getSubmission_id().getId()));
+        return new RedirectView("/error");
+      }
+
+      log.info("Delete file {} from cloud storage", fileId);
+      cloudFileRepository.delete(file.getRepositoryPath());
+      uploadedFileRepositoryService.deleteById(file.getFile_id());
+      HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
+          (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+      HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
+
+      userFileMap.remove(fileId);
+      if (userFileMap.isEmpty()) {
+        dzFilesMap.remove(dropZoneInstanceName);
       }
 
       return new RedirectView(returnPath);
@@ -164,24 +156,5 @@ public class UploadController extends FormFlowController {
       log.error("Error occurred while deleting file " + e.getLocalizedMessage());
       return new RedirectView("/error");
     }
-  }
-
-  /**
-   * Creates a HashMap representation of an uploaded user file that holds information about the file (original file name, file
-   * size, thumbnail and mime type) which we add to the session for persisting user file uploads when a user refreshes the page or
-   * navigates away.
-   *
-   * @param userFile          class representing the file the that was uploaded by the user
-   * @param thumbBase64String base64 encoded thumbnail of the file the user uploaded
-   * @return Hashmap representation of a user file that includes original file name, file size, thumbnail as base64 encoded
-   * string, and mime type.
-   */
-  private HashMap<String, String> createFileInfo(UserFile userFile, String thumbBase64String) {
-    HashMap<String, String> fileInfo = new HashMap<>();
-    fileInfo.put("originalFilename", userFile.getOriginalName());
-    fileInfo.put("filesize", userFile.getFilesize().toString());
-    fileInfo.put("thumbnailUrl", thumbBase64String);
-    fileInfo.put("type", userFile.getExtension());
-    return fileInfo;
   }
 }
