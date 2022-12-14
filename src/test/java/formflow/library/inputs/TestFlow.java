@@ -45,4 +45,5 @@ public class TestFlow {
   String householdMemberRelationship;
   String householdMemberRecentlyMovedToUS;
   MultipartFile testFile;
+  String dropZoneTestInstance;
 }

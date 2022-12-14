@@ -100,7 +100,7 @@ public class UploadController extends FormFlowController {
           dzFilesMap.put(inputName, userFileMap);
         }
       }
-      userFileMap.put(uploadedFile.getFile_id(), fileInfo);
+      userFileMap.put(newFileId, fileInfo);
 
       return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
@@ -121,6 +121,7 @@ public class UploadController extends FormFlowController {
 
       Long submissionId = (Long) httpSession.getAttribute("id");
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
+
       if (maybeSubmission.isEmpty()) {
         log.error(String.format("Session %d does not exist", submissionId));
         return new RedirectView("/error");
@@ -128,14 +129,14 @@ public class UploadController extends FormFlowController {
 
       Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
       if (maybeFile.isEmpty()) {
-        log.error(String.format("File with id %d may have already been deleted",fileId));
+        log.error(String.format("File with id %d may have already been deleted", fileId));
         return new RedirectView("/error");
       }
 
       UserFile file = maybeFile.get();
       if (!submissionId.equals(file.getSubmission_id().getId())) {
         log.error(String.format("Submission %d does not match file %d's submission id %d", submissionId, fileId,
-                file.getSubmission_id().getId()));
+            file.getSubmission_id().getId()));
         return new RedirectView("/error");
       }
 

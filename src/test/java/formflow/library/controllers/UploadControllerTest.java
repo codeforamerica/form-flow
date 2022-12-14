@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.UploadController;
@@ -38,9 +39,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 public class UploadControllerTest extends AbstractMockMvcTest {
 
   Submission submission;
-  // mock S endpoint
-  // mock database
-  // actual upload controller
   private MockMvc mockMvc;
   @SpyBean
   private CloudFileRepository cloudFileRepository;
@@ -59,10 +57,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     super.setUp();
   }
 
-  // TODO: Documentation?
-
   @Test
-  public void fileUploadEndpointHitsCloudFileRepository() throws Exception {
+  public void fileUploadEndpointHitsCloudFileRepositoryAndAddsUserFileToSession() throws Exception {
     long fileId = 1L;
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
@@ -73,7 +69,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file("file", testImage.getBytes())
-            .param("inputName", "testFile")
+            .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
             .param("flow", "testFlow")
             .session(session)
@@ -82,18 +78,35 @@ public class UploadControllerTest extends AbstractMockMvcTest {
         .andExpect(content().string(String.valueOf(fileId)));
 
     verify(cloudFileRepository, times(1)).upload(any(), any());
-    assertThat(session.getAttribute("userFiles")).isEqualTo("{}");
-    // TODO: set above expectation to be hashmaps as {"testFile"={null={"filesize"="4.0", "originalFilename"="", "thumbnailUrl"="base64string", "type"=null}}}
+    UserFile testUserFile = new UserFile(
+        1L,
+        new Submission(),
+        Date.from(Instant.now()),
+        "coolFile.jpg",
+        "pathToS3",
+        ".pdf",
+        Float.valueOf("10"));
+    HashMap<String, HashMap<Long, HashMap<String, String>>> testDzInstanceMap = new HashMap<>();
+    HashMap<Long, HashMap<String, String>> userFiles = new HashMap<>();
+    userFiles.put(1L, UserFile.createFileInfo(testUserFile, "thumbnail"));
+    testDzInstanceMap.put("dropZoneTestInstance", userFiles);
+    session = new MockHttpSession();
+    session.putValue("id", 1L);
+    session.putValue("userFiles", testDzInstanceMap);
+
+    assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
 
   @Nested
   public class Delete {
+
     String dzWidgetInputName = "coolDzWidget";
 
     @BeforeEach
     void setUp() {
       UserFile testUserFile = UserFile.builder().submission_id(submission).build();
       when(submissionRepositoryService.findById(1L)).thenReturn(Optional.ofNullable(submission));
+      when(submissionRepositoryService.findById(2L)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(1L)).thenReturn(Optional.ofNullable(testUserFile));
       doNothing().when(cloudFileRepository).delete(any());
       HashMap<String, HashMap<Long, HashMap<String, String>>> dzWidgets = new HashMap<>();
@@ -115,19 +128,34 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     }
 
     @Test
-    void endpointErrorsWhenSessionDoesntExist() {
+    void endpointErrorsWhenSessionDoesntExist() throws Exception {
+      mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
+              .param("returnPath", "foo")
+              .param("inputName", dzWidgetInputName)
+              .param("id", "1"))
+          .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
     }
 
     @Test
-    void endpointErrorsWhenFileNotFoundInDb() {
+    void endpointErrorsWhenFileNotFoundInDb() throws Exception {
+      mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
+              .param("returnPath", "foo")
+              .param("inputName", dzWidgetInputName)
+              .param("id", "1000")
+              .session(session))
+          .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
     }
 
     @Test
-    void endpointErrorsWhenIdOnRequestDoesntMatchIdInDb() {
-    }
-
-    @Test
-    void endpointErrorsIfSomethingElseWeirdHappens() {
+    void endpointErrorsWhenIdOnRequestDoesntMatchIdInDb() throws Exception {
+      submission = Submission.builder().id(2L).build();
+      session.setAttribute("id", 2L);
+      mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
+              .param("returnPath", "foo")
+              .param("inputName", dzWidgetInputName)
+              .param("id", "1")
+              .session(session))
+          .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
     }
 
     @Test
