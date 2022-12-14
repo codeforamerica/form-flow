@@ -7,15 +7,20 @@
     th:assert="
       ${!#strings.isEmpty(linkLabel)},
       ${!#strings.isEmpty(content)}">
-  <div class="reveal">
-    <a href="#" class="reveal__link reveal__link-adjacent">
-      <div class="reveal__link__header-adjacent" aria-expanded="true" aria-controls="controlId">
-        <th:block th:replace="${linkLabel}"></th:block>
-      </div>
-      <div class="reveal__content reveal__content-adjacent" id="controlId">
-        <th:block th:replace="${content}"/>
-      </div>
+  <div class="reveal reveal-adjacent reveal__border">
+    <!--<button type="button" class="reveal__link reveal__link-adjacent reveal__link__header-adjacent"-->
+    <!--<button type="button" class="reveal__link reveal__link__header-adjacent reveal__button"
+            aria-expanded="false"
+            aria-controls="reveal-content">
+      <th:block th:replace="${linkLabel}"/>
+    </button> -->
+    <a href="#" class="reveal__link reveal__link__header-adjacent" aria-expanded="false"
+       aria-controls="reveal-content">
+      <th:block th:replace="${linkLabel}"></th:block>
     </a>
+    <div class="reveal__content reveal__content-adjacent" id="controlId">
+      <th:block th:replace="${content}"/>
+    </div>
   </div>
 </th:block>
 </body>
