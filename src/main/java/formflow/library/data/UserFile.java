@@ -4,6 +4,7 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -82,5 +83,24 @@ public class UserFile {
   @Override
   public int hashCode() {
     return getClass().hashCode();
+  }
+
+  /**
+   * Creates a HashMap representation of an uploaded user file that holds information about the file (original file name, file
+   * size, thumbnail and mime type) which we add to the session for persisting user file uploads when a user refreshes the page or
+   * navigates away.
+   *
+   * @param userFile          class representing the file the that was uploaded by the user
+   * @param thumbBase64String base64 encoded thumbnail of the file the user uploaded
+   * @return Hashmap representation of a user file that includes original file name, file size, thumbnail as base64 encoded
+   * string, and mime type.
+   */
+  public static HashMap<String, String> createFileInfo(UserFile userFile, String thumbBase64String) {
+    HashMap<String, String> fileInfo = new HashMap<>();
+    fileInfo.put("originalFilename", userFile.getOriginalName());
+    fileInfo.put("filesize", userFile.getFilesize().toString());
+    fileInfo.put("thumbnailUrl", thumbBase64String);
+    fileInfo.put("type", userFile.getExtension());
+    return fileInfo;
   }
 }
