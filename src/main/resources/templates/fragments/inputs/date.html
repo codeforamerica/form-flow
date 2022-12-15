@@ -36,23 +36,6 @@
                th:id="${inputName}+'-year-label'"
                th:text="#{general.year}"></label>
       </p>
-      <style>
-        /* TODO: Add to honeycrisp?? */
-        .text-input--inline {
-          display: inline-block;
-        }
-
-        .form-width--day,
-        .form-width--month {
-          max-width: calc(4.4rem + 2ch);
-          padding: 0 1.5rem;
-        }
-
-        .form-width--year {
-          max-width: calc(4.4rem + 4ch);
-          padding: 0 2rem;
-        }
-      </style>
       <!-- TODO: figure out the three fields for each date issue -->
       <input type="text" inputmode="numeric" maxlength="2"
              class="text-input text-input--inline form-width--month"

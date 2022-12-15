@@ -12,12 +12,6 @@
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},
       ${!#strings.isEmpty(label)}">
-  <style>
-    /* TODO: add to honeycrisp? */
-    .checkbox {
-      display: flex;
-    }
-  </style>
   <label th:for="${inputName} + '-' + ${value}"
          th:id="${inputName} + '-' + ${value} + '-label'"
          class="checkbox display-flex">

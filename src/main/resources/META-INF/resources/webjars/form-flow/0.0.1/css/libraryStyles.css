@@ -474,3 +474,22 @@ body,
   outline: none;
   box-shadow: 0 0 0 5px #ffae00;
 }
+
+.text--normal {
+  font-weight: 400;
+}
+
+.text-input--inline {
+  display: inline-block;
+}
+
+.form-width--day,
+.form-width--month {
+  max-width: calc(4.4rem + 2ch);
+  padding: 0 1.5rem;
+}
+
+.form-width--year {
+  max-width: calc(4.4rem + 4ch);
+  padding: 0 2rem;
+}

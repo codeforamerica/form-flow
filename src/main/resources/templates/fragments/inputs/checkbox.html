@@ -14,12 +14,6 @@
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},
       ${!#strings.isEmpty(label)}">
-  <style>
-    /* TODO: add to honeycrisp? */
-    .checkbox {
-      display: flex;
-    }
-  </style>
   <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
     <label th:for="${inputName} + '-' + ${value}"
            th:id="${inputName} + '-' + ${value} + '-label'"

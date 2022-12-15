@@ -16,12 +16,6 @@
       ${hasLabel || hasAriaLabel},
       ${content != null}">
   <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
-    <style>
-      /* TODO: add to honeycrisp? */
-      .text--normal {
-        font-weight: 400;
-      }
-    </style>
     <fieldset th:attr="
       aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
       aria-labelledby=${hasAriaLabel ? ariaLabel : ''}">
