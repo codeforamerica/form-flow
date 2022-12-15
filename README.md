@@ -468,22 +468,6 @@ which submission it is a part of, like so:
    `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
 ```
 
-If the file has an extension of .jpg, .png, .bmp or .gif, we will also create a thumbnail for that
-image. It will be a base64 encoded PNG and will end up with a `.txt` extension. The thumbnail will
-share the same generated filename as the original, though we remove the extension and tack on
-a `-thumbnail.txt` to distinguish it from the original file. This thumbnail is stored in S3 along
-with the original document.
-
-For files with extensions other than the ones listed, we do not create a thumbnail. We use a
-default image for those thumbnails, so there is no need to save a thumbnail.
-
-The two files end up looking like this:
-
-```
-   `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
-   `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID-thumbnail.txt`
-```
-
 The `flow_name` is the current flow the user is in and the `input_name` is the name of the
 file upload widget that uploaded the file. If there are multiple files uploaded via the same widget,
 then there will be many files with the same `flow_name` and `input_name`, though the UUID will be
@@ -495,12 +479,8 @@ is `homedoc`):
 
 ```java
     42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd.jpg
-    42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd-thumbnail.txt
     42/ubi_homedoc_d612bc77-11de-419f-b7cc-71e4ab2ad571.jpg
-    42/ubi_homedoc_d612bc77-11de-419f-b7cc-71e4ab2ad571-thumbnail.txt
 ```
-
-This naming scheme should place the file and its thumbnail next to each other in the bucket.
 
 ### File Upload Widget
 
@@ -509,8 +489,8 @@ using our handy `cfa:fileUploader` live template. More information
 about [Live Templates here.](#intellij-live-templates)
 
 The live template will prompt you to enter an input name for the file uploader fragment. This input
-name will be the key under which uploaded files for this fragment are stored in the databases JSON
-structure.
+name (field name) will be the key under which uploaded files for this fragment are stored in the database's JSON
+structure.  It will also be part of the normalized filename used in S3. 
 
 The file upload widget allows for single or multiple file uploads and will provide a list of
 uploaded files along with thumbnails for image files or a default icon for documents. The list of
@@ -532,6 +512,16 @@ Example JSON:
 
 This indicates that there were two files uploaded via the `license_upload` widget. Their file ids
 are `34` and `47`, and can be looked up in the `user_files` database table using those ids.
+
+#### Thumbnails
+
+If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
+image and display it on the screen. 
+
+For files with extensions other than the ones listed (like tif files and various document formats), 
+we will display a default image for those thumbnails.
+
+We do not store the thumbnails in cloud storage. 
 
 # How to use
 
