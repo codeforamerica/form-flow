@@ -489,8 +489,9 @@ using our handy `cfa:fileUploader` live template. More information
 about [Live Templates here.](#intellij-live-templates)
 
 The live template will prompt you to enter an input name for the file uploader fragment. This input
-name (field name) will be the key under which uploaded files for this fragment are stored in the database's JSON
-structure.  It will also be part of the normalized filename used in S3. 
+name (field name) will be the key under which uploaded files for this fragment are stored in the
+database's JSON
+structure. It will also be part of the normalized filename used in S3.
 
 The file upload widget allows for single or multiple file uploads and will provide a list of
 uploaded files along with thumbnails for image files or a default icon for documents. The list of
@@ -498,7 +499,21 @@ uploaded files will include a thumbnail, the original file name, file size and l
 or deleting the upload. The cancel link will only be present before the file has finished uploading,
 once the upload is complete it will become a delete link.
 
-The resulting file information will be stored in the saved JSON with the field name being the key.
+#### Thumbnails
+
+If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
+image and display it on the screen.
+
+For files with extensions other than the ones listed (like tif files and various document formats),
+we will display a default image for those thumbnails.
+
+We do not store the thumbnails in cloud storage.
+
+#### Uploaded File Storage
+
+The resulting file information will be stored in the database in two places:
+
+1. The saved JSON in the `submissions` table with the field name being the key.
 
 Example JSON:
 
@@ -511,17 +526,22 @@ Example JSON:
 ```
 
 This indicates that there were two files uploaded via the `license_upload` widget. Their file ids
-are `34` and `47`, and can be looked up in the `user_files` database table using those ids.
+are `34` and `47`, and can be looked up in the `user_files` table (detailed below) using those ids.
 
-#### Thumbnails
+2. The `user_files` table holds information about a submissions uploaded user files, which includes:
+   `file_id`, the corresponding submission's `submission_id`, a `created_at` time,
+   the `original_name`
+   of the file, and the S3 `repository_path`.
 
-If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
-image and display it on the screen. 
+#### Deleting Upploaded Files
 
-For files with extensions other than the ones listed (like tif files and various document formats), 
-we will display a default image for those thumbnails.
-
-We do not store the thumbnails in cloud storage. 
+Upon successful upload a link is provided to delete the file. When
+the
+link is used, a browser native delete confirmation pop up will appear asking the user if they are
+sure
+they want to delete the selected file. If the user selects yes from the pop up, the file will be
+deleted
+from the `user_files` table in the database, as well as from S3 storage.
 
 # How to use
 
@@ -760,7 +780,9 @@ As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
 the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
 quickly build Thymeleaf templates.
 
-More information and example usage can be found in our [starter application](https://github.com/codeforamerica/form-flow-starter-app#about-intellij-live-templates). 
+More information and example usage can be found in
+our [starter application](https://github.com/codeforamerica/form-flow-starter-app#about-intellij-live-templates)
+.
 
 ## Icons
 
