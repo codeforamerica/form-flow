@@ -233,9 +233,9 @@
       previewTemplate: `
             <div class="dz-preview dz-file-preview spacing-below-15">
               <div class="dz-details display-flex">
-                <div class="thumbnail">
+                <div class="thumbnail" style="width: ${thumbnailWidth}px; height: ${thumbnailHeight}px;">
                     <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-                    <img class="dz-thumb" style="width: ${thumbnailWidth}px; height: ${thumbnailHeight}px;" data-dz-thumbnail aria-hidden="true" />
+                    <img class="dz-thumb" data-dz-thumbnail aria-hidden="true" />
                 </div>
                 <div class="file">
                     <div class="dz-filename"><div class="filename-text" data-dz-name></div></div>
