@@ -120,6 +120,12 @@
       }
     }
 
+    function removeCreator(file) {
+      return function () {
+        removeFileFromDropzone(file);
+      }
+    }
+
     function processDZQueueAfterThumbnailGeneration() {
       var allUploadsHaveThumbnails = window['myDropZone'
       + [[${inputName}]]].getQueuedFiles().every(
@@ -180,9 +186,11 @@
 
     function removeFileFromDropzone(file, id) {
       window['myDropZone' + [[${inputName}]]].removeFile(file);
-      let toDeleteIdx = window['userFileIds' + [[${inputName}]]].indexOf(id);
-      if (toDeleteIdx !== -1) {
-        window['userFileIds' + [[${inputName}]]].splice(toDeleteIdx, 1)
+      if (id) {
+        let toDeleteIdx = window['userFileIds' + [[${inputName}]]].indexOf(id);
+        if (toDeleteIdx !== -1) {
+          window['userFileIds' + [[${inputName}]]].splice(toDeleteIdx, 1)
+        }
       }
       updateFileInputValue();
       showNumberOfAddedFiles();
@@ -418,7 +426,7 @@
         file.previewElement.classList.add("form-group--error");
 
         var removeLink = file.previewElement.getElementsByClassName("dz-remove")[0];
-        removeLink.onclick = destroyerCreator(file);
+        removeLink.onclick = removeCreator(file);
         removeLink.innerText = [[#{general.remove}]].toLowerCase();
         removeLink.classList.add("text--red");
 
