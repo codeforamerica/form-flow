@@ -455,7 +455,7 @@ can [follow the instructions here to create an S3 bucket](https://docs.aws.amazo
 Make sure to note your buckets name and region as well as your AWS access and secret keys as you
 will need these for configuring file uploads
 in the library. The bucket and region are configured in your `application.yaml`. See the section on
-[application.yaml configuration](#application-configuration-application.yaml).
+[application.yaml configuration](#application-configuration-applicationyaml).
 
 Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
 Variables](#environment-variables) section below.
@@ -503,7 +503,7 @@ once the upload is complete it will become a delete link.
 
 #### Accepted file types
 
-In the [application.yaml](#application-configuration-application.yaml) file, an implementor may
+In the [application.yaml](#application-configuration-applicationyaml) file, an implementor may
 update the file types that the uploader can accept.
 
 ```yaml
