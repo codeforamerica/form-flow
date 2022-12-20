@@ -69,8 +69,10 @@
     // TODO: move to more global setting
     // - either coming from fragment parameter
     // - or from application properties
-    var thumbnailWidth = '64';
-    var thumbnailHeight = '60';
+    var thumbnailWidthFromAppYml = [[${@environment.getProperty('form-flow.uploads.thumbnail-width')}]];
+    var thumbnailHeightFromAppYml = [[${@environment.getProperty('form-flow.uploads.thumbnail-height')}]];
+    var thumbnailWidth = thumbnailWidthFromAppYml ? thumbnailWidthFromAppYml : '64';
+    var thumbnailHeight = thumbnailHeightFromAppYml ? thumbnailHeightFromAppYml : '60';
 
     function addDragBorder() {
       var dragAndDropBox = document.getElementById("drag-and-drop-box-" + [[${inputName}]]);
