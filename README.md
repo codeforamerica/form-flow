@@ -433,6 +433,39 @@ The IntelliJ Live Template for the above example can be generated with `cfa:stat
 
 ### Fragments
 
+#### Form
+
+A form fragment is provided for easily creating forms. It can be quickly accessed via the Live
+Template `cfa:form` which will create a form fragment the field for `content` (which will fill in
+the empty `th:ref` that you see when first inserting the Live Template). This is needed so that you
+can
+any content you desire within the form fragment. You will also notice areas for
+the forms content and the form's footer. These normally contain the forms inputs, and the forms
+submit button respectively.
+
+Additionally, the form fragment has an optional formId parameter which may be passed to give the
+form an
+ID.
+
+Example form fragment:
+
+```html
+
+<th:block
+    th:replace="'fragments/form' :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')">
+  <th:block th:ref="exampleForm">
+    <div class="form-card__content">
+      INPUTS GO HERE
+    </div>
+    <div class="form-card__footer">
+      SUBMIT BUTTON GOES HERE
+    </div>
+  </th:block>
+</th:block>
+```
+
+A Fragment for the submit button is also provided through `cfa:inputSubmitButton`.
+
 ### Inputs
 
 ### Accessing Conditions

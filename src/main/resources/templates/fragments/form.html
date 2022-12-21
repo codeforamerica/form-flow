@@ -5,6 +5,7 @@
       th:assert="${!#strings.isEmpty(action)}, ${!#strings.isEmpty(content)}"
       th:action="@{${action}}"
       th:enctype="${enctype}"
+      th:id="${formId}"
       autocomplete="off"
       method="post">
   <th:block th:replace="${content}"/>
