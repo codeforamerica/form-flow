@@ -55,6 +55,7 @@ Table of Contents
     * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
     * [Gradle](#gradle)
         * [Build Web/Fat Jar](#build-webfat-jar)
+    * [Spring Profile: `dev`](#spring-profile-dev)
     * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
     * [IntelliJ setup](#intellij-setup)
         * [Connect flows config schema with IntelliJ IDE](#connect-flows-config-schema-with-intellij-ide)
@@ -576,7 +577,7 @@ From there you can add your information and source the file into your environmen
 `source .env`. Now the information will be loaded into your environment and available to the
 form-flow library.
 
-You can also tell Intellij to load environment information from this file, too, by using
+You can also tell IntelliJ to load environment information from this file, too, by using
 the [Env File Plugin](https://plugins.jetbrains.com/plugin/7861-envfile/).
 
 ### Application Configuration: application.yaml
@@ -847,9 +848,36 @@ jenv add /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home/
 Go into `lib/build.gradle` and run the `webjar` task with IntelliJ. This will generate a build file
 that can be used for local development
 
+## Spring Profile: `dev`
+
+There is
+a [Spring Profile](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
+named `dev` to allow for some information to be accessible to developers more easily.
+
+The profile should only be used in a developer's environment.
+
+### DevController
+
+The developer profile controller is the `DevController` and it contains endpoints that developers
+might be interested in.
+
+Current endpoints available:
+
+| Endpoint     | Description                                                                    |
+|--------------|--------------------------------------------------------------------------------|
+| `/dev/icons` |  Displays the icons available for developers to pull in with the icon fragment |
+
+### IntelliJ Configuration
+
+To run under a specific profile in IntelliJ, go to the `Run` menu and
+choose `Edit Configurations...`. Choose your application's profile. In the `Active profiles` field
+add `dev`. If no `Active Profiles` field exists, click on `Modify Options` and
+choose `Spring Boot -> Active profiles`. This should add the `Active Profiles` field to the IntelliJ
+form for you to fill in.
+
 ## Setup Platform Flavored Google Styles for Java
 
-In intelliJ go to `Preferences --> Editor --> Code Style --> Java` and next to Scheme hit the
+In IntelliJ go to `Preferences --> Editor --> Code Style --> Java` and next to Scheme hit the
 cogwheel
 and `Import Scheme --> IntelliJ Code Style XML` with
 [intellij-settings/PlatformFlavoredGoogleStyle.xml](intellij-settings/PlatformFlavoredGoogleStyle.xml)
