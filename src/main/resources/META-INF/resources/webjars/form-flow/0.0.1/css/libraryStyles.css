@@ -393,6 +393,10 @@ body,
   color: #FFFFFF;
 }
 
+.button--other {
+  margin-left: 0;
+}
+
 .yes-no-button {
   min-width: 128px;
   margin-right: 2.5rem;
@@ -493,3 +497,81 @@ body,
   max-width: calc(4.4rem + 4ch);
   padding: 0 2rem;
 }
+
+/*
+ * Reveal
+ */
+
+.reveal__border {
+  border-radius: 10px;
+}
+
+.reveal__link {
+  border: none;
+  width: 100%;
+}
+
+.reveal__link__header-adjacent {
+  display: inline-block;
+  padding: .3em .5em .3em .9em;
+}
+
+.reveal__link-adjacent {
+  width: 100%;
+  padding: unset;
+  border: unset;
+}
+
+.reveal__link-adjacent:after {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+}
+
+.is-hidden .reveal__link-adjacent {
+  border-radius: inherit;
+}
+
+.reveal-icon {
+  position: relative;
+  top: 3px;
+  left: 9px;
+  margin-left: 16px;
+}
+
+/*noinspection CssReplaceWithShorthandSafely*/
+.reveal__content-adjacent {
+  margin-top: 0;
+  border: unset;
+  border-top-left-radius: unset;
+  border-top-right-radius: unset;
+  border-top: 2px solid #034E46;
+  background-color: #EBFFFA;
+  color: #034E46;
+}
+
+.reveal {
+  border: 2px solid #CFC5BF;
+}
+
+.reveal h3 {
+  color: #000;
+  margin-bottom: 0;
+}
+
+.reveal .reveal__link {
+  color: #000;
+  background-color: #F7F5F4;
+}
+
+.reveal .reveal__content-adjacent {
+  background-color: #F7F5F4;
+  color: #000;
+  border-top: solid 2px #CFC5BF;
+}
+
+.reveal .reveal-icon svg {
+  fill: #CFC5BF;
+}
+
+/* end reveal */

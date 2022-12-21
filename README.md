@@ -34,6 +34,8 @@ Table of Contents
         * [AWS S3](#aws-s3)
         * [File Naming Conventions](#file-naming-conventions)
         * [File Upload Widget](#file-upload-widget)
+        * [Uploaded File Storage](#uploaded-file-storage)
+        * [Deleting Uploaded Files](#deleting-uploaded-files)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -377,7 +379,7 @@ Live templates are provided for the following input types:
 - `Ssn`
 - `YesOrNo`
 - `Submit`
-- `FileUpload` (TBD)
+- `FileUpload`
 
 ### Static Pages
 
@@ -453,7 +455,7 @@ can [follow the instructions here to create an S3 bucket](https://docs.aws.amazo
 Make sure to note your buckets name and region as well as your AWS access and secret keys as you
 will need these for configuring file uploads
 in the library. The bucket and region are configured in your `application.yaml`. See the section on
-[application.yaml configuration.](#application-configuration-application.yaml)
+[application.yaml configuration](#application-configuration-applicationyaml).
 
 Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
 Variables](#environment-variables) section below.
@@ -499,6 +501,23 @@ uploaded files will include a thumbnail, the original file name, file size and l
 or deleting the upload. The cancel link will only be present before the file has finished uploading,
 once the upload is complete it will become a delete link.
 
+#### Accepted file types
+
+In the [application.yaml](#application-configuration-applicationyaml) file, an implementor may
+update the file types that the uploader can accept.
+
+```yaml
+form-flow:
+  uploads:
+    accepted-file-types: '.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp,.heic'
+```
+
+This list is passed to DropZone and anything not listed in `accepted-file-types` will be rejected by
+the file upload widget.
+
+_Note: `.tif`/`.tiff` extensions do not seem to work right in DropZone, and we do not recommend
+including that file type. We've noticed that thumbnails are not created correctly for TIFF files._
+
 #### Thumbnails
 
 If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
@@ -507,13 +526,16 @@ image and display it on the screen.
 For files with extensions other than the ones listed (like tif files and various document formats),
 we will display a default image for those thumbnails.
 
-We do not store the thumbnails in cloud storage.
+We do not store the thumbnails on the server side at all.
 
-#### Uploaded File Storage
+### Uploaded File Storage
 
 The resulting file information will be stored in the database in two places:
 
-1. The saved JSON in the `submissions` table with the field name being the key.
+1. the `submissions` table
+2. the `user_files` table
+
+The saved JSON is store in the `submissions` table with the field name being the key.
 
 Example JSON:
 
@@ -528,19 +550,15 @@ Example JSON:
 This indicates that there were two files uploaded via the `license_upload` widget. Their file ids
 are `34` and `47`, and can be looked up in the `user_files` table (detailed below) using those ids.
 
-2. The `user_files` table holds information about a submissions uploaded user files, which includes:
-   `file_id`, the corresponding submission's `submission_id`, a `created_at` time,
-   the `original_name`
-   of the file, and the S3 `repository_path`.
+The `user_files` table holds information about a submission's uploaded user files, which includes:
+`file_id`, the corresponding submission's `submission_id`, a `created_at` time,
+the `original_name` of the file, and the S3 `repository_path`.
 
-#### Deleting Upploaded Files
+### Deleting Uploaded Files
 
-Upon successful upload a link is provided to delete the file. When
-the
-link is used, a browser native delete confirmation pop up will appear asking the user if they are
-sure
-they want to delete the selected file. If the user selects yes from the pop up, the file will be
-deleted
+Upon successful upload a link is provided to delete the file. When the link is used, a browser
+native delete confirmation pop-up will appear asking the user if they are sure they want to delete
+the selected file. If the user selects yes from the pop-up, the file will be deleted
 from the `user_files` table in the database, as well as from S3 storage.
 
 # How to use
