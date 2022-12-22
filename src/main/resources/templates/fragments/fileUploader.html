@@ -71,13 +71,12 @@
     window['userFileIds' + [[${inputName}]]] = [];
     window['cancelledFiles' + [[${inputName}]]] = [];
     var userFiles = [[${session.userFiles}]]
-    // TODO: move to more global setting
-    // - either coming from fragment parameter
-    // - or from application properties
     var thumbnailWidthFromAppYml = [[${@environment.getProperty('form-flow.uploads.thumbnail-width')}]];
     var thumbnailHeightFromAppYml = [[${@environment.getProperty('form-flow.uploads.thumbnail-height')}]];
     var thumbnailWidth = thumbnailWidthFromAppYml ? thumbnailWidthFromAppYml : '64';
     var thumbnailHeight = thumbnailHeightFromAppYml ? thumbnailHeightFromAppYml : '60';
+    var maxFilesFromAppYaml = [[${@environment.getProperty('form-flow.uploads.max-files')}]];
+    var maxFiles = maxFilesFromAppYaml ? maxFilesFromAppYaml : 20;
 
     function addDragBorder() {
       var dragAndDropBox = document.getElementById("drag-and-drop-box-" + [[${inputName}]]);
@@ -235,7 +234,7 @@
       thumbnailMethod: "crop",
       thumbnailWidth: thumbnailWidth,
       thumbnailHeight: thumbnailHeight,
-      maxFiles: 20,
+      maxFiles: maxFiles,
       parallelUploads: 1,
       timeout: 0,
       maxFilesize: Number(
@@ -268,15 +267,13 @@
         var dzInstance = [[${inputName}]]
         var documents = userFiles !== null ? userFiles[dzInstance] : [];
 
-        // TODO: Verify that documents are found. Make sure uploaded doc logic works.
-
-        if (documents != null && Object.entries(documents).length >= this.options.maxFiles) {
+        if (documents != null && Object.entries(documents).length >= this.options.maxFiles + 1) {
           showMaxFileMessage();
         }
 
         this.on('addedfile', function (file) {
           if (window['myDropZone' + [[${inputName}]]].files.length >= window['myDropZone'
-          + [[${inputName}]]].options.maxFiles) {
+          + [[${inputName}]]].options.maxFiles + 1) {
             showMaxFileMessage();
           }
           var fileNameSpan = file.previewElement.getElementsByClassName('filename-text')[0];
@@ -328,7 +325,7 @@
 
         this.on('queuecomplete', function () {
           window['isUploadComplete' + [[${inputName}]]] = true;
-          if (documents != null && Object.entries(documents).length >= this.options.maxFiles) {
+          if (documents != null && Object.entries(documents).length >= this.options.maxFiles + 1) {
             showMaxFileMessage();
           }
         });

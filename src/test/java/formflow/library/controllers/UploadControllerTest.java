@@ -97,27 +97,6 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
 
-  @Test
-  public void shouldOnlyAcceptFileTypesConfiguredInApplicationYaml() throws Exception {
-    long fileId = 1L;
-    when(userFileRepositoryService.save(any())).thenReturn(fileId);
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
-    doNothing().when(cloudFileRepository).upload(any(), any());
-    MockMultipartFile testImage = new MockMultipartFile("file.xml", "someImage.xml", MediaType.APPLICATION_XML_VALUE,
-        "test".getBytes());
-    session = new MockHttpSession();
-
-    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-            .file("file", testImage.getBytes())
-            .param("inputName", "dropZoneTestInstance")
-            .param("thumbDataURL", "base64string")
-            .param("flow", "testFlow")
-            .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-        .andExpect(status().is(200))
-        .andExpect(content().string("Error"));
-  }
-
   @Nested
   public class Delete {
 
