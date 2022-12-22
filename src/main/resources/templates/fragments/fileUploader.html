@@ -112,7 +112,7 @@
     function showMaxFileMessage() {
       var dragBox = document.getElementById("drag-and-drop-box-" + [[${inputName}]]);
       dragBox.style.display = "none";
-      var maxFilesReached = document.getElementById("max-files-" + [[${inputName}]]);
+      var maxFilesReached = document.getElementById("max-files-reached-" + [[${inputName}]]);
       maxFilesReached.style.display = "flex";
     }
 
@@ -267,13 +267,13 @@
         var dzInstance = [[${inputName}]]
         var documents = userFiles !== null ? userFiles[dzInstance] : [];
 
-        if (documents != null && Object.entries(documents).length >= this.options.maxFiles + 1) {
+        if (documents != null && Object.entries(documents).length > this.options.maxFiles) {
           showMaxFileMessage();
         }
 
         this.on('addedfile', function (file) {
-          if (window['myDropZone' + [[${inputName}]]].files.length >= window['myDropZone'
-          + [[${inputName}]]].options.maxFiles + 1) {
+          if (window['myDropZone' + [[${inputName}]]].files.length > window['myDropZone'
+          + [[${inputName}]]].options.maxFiles) {
             showMaxFileMessage();
           }
           var fileNameSpan = file.previewElement.getElementsByClassName('filename-text')[0];
@@ -325,7 +325,7 @@
 
         this.on('queuecomplete', function () {
           window['isUploadComplete' + [[${inputName}]]] = true;
-          if (documents != null && Object.entries(documents).length >= this.options.maxFiles + 1) {
+          if (documents != null && Object.entries(documents).length > this.options.maxFiles) {
             showMaxFileMessage();
           }
         });
