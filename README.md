@@ -39,7 +39,7 @@ Table of Contents
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
-        * [Application Configuration: application.yaml](#application-configuration-applicationyaml)
+        * [Application Configuration](#application-configuration)
         * [flows-config.yaml file](#flows-configyaml-file)
         * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
         * [Screens](#screens)
@@ -55,11 +55,11 @@ Table of Contents
     * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
     * [Gradle](#gradle)
         * [Build Web/Fat Jar](#build-webfat-jar)
-    * [Spring Profile: `dev`](#spring-profile-dev)
+    * [Spring Profile: `dev`](#spring-profile--dev)
     * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
-    * [IntelliJ setup](#intellij-setup)
-        * [Connect flows config schema with IntelliJ IDE](#connect-flows-config-schema-with-intellij-ide)
-        * [Testing](#testing)
+    * [IntelliJ Setup](#intellij-setup)
+      * [Set Java SDK](#set-java-sdk)
+      * [Testing](#testing)
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
@@ -362,7 +362,7 @@ The templates will contain the HTML which drive how the pages that run the flow 
 The application using this library will have a set of templates to gather input with.
 
 We have provided a suite of input based Live Templates, more
-on [live templates here](#about-intellij-live-templates).
+on [live templates here.](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
 
 Live templates are provided for the following input types:
 
@@ -456,7 +456,7 @@ can [follow the instructions here to create an S3 bucket](https://docs.aws.amazo
 Make sure to note your buckets name and region as well as your AWS access and secret keys as you
 will need these for configuring file uploads
 in the library. The bucket and region are configured in your `application.yaml`. See the section on
-[application.yaml configuration](#application-configuration-applicationyaml).
+[application.yaml configuration](#application-configuration).
 
 Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
 Variables](#environment-variables) section below.
@@ -489,7 +489,7 @@ is `homedoc`):
 
 A file upload thymeleaf fragment has been provided for uploading files. You can add it to a screen
 using our handy `cfa:fileUploader` live template. More information
-about [Live Templates here.](#intellij-live-templates)
+about [Live Templates here.](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
 
 The live template will prompt you to enter an input name for the file uploader fragment. This input
 name (field name) will be the key under which uploaded files for this fragment are stored in the
@@ -504,7 +504,7 @@ once the upload is complete it will become a delete link.
 
 #### Accepted file types
 
-In the [application.yaml](#application-configuration-applicationyaml) file, an implementor may
+In the [application.yaml](#application-configuration) file, an implementor may
 update the file types that the uploader can accept.
 
 ```yaml
@@ -580,7 +580,7 @@ form-flow library.
 You can also tell IntelliJ to load environment information from this file, too, by using
 the [Env File Plugin](https://plugins.jetbrains.com/plugin/7861-envfile/).
 
-### Application Configuration: application.yaml
+### Application Configuration
 
 The main configuration file for any Spring Boot application is the `application.yaml` file.
 For general information about the file, please see
@@ -668,7 +668,7 @@ flow:
   otherFlowScreen:
 ```
 
-[You can have autocomplete and validation for flows-config by connecting your intelliJ to the flows-config-schema.json](#connect-flows-config-schema-with-intellij-ide)
+You can have autocomplete and validation for flows-config by connecting your IntelliJ to the flows-config-schema.json [as described here.](https://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
 
 ### Screens
 
@@ -800,8 +800,7 @@ the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.ht
 quickly build Thymeleaf templates.
 
 More information and example usage can be found in
-our [starter application](https://github.com/codeforamerica/form-flow-starter-app#about-intellij-live-templates)
-.
+our [starter application](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide).
 
 ## Icons
 
@@ -846,7 +845,7 @@ jenv add /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home/
 ### Build Web/Fat Jar
 
 Go into `lib/build.gradle` and run the `webjar` task with IntelliJ. This will generate a build file
-that can be used for local development
+that can be used for local development.
 
 ## Spring Profile: `dev`
 
@@ -875,42 +874,23 @@ add `dev`. If no `Active Profiles` field exists, click on `Modify Options` and
 choose `Spring Boot -> Active profiles`. This should add the `Active Profiles` field to the IntelliJ
 form for you to fill in.
 
-## Setup Platform Flavored Google Styles for Java
+## IntelliJ Setup
+This is the minimum IDE setup to contribute to the project, instructions for installing additional tools like live templates, yaml validation, and more can be found [in the starter-app README here.](https://github.com/codeforamerica/form-flow-starter-app#intellij-setup)
+
+### Set Java SDK
+- Set the Project SDK to Java 17 in `File -> Project Structure -> SDK` 
+- Enable annotation processing
+  in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
+- Set the Gradle JVM version to `17 Eclipse Temurin version 17.0.5`
+  in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
+- Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.5` in `File > Project Structure`
+
+### Setup Platform Flavored Google Styles for Java ##
 
 In IntelliJ go to `Preferences --> Editor --> Code Style --> Java` and next to Scheme hit the
 cogwheel
 and `Import Scheme --> IntelliJ Code Style XML` with
 [intellij-settings/PlatformFlavoredGoogleStyle.xml](intellij-settings/PlatformFlavoredGoogleStyle.xml)
-
-## IntelliJ setup
-
-- Enable annotation processing
-  in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
-- Set the Gradle JVM version to 17
-  in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
-- Set the Project SDK to Java 17 in `File > Project Structure`
-
-### Connect flows config schema with IntelliJ IDE
-
-We use [JSON schema](https://json-schema.org/understanding-json-schema/index.html) to autocomplete
-and validate the `flows-config.yaml` file.
-
-You must manually connect the schema to the local file in your instance of IntelliJ IDE.
-
-1. Open IntelliJ preferences (`Cmd + ,` on mac)
-2. Navigate to "JSON Schema Mappings"
-3. Select the "+" in the top left to add a new mapping
-4. Name can be anything (I use "flow config")
-5. "Schema file or URL" needs to be set to the `src/main/resources/flows-config-schema.json`
-6. "Schema version" set to "JSON Schema version 7"
-7. Use the "+" under schema version to add:
-    - a new file and connect to `src/main/resources/flows-config.yaml`
-    - a folder and connect to `src/test/resources/flows-config`
-
-To confirm that the connection is work, go into `flows-config.yaml` and see if autocomplete is
-appearing for you.
-
-![IntelliJ JSON Schema Mappings menu](readme-assets/intellij-json-schema-mappings.png)
 
 ### Testing
 
