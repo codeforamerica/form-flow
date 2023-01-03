@@ -62,11 +62,6 @@
     window['fileTooBigMsg' + [[${inputName}]]] = [[#{upload-documents.this-file-is-too-large(20)}]];
     window['heicFilesNotAccepted'
     + [[${inputName}]]] = [[#{upload-documents.heic-files-not-accepted}]];
-    // TODO is there a way to get thymeleaf to treat the accepted file types from env as a string so the replace works for formatting correctly?
-    window['invalidFileType' + [[${inputName}]]] = [[#{error.files.invalid-file-type}]]
-        + ' '
-        + [[${@environment.getProperty('form-flow.uploads.accepted-file-types')}]].toString().replace(
-            ",", ", ");
     window['myDropZone' + [[${inputName}]]] = null;
     window['userFileIds' + [[${inputName}]]] = [];
     window['cancelledFiles' + [[${inputName}]]] = [];
@@ -77,6 +72,8 @@
     var thumbnailHeight = thumbnailHeightFromAppYml ? thumbnailHeightFromAppYml : '60';
     var maxFilesFromAppYaml = [[${@environment.getProperty('form-flow.uploads.max-files')}]];
     var maxFiles = maxFilesFromAppYaml ? maxFilesFromAppYaml : 20;
+    var maxFileSize = Number(
+        [[${@environment.getProperty('form-flow.uploads.max-file-size')}]]);
 
     function addDragBorder() {
       var dragAndDropBox = document.getElementById("drag-and-drop-box-" + [[${inputName}]]);
@@ -245,11 +242,14 @@
       maxFiles: maxFiles,
       parallelUploads: 1,
       timeout: 0,
-      maxFilesize: Number(
-          [[${@environment.getProperty('spring.servlet.multipart.max-request-size')}]].replace("MB",
-              "")),
-      dictFileTooBig: window['fileTooBigMsg' + [[${inputName}]]],
-      dictInvalidFileType: window['invalidFileType' + [[${inputName}]]],
+      maxFilesize: maxFileSize,
+      dictFileTooBig: [[#{upload-documents.this-file-is-too-large(0)}]].toString().replace("0",
+          maxFileSize),
+      dictMaxFilesExceeded: [[#{general.files.maximum-number-of-files}]],
+      dictInvalidFileType: [[#{error.files.invalid-file-type}]]
+          + ' '
+          + [[${@environment.getProperty('form-flow.uploads.accepted-file-types')}]].toString().replaceAll(
+              ",", ", "),
       acceptedFiles: [[${@environment.getProperty('form-flow.uploads.accepted-file-types')}]],
       clickable: ".drag-and-drop-box",
       previewTemplate: `

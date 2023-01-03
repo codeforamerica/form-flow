@@ -1,11 +1,6 @@
 form-flow:
   path: 'flows-config.yaml'
   inputs: 'formflow.library.inputs.'
-  aws:
-    region: 'us-west-1'
-    s3_bucket_name: 'test-form-flow'
-    access_key: 'bar'
-    secret_key: 'foo'
   uploads:
     accepted-file-types: '.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp,.heic'
 spring:

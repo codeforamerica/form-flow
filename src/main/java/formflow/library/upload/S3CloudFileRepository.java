@@ -15,10 +15,12 @@ import com.amazonaws.services.s3.transfer.Upload;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Profile({"production", "demo", "staging", "dev"})
 @Slf4j
 public class S3CloudFileRepository implements CloudFileRepository {
 

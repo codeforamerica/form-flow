@@ -535,6 +535,18 @@ uploaded files will include a thumbnail, the original file name, file size and l
 or deleting the upload. The cancel link will only be present before the file has finished uploading,
 once the upload is complete it will become a delete link.
 
+#### Thumbnails
+
+If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
+image and display it on the screen.
+
+For files with extensions other than the ones listed (like tif files and various document formats),
+we will display a default image for those thumbnails.
+
+We do not store the thumbnails on the server side at all.
+
+### Configuring the Dropzone Widget
+
 #### Accepted file types
 
 In the [application.yaml](#application-configuration) file, an implementor may
@@ -552,15 +564,50 @@ the file upload widget.
 _Note: `.tif`/`.tiff` extensions do not seem to work right in DropZone, and we do not recommend
 including that file type. We've noticed that thumbnails are not created correctly for TIFF files._
 
-#### Thumbnails
+#### Max File Size
 
-If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
-image and display it on the screen.
+You can configure a max file in MB, in `application.yaml`
+you just need to declare as `max-file-size` like below:
 
-For files with extensions other than the ones listed (like tif files and various document formats),
-we will display a default image for those thumbnails.
+```yaml
+form-flow:
+  uploads:
+    max-file-size: '20'
+```
 
-We do not store the thumbnails on the server side at all.
+This will prevent a user from uploading any file that is larger than this set limit.
+
+Note that the number value is in Megabytes.
+
+#### Max number of files
+
+You can configure a maximum number of files allowed to be uploaded in your `application.yaml`. Just
+set `max-files` to the value you desire like below:
+
+```yaml
+form-flow:
+  uploads:
+    max-files: '20'
+```
+
+This will prevent a user from uploading more than that number of files.
+
+#### Thumbnail Size Configuration
+
+You can configure the desired width and height of the thumbnails the dropzone widget creates. To do
+so
+set a `thumbnail-width` and `thumbnail-height` value like so:
+
+```yaml
+form-flow:
+  uploads:
+    thumbnail-width: '64'
+    thumbnail-height: '60'
+```
+
+Note that these values are in pixels. We don't recommend going much larger than the values listed
+here
+to maintain a good-looking responsive design across both desktop and mobile.
 
 ### Uploaded File Storage
 
@@ -594,6 +641,14 @@ Upon successful upload a link is provided to delete the file. When the link is u
 native delete confirmation pop-up will appear asking the user if they are sure they want to delete
 the selected file. If the user selects yes from the pop-up, the file will be deleted
 from the `user_files` table in the database, as well as from S3 storage.
+
+### S3 File Retention Policies
+
+We recommend setting a maximum file retention period in S3 by setting up a retention policy on your
+bucket.
+This will automatically delete files in your bucket that are older than the retention policy
+permits.
+[You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
 # How to use
 
@@ -895,9 +950,9 @@ might be interested in.
 
 Current endpoints available:
 
-| Endpoint     | Description                                                                    |
-|--------------|--------------------------------------------------------------------------------|
-| `/dev/icons` |  Displays the icons available for developers to pull in with the icon fragment |
+| Endpoint     | Description                                                                   |
+|--------------|-------------------------------------------------------------------------------|
+| `/dev/icons` | Displays the icons available for developers to pull in with the icon fragment |
 
 ### IntelliJ Configuration
 
