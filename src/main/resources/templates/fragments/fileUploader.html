@@ -338,11 +338,6 @@
           }
         });
 
-        this.on('maxfilesreached', function () {
-          console.log("maxfilesreached was emitted");
-          toggleMaxFileMessage('on');
-        });
-
         this.on('maxfilesexceeded', function () {
           console.log("maxfilesexceeded was emitted");
           toggleMaxFileMessage('on');
@@ -399,7 +394,8 @@
               name: doc.originalFilename,
               size: doc.filesize,
               type: doc.type,
-              id: parseInt(uploadedDocWithThumbnail[0])
+              id: parseInt(uploadedDocWithThumbnail[0]),
+              accepted: true
             };
             window['myDropZone' + [[${inputName}]]].files.push(mockFile);
             window['myDropZone' + [[${inputName}]]].emit("addedfile", mockFile);
