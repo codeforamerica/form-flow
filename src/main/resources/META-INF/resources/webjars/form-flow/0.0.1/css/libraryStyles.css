@@ -478,6 +478,10 @@ body,
   display: flex;
 }
 
+.display-none {
+  display: none;
+}
+
 .accordion__button:focus {
   outline: none;
   box-shadow: 0 0 0 5px #ffae00;
