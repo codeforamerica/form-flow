@@ -7,7 +7,7 @@
   <div th:id="${'dropzone-' + inputName}">
     <div class="dropzone needsclick" th:id="${'document-upload-' + inputName}">
       <div th:id="${'max-files-reached-' + inputName}">
-        <div class='max-files spacing-below-35' id="max-files"
+        <div class='max-files spacing-below-35 display-none' id="max-files"
              th:text='#{general.files.maximum-number-of-files}'></div>
       </div>
       <div th:id="${'drag-and-drop-box-' + inputName}"
@@ -109,11 +109,14 @@
       }
     }
 
-    function showMaxFileMessage() {
-      var dragBox = document.getElementById("drag-and-drop-box-" + [[${inputName}]]);
-      dragBox.style.display = "none";
-      var maxFilesReached = document.getElementById("max-files-reached-" + [[${inputName}]]);
-      maxFilesReached.style.display = "flex";
+    function toggleMaxFileMessage(state) {
+      if (state === 'on') {
+        $(document.getElementById("max-files")).addClass("display-flex").removeClass(
+            "display-none");
+      } else {
+        $(document.getElementById("max-files")).addClass("display-none").removeClass(
+            "display-flex");
+      }
     }
 
     $('.text--error').hide();
@@ -198,6 +201,11 @@
       }
       updateFileInputValue();
       showNumberOfAddedFiles();
+
+      if (window['myDropZone' + [[${inputName}]]].files.length <= window['myDropZone'
+      + [[${inputName}]]].options.maxFiles) {
+        toggleMaxFileMessage('off');
+      }
     }
 
     function deleteCancelledFiles(file, id) {
@@ -268,13 +276,13 @@
         var documents = userFiles !== null ? userFiles[dzInstance] : [];
 
         if (documents != null && Object.entries(documents).length > this.options.maxFiles) {
-          showMaxFileMessage();
+          toggleMaxFileMessage('on');
         }
 
         this.on('addedfile', function (file) {
           if (window['myDropZone' + [[${inputName}]]].files.length > window['myDropZone'
           + [[${inputName}]]].options.maxFiles) {
-            showMaxFileMessage();
+            toggleMaxFileMessage('on');
           }
           var fileNameSpan = file.previewElement.getElementsByClassName('filename-text')[0];
           var fileNameComponents = getFilenameComponents(fileNameSpan);
@@ -326,16 +334,18 @@
         this.on('queuecomplete', function () {
           window['isUploadComplete' + [[${inputName}]]] = true;
           if (documents != null && Object.entries(documents).length > this.options.maxFiles) {
-            showMaxFileMessage();
+            toggleMaxFileMessage('on');
           }
         });
 
         this.on('maxfilesreached', function () {
-          showMaxFileMessage();
+          console.log("maxfilesreached was emitted");
+          toggleMaxFileMessage('on');
         });
 
         this.on('maxfilesexceeded', function () {
-          showMaxFileMessage();
+          console.log("maxfilesexceeded was emitted");
+          toggleMaxFileMessage('on');
         });
 
         this.on('success', function (file, id) {
