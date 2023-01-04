@@ -11,11 +11,10 @@ import javax.validation.Payload;
 
 @Target({FIELD})
 @Retention(RUNTIME)
-@Constraint(validatedBy = FileTypeValidator.class)
+@Constraint(validatedBy = MoneyValidator.class)
 @Documented
-public @interface CheckFileType {
-
-  String message() default "{org.formflow.library.data.validators.CheckFileType.message}";
+public @interface Money {
+  String message() default "Please make sure to enter a valid dollar amount.";
 
   Class<?>[] groups() default {};
 

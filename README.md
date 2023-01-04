@@ -20,6 +20,7 @@ Table of Contents
     * [Submission Object](#submission-object)
     * [Defining Inputs](#defining-inputs)
         * [Input Class](#input-class)
+        * [Custom Validations](#custom-validations)
         * [Input Data JSON Structure](#input-data-json-structure)
 * [General Information](#general-information)
     * [Thymeleaf](#thymeleaf)
@@ -288,6 +289,14 @@ class ApplicationInformation {
 Validations for inputs use the JSR-303 bean validation paradigm, more specifically, Hibernate
 validations. For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+
+### Custom Validations
+
+We also implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use them the same way you would any other JavaX validator, like so:
+```java
+@Money(message = "Please make sure to enter a valid dollar amount.")
+private String income;
+```
 
 ### Input Data JSON Structure
 
