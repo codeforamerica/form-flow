@@ -13,6 +13,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'java'
+    id 'com.adarshr.test-logger' version '3.2.0'
 }
 
 targetCompatibility = JavaVersion.VERSION_17
