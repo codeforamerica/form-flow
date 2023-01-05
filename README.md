@@ -56,7 +56,7 @@ Table of Contents
     * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
     * [Gradle](#gradle)
         * [Build Web/Fat Jar](#build-webfat-jar)
-    * [Spring Profile: `dev`](#spring-profile--dev)
+    * [Spring Profiles](#spring-profiles)
     * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
     * [IntelliJ Setup](#intellij-setup)
         * [Set Java SDK](#set-java-sdk)
@@ -90,6 +90,15 @@ The library includes tooling for:
 - Data Persistence
 - File Uploads
 
+Out-of-the-box, integrations can be set up with common third-party services:
+
+- Intercom
+- Google Analytics
+- Mixpanel
+- Optimizely
+- Google Ads
+- Facebook Ads
+
 # What is a form flow?
 
 # Concepts
@@ -121,6 +130,43 @@ erDiagram
 ## Flow
 
 ## Screen
+
+## Defining Screens ##
+
+All screens must have an entry in the flows-config in order to be rendered. Additionally, each
+screen should have its own template defined in a folder respective to the flow that screen is
+contained within. Example `/src/resources/templates/<flowName>/<templateName>`.
+
+We have provided a number of IntelliJ Live templates to make the creation of screens faster and
+easier. [More on Live Templates here](#applying-live-templates-to-your-intellij-ide).
+
+When setting up a new flow, create a folder in `src/main/resources/templates` to hold all HTML
+files. In the starter app, we name the respective template folders after their respective flows.
+
+For example, add an HTML file such
+as `about-you.html` [in the flow's templates folder](src/main/resources/templates). Here is an
+example using our [live templates for a form screen](#applying-live-templates-to-your-intellij-ide):
+
+```html
+
+<th:block th:replace="'fragments/form' :: form(action=${formAction}, content=~{::formContent})">
+  <th:block th:ref="formContent">
+    <div class="form-card__content">
+      <th:block th:replace="'icons' :: 'clipboard'"></th:block>
+      <th:block th:replace="'content' :: cardHeader(header='Tell us about yourself')"/>
+      <th:block
+          th:replace="'inputs' :: textInput(name='firstName', label='What's your first name?')"/>
+      <th:block
+          th:replace="'inputs' :: textInput(name='lastName', label='What's your last name?')"/>
+      <th:block
+          th:replace="'inputs' :: textInput(name='emailAddress', label='What's your email address?')"/>
+    </div>
+    <div class="form-card__footer">
+      <th:block th:replace="'fragments/continueButton' :: continue"/>
+    </div>
+  </th:block>
+</th:block>
+```
 
 ## Subflows
 
@@ -195,11 +241,13 @@ public class ApplyConditions extends FlowConditions {
   public boolean isGmailUser() {
     return inputData.get('emailAddress').contains("gmail.com");
   }
-
 } 
 ```
 
 ### Using conditions in templates
+
+We have created a Java object that's part of the model handed to the Thymeleaf templates.
+named `templateManager` that is part of the
 
 ```html
 
@@ -330,7 +378,7 @@ In the example below the following assumptions are applied:
 {
   "first_input1": "some value",
   "first_input2": "some value",
-  "second_input1": "abcd",
+  "second_input1": "a`Gbcd",
   "docsStart_input1": "some doc info",
   "doc": [
     {
@@ -368,6 +416,55 @@ with a specific iteration's data.
 
 ### Using Thymeleaf
 
+We use Thymeleaf for frontend views. Thymeleaf is a Java based HTML framework for frontend
+templating.
+[You can learn more about Thymeleaf here.](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
+
+We use Thymeleaf's concept
+of  [fragments](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#fragments) to store
+complex mark up into simple reusable imports.
+
+Fragments simplify the process of creating more complex HTML pages. Some places we use fragments
+include input types, forms, page headers and footers, error handlers,
+etc. [You can view these fragments
+here.](src/main/resources/templates/fragments)
+
+Thymeleaf is also capable of making direct calls to Java class methods using what is known as the
+Spring Expression Language T operator. This allows you to implement Java code in your Thymeleaf
+templates.
+We provide two classes for this purpose:
+
+- ConditionDefinitions
+    - Houses methods which should always return Booleans and can be used to conditionally show or
+      hide
+      sections of a Thymeleaf template
+- ViewUtilities
+    - Houses methods for general purpose manipulation of data to display on the frontend in
+      Thymeleaf templates
+
+An example of using the T operator can be found in the `incomeAmounts` template from the starter
+app.
+
+```html
+
+<main id="content" role="main" class="form-card spacing-above-35"
+      th:with="selectedSelf=${T(org.codeforamerica.formflowstarter.app.config.ConditionDefinitions).incomeSelectedSelf(submission, uuid)},
+                     houseHoldMemberName=${T(org.codeforamerica.formflowstarter.app.data.Submission).getSubflowEntryByUuid('income', uuid, submission).householdMember}">
+  ...
+</main>
+```
+
+### Fragments
+
+#### Icon reference
+
+If you need to see a reference of all icons from the form flow library, you can paste this fragment
+import into your template to quickly see a preview and names of icons:
+
+```
+<th:block th:replace="fragments/icons :: icons-list"></th:block>
+```
+
 ### Templates
 
 The templates will contain the HTML which drive how the pages that run the flow are rendered.
@@ -396,11 +493,8 @@ Live templates are provided for the following input types:
 
 ### Static Pages
 
-Unlike Screens, Static Pages are HTML content not part of a flow. Examples include the home page,
-privacy policy, or FAQ.
-
-This starter app contains a home page (`index.html`) and FAQ (`faq.html`)
-as examples in the `resources/templates` folder.
+Unlike Screens, Static Pages are HTML content and are not part of a flow. Examples include the home
+page, privacy policy, or FAQ.
 
 Generally your application would have a static page controller (named something like
 StaticPageController.java) file. At a minimum, it would handle the routing to your home
@@ -691,7 +785,7 @@ permits.
 When configuring your application, the form-flow library will expect to find your secret
 information in the environment. One way to do this is by creating an `.env` file that is a copy
 of this [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env).
-The template file has a detailed description of information that would be expected in the setup.
+The sample file has a detailed description of information that would be expected in the setup.
 
 From there you can add your information and source the file into your environment:
 `source .env`. Now the information will be loaded into your environment and available to the
@@ -921,7 +1015,8 @@ the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.ht
 quickly build Thymeleaf templates.
 
 More information and example usage can be found in
-our [starter application](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide).
+our [starter application](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
+.
 
 ## Icons
 
@@ -968,15 +1063,18 @@ jenv add /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home/
 Go into `lib/build.gradle` and run the `webjar` task with IntelliJ. This will generate a build file
 that can be used for local development.
 
-## Spring Profile: `dev`
+## Spring Profiles
 
-There is
-a [Spring Profile](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
-named `dev` to allow for some information to be accessible to developers more easily.
+There are a few  
+[Spring Profiles](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
+we use in the Form Flow library.
 
+### `dev` profile
+
+This `dev` profile allows for some information to be accessible to developers more easily.
 The profile should only be used in a developer's environment.
 
-### DevController
+#### DevController
 
 The developer profile controller is the `DevController` and it contains endpoints that developers
 might be interested in.
@@ -987,7 +1085,7 @@ Current endpoints available:
 |--------------|-------------------------------------------------------------------------------|
 | `/dev/icons` | Displays the icons available for developers to pull in with the icon fragment |
 
-### IntelliJ Configuration
+#### IntelliJ Configuration
 
 To run under a specific profile in IntelliJ, go to the `Run` menu and
 choose `Edit Configurations...`. Choose your application's profile. In the `Active profiles` field
@@ -995,11 +1093,77 @@ add `dev`. If no `Active Profiles` field exists, click on `Modify Options` and
 choose `Spring Boot -> Active profiles`. This should add the `Active Profiles` field to the IntelliJ
 form for you to fill in.
 
+### `test` profile
+
+The items that are part of this profile will only be available when unit and journey tests are being
+run.
+
+### `demo` profile
+
+The items that are part of this profile will be available in the staging/demo environment.
+
 ## IntelliJ Setup
 
-This is the minimum IDE setup to contribute to the project, instructions for installing additional
-tools like live templates, yaml validation, and more can be
-found [in the starter-app README here.](https://github.com/codeforamerica/form-flow-starter-app#intellij-setup)
+### Connect flows config schema
+
+We use [JSON schema](https://json-schema.org/understanding-json-schema/index.html) to autocomplete
+and validate the `flows-config.yaml` file.
+
+Follow the steps below in IntelliJ to connect the schema to your project's version
+of `flows-config.yaml`:
+
+1. Download [`flows-config-schema.json` here.](intellij-settings/flows-config-schema.json)
+1. Open IntelliJ preferences (`Cmd + ,` on mac)
+1. Navigate to "JSON Schema Mappings"
+1. Select the "+" in the top left to add a new mapping
+1. Name can be anything (i.e. "Flow Config")
+1. "Schema file or URL" needs to be set to the `flows-config-schema.json` file you just downloaded
+1. "Schema version" set to "JSON Schema version 7"
+1. Use the "+" under schema version to add:
+    - a new file and connect to `src/main/resources/flows-config.yaml`
+    - a folder and connect to `src/test/resources/flows-config`
+
+To confirm that the connection is work, go into `flows-config.yaml` and see if autocomplete is
+appearing for you.
+
+![IntelliJ JSON Schema Mappings menu](readme-assets/intellij-json-schema-mappings.png)
+
+### Applying Live Templates to your IntelliJ IDE ###
+
+As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
+the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
+quickly build
+Thymeleaf templates.
+
+Support for importing/exporting these Live Templates is
+a [buggy process](https://youtrack.jetbrains.com/issue/IDEA-184753) that can sometimes wipe away all
+of your previous
+settings. So we're going to use a copy/paste approach.
+
+1. Open the [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) from the root
+   of
+   this repo
+2. Copy the whole file
+3. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
+4. If there isn't a template group already called CfA, create one by pressing the "+" in the top
+   right area and selecting "Template group..."
+5. Highlight the template group "CfA", right click and "Paste"
+6. You should now see Live templates with the prefix "cfa:" populated in the template group
+
+### Using Live Templates ###
+
+Once you have Live Templates installed on your IntelliJ IDE, in (`.html`, `.java`) files you can use
+our Live Templates by typing `cfa:` and a list of templates to autofill will show itself.
+
+### Contribute new Live Templates ###
+
+1. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
+2. Find the Live Template you want to contribute
+3. Right click and "Copy" (this will copy the Live Template in XML form)
+4. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
+5. Paste at the bottom of the file
+6. Commit to GitHub
+7. Now others can copy/paste your Live Templates
 
 ### Set Java SDK
 
@@ -1034,5 +1198,5 @@ or `ctrl + shift + r`).
 
 ## Maintainer information
 
-This form-flow library was created and is maintained by a team at Code for America.
+This form-flow library was created and is maintained by the Platform team at Code for America.
 Email addresses? More information about contacting us? Email list somewhere?
