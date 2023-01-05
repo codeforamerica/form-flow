@@ -62,8 +62,8 @@ public class UserFile {
   @Column(name = "repository_path")
   private String repositoryPath;
 
-  @Column(name = "extension")
-  private String extension;
+  @Column(name = "mime_type")
+  private String mimeType;
 
   @Column
   private Float filesize;
@@ -100,7 +100,7 @@ public class UserFile {
     fileInfo.put("originalFilename", userFile.getOriginalName());
     fileInfo.put("filesize", userFile.getFilesize().toString());
     fileInfo.put("thumbnailUrl", thumbBase64String);
-    fileInfo.put("type", userFile.getExtension());
+    fileInfo.put("type", userFile.getMimeType());
     return fileInfo;
   }
 }
