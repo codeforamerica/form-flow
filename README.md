@@ -12,6 +12,7 @@ Table of Contents
 * [Concepts](#concepts)
     * [Flow](#flow)
     * [Screen](#screen)
+    * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
     * [Conditions and Actions](#conditions-and-actions)
@@ -35,8 +36,10 @@ Table of Contents
         * [AWS S3](#aws-s3)
         * [File Naming Conventions](#file-naming-conventions)
         * [File Upload Widget](#file-upload-widget)
+        * [Configuring the Dropzone Widget](#configuring-the-dropzone-widget)
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
+        * [S3 File Retention Policies](#s3-file-retention-policies)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -57,19 +60,22 @@ Table of Contents
     * [Gradle](#gradle)
         * [Build Web/Fat Jar](#build-webfat-jar)
     * [Spring Profiles](#spring-profiles)
-    * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
+        * [DevController](#devcontroller)
+        * [IntelliJ Configuration](#intellij-configuration)
     * [IntelliJ Setup](#intellij-setup)
+        * [Connect flows config schema](#connect-flows-config-schema)
+        * [Applying Live Templates to your IntelliJ IDE](#applying-live-templates-to-your-intellij-ide)
+        * [Using Live Templates](#using-live-templates)
+        * [Contribute new Live Templates](#contribute-new-live-templates)
         * [Set Java SDK](#set-java-sdk)
+        * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
         * [Testing](#testing)
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
-<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-
 A Spring Boot Java library that provide a framework for developing *form-flow* based applications.
 The intention is to speed up the creation of web applications that are a series of forms that
-collect
-input from users.
+collect input from users.
 
 The library includes tooling for:
 
@@ -98,6 +104,9 @@ Out-of-the-box, integrations can be set up with common third-party services:
 - Optimizely
 - Google Ads
 - Facebook Ads
+
+An example project built off of this Form Flow library can be found in
+our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
 
 # What is a form flow?
 
@@ -454,24 +463,13 @@ app.
 </main>
 ```
 
-### Fragments
-
-#### Icon reference
-
-If you need to see a reference of all icons from the form flow library, you can paste this fragment
-import into your template to quickly see a preview and names of icons:
-
-```
-<th:block th:replace="fragments/icons :: icons-list"></th:block>
-```
-
 ### Templates
 
 The templates will contain the HTML which drive how the pages that run the flow are rendered.
 The application using this library will have a set of templates to gather input with.
 
 We have provided a suite of input based Live Templates, more
-on [live templates here.](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
+on [live templates here.](#applying-live-templates-to-your-intellij-ide)
 
 Live templates are provided for the following input types:
 
@@ -572,6 +570,15 @@ Example form fragment:
 
 A Fragment for the submit button is also provided through `cfa:inputSubmitButton`.
 
+#### Icon reference
+
+If you need to see a reference of all icons from the form flow library, you can paste this fragment
+into your template to quickly see a preview and names of icons:
+
+```
+<th:block th:replace="fragments/icons :: icons-list"></th:block>
+```
+
 ### Inputs
 
 ### Accessing Conditions
@@ -628,7 +635,7 @@ is `homedoc`):
 
 A file upload thymeleaf fragment has been provided for uploading files. You can add it to a screen
 using our handy `cfa:fileUploader` live template. More information
-about [Live Templates here.](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
+about [Live Templates here.](#applying-live-templates-to-your-intellij-ide)
 
 The live template will prompt you to enter an input name for the file uploader fragment. This input
 name (field name) will be the key under which uploaded files for this fragment are stored in the
@@ -883,7 +890,7 @@ flow:
 ```
 
 You can have autocomplete and validation for flows-config by connecting your IntelliJ to the
-flows-config-schema.json [as described here.](https://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
+flows-config-schema.json [as described here.](#applying-live-templates-to-your-intellij-ide)
 
 ### Screens
 
@@ -988,23 +995,25 @@ There are spots in the templates where the `T` operator is used.
 
 #### Publishing
 
-##### Github Packaging Repository
-
 ##### Maven Central
 
-#### How to pull in the library
+Currently, the Form Flow builder library is published on Sonatype. It can be pulled into a gradle
+file like so:
 
-##### Credential Information
+```text
+   implementation 'org.codeforamerica.platform:form-flow:0.0.1-SNAPSHOT'
+```
 
-#### Versioning Information
-
-##### Version / Release plan
+For an example of how to pull in the file as well a how one might pull in a local jar see
+the form-flow-starter-app's
+[gradle.build](https://github.com/codeforamerica/form-flow-starter-app/blob/main/build.gradle)
+file.
 
 #### Building Fat Jars
 
 This library is created as a Web/Fat jar to include all the items this class depends on.
-Specifically it's
-created this way to ensure that all the resources are included in the distribution.
+Specifically it's created this way to ensure that all the resources are included in the
+distribution.
 
 # Help
 
@@ -1015,13 +1024,8 @@ the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.ht
 quickly build Thymeleaf templates.
 
 More information and example usage can be found in
-our [starter application](https://github.com/codeforamerica/form-flow-starter-apphttps://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
+our [starter application](#applying-live-templates-to-your-intellij-ide)
 .
-
-## Icons
-
-There is an [icon fragment](src/main/resources/templates/fragments/icons.html)
-that can provide a display of all available icons for use.
 
 # Developer Setup
 
