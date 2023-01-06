@@ -72,7 +72,7 @@ public class UploadController extends FormFlowController {
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
-          .extension(file.getContentType()).build();
+          .mimeType(file.getContentType()).build();
 
       Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
