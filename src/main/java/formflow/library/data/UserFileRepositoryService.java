@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Transactional
-@Slf4j
 public class UserFileRepositoryService {
 
   UserFileRepository repository;
@@ -27,12 +26,7 @@ public class UserFileRepositoryService {
    * @return UUID of the file
    */
   public UUID save(UserFile userFile) {
-    log.info("in save");
-    UserFile newFile = repository.save(userFile);
-    log.info("saved, returning id now");
-    log.info("id: " + newFile.getFile_id());
-    return newFile.getFile_id();
-
+    return repository.save(userFile).getFile_id();
   }
 
   /**
