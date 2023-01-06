@@ -65,7 +65,10 @@ public class UploadController extends FormFlowController {
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
+      log.info("cloud repo upload attempt");
       cloudFileRepository.upload(uploadLocation, file);
+
+      log.info("cloud repo upload done");
 
       UserFile uploadedFile = UserFile.builder()
           .submission_id(submission)
@@ -74,18 +77,20 @@ public class UploadController extends FormFlowController {
           .filesize((float) file.getSize())
           .mimeType(file.getContentType()).build();
 
-      Long newFileId = uploadedFileRepositoryService.save(uploadedFile);
+      log.info("now going to save");
+
+      UUID newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
       //TODO: change userFiles special string to constant to be referenced in thymeleaf
-      HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
-          (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
-      HashMap<Long, HashMap<String, String>> userFileMap = new HashMap<>();
+      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
+          (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+      HashMap<UUID, HashMap<String, String>> userFileMap = new HashMap<>();
       HashMap<String, String> fileInfo;
 
       if (dzFilesMap == null) {
         fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
-        HashMap<String, HashMap<Long, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
+        HashMap<String, HashMap<UUID, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
         dropzoneInstanceMap.put(inputName, userFileMap);
         httpSession.setAttribute("userFiles", dropzoneInstanceMap);
       } else {
@@ -111,7 +116,7 @@ public class UploadController extends FormFlowController {
 
   @PostMapping("/file-delete")
   RedirectView delete(
-      @RequestParam("id") Long fileId,
+      @RequestParam("id") UUID fileId,
       @RequestParam("returnPath") String returnPath,
       @RequestParam("inputName") String dropZoneInstanceName,
       HttpSession httpSession
@@ -143,9 +148,9 @@ public class UploadController extends FormFlowController {
       log.info("Delete file {} from cloud storage", fileId);
       cloudFileRepository.delete(file.getRepositoryPath());
       uploadedFileRepositoryService.deleteById(file.getFile_id());
-      HashMap<String, HashMap<Long, HashMap<String, String>>> dzFilesMap =
-          (HashMap<String, HashMap<Long, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
-      HashMap<Long, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
+      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
+          (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+      HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
 
       userFileMap.remove(fileId);
       if (userFileMap.isEmpty()) {
