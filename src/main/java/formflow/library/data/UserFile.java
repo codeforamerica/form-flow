@@ -6,6 +6,7 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,6 +24,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +46,10 @@ import org.springframework.stereotype.Component;
 public class UserFile {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long file_id;
+  @GeneratedValue
+  //@Type(type = "org.hibernate.type.UUIDCharType")
+  @Type(type = "pg-uuid")
+  private UUID file_id;
 
   @ManyToOne
   @JoinColumn(name = "submission_id")
