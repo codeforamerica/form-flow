@@ -217,7 +217,7 @@
     function sendDeleteXhrRequest(id) {
       var xhrRequest = new XMLHttpRequest();
       xhrRequest.open('POST',
-          '/file-delete?' + id + '&returnPath=' + window.location.pathname + '&inputName='
+          '/file-delete?returnPath=' + window.location.pathname + '&inputName='
           + [[${inputName}]], true);
       xhrRequest.withCredentials = false;
       xhrRequest.setRequestHeader("Accept", "*/*");
@@ -388,7 +388,7 @@
               name: doc.originalFilename,
               size: doc.filesize,
               type: doc.type,
-              id: parseInt(uploadedDocWithThumbnail[0]),
+              id: uploadedDocWithThumbnail[0],
               accepted: true
             };
             window[dropzonePrefix + [[${inputName}]]].files.push(mockFile);
