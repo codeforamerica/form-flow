@@ -16,8 +16,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,7 +24,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.stereotype.Component;
 
 /**
  * A class representing what a submission of the form flow looks like in the database.
@@ -43,10 +40,10 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
-@Component
-@Builder
-public class Submission {
+//@AllArgsConstructor
+//@Component
+//@Builder
+public abstract class Submission {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

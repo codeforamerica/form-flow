@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 /**
  * Service to retrieve and store Submission objects in the database.
  */
-@Service
-@Transactional
-public class SubmissionRepositoryService {
+//@Service
+//@Transactional
+public abstract class SubmissionRepositoryService {
 
   SubmissionRepository repository;
 
