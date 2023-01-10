@@ -295,14 +295,16 @@
 
           removeLink.onclick = destroyerCreator(file);
           removeLink.innerText = [[#{general.cancel}]].toLowerCase();
-
           thumbnail.classList.add("hidden");
-
           window['isUploadComplete' + [[${inputName}]]] = false;
 
           if (!file.type.includes("image")) {
             setDefaultThumbnail(file);
           }
+          if (file.type.includes("image") && file.size / 1024 / 1024 >= 10) {
+            setDefaultThumbnail(file)
+          }
+
           $('#submit-my-documents-' + [[${inputName}]]).removeClass('hidden');
           showNumberOfAddedFiles();
           prependAddedFile();

@@ -592,7 +592,24 @@ form-flow:
 
 This will prevent a user from uploading any file that is larger than this set limit.
 
-Note that the number value is in Megabytes.
+Notice that the number value is in Megabytes but does not need the trailing MB.
+
+**Note:** if this value is not set, then the server will use it's default value of 1MB preventing
+any
+uploads larger than 1MB. When configuring this value, be sure to also
+set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
+and `server.tomcat.max-http-form-post-size` to be equal to the set value, in MB. Example below:
+
+```yaml
+spring:
+  servlet:
+  multipart:
+    max-file-size: ${form-flow.uploads.max-file-size}MB
+    max-request-size: ${form-flow.uploads.max-file-size}MB
+server:
+  tomcat:
+    max-http-form-post-size: ${form-flow.uploads.max-file-size}MB
+```
 
 #### Max number of files
 
