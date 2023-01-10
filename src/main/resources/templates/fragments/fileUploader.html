@@ -61,8 +61,6 @@
     window['isUploadComplete' + [[${inputName}]]] = true;
     // TODO: pull file size from variable?
     window['fileTooBigMsg' + [[${inputName}]]] = [[#{upload-documents.this-file-is-too-large(20)}]];
-    window['heicFilesNotAccepted'
-    + [[${inputName}]]] = [[#{upload-documents.heic-files-not-accepted}]];
     window['myDropZone' + [[${inputName}]]] = null;
     window['userFileIds' + [[${inputName}]]] = [];
     window['cancelledFiles' + [[${inputName}]]] = [];
@@ -305,8 +303,8 @@
           if (!file.type.includes("image")) {
             setDefaultThumbnail(file);
           }
-          if (file.type.includes("image/heic") || file.type.includes("image/tif")) {
-            setDefaultThumbnail(file);
+          if (file.size / 1024 / 1024 >= 10) {
+            setDefaultThumbnail(file)
           }
           $('#submit-my-documents-' + [[${inputName}]]).removeClass('hidden');
           showNumberOfAddedFiles();
@@ -351,10 +349,6 @@
           var fileName = file.name;
           window['userFileIds' + [[${inputName}]]].push(id);
           updateFileInputValue();
-
-          if (file.type.includes("heic") || file.type.includes("tif")) {
-            setDefaultThumbnail(file);
-          }
 
           removeLink.onclick = function () {
             let confirmation = confirm(
@@ -412,12 +406,6 @@
           file.previewElement.getElementsByClassName("text--error")[0].innerText = xhr.response;
         } else {
           var message = errorMessage.error ? errorMessage.error : errorMessage;
-          // special case error message for unsupported HEIC file type uploads
-          if (message.localeCompare(
-                  window[dropzonePrefix + [[${inputName}]]].options.dictInvalidFileType) == 0
-              && file.name.toLocaleLowerCase().endsWith('.heic')) {
-            message = window['heicFilesNotAccepted' + [[${inputName}]]];
-          }
           file.previewElement.getElementsByClassName("text--error")[0].innerText = message;
         }
 
