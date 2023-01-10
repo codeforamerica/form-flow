@@ -573,8 +573,11 @@ form-flow:
 This list is passed to DropZone and anything not listed in `accepted-file-types` will be rejected by
 the file upload widget.
 
-_Note: `.tif`/`.tiff` extensions do not seem to work right in DropZone, and we do not recommend
-including that file type. We've noticed that thumbnails are not created correctly for TIFF files._
+_Note: `.tif`/`.tiff` and `heic` extensions do not seem to work right in DropZone, and we do not
+recommend
+including these file types. We've noticed that thumbnails are not created correctly for TIFF and
+HEIC files
+and they fail to correct upload when batched with other uploaded files._
 
 #### Max File Size
 
