@@ -43,7 +43,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 //@AllArgsConstructor
 //@Component
 //@Builder
-public abstract class Submission {
+public class Submission {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
