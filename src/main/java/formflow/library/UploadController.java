@@ -66,10 +66,7 @@ public class UploadController extends FormFlowController {
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
-      log.info("cloud repo upload attempt");
       cloudFileRepository.upload(uploadLocation, file);
-
-      log.info("cloud repo upload done");
 
       UserFile uploadedFile = UserFile.builder()
           .submission_id(submission)
@@ -77,8 +74,6 @@ public class UploadController extends FormFlowController {
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
           .mimeType(file.getContentType()).build();
-
-      log.info("now going to save");
 
       UUID newFileId = uploadedFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
@@ -107,7 +102,7 @@ public class UploadController extends FormFlowController {
         }
       }
       userFileMap.put(newFileId, fileInfo);
-
+      
       return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
