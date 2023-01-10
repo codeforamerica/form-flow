@@ -59,8 +59,8 @@ Table of Contents
     * [Spring Profile: `dev`](#spring-profile--dev)
     * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
     * [IntelliJ Setup](#intellij-setup)
-      * [Set Java SDK](#set-java-sdk)
-      * [Testing](#testing)
+        * [Set Java SDK](#set-java-sdk)
+        * [Testing](#testing)
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
@@ -292,7 +292,10 @@ see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validat
 
 ### Custom Validations
 
-We also implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use them the same way you would any other JavaX validator, like so:
+We also
+implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use
+them the same way you would any other JavaX validator, like so:
+
 ```java
 @Money(message = "Please make sure to enter a valid dollar amount.")
 private String income;
@@ -586,7 +589,24 @@ form-flow:
 
 This will prevent a user from uploading any file that is larger than this set limit.
 
-Note that the number value is in Megabytes.
+Notice that the number value is in Megabytes but does not need the trailing MB.
+
+**Note:** if this value is not set, then the server will use it's default value of 1MB preventing
+any
+uploads larger than 1MB. When configuring this value, be sure to also
+set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
+and `server.tomcat.max-http-form-post-size` to be equal to the set value, in MB. Example below:
+
+```yaml
+spring:
+  servlet:
+  multipart:
+    max-file-size: ${form-flow.uploads.max-file-size}MB
+    max-request-size: ${form-flow.uploads.max-file-size}MB
+server:
+  tomcat:
+    max-http-form-post-size: ${form-flow.uploads.max-file-size}MB
+```
 
 #### Max number of files
 
@@ -765,7 +785,8 @@ flow:
   otherFlowScreen:
 ```
 
-You can have autocomplete and validation for flows-config by connecting your IntelliJ to the flows-config-schema.json [as described here.](https://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
+You can have autocomplete and validation for flows-config by connecting your IntelliJ to the
+flows-config-schema.json [as described here.](https://github.com/codeforamerica/form-flow-starter-app#applying-live-templates-to-your-intellij-ide)
 
 ### Screens
 
@@ -972,15 +993,20 @@ choose `Spring Boot -> Active profiles`. This should add the `Active Profiles` f
 form for you to fill in.
 
 ## IntelliJ Setup
-This is the minimum IDE setup to contribute to the project, instructions for installing additional tools like live templates, yaml validation, and more can be found [in the starter-app README here.](https://github.com/codeforamerica/form-flow-starter-app#intellij-setup)
+
+This is the minimum IDE setup to contribute to the project, instructions for installing additional
+tools like live templates, yaml validation, and more can be
+found [in the starter-app README here.](https://github.com/codeforamerica/form-flow-starter-app#intellij-setup)
 
 ### Set Java SDK
-- Set the Project SDK to Java 17 in `File -> Project Structure -> SDK` 
+
+- Set the Project SDK to Java 17 in `File -> Project Structure -> SDK`
 - Enable annotation processing
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
 - Set the Gradle JVM version to `17 Eclipse Temurin version 17.0.5`
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
-- Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.5` in `File > Project Structure`
+- Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.5`
+  in `File > Project Structure`
 
 ### Setup Platform Flavored Google Styles for Java ##
 
