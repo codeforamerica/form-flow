@@ -6,6 +6,7 @@ import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
+import formflow.library.data.SubmissionHandler;
 import formflow.library.data.SubmissionRepositoryService;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -614,7 +615,7 @@ public class ScreenController extends FormFlowController {
       submission.mergeFormDataWithSubmissionData((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
     }
 
-    model.put("submission", submission);
+    model.put("submissionHandler", new SubmissionHandler(submission));
     model.put("inputData", submission.getInputData());
 
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
