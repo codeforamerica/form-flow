@@ -1,0 +1,4 @@
+name: uploadFlow
+flow:
+  upload:
+    nextScreens: null
