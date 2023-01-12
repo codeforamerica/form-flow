@@ -20,8 +20,8 @@ public class UploadJourneyTest extends AbstractBasePageTest {
   }
 
   @Test
-  void shouldDoSomeStuff() {
+  void runQunitTests() {
     takeSnapShot("uhmmmm.png");
-    assertThat(testPage.getTitle()).isEqualTo("✔ Upload Test");
+    assertThat(testPage.getHtml()).contains("O failed.");
   }
 }

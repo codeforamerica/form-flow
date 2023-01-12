@@ -293,6 +293,10 @@ public class Page {
     inputToSelect.click();
   }
 
+  public String getHtml() {
+    return driver.getPageSource();
+  }
+
 //  public void chooseSentiment(Sentiment sentiment) {
 //    driver.findElement(
 //            By.cssSelector(String.format("label[for='%s']", sentiment.name().toLowerCase())))
