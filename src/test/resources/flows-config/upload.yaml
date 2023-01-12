@@ -1,4 +1,4 @@
 name: uploadFlow
 flow:
-  upload:
+  docUpload:
     nextScreens: null

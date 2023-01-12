@@ -12,7 +12,7 @@
     <div class="grid">
       <div th:replace="fragments/goBack :: goBackLink"></div>
       <main id="content" role="main" class="form-card spacing-above-35"
-            th:with="dzFormName='doc-upload-files'">
+            th:with="dzFormName='uploadTest'">
         <th:block
             th:replace="'fragments/cardHeader' :: cardHeader(header='Upload Test')"/>
         <th:block
@@ -44,6 +44,10 @@
   QUnit.module('add', function () {
     QUnit.test('two numbers', function (assert) {
       assert.equal(add(1, 2), 3);
+    });
+    QUnit.test('dropzone loads', function (assert) {
+      assert.equal(window['myDropzoneuploadTest'].options.acceptedFiles,
+          ".jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp");
     });
   });
 </script>

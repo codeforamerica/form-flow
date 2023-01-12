@@ -2,7 +2,6 @@ package formflow.library.utilities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +15,10 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import({WebDriverConfiguration.class})
 @ActiveProfiles("test")
 public abstract class AbstractBasePageTest {
@@ -40,11 +37,12 @@ public abstract class AbstractBasePageTest {
   protected String localServerPort;
 
   protected Page testPage;
+  protected String startingPage = "";
 
   @BeforeEach
   protected void setUp() throws IOException {
     initTestPage();
-    baseUrl = "http://localhost:%s".formatted(localServerPort);
+    baseUrl = "http://localhost:%s/%s".formatted(localServerPort, startingPage);
     driver.navigate().to(baseUrl);
   }
 
