@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/upload.yaml"}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-upload.yaml"}, webEnvironment = RANDOM_PORT)
 public class UploadJourneyTest extends AbstractBasePageTest {
 
   @Override
@@ -21,9 +21,8 @@ public class UploadJourneyTest extends AbstractBasePageTest {
 
   @Test
   void runQunitTests() {
-    takeSnapShot("uhmmmm.png");
-    // wait for element with id 'qunit-testresult-display' to contain the text '0 failed'
-//    await().until(() -> driver.findElement(By.id("qunit-testresult-display")).getText().contains("0 failed"));
+    takeSnapShot("src/test/resources/qunit-results.png");
+    assertThat(testPage.getElementText("qunit-testresult-display")).doesNotContain("global failure");
     assertThat(testPage.getElementText("qunit-testresult-display")).contains("0 failed");
   }
 }
