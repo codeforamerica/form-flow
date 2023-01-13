@@ -1,6 +1,6 @@
 -- This will make the original file_id a column a uuid column
-create extension if not exists "uuid-ossp";
-alter table user_files add column new_id uuid DEFAULT uuid_generate_v4();
+
+alter table user_files add column new_id uuid DEFAULT gen_random_uuid();
 alter table user_files drop column file_id;
 alter table user_files rename column new_id to file_id;
 alter table user_files alter column file_id set not null;
