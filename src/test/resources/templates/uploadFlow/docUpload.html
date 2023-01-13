@@ -2,6 +2,7 @@
 <html th:lang="${#locale.language}">
 <head th:replace="fragments/head :: head(title='Upload Test')"></head>
 <script src="https://code.jquery.com/qunit/qunit-2.19.3.js"></script>
+<script src="/webjars/form-flow/0.0.1/js/qunit-upload-tests.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.3.css">
 <body>
 <div id="qunit"></div>
@@ -34,49 +35,6 @@
 </div>
 <script>
   FormFlowDZ.hideContinueIfNoFiles('uploadTest', 'submit');
-</script>
-<script>
-  QUnit.module('Dropzone', function () {
-    const dzInstance = window['myDropZoneuploadTest'];
-
-    QUnit.testStart(function () {
-      dzInstance.removeAllFiles();
-    });
-
-    QUnit.test('loads accepted files from application.yaml', function (assert) {
-      assert.equal(dzInstance.options.acceptedFiles,
-          ".jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp");
-    });
-
-    QUnit.test('deleting an upload file removes it from the page', function (assert) {
-      // Upload a file
-      const file = new File([""], "test.pdf", {type: "application/pdf"});
-      dzInstance.addFile(file);
-
-      // Wait for file to upload
-      dzInstance.on("success", function () {
-        // Check file is on page
-        assert.equal(document.querySelectorAll('.dz-preview').length, 1);
-      });
-
-      // Delete file
-      document.querySelector('.dz-remove').click();
-      // Check file is no longer on page
-      assert.equal(document.querySelectorAll('.dz-preview').length, 0);
-      // Assert the dzInstance has no files
-      assert.equal(dzInstance.files.length, 0);
-
-      // // Click the delete button
-      // $.findElementById('uploadTest').findElementByClassName('dz-remove').click();
-      //
-      // // Assert that the file is no longer on the page
-      // assert.equal($.findElementById('uploadTest').findElementsByClassName('dz-preview').length, 0);
-    });
-  });
-
-  QUnit.testDone(function(){
-    document.querySelector("#uploadTest").className += " display-none";
-  });
 </script>
 </body>
 </html>

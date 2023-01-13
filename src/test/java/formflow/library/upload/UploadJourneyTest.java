@@ -1,6 +1,6 @@
 package formflow.library.upload;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import formflow.library.utilities.AbstractBasePageTest;
@@ -22,6 +22,8 @@ public class UploadJourneyTest extends AbstractBasePageTest {
   @Test
   void runQunitTests() {
     takeSnapShot("uhmmmm.png");
-    assertThat(testPage.getHtml()).contains("O failed.");
+    // wait for element with id 'qunit-testresult-display' to contain the text '0 failed'
+//    await().until(() -> driver.findElement(By.id("qunit-testresult-display")).getText().contains("0 failed"));
+    assertThat(testPage.getElementText("qunit-testresult-display")).contains("0 failed");
   }
 }
