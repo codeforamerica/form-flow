@@ -1,8 +1,8 @@
 package formflow.library.inputs;
 
+import formflow.library.data.FlowInputs;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -11,11 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @TestConfiguration
 @SuppressWarnings("unused")
-public class TestFlow {
-
-  // Ignore csrf for validation
-  @Transient
-  String _csrf;
+public class TestFlow extends FlowInputs {
 
   @NotBlank(message = "{validations.make-sure-to-provide-a-first-name}")
   String firstName;
