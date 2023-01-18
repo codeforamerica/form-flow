@@ -1,11 +1,11 @@
-
 QUnit.module('Dropzone', function () {
   QUnit.testStart(function () {
     window['myDropZoneuploadTest'].removeAllFiles();
   });
 
   QUnit.test('loads accepted files from application.yaml', assert => {
-    assert.equal(window['myDropZoneuploadTest'].options.acceptedFiles, ".jpeg, .fake");
+    assert.equal(window['myDropZoneuploadTest'].options.acceptedFiles,
+        ".jpeg, .fake");
   });
 
   QUnit.test('loads max file size from application.yaml', assert => {
@@ -13,7 +13,7 @@ QUnit.module('Dropzone', function () {
   });
 
   QUnit.test('loads max number of files from application.yaml', assert => {
-    assert.equal(window['myDropZoneuploadTest'].options.maxFiles, "3");
+    assert.equal(window['myDropZoneuploadTest'].options.maxFiles, "5");
   });
 
   QUnit.test('loads thumbnail height/width from application.yaml', assert => {
