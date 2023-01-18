@@ -3,7 +3,7 @@ form-flow:
   inputs: 'formflow.library.inputs.'
   uploads:
     accepted-file-types: '.jpeg, .fake'
-    max-files: '3'
+    max-files: '5'
     max-file-size: '17'
     thumbnail-width: '100'
     thumbnail-height: '50'

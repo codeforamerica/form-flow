@@ -12,12 +12,12 @@ import org.openqa.selenium.By;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-upload.yaml"}, webEnvironment = RANDOM_PORT)
-public class UploadJourneyTest extends AbstractBasePageTest {
+public class UploadUnitTests extends AbstractBasePageTest {
 
   @Override
   @BeforeEach
   public void setUp() throws IOException {
-    startingPage = "uploadFlow/docUpload";
+    startingPage = "uploadFlow/docUploadUnit";
     super.setUp();
   }
 
