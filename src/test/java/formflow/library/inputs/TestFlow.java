@@ -27,7 +27,7 @@ public class TestFlow {
   String dateYear;
   String numberInput;
   ArrayList<String> checkboxSet;
-  String checkboxInput;
+  ArrayList<String> checkboxInput;
   String radioInput;
   String selectInput;
   String moneyInput;

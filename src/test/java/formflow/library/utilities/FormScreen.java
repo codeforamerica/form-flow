@@ -120,7 +120,6 @@ public class FormScreen {
         .filter(element -> element.hasAttr("checked"))
         .map(element -> element.attr("value"))
         .toList();
-
   }
 
   public String getCheckboxValue(String inputName) {

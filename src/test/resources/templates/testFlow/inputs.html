@@ -31,13 +31,13 @@
                           content=~{::checkboxContent})">
                   <th:block th:ref="checkboxContent">
                     <th:block
-                        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='checkboxSet',value='Checkbox A', label='Checkbox A')"/>
+                        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='checkboxSet', value='Checkbox-A', label='Checkbox A')"/>
                     <th:block
-                        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='checkboxSet',value='Checkbox B', label='Checkbox B')"/>
+                        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='checkboxSet', value='Checkbox-B', label='Checkbox B')"/>
                   </th:block>
                 </th:block>
                 <th:block
-                    th:replace="'fragments/inputs/checkbox' :: checkbox(inputName='checkboxInput',value='checkbox value', label='Single checkbox')"/>
+                    th:replace="'fragments/inputs/checkbox' :: checkbox(inputName='checkboxInput', value='checkbox-value', label='Single checkbox')"/>
                 <th:block th:replace="'fragments/inputs/radioFieldset' ::
                           radioFieldset(inputName='radioInput',
                           label='radioInput',
