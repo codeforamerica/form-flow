@@ -1,13 +1,10 @@
 package formflow.library.inputs;
 
-import javax.persistence.Transient;
+import formflow.library.data.FlowInputs;
 import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
-public class UploadFlow {
+public class UploadFlow extends FlowInputs {
 
-  // Ignore csrf for validation
-  @Transient
-  String _csrf;
   String uploadTest;
 }
