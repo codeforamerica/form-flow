@@ -6,6 +6,7 @@
     th:with="
       hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
+      name=${inputName} + '[]',
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
@@ -18,11 +19,12 @@
     <label th:for="${inputName} + '-' + ${value}"
            th:id="${inputName} + '-' + ${value} + '-label'"
            class="checkbox display-flex">
+      <input type="hidden" th:id="${inputName} + 'Hidden'" th:name="${name}" value="">
       <input type="checkbox"
              th:id="${inputName} + '-' + ${value}"
              th:value="${value}"
-             th:name="${inputName}"
-             th:with="checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(inputName, ''), value)}"
+             th:name="${name}"
+             th:with="checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(name, ''), value)}"
              th:checked="${checked}"
              th:attr="
               aria-invalid=${hasError},
@@ -33,7 +35,7 @@
       <div>
         <span th:text="${label}"></span>
         <p th:if="${hasHelpText}"
-           th:id="${inputName} + '-' + ${value} + '-help-text'"
+           th:id="${name} + '-' + ${value} + '-help-text'"
            th:text="${checkboxHelpText}"
            class="text--help with-no-padding"></p>
       </div>
