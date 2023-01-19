@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html th:lang="${#locale.language}">
 <head th:replace="fragments/head :: head(title='Upload Documents')"></head>
-<body>
+<body th:with="dzFormName='uploadTest'">
 <div class="page-wrapper" id="uploadTest">
   <div th:replace="fragments/toolbar :: toolbar"></div>
   <section class="slab">
     <div class="grid">
       <div th:replace="fragments/goBack :: goBackLink"></div>
-      <main id="content" role="main" class="form-card spacing-above-35"
-            th:with="dzFormName='uploadTest'">
+      <main id="content" role="main" class="form-card spacing-above-35">
         <th:block
             th:replace="'fragments/cardHeader' :: cardHeader(header='Upload Documents')"/>
         <th:block
@@ -29,7 +28,7 @@
   </section>
 </div>
 <script>
-  FormFlowDZ.hideContinueIfNoFiles('uploadTest', 'submit');
+  FormFlowDZ.hideContinueIfNoFiles('[[${dzFormName}]]', 'submit');
 </script>
 </body>
 </html>
