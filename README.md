@@ -328,8 +328,8 @@ extend the class `FlowInputs` which provides CSRF functionality for security.
 Also note that for single value inputs the type when defining the input is String. However, for
 input types that can contain more than one value, the type is ArrayList<String>.
 
-When naming your inputs in your templates, make sure that you use camel case so that the given input
-name can also be used as a field name in your inputs class.
+When naming your inputs in your templates, **you must use camel case so that the given input
+name can also be used as a field name in your inputs class**. Java will require that to be the case.
 
 ```java
 class ApplicationInformation extends FlowInputs {
