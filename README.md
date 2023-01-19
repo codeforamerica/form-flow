@@ -321,13 +321,18 @@ The library will expect a class that matches the name of the flow there. So if t
 defined in the application's `flows-config.yaml` configuration, is `ubi` we will expect a class by
 the name of `Ubi` to be located at the specified input path.
 
-An example inputs class can be seen below, with example validations.
+An example inputs class can be seen below, with example validations. Note that all inputs classses
+should
+extend the class `FlowInputs` which provides CSRF functionality for security.
 
-Please note that for single value inputs the type when defining the input is String. However, for
+Also note that for single value inputs the type when defining the input is String. However, for
 input types that can contain more than one value, the type is ArrayList<String>.
 
+When naming your inputs in your templates, **you must use camel case so that the given input
+name can also be used as a field name in your inputs class**. Java will require that to be the case.
+
 ```java
-class ApplicationInformation {
+class ApplicationInformation extends FlowInputs {
 
   @NotBlank(message = "{personal-info.provide-first-name}")
   String firstName;

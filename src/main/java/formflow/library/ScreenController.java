@@ -636,7 +636,7 @@ public class ScreenController extends FormFlowController {
   private Map<String, Object> removeEmptyValuesAndFlatten(MultiValueMap<String, String> formData) {
     return formData.entrySet().stream()
         .peek(entry -> {
-          // An empty checkboxSet has a hidden value of "" which needs to be removed
+          // An empty checkbox/checkboxSet has a hidden value of "" which needs to be removed
           if (entry.getKey().contains("[]") && entry.getValue().size() == 1) {
             entry.setValue(new ArrayList<>());
           }
