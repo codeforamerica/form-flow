@@ -541,6 +541,21 @@ The template HTML can look like:
 
 The IntelliJ Live Template for the above example can be generated with `cfa:staticPage`.
 
+#### Error Page
+
+A generic error page is provided by the library in place of a white label page. In order to see the
+error page you will need to add the following to your application's `application.yaml` file:
+
+```yaml
+server:
+  error:
+    whitelabel:
+      enabled: false
+```
+
+You can also override our error page by placing your own `error.html` file in your application's
+templates folder.
+
 ### Fragments
 
 #### Form
