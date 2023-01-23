@@ -1,6 +1,7 @@
 package formflow.library;
 
 import com.google.common.io.Files;
+import formflow.library.config.LocaleLibraryConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -105,7 +106,10 @@ public class UploadController extends FormFlowController {
       return ResponseEntity.status(HttpStatus.OK).body(newFileId);
     } catch (Exception e) {
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      LocaleLibraryConfiguration localeLibraryConfiguration = new LocaleLibraryConfiguration();
+      // TODO update when we add internationalization to use locale for message source
+      String message = localeLibraryConfiguration.messageSource().getMessage("upload-documents.file-upload-error", null, null);
+      return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
