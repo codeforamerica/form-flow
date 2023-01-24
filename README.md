@@ -29,7 +29,7 @@ Table of Contents
         * [Templates](#templates)
         * [Static Pages](#static-pages)
         * [Fragments](#fragments)
-        * [Inputs](#inputs)
+        * [Input Types](#input-types)
         * [Accessing Conditions](#accessing-conditions)
         * [Accessing Submission Object](#accessing-submission-object)
     * [Document Upload](#document-upload)
