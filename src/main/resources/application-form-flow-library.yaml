@@ -1,0 +1,9 @@
+logging:
+  level:
+    root: INFO
+    org.springframework.web: ERROR
+
+spring:
+  flyway:
+    placeholders:
+      uuid_function: "gen_random_uuid"
