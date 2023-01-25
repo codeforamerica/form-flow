@@ -793,8 +793,6 @@ are the same. This is how the fieldset and internal checkbox options are grouped
 multiple checkbox
 input.
 
-Convenience
-
 #### Checkbox
 
 ```html
