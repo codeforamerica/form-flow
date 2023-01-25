@@ -48,7 +48,7 @@ public class UserFile {
   @Id
   @GeneratedValue
   //@Type(type = "org.hibernate.type.UUIDCharType")
-  @Type(type = "pg-uuid")
+  //@Type(type = "pg-uuid")
   private UUID file_id;
 
   @ManyToOne

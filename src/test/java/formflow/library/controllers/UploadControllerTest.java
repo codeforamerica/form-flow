@@ -77,7 +77,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
             .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().is(200))
-        .andExpect(content().string(String.valueOf(fileId)));
+        .andExpect(content().string(fileId.toString()));
 
     verify(cloudFileRepository, times(1)).upload(any(), any());
     UserFile testUserFile = new UserFile(
@@ -106,6 +106,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
 
     @BeforeEach
     void setUp() {
+      // reset submission.
+      submission = Submission.builder().id(1L).build();
       UserFile testUserFile = UserFile.builder().submission_id(submission).build();
       when(submissionRepositoryService.findById(1L)).thenReturn(Optional.ofNullable(submission));
       when(submissionRepositoryService.findById(2L)).thenReturn(Optional.ofNullable(submission));
@@ -125,7 +127,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
           ), "thumbnail"));
       dzWidgets.put(dzWidgetInputName, userFiles);
       session = new MockHttpSession();
-      session.putValue("id", fileId);
+      session.putValue("id", submission.getId());
       session.putValue("userFiles", dzWidgets);
     }
 

@@ -16,6 +16,7 @@ import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -102,8 +103,8 @@ public class UploadController extends FormFlowController {
         }
       }
       userFileMap.put(newFileId, fileInfo);
-      
-      return ResponseEntity.status(HttpStatus.OK).body(newFileId);
+
+      return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
       LocaleLibraryConfiguration localeLibraryConfiguration = new LocaleLibraryConfiguration();
@@ -133,13 +134,13 @@ public class UploadController extends FormFlowController {
 
       Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
       if (maybeFile.isEmpty()) {
-        log.error(String.format("File with id %d may have already been deleted", fileId));
+        log.error(String.format("File with id %s may have already been deleted", fileId));
         return new RedirectView("/error");
       }
 
       UserFile file = maybeFile.get();
       if (!submissionId.equals(file.getSubmission_id().getId())) {
-        log.error(String.format("Submission %d does not match file %d's submission id %d", submissionId, fileId,
+        log.error(String.format("Submission %d does not match file %s's submission id %d", submissionId, fileId,
             file.getSubmission_id().getId()));
         return new RedirectView("/error");
       }

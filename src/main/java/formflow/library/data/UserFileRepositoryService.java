@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Transactional
+@Slf4j
 public class UserFileRepositoryService {
 
   UserFileRepository repository;
@@ -45,6 +46,7 @@ public class UserFileRepositoryService {
    * @param id UUID of UserFile to remove, not null
    */
   public void deleteById(UUID id) {
+    log.info(String.format("Deleting file with id: '%s'", id));
     repository.deleteById(id);
   }
 }
