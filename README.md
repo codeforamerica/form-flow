@@ -1478,8 +1478,7 @@ of your previous
 settings. So we're going to use a copy/paste approach.
 
 1. Open the [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) from the root
-   of
-   this repo
+   of this repo
 2. Copy the whole file
 3. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
 4. If there isn't a template group already called CfA, create one by pressing the "+" in the top
