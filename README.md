@@ -790,13 +790,13 @@ permits.
 ### Address Validation
 
 `Form-flow` will support address validation through [Smarty](https://www.smarty.com/). Configuration
-information for smarty can be found [here].
+information for smarty can be found [here](#smarty).
 
 #### Smarty
 
 ##### How to configure
 
-Please use the `sample.env` as an example for creating the `.env` a form-flow application. A **
+Please use the `sample.env` as an example for creating the `.env` for a form-flow application. A **
 smarty** auth-token and auth-id must be passed into our `application.yaml` file in order to the
 address validation to work.
 
