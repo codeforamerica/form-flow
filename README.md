@@ -639,7 +639,7 @@ Text inputs are used to gather text input from the user. They can be used to gat
 names, addresses, and emails, etc.
 
 Text inputs have an optional placeholder parameter which can be used to display a placeholder within
-rendered input field.
+the rendered input field.
 
 Example of using a text input:
 
@@ -661,7 +661,8 @@ optional parameters for `placeholder`, `rows`, and `maxlength`. The `rows` param
 many rows
 the textarea will display by default, where the `maxlength` parameter controls how many characters
 are
-allowed to be entered.
+allowed to be entered. Both `rows` and `maxlength` are provided as integers. Rows will default to 6
+if no value is passed and maxlength will default to 500 if no value is passed.
 
 A convenience live template for text area inputs is provided through `cfa:inputTextArea`.
 
@@ -689,7 +690,7 @@ the middle 2 digits and the last 4 like so: 123-45-6789.
 SSN inputs also have an optional `placeholder` parameter which can be passed to provide a
 placeholder.
 
-A convenience live template for date's is provided through `cfa:inputSSN`.
+A convenience live template for SSN inputs is provided through `cfa:inputSSN`.
 
 ### Money
 
@@ -700,7 +701,7 @@ parameter.
 We also provide a convenience validator for money inputs, `@Money`
 which validates that entered values are valid monetary values.
 
-A convenience live template for date's is provided through `cfa:inputMoney`.
+A convenience live template for money inputs is provided through `cfa:inputMoney`.
 
 ### Phone
 
@@ -714,7 +715,7 @@ A convenience live template for phone inputs is provided through `cfa:inputPhone
 
 ### YesOrNo
 
-Yes or no inputs are used to gather a yes or no answer from a user. They are visually displayed as
+Yes or no inputs are used to gather a yes or no answers from a user. They are visually displayed as
 two buttons, one with a green check and the word `Yes`, the other with a red X and the word `No`.
 The values that are submitted to the server are `true` and `false` respectively.
 
@@ -728,8 +729,9 @@ with the `cfa:screenWithOneInput` live template.
 
 The Yes or No input has an optional but recommended `ariaDescribe` parameter which takes the string
 value
-of the HTML ID of the element that describes the input. Most often this is `header` which is the ID
-of page headers in the form-flow library.
+of the HTML ID of the element that describes the input. Most often this is `header` which is the
+default
+ID of page headers in the form-flow library.
 
 A convenience live template for yes or no inputs is provided through `cfa:inputYesOrNo`.
 
@@ -784,8 +786,14 @@ Below are examples of both types of checkboxes:
 </th:block>
 ```
 
-Note that the `checkboxInSet` fragment is used for provide multiple options within
-a `checkboxFieldset` fragment.
+Note that the `checkboxInSet` fragment is used to provide multiple options within
+a `checkboxFieldset` fragment. Also note that the input name fo the `checkboxFieldset` and
+the `checkboxInSet`
+are the same. This is how the fieldset and internal checkbox options are grouped into a single
+multiple checkbox
+input.
+
+Convenience
 
 #### Checkbox
 
@@ -803,7 +811,7 @@ help text below the legend.
 
 For convenience, we have provided a `cfa:inputFieldsetWithCheckbox` live template which can be used
 to quickly
-create groupings of checkbox inputs. Not that when using this template, you can copy the inner
+create groupings of checkbox inputs. Note that when using this template, you can copy the inner
 checkbox option fragment
 as many times as you like to create the necessary number of checkbox options.
 
@@ -883,9 +891,11 @@ Note that we use three seperate fragments here, `select`, `selectOptionPlacehold
 and `selectOption`.
 
 `select` wraps the internal options and provides a label and optional help text for the grouping.
-`selectOptionPlaceholder` is used to provide a placeholder option that will be displayed when but
+`selectOptionPlaceholder` is used to provide a placeholder option that will be displayed but
 not
-selectable. It will appear greyed out to the user.
+selectable. It will appear greyed out to the user. This should typically be the first item in the
+list of
+possible selections.
 `selectOption` represents a selectable option where value represents what will be submitted to the
 server
 if that option is selected and optionText is the text that will be displayed to the user.
