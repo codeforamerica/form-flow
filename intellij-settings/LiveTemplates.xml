@@ -189,7 +189,14 @@
   <option name="HTML" value="true" />
 </context>
 </template>
-<template name="cfa:inputYesOrNo" value="&lt;th:block th:replace=&quot;fragments/inputs/yesOrNo :: yesOrNo(&#10;  inputName='$INPUT_NAME$',&#10;  helpText=#{$HELP_TEXT$})&quot;/&gt;" description="An input that is a yes or no question with optional help text" toReformat="false" toShortenFQNames="true">
+<template name="cfa:inputYesOrNo" value="&lt;th:block th:replace=&quot;fragments/inputs/yesOrNo :: yesOrNo(&#10;  inputName='$INPUT_NAME$',&#10;  ariaDescribe='#{$ARIA_DESCRIBE$}',&#10;  helpText=#{$HELP_TEXT$})&quot;/&gt;" description="An input that is a yes or no question with optional help text" toReformat="false" toShortenFQNames="true">
+<variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="ARIA_DESCRIBE" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
+<context>
+  <option name="HTML" value="true" />
+</context>
+</template>
 <variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
 <context>
