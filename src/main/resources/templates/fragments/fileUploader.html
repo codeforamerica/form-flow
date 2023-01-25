@@ -8,7 +8,7 @@
     <div class="dropzone needsclick" th:id="${'document-upload-' + inputName}">
       <div th:id="${'max-files-reached-' + inputName}">
         <div class='max-files spacing-below-35 display-none' id="max-files"
-             th:text='#{general.files.maximum-number-of-files}'></div>
+             th:text='#{upload-documents.error-maximum-number-of-files}'></div>
       </div>
       <div th:id="${'drag-and-drop-box-' + inputName}"
            class="drag-and-drop-box spacing-below-35 spacing-above-35 grid"
@@ -244,8 +244,8 @@
       maxFilesize: maxFileSize,
       dictFileTooBig: [[#{upload-documents.this-file-is-too-large(0)}]].toString().replace("0",
           maxFileSize),
-      dictMaxFilesExceeded: [[#{general.files.maximum-number-of-files}]],
-      dictInvalidFileType: [[#{error.files.invalid-file-type}]]
+      dictMaxFilesExceeded: [[#{upload-documents.error-maximum-number-of-files}]],
+      dictInvalidFileType: [[#{upload-documents.error-invalid-file-type}]]
           + ' '
           + [[${@environment.getProperty('form-flow.uploads.accepted-file-types')}]].toString().replaceAll(
               ",", ", "),
@@ -297,7 +297,14 @@
           removeLink.innerText = [[#{general.cancel}]].toLowerCase();
           thumbnail.classList.add("hidden");
           window['isUploadComplete' + [[${inputName}]]] = false;
-
+          if (file.type.includes('heic')) {
+            window[dropzonePrefix + [[${inputName}]]].emit("error", file,
+                [[#{upload-documents.error-heic}]]);
+          }
+          if (file.type.includes('tif') || file.type.includes('tiff')) {
+            window[dropzonePrefix + [[${inputName}]]].emit("error", file,
+                [[#{upload-documents.error-tiff}]]);
+          }
           if (!file.type.includes("image")) {
             setDefaultThumbnail(file);
           }
