@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    group:
+      test:
+        - test
+        - form-flow-library-test
