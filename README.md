@@ -226,7 +226,7 @@ and provides options to edit or delete a single iteration.
 This screen does not need to be demarked with `subflow: subflowName` in the `flows-config.yaml`. It
 is not technically part of the repeating screens within a subflow, however, you do visit this screen
 at the end of each iteration to show iterations completed so far and ask the user if they would like
-to add another?
+to add another.
 
 #### Delete Confirmation Screen
 
@@ -789,15 +789,14 @@ permits.
 
 ### Address Validation
 
-`Form-flow` will support address validation through [Smarty](https://www.smarty.com/). Configuration
-information for smarty can be found [here](#smarty).
+`Form-flow` will support address validation through [Smarty](https://www.smarty.com/).
 
 #### Smarty
 
 ##### How to configure
 
 Please use the `sample.env` as an example for creating the `.env` for a form-flow application. A **
-smarty** auth-token and auth-id must be passed into our `application.yaml` file in order to the
+smarty** auth-token and auth-id must be passed into our `application.yaml` file in order for the
 address validation to work.
 
 ```yaml
