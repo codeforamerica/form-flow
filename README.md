@@ -795,8 +795,8 @@ permits.
 
 ##### How to configure
 
-Please use the `sample.env` as an example for creating the `.env` for a form-flow application. A **
-smarty** auth-token and auth-id must be passed into our `application.yaml` file in order for the
+Please use the `sample.env` as an example for creating the `.env` for a form-flow application.
+A `smarty` auth-token and auth-id must be passed into our `application.yaml` file in order for the
 address validation to work.
 
 ```yaml
