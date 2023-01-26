@@ -29,7 +29,7 @@ Table of Contents
         * [Templates](#templates)
         * [Static Pages](#static-pages)
         * [Fragments](#fragments)
-        * [Inputs](#inputs)
+        * [Input Types](#input-types)
         * [Accessing Conditions](#accessing-conditions)
         * [Accessing Submission Object](#accessing-submission-object)
     * [Document Upload](#document-upload)
@@ -592,7 +592,319 @@ into your template to quickly see a preview and names of icons:
 <th:block th:replace="fragments/icons :: icons-list"></th:block>
 ```
 
-### Inputs
+## Input Types
+
+Inputs are the building blocks of the form flow library. The library provides a set of input
+fragments
+which can be easily accessed using our live templates.
+
+Some inputs have optional parameters such as placeholder text.
+
+Note that **all** inputs have an optional help text parameter which can be used to provide further
+descriptive or helpful text if just a label is not enough.
+
+Optional parameters for all inputs can be used by adding them to the thymeleaf fragments passed
+parameters
+when you use the fragment like below:
+
+```html
+
+<th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName='firstName',
+                  label=#{personal-info.first-name-label},
+                  helpText=#{personal-info.first-name-help})"/>
+```
+
+Notice that in this example both the label and the optional help text are using the `#{}` syntax to
+indicate that they are pulling from a message.properties file for internationalization.
+
+Note that sometimes an input fragment may not need a label, for example if the only input on the
+page is labeled by the page header. In this case we recommend using the `cfa:screenWithOneInput`
+live
+template which we have provided. This template makes use of an `aria-label` referencing the header
+of
+the page instead of a traditional label.
+
+### Text
+
+Text inputs are used to gather text input from the user. They can be used to gather things like
+names, addresses, and emails, etc.
+
+Text inputs have an optional placeholder parameter which can be used to display a placeholder within
+the rendered input field.
+
+Example of using a text input:
+
+```html
+
+<th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName='firstName',
+                  label=#{personal-info.first-name-label},
+                  placeholder=#{personal-info.first-name-placeholder})"/>
+```
+
+A convenience fragment is provided through `cfa:inputText`.
+
+### Text Area
+
+Text area inputs are used to gather large amounts of text. They are usually used for things like
+asking for user feedback, or more detailed explanations for question answers. Textarea inputs have
+optional parameters for `placeholder`, `rows`, and `maxlength`. The `rows` parameter controls how
+many rows
+the textarea will display by default, where the `maxlength` parameter controls how many characters
+are
+allowed to be entered. Both `rows` and `maxlength` are provided as integers. Rows will default to 6
+if no value is passed and maxlength will default to 500 if no value is passed.
+
+A convenience live template for text area inputs is provided through `cfa:inputTextArea`.
+
+### Number
+
+Number inputs are used to gather numbers from users. The number input makes use of `type="number"`
+which
+will cause mobile devices to display the number pad when entering values into the input. The number
+input
+is useful for gathering numbers that don't already have a specific input type, such as the phone,
+money,
+date or SSN inputs. Number inputs have an optional `placeholder` parameter.
+
+A convenience live template for date's is provided through `cfa:inputNumber`.
+
+### Social Security Number
+
+The social security number input is provided specifically for asking users for their social security
+number.
+
+SSN inputs are visually displayed as three separate sections seperated by dashes, the first three
+digits,
+the middle 2 digits and the last 4 like so: 123-45-6789.
+
+SSN inputs also have an optional `placeholder` parameter which can be passed to provide a
+placeholder.
+
+A convenience live template for SSN inputs is provided through `cfa:inputSSN`.
+
+### Money
+
+Money inputs are used to gather monetary values. Visually, they are displayed as a single input with
+a dollar sign `$` prefixed in front of the input. Money inputs have an optional `placeholder`
+parameter.
+
+We also provide a convenience validator for money inputs, `@Money`
+which validates that entered values are valid monetary values.
+
+A convenience live template for money inputs is provided through `cfa:inputMoney`.
+
+### Phone
+
+Phone inputs are used to gather phone numbers. Visually, they are displayed as three seperate
+sections,
+the first three digits, the middle 3 digits and the last 4 like so: (123) 456-7890. This is also how
+entered
+values will be stored in the database. Phone inputs also have an optional `placeholder` parameter.
+
+A convenience live template for phone inputs is provided through `cfa:inputPhone`.
+
+### YesOrNo
+
+Yes or no inputs are used to gather a yes or no answers from a user. They are visually displayed as
+two buttons, one with a green check and the word `Yes`, the other with a red X and the word `No`.
+The values that are submitted to the server are `true` and `false` respectively.
+
+Yes or No inputs are traditionally used for simple yes or no questions, such as "Are you pregnant?"
+or
+"Do you have a disability?". Traditionally this input style is used on pages where the header is the
+question
+to which the user is answering yes or no. As such, we recommend using this input style in
+conjunction
+with the `cfa:screenWithOneInput` live template.
+
+The Yes or No input has an optional but recommended `ariaDescribe` parameter which takes the string
+value
+of the HTML ID of the element that describes the input. Most often this is `header` which is the
+default
+ID of page headers in the form-flow library.
+
+A convenience live template for yes or no inputs is provided through `cfa:inputYesOrNo`.
+
+### Checkbox
+
+We provide two types of checkbox inputs. One is a single `checkbox`, useful for things like asking a
+user
+to check the box if they agree to the terms of an application, etc. The other, `checkboxInSet` is
+used
+in unison with `checkboxFieldset` to create a group of checkboxes that are all related to each
+other.
+
+A checkbox uses the `value` field to indicate what value should be submitted to the server if that
+checkbox
+is selected.
+
+Note that both checkbox types have an optional `icon` field which can be used to display an icon
+next the checkbox. These icons are pulled from Google's Material Fonts
+and [Honeycrisp](https://honeycrisp.herokuapp.com/cfa/styleguide) provides some convenience access
+classes.
+For those listed in Honeycrisp, you just need to include the icon name, without the leading `icon-`.
+For example:
+
+```html
+
+<th:block th:replace="'fragments/inputs/checkbox' ::
+                  checkbox(inputName='agreeToTerms',
+                  value='agree',
+                  icon='check')"/>
+```
+
+For icons not listed in Honeycrisp you can use
+the [character codepoint for the icon](https://github.com/google/material-design-icons/blob/f5f56570741833bdd36463f1f1b6b7d4edd3f9c1/font/MaterialIconsOutlined-Regular.codepoints).
+
+Below are examples of both types of checkboxes:
+
+#### Checkbox in set
+
+```html
+
+<th:block th:replace="'fragments/inputs/checkboxFieldset' ::
+                          checkboxFieldset(inputName='vehiclesOwned',
+                          label='This label is actually a legend for the checkbox fieldset',
+                          fieldsetHelpText='This help text will appear below the legend',
+                          content=~{::vehiclesOwnedContent})">
+  <th:block th:ref="vehiclesOwnedContent">
+    <th:block
+        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')"/>
+    <th:block
+        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')"/>
+  </th:block>
+</th:block>
+```
+
+Note that the `checkboxInSet` fragment is used to provide multiple options within
+a `checkboxFieldset` fragment. Also note that the input name fo the `checkboxFieldset` and
+the `checkboxInSet`
+are the same. This is how the fieldset and internal checkbox options are grouped into a single
+multiple checkbox
+input.
+
+#### Checkbox
+
+```html
+
+<th:block th:replace="'fragments/inputs/checkbox' ::
+                  checkbox(inputName='agreeToTerms',
+                  label='I agree to the terms of service',
+                  checkboxHelpText='This help text will appear next to the checkbox')"/>
+```
+
+For both checkbox types note the difference between checkboxHelpText and fieldsetHelpText where
+checkboxHelpText is used for the help text next to the checkbox and fieldsetHelpText is used for the
+help text below the legend.
+
+For convenience, we have provided a `cfa:inputFieldsetWithCheckbox` live template which can be used
+to quickly
+create groupings of checkbox inputs. Note that when using this template, you can copy the inner
+checkbox option fragment
+as many times as you like to create the necessary number of checkbox options.
+
+### Radio
+
+Radio inputs are used to gather a single selection from a set of options. They are used in unison
+with
+a `radioFieldset` fragment to create a group of radio inputs that are all related to each other.
+
+A radio uses the `value` field to indicate what value should be submitted to the server if that
+radio
+is selected.
+
+An example of a radio input:
+
+```html
+
+<th:block th:replace="'fragments/inputs/radioFieldset' ::
+                          radioFieldset(inputName='favoriteColor',
+                          label='What\'s your favorite color?',
+                          fieldsetHelpText='The only true answer is blue',
+                          content=~{::favoriteColorContent})">
+  <th:block th:ref="favoriteColorContent">
+    <th:block
+        th:replace="'fragments/inputs/radio' :: radio(inputName='favoriteColor',value='BLUE', label='Blue')"/>
+    <th:block
+        th:replace="'fragments/inputs/radio' :: radio(inputName='favoriteColor',value='RED', label='Red')"/>
+    <th:block
+        th:replace="'fragments/inputs/radio' :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')"/>
+  </th:block>
+</th:block>
+```
+
+Notice how the `radioFieldset` fragment wraps multiple `radio` fragments, where both the fieldset
+and
+the radio use the same input name. This is how you create a group of radio inputs that are all
+associated
+with each other.
+
+Note that similar to `checkboxFieldset`, `radioFieldset` also has an optional `radioHelpText` field
+which will appear under the fieldsets legend.
+
+For convenience, we have provided a `cfa:inputFieldsetWithRadio` live template which can be used to
+quickly
+create groupings of radio inputs. Not that when using this template, you can copy the inner radio
+option fragment
+as many times as you like to create the necessary number of radio options.
+
+### Select
+
+Select inputs are used to gather a single selection from a set of options. They are usually used
+when
+you want a user to select one of many options, but you don't want to overwhelm them with a large
+list taking
+up the whole screen.
+
+An example select input:
+
+```html
+
+<th:block
+    th:replace="'fragments/inputs/select' :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})">
+  <th:block th:ref="favoriteFruitContent">
+    <th:block
+        th:replace="'fragments/inputs/selectOption' :: selectOption(value='', optionText='Choose one')"/>
+    <th:block
+        th:replace="'fragments/inputs/selectOption' :: selectOption(value='APPLE', optionText='Apple')"/>
+    <th:block
+        th:replace="'fragments/inputs/selectOption' :: selectOption(value='BANANA', optionText='Banana')"/>
+    <th:block
+        th:replace="'fragments/inputs/selectOption' :: selectOption(value='KIWI', optionText='Kiwi')"/>
+  </th:block>
+</th:block>
+```
+
+Note that we use three seperate fragments here, `select`, `selectOptionPlaceholder`,
+and `selectOption`.
+
+`select` wraps the internal options and provides a label and optional help text for the grouping.
+`selectOptionPlaceholder` is used to provide a placeholder option that will be displayed but
+not
+selectable. It will appear greyed out to the user. This should typically be the first item in the
+list of
+possible selections.
+`selectOption` represents a selectable option where value represents what will be submitted to the
+server
+if that option is selected and optionText is the text that will be displayed to the user.
+
+For convenience, we have provided a `cfa:inputSelectWithOption` live template which can be used to
+quickly
+create a grouping with a label and internal options which can be copied as many times as you need.
+We also
+provide a `cfa:selectOptionPlaceholder` live template which can be used to quickly create a
+placeholder option
+as mentioned above.
+
+### Date
+
+Date inputs are used to gather dates, such as birthdates, start dates for places of employment,
+etc.
+They are visually displayed as three separate inputs for Month, Day and Year in MM/DD/YYYY format.
+
+A convenience live template for date's is provided through `cfa:inputDate`.
 
 ### Accessing Conditions
 

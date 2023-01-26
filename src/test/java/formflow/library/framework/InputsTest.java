@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -13,12 +12,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-inputs.yaml"})
 @DirtiesContext()
 public class InputsTest extends AbstractMockMvcTest {
-
-  @Override
-  @BeforeEach
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
 
   @Test
   void shouldPersistInputValuesWhenNavigatingBetweenScreens() throws Exception {
