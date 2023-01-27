@@ -1099,13 +1099,13 @@ bucket. This will automatically delete files in your bucket that are older than 
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
-### Address Validation
+## Address Validation
 
 `Form-flow` will support address validation through [Smarty](https://www.smarty.com/).
 
-#### Smarty
+### Smarty
 
-##### How to configure
+#### How to configure
 
 Please use the `sample.env` as an example for creating the `.env` for a form-flow application.
 A `smarty` auth-token and auth-id must be passed into our `application.yaml` file in order for the
