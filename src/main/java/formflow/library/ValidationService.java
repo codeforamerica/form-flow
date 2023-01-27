@@ -69,6 +69,7 @@ public class ValidationService {
         } catch (NoSuchFieldException e) {
           throw new RuntimeException(e);
         }
+        // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
         if (!annotationNames.contains("javax.validation.constraints.NotNull") &&
             !annotationNames.contains("javax.validation.constraints.NotEmpty") &&
             !annotationNames.contains("javax.validation.constraints.NotBlank") &&

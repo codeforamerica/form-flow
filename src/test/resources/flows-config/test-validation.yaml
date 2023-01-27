@@ -8,6 +8,9 @@ flow:
       - name: pageWithCheckboxSetInput
   pageWithCheckboxSetInput:
     nextScreens:
+      - name: pageWithOptionalValidation
+  pageWithOptionalValidation:
+    nextScreens:
       - name: last
   last:
     nextScreens:
