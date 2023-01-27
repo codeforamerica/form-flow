@@ -1,5 +1,6 @@
 package formflow.library.upload;
 
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import formflow.library.utilities.AbstractBasePageTest;
@@ -28,15 +29,13 @@ public class UploadJourneyTests extends AbstractBasePageTest {
 
     // Test HEIC and TIFF/TIF files still throw an error even when they are in the list of accepted file types
     uploadFile("test.tif", "uploadTest");
-    Assertions.assertThat(testPage.findElementsByClass("text--error").get(0).getText())
-        .isEqualTo(
-            "We are unable to process TIFF files. Please convert your file to a JPG or PNG and try again.");
+    await().until(() -> testPage.findElementsByClass("text--error").get(0).getText()
+        .contains("We are unable to process TIFF files. Please convert your file to a JPG or PNG and try again."));
     testPage.clickLink("remove");
     Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
     uploadFile("test.heic", "uploadTest");
-    Assertions.assertThat(testPage.findElementsByClass("text--error").get(0).getText())
-        .isEqualTo(
-            "We are unable to process HEIC files. Please convert your file to a JPG or PNG and try again.");
+    await().until(() -> testPage.findElementsByClass("text--error").get(0).getText()
+        .contains("We are unable to process HEIC files. Please convert your file to a JPG or PNG and try again."));
     testPage.clickLink("remove");
     Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
     // Test accepted file types
