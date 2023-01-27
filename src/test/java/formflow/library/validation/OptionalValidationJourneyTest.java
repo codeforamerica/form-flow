@@ -31,8 +31,8 @@ public class OptionalValidationJourneyTest extends AbstractBasePageTest {
         testPage.goBack();
         Assertions.assertThat(testPage.getTitle()).isEqualTo("Optional validation page");
 
-
-        testPage.enter("validatePositiveIfNotEmpty", "0");
+        testPage.enter("validatePositiveIfNotEmpty", "-2");
+        System.out.println(testPage.getInputValue("validatePositiveIfNotEmpty"));
 
         testPage.clickContinue();
         Assertions.assertThat(testPage.hasInputError("validatePositiveIfNotEmpty")).isTrue();

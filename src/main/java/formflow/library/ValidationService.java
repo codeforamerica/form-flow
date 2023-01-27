@@ -48,6 +48,7 @@ public class ValidationService {
    */
   public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
     Class<?> clazz;
+    log.info("entering validation service");
     try {
       clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
     } catch (ReflectiveOperationException e) {
@@ -57,6 +58,7 @@ public class ValidationService {
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
     formDataSubmission.forEach((key, value) -> {
+      log.info(String.format("checking key %s", key));
       var messages = new ArrayList<String>();
       if (key.contains("[]")) {
         key = key.replace("[]", "");
@@ -74,6 +76,7 @@ public class ValidationService {
             !annotationNames.contains("javax.validation.constraints.NotEmpty") &&
             !annotationNames.contains("javax.validation.constraints.NotBlank") &&
             value.equals("")) {
+          log.info("skipping validation - found empty input for non-required field");
           return;
         }
       }
