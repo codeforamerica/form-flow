@@ -3,6 +3,9 @@ flow:
   inputs:
     nextScreens:
       - name: test
+  address:
+    nextScreens:
+      - name: test
   test:
     nextScreens:
       - name: success

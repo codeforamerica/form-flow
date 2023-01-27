@@ -2,6 +2,7 @@ package formflow.library.inputs;
 
 import formflow.library.data.FlowInputs;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -50,4 +51,20 @@ public class TestFlow extends FlowInputs {
 
   @Positive()
   String validatePositiveIfNotEmpty;
+
+  HashMap<String, HashMap<String, String>> address;
+  HashMap<String, HashMap<String, String>> addressValidated;
+
+//  "addressValidated" : {
+//    "testValidatedAddress": {
+//      "address1": "value 1",
+//      "city": "city value"
+//          "validate" : [true /false]
+//    },
+//
+//    "testUnvalidatedAddress": {
+//
+//    }
+//  }
+
 }

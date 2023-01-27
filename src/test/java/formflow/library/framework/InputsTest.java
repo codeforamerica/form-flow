@@ -85,6 +85,43 @@ public class InputsTest extends AbstractMockMvcTest {
   }
 
   @Test
+  void addressFragmentValidatesByDefault() throws Exception {
+    String streetAddress1 = "1111 N State St";
+    String streetAddress2 = "Apt 2";
+    String city = "Roswell";
+    String state = "NM - New Mexico";
+    String zipCode = "88201";
+
+    postExpectingNextPageTitle("address",
+        Map.ofEntries(
+            Map.entry("address[testValidatedAddress][streetAddress1]", List.of(streetAddress1)),
+            Map.entry("address[testValidatedAddress][streetAddress2]", List.of(streetAddress2)),
+            Map.entry("address[testValidatedAddress][city]", List.of(city)),
+            Map.entry("address[testValidatedAddress][state]", List.of(state)),
+            Map.entry("address[testValidatedAddress][zip]", List.of(zipCode)),
+            Map.entry("address[testUnvalidatedAddress][streetAddress1]", List.of(streetAddress1)),
+            Map.entry("address[testUnvalidatedAddress][streetAddress2]", List.of(streetAddress2)),
+            Map.entry("address[testUnvalidatedAddress][city]", List.of(city)),
+            Map.entry("address[testUnvalidatedAddress][state]", List.of(state)),
+            Map.entry("address[testUnvalidatedAddress][zip]", List.of(zipCode))
+        ),"Test");
+
+    var addressScreen = goBackTo("address]");
+
+    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][streetAddress1]")).isEqualTo(streetAddress1);
+    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][streetAddress2]")).isEqualTo(streetAddress2);
+    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][city]")).isEqualTo(city);
+    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][state]")).isEqualTo(state);
+    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][zip]")).isEqualTo(zipCode);
+
+    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress1]")).isEqualTo(streetAddress1);
+    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress2]")).isEqualTo(streetAddress2);
+    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][city]")).isEqualTo(city);
+    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][state]")).isEqualTo(state);
+    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][zip]")).isEqualTo(zipCode);
+  }
+
+  @Test
   void shouldShowCorrectNumberOfErrorMessagesOnInputs() throws Exception {
     var inputParams = Map.of(
         "inputWithMultipleValidations", "",
@@ -99,3 +136,4 @@ public class InputsTest extends AbstractMockMvcTest {
         expectedErrors);
   }
 }
+

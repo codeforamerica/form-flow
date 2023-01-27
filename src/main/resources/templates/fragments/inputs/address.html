@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<body>
+ <th:block
+   th:fragment="address(validate, inputName)"
+   th:with="validateAddress=${validate ? validate : true}"
+ >
+  <th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName=${'address[' + inputName + '][streetAddress1]'},
+                  label=#{homeAddress.streetAddress})" />
+  <th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName=${'address[' + inputName + '][streetAddress2]'},
+                  label=#{homeAddress.apartment})" />
+  <th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName=${'address[' + inputName + '][city]'},
+                  label=#{homeAddress.city})" />
+  <th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName='state',
+                  label=#{homeAddress.state})" />
+  <th:block th:replace="'fragments/inputs/text' ::
+                  text(inputName='zip',
+                  label=#{homeAddress.zip})" />
+ </th:block>
+</body>
+</html>
