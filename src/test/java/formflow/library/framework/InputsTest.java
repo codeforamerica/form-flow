@@ -69,4 +69,14 @@ public class InputsTest extends AbstractMockMvcTest {
     assertThat(inputsScreen.getInputValue("phoneInput")).isEqualTo(phoneInput);
     assertThat(inputsScreen.getInputValue("ssnInput")).isEqualTo(ssnInput);
   }
+
+  @Test
+  void shouldOnlyRunValidationIfItHasARequiredAnnoation() throws Exception {
+    // Should not validate when value is empty
+    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
+    // Should validate when a value is entered
+    postExpectingFailureAndAssertErrorDisplaysForThatInput("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2", "must be greater than 0");
+    // Should redirect when input is valid
+    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
+  }
 }

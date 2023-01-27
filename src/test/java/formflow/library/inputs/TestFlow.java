@@ -45,5 +45,5 @@ public class TestFlow extends FlowInputs {
   String dropZoneTestInstance;
 
   @Positive()
-  int validatePositiveIfNotEmpty;
+  String validatePositiveIfNotEmpty;
 }

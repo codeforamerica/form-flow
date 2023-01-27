@@ -17,7 +17,8 @@
                   label='validatePositiveIfNotEmpty')" />
             </div>
             <div class="form-card__footer">
-              <th:block th:replace="'fragments/continueButton' :: continue" />
+              <th:block th:replace="fragments/inputs/submitButton :: submitButton(
+                text=#{general.inputs.continue})" />
             </div>
           </th:block>
         </th:block>
@@ -25,6 +26,5 @@
     </div>
   </section>
 </div>
-<!--<th:block th:replace="fragments/footer :: footer" />-->
 </body>
 </html>
