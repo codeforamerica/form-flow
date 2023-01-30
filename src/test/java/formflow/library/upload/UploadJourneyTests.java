@@ -26,16 +26,16 @@ public class UploadJourneyTests extends AbstractBasePageTest {
   void documentUploadFlow() {
     Assertions.assertThat(testPage.getTitle()).isEqualTo("Upload Documents");
     // Test HEIC and TIFF/TIF files still throw an error even when they are in the list of accepted file types
+    uploadFile("another-test-heic.heic", "uploadTest");
+    Assertions.assertThat(testPage.findElementsByClass("text--error").get(0).getText())
+        .isEqualTo("We are unable to process HEIC files. Please convert your file to a JPG or PNG and try again.");
+    testPage.clickLink("remove");
+    Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
     uploadFile("test.tif", "uploadTest");
     Assertions.assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo("We are unable to process TIFF files. Please convert your file to a JPG or PNG and try again.");
     testPage.clickLink("remove");
-//    Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
-//    uploadFile("another-test-heic.heic", "uploadTest");
-//    Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> testPage.findElementsByClass("text--error").get(0).getText()
-//        .contains("We are unable to process HEIC files. Please convert your file to a JPG or PNG and try again."));
-//    testPage.clickLink("remove");
-//    Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
+    Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
     // Test accepted file types
     // Extension list comes from application.yaml -- form-flow.uploads.accepted-file-types
     uploadFile("test-platypus.gif", "uploadTest");
