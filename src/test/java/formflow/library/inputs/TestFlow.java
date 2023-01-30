@@ -30,6 +30,7 @@ public class TestFlow extends FlowInputs {
   String moneyInput;
   String phoneInput;
   String ssnInput;
+  String stateInput;
   @NotEmpty(message = "Please select at least one")
   List<String> favoriteFruitCheckbox;
 
