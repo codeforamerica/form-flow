@@ -1,10 +1,12 @@
 package formflow.library;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
  * </p>
  */
 @Service
+@Slf4j
 public class ValidationService {
 
   private final Validator validator;
@@ -57,6 +60,23 @@ public class ValidationService {
       var messages = new ArrayList<String>();
       if (key.contains("[]")) {
         key = key.replace("[]", "");
+      }
+      if (!key.equals("_csrf")) {
+        List<String> annotationNames = null;
+        try {
+          annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
+              .map(annotation -> annotation.annotationType().getName()).toList();
+        } catch (NoSuchFieldException e) {
+          throw new RuntimeException(e);
+        }
+        // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
+        if (!annotationNames.contains("javax.validation.constraints.NotNull") &&
+            !annotationNames.contains("javax.validation.constraints.NotEmpty") &&
+            !annotationNames.contains("javax.validation.constraints.NotBlank") &&
+            value.equals("")) {
+          log.info("skipping validation - found empty input for non-required field");
+          return;
+        }
       }
       validator.validateValue(flowClass, key, value)
           .forEach(violation -> messages.add(violation.getMessage()));

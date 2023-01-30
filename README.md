@@ -347,9 +347,21 @@ class ApplicationInformation extends FlowInputs {
 }
 ```
 
-Validations for inputs use the JSR-303 bean validation paradigm, more specifically, Hibernate
+### Validating Inputs
+
+Validations for inputs use the Java Bean Validation, more specifically, Hibernate
 validations. For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+
+Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
+`@NotNull` is used. That is to say if a validation annotation such as `@Email` is used, it will not
+actually
+validate the annotated input unless a user actually enters a value for that input. If you use
+`@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
+enter a value,
+validating both that they need to enter a value due to `@NotBlank` and because the blank value needs
+to be
+a validly formatted email address due to `@Email`.
 
 ### Custom Validations
 
@@ -1099,13 +1111,13 @@ bucket. This will automatically delete files in your bucket that are older than 
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
-### Address Validation
+## Address Validation
 
 `Form-flow` will support address validation through [Smarty](https://www.smarty.com/).
 
-#### Smarty
+### Smarty
 
-##### How to configure
+#### How to configure
 
 Please use the `sample.env` as an example for creating the `.env` for a form-flow application.
 A `smarty` auth-token and auth-id must be passed into our `application.yaml` file in order for the
