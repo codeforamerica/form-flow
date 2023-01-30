@@ -132,7 +132,7 @@ public class FormScreen {
   public String getSelectValue(String inputName) {
     var optionElements = html.select("select[name='%s']".formatted(inputName)).select("option");
     return optionElements.stream()
-        .filter(element -> element.hasAttr("selected"))
+        .filter(element -> element.hasAttr("selected") && !element.hasAttr("disabled"))
         .findFirst()
         .map(element -> element.attr("value"))
         .orElseThrow();
