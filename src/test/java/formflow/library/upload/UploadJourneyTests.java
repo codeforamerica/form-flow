@@ -26,7 +26,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
   void documentUploadFlow() {
     Assertions.assertThat(testPage.getTitle()).isEqualTo("Upload Documents");
     // Test HEIC and TIFF/TIF files still throw an error even when they are in the list of accepted file types
-    uploadFile("test.heic", "uploadTest");
+    uploadFile("another-test-heic.heic", "uploadTest");
     Assertions.assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo("We are unable to process HEIC files. Please convert your file to a JPG or PNG and try again.");
     testPage.clickLink("remove");
