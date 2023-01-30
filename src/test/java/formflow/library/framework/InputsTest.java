@@ -29,6 +29,7 @@ public class InputsTest extends AbstractMockMvcTest {
     String moneyInput = "100";
     String phoneInput = "(555) 555-1234";
     String ssnInput = "333-22-4444";
+    String stateInput = "NH";
 
     postExpectingNextPageTitle("inputs",
         Map.ofEntries(
@@ -46,7 +47,8 @@ public class InputsTest extends AbstractMockMvcTest {
             Map.entry("selectInput", List.of(selectInput)),
             Map.entry("moneyInput", List.of(moneyInput)),
             Map.entry("phoneInput", List.of(phoneInput)),
-            Map.entry("ssnInput", List.of(ssnInput))),
+            Map.entry("ssnInput", List.of(ssnInput)),
+            Map.entry("stateInput", List.of(stateInput))),
         "Test");
 
     var inputsScreen = goBackTo("inputs");
@@ -68,6 +70,7 @@ public class InputsTest extends AbstractMockMvcTest {
     assertThat(inputsScreen.getInputValue("moneyInput")).isEqualTo(moneyInput);
     assertThat(inputsScreen.getInputValue("phoneInput")).isEqualTo(phoneInput);
     assertThat(inputsScreen.getInputValue("ssnInput")).isEqualTo(ssnInput);
+    assertThat(inputsScreen.getSelectValue("stateInput")).isEqualTo(stateInput);
   }
 
   @Test
