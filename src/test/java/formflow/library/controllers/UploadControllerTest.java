@@ -21,6 +21,7 @@ import java.sql.Date;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
   @Autowired
   private UploadController uploadController;
 
+  private UUID fileId = UUID.randomUUID();
+
   @Override
   @BeforeEach
   public void setUp() throws Exception {
@@ -59,7 +62,6 @@ public class UploadControllerTest extends AbstractMockMvcTest {
 
   @Test
   public void fileUploadEndpointHitsCloudFileRepositoryAndAddsUserFileToSession() throws Exception {
-    long fileId = 1L;
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     doNothing().when(cloudFileRepository).upload(any(), any());
@@ -75,11 +77,11 @@ public class UploadControllerTest extends AbstractMockMvcTest {
             .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().is(200))
-        .andExpect(content().string(String.valueOf(fileId)));
+        .andExpect(content().string(fileId.toString()));
 
     verify(cloudFileRepository, times(1)).upload(any(), any());
     UserFile testUserFile = new UserFile(
-        1L,
+        fileId,
         new Submission(),
         Date.from(Instant.now()),
         "coolFile.jpg",
@@ -91,7 +93,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     userFiles.put(1L, UserFile.createFileInfo(testUserFile, "thumbnail"));
     testDzInstanceMap.put("dropZoneTestInstance", userFiles);
     session = new MockHttpSession();
-    session.putValue("id", 1L);
+    session.putValue("id", fileId);
     session.putValue("userFiles", testDzInstanceMap);
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
@@ -104,16 +106,18 @@ public class UploadControllerTest extends AbstractMockMvcTest {
 
     @BeforeEach
     void setUp() {
+      // reset submission.
+      submission = Submission.builder().id(1L).build();
       UserFile testUserFile = UserFile.builder().submission_id(submission).build();
       when(submissionRepositoryService.findById(1L)).thenReturn(Optional.ofNullable(submission));
       when(submissionRepositoryService.findById(2L)).thenReturn(Optional.ofNullable(submission));
-      when(userFileRepositoryService.findById(1L)).thenReturn(Optional.ofNullable(testUserFile));
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       doNothing().when(cloudFileRepository).delete(any());
-      HashMap<String, HashMap<Long, HashMap<String, String>>> dzWidgets = new HashMap<>();
-      HashMap<Long, HashMap<String, String>> userFiles = new HashMap<>();
-      userFiles.put(1L, UserFile.createFileInfo(
+      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzWidgets = new HashMap<>();
+      HashMap<UUID, HashMap<String, String>> userFiles = new HashMap<>();
+      userFiles.put(fileId, UserFile.createFileInfo(
           new UserFile(
-              1L,
+              fileId,
               new Submission(),
               Date.from(Instant.now()),
               "coolFile.jpg",
@@ -123,7 +127,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
           ), "thumbnail"));
       dzWidgets.put(dzWidgetInputName, userFiles);
       session = new MockHttpSession();
-      session.putValue("id", 1L);
+      session.putValue("id", submission.getId());
       session.putValue("userFiles", dzWidgets);
     }
 
@@ -132,7 +136,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
-              .param("id", "1"))
+              .param("id", fileId.toString()))
           .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
     }
 
@@ -141,7 +145,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
-              .param("id", "1000")
+              .param("id", UUID.randomUUID().toString())
               .session(session))
           .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
     }
@@ -153,7 +157,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
-              .param("id", "1")
+              .param("id", fileId.toString())
               .session(session))
           .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
     }
@@ -163,7 +167,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
-              .param("id", "1")
+              .param("id", fileId.toString())
               .session(session))
           .andExpect(status().is(302));
 

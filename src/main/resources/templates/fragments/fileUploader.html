@@ -341,7 +341,8 @@
           toggleMaxFileMessage('on');
         });
 
-        this.on('success', function (file, id) {
+        this.on('success', function (file, id, e) {
+          console.log("error is " + e);
           var removeLink = file.previewElement.getElementsByClassName("dz-remove")[0];
           var thumbnail = file.previewElement.getElementsByClassName("dz-thumb")[0];
           var progressBar = file.previewElement.getElementsByClassName("dz-progress")[0];
@@ -388,7 +389,7 @@
               name: doc.originalFilename,
               size: doc.filesize,
               type: doc.type,
-              id: parseInt(uploadedDocWithThumbnail[0]),
+              id: uploadedDocWithThumbnail[0],
               accepted: true
             };
             window[dropzonePrefix + [[${inputName}]]].files.push(mockFile);
