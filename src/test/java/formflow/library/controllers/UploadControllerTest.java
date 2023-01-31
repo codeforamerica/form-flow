@@ -17,6 +17,10 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.HashMap;
@@ -55,6 +59,34 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     mockMvc = MockMvcBuilders.standaloneSetup(uploadController).build();
     submission = Submission.builder().id(1L).build();
     super.setUp();
+  }
+
+  @Test
+  public void fileUploadEndpointDoesNotUploadPasswordProtectedPdf() throws Exception {
+    // TODO: might can delete these first couple of when()s
+    long fileId = 1L;
+    when(userFileRepositoryService.save(any())).thenReturn(fileId);
+    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    doNothing().when(cloudFileRepository).upload(any(), any());
+//    Old way
+//    MockMultipartFile testPdf = new MockMultipartFile("file.pdf", "someImage.jpg",
+//        MediaType.PDF, "test".getBytes());
+    Path pdfPath = Paths.get("src/test/resources/password-protected.pdf");
+    byte[] testPdf = Files.readAllBytes(pdfPath);
+    session = new MockHttpSession();
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file("file", testPdf)
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .param("flow", "testFlow")
+            .session(session)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .andExpect(status().is(415))
+        // TODO: Unsupported media type, or something like that
+        .andExpect(content().string("Something???"));
+
+    verify(cloudFileRepository, times(0)).upload(any(), any());
   }
 
   @Test

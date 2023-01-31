@@ -66,6 +66,17 @@ public class UploadController extends FormFlowController {
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
+//      if (fileExtension.contains("pdf")) {
+//        try (PDDocument pdfFile = PDDocument.load(file.getBytes())) {
+//          if (pdfFile.getDocumentCatalog().getAcroForm().xfaIsDynamic()) {
+//            throw new XfaException();
+//            return new ResponseEntity<>("An XFA formatted PDF was uploaded.", HttpStatus.UNPROCESSABLE_ENTITY);
+//          }
+//        } catch (InvalidPasswordException e) {
+//          return new ResponseEntity<>("A password protected PDF was uploaded.", HttpStatus.UNPROCESSABLE_ENTITY);
+//        }
+//      }
+
       cloudFileRepository.upload(uploadLocation, file);
 
       UserFile uploadedFile = UserFile.builder()
