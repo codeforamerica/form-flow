@@ -167,7 +167,8 @@ public class Page {
   }
 
   public String getInputValue(String inputName) {
-    return driver.findElement(By.cssSelector(String.format("input[name='%s[]']", inputName)))
+    // TODO: is there a reason why the selector name had [] at the end ? I noticed this wasn't used elsewhere so I have adapted it
+    return driver.findElement(By.cssSelector(String.format("input[name='%s']", inputName)))
         .getAttribute("value");
   }
 
@@ -214,7 +215,7 @@ public class Page {
 
   public boolean hasInputError(String inputName) {
     return !driver.findElements(
-        By.cssSelector(String.format("input[name='%s[]'] ~ p.text--error", inputName))).isEmpty();
+        By.cssSelector(String.format("input[name='%s'] ~ p.text--error", inputName))).isEmpty();
   }
 
   public boolean selectHasInputError(String inputName) {

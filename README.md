@@ -40,6 +40,7 @@ Table of Contents
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
+    * [Address Validation](#address-validation)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -119,14 +120,13 @@ our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 * Conditions
 * Validations
 
-Flows are the top-level construct that define the navigation between a collection of screens.
-A flow can have many inputs to accept user data (e.g. first name, zip
-code, email, file upload). Each input can have zero to many validations.
+Flows are the top-level construct that define the navigation between a collection of screens. A flow
+can have many inputs to accept user data (e.g. first name, zip code, email, file upload). Each input
+can have zero to many validations.
 
 A flow also has many screens. Each screen can be made up of zero or more inputs. A flow has an
-ordering of screens, and can use defined conditions to control navigation. Conditions use
-submitted inputs to make a logical decision about showing or not showing a screen / part of a
-screen.
+ordering of screens, and can use defined conditions to control navigation. Conditions use submitted
+inputs to make a logical decision about showing or not showing a screen / part of a screen.
 
 ```mermaid
 erDiagram      
@@ -181,10 +181,9 @@ example using our [live templates for a form screen](#applying-live-templates-to
 ## Subflows
 
 Subflows are repeating sections of one or more screens within a regular flow. These can be things
-like household builders
-that ask a repeating set of questions about members of a household. Subflows represent an array of
-screens and their respective inputs (represented as a HashMap) where each item in the array is one
-iteration.
+like household builders that ask a repeating set of questions about members of a household. Subflows
+represent an array of screens and their respective inputs (represented as a HashMap) where each item
+in the array is one iteration.
 
 ### Dedicated Subflow Screens
 
@@ -225,9 +224,9 @@ This is the last screen in a subflow. This screen lists each iteration completed
 and provides options to edit or delete a single iteration.
 
 This screen does not need to be demarked with `subflow: subflowName` in the `flows-config.yaml`. It
-is not technically part of the repeating screens within a subflow, however,
-you do visit this screen at the end of each iteration to show iterations completed so far and ask
-the user if they would like to add another?
+is not technically part of the repeating screens within a subflow, however, you do visit this screen
+at the end of each iteration to show iterations completed so far and ask the user if they would like
+to add another.
 
 #### Delete Confirmation Screen
 
@@ -297,20 +296,20 @@ class Submission {
 }
 ```
 
-The `inputData` field is a JSON object that stores data from the user's input as a given
-flow progresses. This field is placed in the model handed to the Thymeleaf templates, so each page
-should have access to it.
+The `inputData` field is a JSON object that stores data from the user's input as a given flow
+progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
+have access to it.
 
 ## Defining Inputs
 
-Inputs to the application are defined in two places - the template in which they are rendered,
-and in a separate class for validation.
+Inputs to the application are defined in two places - the template in which they are rendered, and
+in a separate class for validation.
 
 ### Input Class
 
 The inputs class's location is defined by the application using this library. The application using
-this library will need a field in its `application.yaml` that shows the location of the input
-class(es). It should look like this:
+this library will need a field in its `application.yaml` that shows the location of the input class(
+es). It should look like this:
 
 ```yaml
 form-flow:
@@ -322,14 +321,13 @@ defined in the application's `flows-config.yaml` configuration, is `ubi` we will
 the name of `Ubi` to be located at the specified input path.
 
 An example inputs class can be seen below, with example validations. Note that all inputs classses
-should
-extend the class `FlowInputs` which provides CSRF functionality for security.
+should extend the class `FlowInputs` which provides CSRF functionality for security.
 
 Also note that for single value inputs the type when defining the input is String. However, for
 input types that can contain more than one value, the type is ArrayList<String>.
 
-When naming your inputs in your templates, **you must use camel case so that the given input
-name can also be used as a field name in your inputs class**. Java will require that to be the case.
+When naming your inputs in your templates, **you must use camel case so that the given input name
+can also be used as a field name in your inputs class**. Java will require that to be the case.
 
 ```java
 class ApplicationInformation extends FlowInputs {
@@ -349,9 +347,21 @@ class ApplicationInformation extends FlowInputs {
 }
 ```
 
-Validations for inputs use the JSR-303 bean validation paradigm, more specifically, Hibernate
+### Validating Inputs
+
+Validations for inputs use the Java Bean Validation, more specifically, Hibernate
 validations. For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+
+Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
+`@NotNull` is used. That is to say if a validation annotation such as `@Email` is used, it will not
+actually
+validate the annotated input unless a user actually enters a value for that input. If you use
+`@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
+enter a value,
+validating both that they need to enter a value due to `@NotBlank` and because the blank value needs
+to be
+a validly formatted email address due to `@Email`.
 
 ### Custom Validations
 
@@ -366,18 +376,17 @@ private String income;
 
 ### Input Data JSON Structure
 
-As the end user walks through the flow entering data, their input data will get stored as
-JSON in the database. It is stored in a column named `inputData` on the `submissions` table.
+As the end user walks through the flow entering data, their input data will get stored as JSON in
+the database. It is stored in a column named `inputData` on the `submissions` table.
 
 * The organization of the data is based on the form flow setup and the field names on the forms.
 * The input fields on pages that are not part of a subflow will be stored in the main part of the
   JSON data. The keys will be the input fields name.
 * The input fields that are part of a subflow will be stored in an array under a key that is the
   name of the subflow.
-* Field names are used as keys. We use them directly as they are and therefore they must
-  be unique across a whole flow to avoid naming collisions. The example applies a prefix to the
-  fields, but that's just for ease of being clear in the example. The system does not apply
-  prefixes.
+* Field names are used as keys. We use them directly as they are and therefore they must be unique
+  across a whole flow to avoid naming collisions. The example applies a prefix to the fields, but
+  that's just for ease of being clear in the example. The system does not apply prefixes.
 
 For example, for the docs subflow configuration described above in
 the [Defining Subflows](#defining-subflows) section, the resulting data might be organized as
@@ -421,9 +430,9 @@ In the example below the following assumptions are applied:
 So the resulting JSON stored in the database has input fields as key values, and for subflow the
 subflow name is the key value.
 
-Note that the subflows are an array of repeating entries - one for each iteration a user did
-of the subflow. Each iteration has a unique UUID associated with it so we can have a way of working
-with a specific iteration's data.
+Note that the subflows are an array of repeating entries - one for each iteration a user did of the
+subflow. Each iteration has a unique UUID associated with it so we can have a way of working with a
+specific iteration's data.
 
 # General Information
 
@@ -441,18 +450,15 @@ complex mark up into simple reusable imports.
 
 Fragments simplify the process of creating more complex HTML pages. Some places we use fragments
 include input types, forms, page headers and footers, error handlers,
-etc. [You can view these fragments
-here.](src/main/resources/templates/fragments)
+etc. [You can view these fragments here.](src/main/resources/templates/fragments)
 
 Thymeleaf is also capable of making direct calls to Java class methods using what is known as the
 Spring Expression Language T operator. This allows you to implement Java code in your Thymeleaf
-templates.
-We provide two classes for this purpose:
+templates. We provide two classes for this purpose:
 
 - ConditionDefinitions
     - Houses methods which should always return Booleans and can be used to conditionally show or
-      hide
-      sections of a Thymeleaf template
+      hide sections of a Thymeleaf template
 - ViewUtilities
     - Houses methods for general purpose manipulation of data to display on the frontend in
       Thymeleaf templates
@@ -471,8 +477,8 @@ app.
 
 ### Templates
 
-The templates will contain the HTML which drive how the pages that run the flow are rendered.
-The application using this library will have a set of templates to gather input with.
+The templates will contain the HTML which drive how the pages that run the flow are rendered. The
+application using this library will have a set of templates to gather input with.
 
 We have provided a suite of input based Live Templates, more
 on [live templates here.](#applying-live-templates-to-your-intellij-ide)
@@ -563,14 +569,12 @@ templates folder.
 A form fragment is provided for easily creating forms. It can be quickly accessed via the Live
 Template `cfa:form` which will create a form fragment the field for `content` (which will fill in
 the empty `th:ref` that you see when first inserting the Live Template). This is needed so that you
-can
-any content you desire within the form fragment. You will also notice areas for
-the forms content and the form's footer. These normally contain the forms inputs, and the forms
-submit button respectively.
+can any content you desire within the form fragment. You will also notice areas for the forms
+content and the form's footer. These normally contain the forms inputs, and the forms submit button
+respectively.
 
 Additionally, the form fragment has an optional formId parameter which may be passed to give the
-form an
-ID.
+form an ID.
 
 Example form fragment:
 
@@ -921,9 +925,8 @@ A convenience live template for date's is provided through `cfa:inputDate`.
 ## Document Upload
 
 The library provides a file upload feature using the client side JavaScript
-library [Dropzone JS](https://www.dropzone.dev/).
-File uploads need a configured AWS S3 Bucket to upload to and provide functionality for uploading,
-retrieving and deleting files.
+library [Dropzone JS](https://www.dropzone.dev/). File uploads need a configured AWS S3 Bucket to
+upload to and provide functionality for uploading, retrieving and deleting files.
 
 ### AWS S3
 
@@ -933,31 +936,30 @@ can [follow the instructions here to create an S3 bucket](https://docs.aws.amazo
 .
 
 Make sure to note your buckets name and region as well as your AWS access and secret keys as you
-will need these for configuring file uploads
-in the library. The bucket and region are configured in your `application.yaml`. See the section on
+will need these for configuring file uploads in the library. The bucket and region are configured in
+your `application.yaml`. See the section on
 [application.yaml configuration](#application-configuration).
 
-Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in the [Environment
-Variables](#environment-variables) section below.
+Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in
+the [Environment Variables](#environment-variables) section below.
 
 ### File Naming Conventions
 
 Before a file is uploaded to S3, we give it a normalized filename. It consists of the flow name,
-input field the file was uploaded from, and a UUID. Then we store it in S3, organized by
-which submission it is a part of, like so:
+input field the file was uploaded from, and a UUID. Then we store it in S3, organized by which
+submission it is a part of, like so:
 
 ```
    `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
 ```
 
-The `flow_name` is the current flow the user is in and the `input_name` is the name of the
-file upload widget that uploaded the file. If there are multiple files uploaded via the same widget,
-then there will be many files with the same `flow_name` and `input_name`, though the UUID will be
-unique for each file.
+The `flow_name` is the current flow the user is in and the `input_name` is the name of the file
+upload widget that uploaded the file. If there are multiple files uploaded via the same widget, then
+there will be many files with the same `flow_name` and `input_name`, though the UUID will be unique
+for each file.
 
 Here is an example of what two files uploaded via the same input will look like in S3 (flow name
-is `ubi` and widget name
-is `homedoc`):
+is `ubi` and widget name is `homedoc`):
 
 ```java
     42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd.jpg
@@ -972,8 +974,7 @@ about [Live Templates here.](#applying-live-templates-to-your-intellij-ide)
 
 The live template will prompt you to enter an input name for the file uploader fragment. This input
 name (field name) will be the key under which uploaded files for this fragment are stored in the
-database's JSON
-structure. It will also be part of the normalized filename used in S3.
+database's JSON structure. It will also be part of the normalized filename used in S3.
 
 The file upload widget allows for single or multiple file uploads and will provide a list of
 uploaded files along with thumbnails for image files or a default icon for documents. The list of
@@ -995,8 +996,8 @@ We do not store the thumbnails on the server side at all.
 
 #### Accepted file types
 
-In the [application.yaml](#application-configuration) file, an implementor may
-update the file types that the uploader can accept.
+In the [application.yaml](#application-configuration) file, an implementor may update the file types
+that the uploader can accept.
 
 ```yaml
 form-flow:
@@ -1008,10 +1009,8 @@ This list is passed to DropZone and anything not listed in `accepted-file-types`
 the file upload widget.
 
 _Note: `.tif`/`.tiff` and `heic` extensions do not seem to work right in DropZone, and we do not
-recommend
-including these file types. We've noticed that thumbnails are not created correctly for TIFF and
-HEIC files
-and they fail to correct upload when batched with other uploaded files._
+recommend including these file types. We've noticed that thumbnails are not created correctly for
+TIFF and HEIC files and they fail to correct upload when batched with other uploaded files._
 
 #### Max File Size
 
@@ -1029,8 +1028,7 @@ This will prevent a user from uploading any file that is larger than this set li
 Notice that the number value is in Megabytes but does not need the trailing MB.
 
 **Note:** if this value is not set, then the server will use it's default value of 1MB preventing
-any
-uploads larger than 1MB. When configuring this value, be sure to also
+any uploads larger than 1MB. When configuring this value, be sure to also
 set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
 and `server.tomcat.max-http-form-post-size` to be equal to the set value, in MB. Example below:
 
@@ -1061,8 +1059,7 @@ This will prevent a user from uploading more than that number of files.
 #### Thumbnail Size Configuration
 
 You can configure the desired width and height of the thumbnails the dropzone widget creates. To do
-so
-set a `thumbnail-width` and `thumbnail-height` value like so:
+so set a `thumbnail-width` and `thumbnail-height` value like so:
 
 ```yaml
 form-flow:
@@ -1072,8 +1069,7 @@ form-flow:
 ```
 
 Note that these values are in pixels. We don't recommend going much larger than the values listed
-here
-to maintain a good-looking responsive design across both desktop and mobile.
+here to maintain a good-looking responsive design across both desktop and mobile.
 
 ### Uploaded File Storage
 
@@ -1098,23 +1094,42 @@ This indicates that there were two files uploaded via the `license_upload` widge
 are `34` and `47`, and can be looked up in the `user_files` table (detailed below) using those ids.
 
 The `user_files` table holds information about a submission's uploaded user files, which includes:
-`file_id`, the corresponding submission's `submission_id`, a `created_at` time,
-the `original_name` of the file, and the S3 `repository_path`.
+`file_id`, the corresponding submission's `submission_id`, a `created_at` time, the `original_name`
+of the file, and the S3 `repository_path`.
 
 ### Deleting Uploaded Files
 
 Upon successful upload a link is provided to delete the file. When the link is used, a browser
 native delete confirmation pop-up will appear asking the user if they are sure they want to delete
-the selected file. If the user selects yes from the pop-up, the file will be deleted
-from the `user_files` table in the database, as well as from S3 storage.
+the selected file. If the user selects yes from the pop-up, the file will be deleted from
+the `user_files` table in the database, as well as from S3 storage.
 
 ### S3 File Retention Policies
 
 We recommend setting a maximum file retention period in S3 by setting up a retention policy on your
-bucket.
-This will automatically delete files in your bucket that are older than the retention policy
+bucket. This will automatically delete files in your bucket that are older than the retention policy
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
+
+## Address Validation
+
+`Form-flow` will support address validation through [Smarty](https://www.smarty.com/).
+
+### Smarty
+
+#### How to configure
+
+Please use the `sample.env` as an example for creating the `.env` for a form-flow application.
+A `smarty` auth-token and auth-id must be passed into our `application.yaml` file in order for the
+address validation to work.
+
+```yaml
+  address:
+    smarty:
+      smarty_auth_id: ${SMARTY_AUTH_ID}
+      smarty_auth_token: ${SMARTY_AUTH_TOKEN}
+      smarty_url: "https://us-street.api.smartystreets.com/street-address"
+```
 
 # How to use
 
@@ -1122,10 +1137,10 @@ permits.
 
 ### Environment Variables
 
-When configuring your application, the form-flow library will expect to find your secret
-information in the environment. One way to do this is by creating an `.env` file that is a copy
-of this [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env).
-The sample file has a detailed description of information that would be expected in the setup.
+When configuring your application, the form-flow library will expect to find your secret information
+in the environment. One way to do this is by creating an `.env` file that is a copy of
+this [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env). The
+sample file has a detailed description of information that would be expected in the setup.
 
 From there you can add your information and source the file into your environment:
 `source .env`. Now the information will be loaded into your environment and available to the
@@ -1136,11 +1151,10 @@ the [Env File Plugin](https://plugins.jetbrains.com/plugin/7861-envfile/).
 
 ### Application Configuration
 
-The main configuration file for any Spring Boot application is the `application.yaml` file.
-For general information about the file, please see
+The main configuration file for any Spring Boot application is the `application.yaml` file. For
+general information about the file, please see
 the [Spring.io documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.files)
-.
-To learn more about what configuration can be set there, please see the
+. To learn more about what configuration can be set there, please see the
 [Spring Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html)
 .
 
@@ -1160,10 +1174,9 @@ form-flow:
     secret_key: ${AWS_SECRET_KEY}
 ```
 
-Note that the two AWS keys above are set in the `.env` file above.
-Also note that if you change the name of your `flows-config.yaml` file to anything else you will
-need
-to add it to your `application.yaml` like such:
+Note that the two AWS keys above are set in the `.env` file above. Also note that if you change the
+name of your `flows-config.yaml` file to anything else you will need to add it to
+your `application.yaml` like such:
 
 ```yaml
 form-flow:
@@ -1189,9 +1202,9 @@ You can define multiple flows by
 [separating them with `---`](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-external-config.html#boot-features-external-config-multi-profile-yaml)
 .
 
-At it's base a flow as defined in yaml has a name, a flow object, and a collection of screens,
-their next screens, any conditions for navigation between those screens, and optionally one or
-more subflows.
+At it's base a flow as defined in yaml has a name, a flow object, and a collection of screens, their
+next screens, any conditions for navigation between those screens, and optionally one or more
+subflows.
 
 #### form-flow.yaml basic configuration
 
@@ -1227,8 +1240,8 @@ flows-config-schema.json [as described here.](#applying-live-templates-to-your-i
 
 ### Screens
 
-Screens are the actual form that will be displayed to the user. Screens are specified as steps
-in the form flow.
+Screens are the actual form that will be displayed to the user. Screens are specified as steps in
+the form flow.
 
 Screens are defined in the Spring Boot `flows-config.yaml`, along with template views.
 
@@ -1243,8 +1256,7 @@ What do you need to do to create a subflow?
     - Define a `subflow` section
     - Create a name for your subflow in the `subflow` section
     - Define `entryScreen`, `iterationStartScreen`, `reviewScreen`, and `deleteConfirmationScreen`
-      in
-      the `subflow` section
+      in the `subflow` section
     - Add all subflow screens into the `flow`, with `subflow: <subflow-name>` unless otherwise noted
       above
       (for dedicated subflow screens)
@@ -1337,8 +1349,8 @@ file like so:
    implementation 'org.codeforamerica.platform:form-flow:0.0.1-SNAPSHOT'
 ```
 
-For an example of how to pull in the file as well a how one might pull in a local jar see
-the form-flow-starter-app's
+For an example of how to pull in the file as well a how one might pull in a local jar see the
+form-flow-starter-app's
 [gradle.build](https://github.com/codeforamerica/form-flow-starter-app/blob/main/build.gradle)
 file.
 
@@ -1408,8 +1420,8 @@ we use in the Form Flow library.
 
 ### `dev` profile
 
-This `dev` profile allows for some information to be accessible to developers more easily.
-The profile should only be used in a developer's environment.
+This `dev` profile allows for some information to be accessible to developers more easily. The
+profile should only be used in a developer's environment.
 
 #### DevController
 
@@ -1469,13 +1481,11 @@ appearing for you.
 
 As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
 the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
-quickly build
-Thymeleaf templates.
+quickly build Thymeleaf templates.
 
 Support for importing/exporting these Live Templates is
 a [buggy process](https://youtrack.jetbrains.com/issue/IDEA-184753) that can sometimes wipe away all
-of your previous
-settings. So we're going to use a copy/paste approach.
+of your previous settings. So we're going to use a copy/paste approach.
 
 1. Open the [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) from the root
    of this repo
@@ -1514,8 +1524,7 @@ our Live Templates by typing `cfa:` and a list of templates to autofill will sho
 ### Setup Platform Flavored Google Styles for Java ##
 
 In IntelliJ go to `Preferences --> Editor --> Code Style --> Java` and next to Scheme hit the
-cogwheel
-and `Import Scheme --> IntelliJ Code Style XML` with
+cogwheel and `Import Scheme --> IntelliJ Code Style XML` with
 [intellij-settings/PlatformFlavoredGoogleStyle.xml](intellij-settings/PlatformFlavoredGoogleStyle.xml)
 
 ### Testing
@@ -1550,5 +1559,5 @@ or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake
 
 ## Maintainer information
 
-This form-flow library was created and is maintained by the Platform team at Code for America.
-Email addresses? More information about contacting us? Email list somewhere?
+This form-flow library was created and is maintained by the Platform team at Code for America. Email
+addresses? More information about contacting us? Email list somewhere?
