@@ -672,15 +672,33 @@ A convenience live template for text area inputs is provided through `cfa:inputT
 
 ### Number
 
-Number inputs are used to gather numbers from users. The number input makes use of `type="number"`
+Number inputs are used to gather numbers from users. The number input makes use
+of `inputmode="numeric"`
 which
 will cause mobile devices to display the number pad when entering values into the input. The number
 input
 is useful for gathering numbers that don't already have a specific input type, such as the phone,
 money,
-date or SSN inputs. Number inputs have an optional `placeholder` parameter.
+date or SSN inputs.
 
-A convenience live template for date's is provided through `cfa:inputNumber`.
+Number inputs have an optional `title` parameter, which when passed will set the `title` attribute
+on the input
+The text given for the title will be displayed as a tooltip when the user hovers over the input as
+well as in
+client-side HTML based validation errors. The default title if one is not passed will
+be `Please make sure you are entering a positive, whole number or decimal value with 2 decimal places.`
+
+Number inputs also have an optional `pattern` parameter which represents a regex pattern that must
+be met for the input to be valid.
+The default regex pattern is `^\d*(\.\d{0,2})?$` which allows for any positive number with up to 2
+decimal places.
+A different pattern can be passed if you wish to change this default behavior. If you change
+the `pattern`
+make sure you also change the `title` to represent your new pattern.
+
+Number inputs have an optional `placeholder` parameter.
+
+A convenience live template for numbers is provided through `cfa:inputNumber`.
 
 ### Social Security Number
 
