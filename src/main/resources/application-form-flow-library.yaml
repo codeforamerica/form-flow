@@ -1,0 +1,4 @@
+spring:
+  flyway:
+    placeholders:
+      uuid_function: "gen_random_uuid"
