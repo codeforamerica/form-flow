@@ -14,7 +14,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = MoneyValidator.class)
 @Documented
 public @interface Money {
-  String message() default "Please make sure to enter a valid dollar amount.";
+  String message() default "Please make sure to enter a valid dollar amount. Example: 1.50.";
 
   Class<?>[] groups() default {};
 
