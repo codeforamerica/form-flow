@@ -8,9 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class MoneyValidatorTest {
 
   @ValueSource(strings = {
-      "100",
-      "100.05",
-      ".05",
+      "100", "100.05", "0.05", "0.15"
   })
   @ParameterizedTest
   void validMoneyAmountsShouldReturnTrue(String value) {
@@ -22,7 +20,7 @@ class MoneyValidatorTest {
       "012.34",
       "0999",
       "-100",
-      "100.123",
+      "100.123", ""
   })
   @ParameterizedTest
   void invalidMoneyAmountsShouldReturnFalse(String value) {
