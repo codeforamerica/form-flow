@@ -1,4 +1,6 @@
-logging:
-  level:
-    root: INFO
-    org.springframework.web: ERROR
+spring:
+  profiles:
+    group:
+      test:
+        - test
+        - form-flow-library-test
