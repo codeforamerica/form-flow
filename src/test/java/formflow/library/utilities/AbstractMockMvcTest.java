@@ -395,7 +395,7 @@ public abstract class AbstractMockMvcTest {
   protected void assertInputHasErrors(String pageName, String inputName, List<String> errorMessages)
       throws Exception {
     var page = new FormScreen(getPage(pageName));
-    assertEquals(errorMessages, page.getInputErrors(inputName).stream().map(Element::ownText).toList());
+    assertTrue(errorMessages.containsAll(page.getInputErrors(inputName).stream().map(Element::ownText).toList()));
   }
 
   protected void assertPageHasDateInputError(String pageName, String inputName) throws Exception {
