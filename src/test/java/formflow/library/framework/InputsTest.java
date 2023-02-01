@@ -85,7 +85,7 @@ public class InputsTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldShowMultipleValidationMessagesOnASingleInput() throws Exception {
+  void shouldShowMultipleErrorMessagesOnSingleInput() throws Exception {
     postExpectingFailureAndAssertErrorsDisplaysForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
         2);
     postExpectingFailureAndAssertErrorsDisplayForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
