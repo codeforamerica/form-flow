@@ -78,8 +78,17 @@ public class InputsTest extends AbstractMockMvcTest {
     // Should not validate when value is empty
     postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
     // Should validate when a value is entered
-    postExpectingFailureAndAssertErrorDisplaysForThatInput("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2", "must be greater than 0");
+    postExpectingFailureAndAssertErrorDisplaysForThatInput("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2",
+        "must be greater than 0");
     // Should redirect when input is valid
     postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
+  }
+
+  @Test
+  void shouldShowMultipleErrorMessagesOnSingleInput() throws Exception {
+    postExpectingFailureAndAssertErrorsDisplaysForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
+        2);
+    postExpectingFailureAndAssertErrorsDisplayForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
+        List.of("You must enter a value 2 characters or longer", "Don't leave this blank"));
   }
 }
