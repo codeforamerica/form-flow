@@ -2,12 +2,12 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-    th:fragment="state(inputName, label, placeholderText)"
-    th:assert="${!#strings.isEmpty(inputName)}, ${!#strings.isEmpty(label)}, ${!#strings.isEmpty(placeholderText)}"
+    th:fragment="state(inputName, label)"
+    th:assert="${!#strings.isEmpty(inputName)}, ${!#strings.isEmpty(label)}"
     th:replace="'fragments/inputs/select' :: select(label=${label}, inputName=${inputName}, helpText=${helpText}, content=~{::usState})">
   <th:block th:ref="usState">
     <th:block
-      th:replace="'fragments/inputs/selectOptionPlaceholder' :: selectOptionPlaceholder(optionText=${placeholderText})"/>
+      th:replace="'fragments/inputs/selectOptionPlaceholder' :: selectOptionPlaceholder(optionText=#{state.placeholder})"/>
     <th:block th:replace="'fragments/inputs/selectOption' :: selectOption(value='AL', optionText=#{state.al})"/>
     <th:block th:replace="'fragments/inputs/selectOption' :: selectOption(value='AK', optionText=#{state.ak})"/>
     <th:block th:replace="'fragments/inputs/selectOption' :: selectOption(value='AZ', optionText=#{state.az})"/>
