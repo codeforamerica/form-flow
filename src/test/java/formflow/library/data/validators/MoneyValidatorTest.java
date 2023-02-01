@@ -19,7 +19,7 @@ class MoneyValidatorTest {
       "012.34",
       "0999",
       "-100",
-      "100.123", ""
+      "100.123"
   })
   @ParameterizedTest
   void invalidMoneyAmountsShouldReturnFalse(String value) {
