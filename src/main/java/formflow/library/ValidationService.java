@@ -1,10 +1,6 @@
 package formflow.library;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,8 +52,8 @@ public class ValidationService {
 
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
+    var messages = new ArrayList<String>();
     formDataSubmission.forEach((key, value) -> {
-      var messages = new ArrayList<String>();
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
@@ -70,9 +66,8 @@ public class ValidationService {
           throw new RuntimeException(e);
         }
         // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
-        if (!annotationNames.contains("javax.validation.constraints.NotNull") &&
-            !annotationNames.contains("javax.validation.constraints.NotEmpty") &&
-            !annotationNames.contains("javax.validation.constraints.NotBlank") &&
+        List<String> requireAnnotations = List.of("javax.validation.constraints.NotNull", "javax.validation.constraints.NotEmpty", "javax.validation.constraints.NotBlank");
+        if (Collections.disjoint(annotationNames, requireAnnotations) &&
             value.equals("")) {
           log.info("skipping validation - found empty input for non-required field");
           return;
