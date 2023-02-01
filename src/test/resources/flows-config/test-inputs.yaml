@@ -9,6 +9,9 @@ flow:
   pageWithOptionalValidation:
     nextScreens:
       - name: success
+  pageWithMultipleValidationInput:
+    nextScreens:
+      - name: success
   success:
     nextScreens:
 subflows:

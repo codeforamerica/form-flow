@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.jetbrains.annotations.NotNull;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -323,6 +324,13 @@ public abstract class AbstractMockMvcTest {
     assertInputHasErrors(pageName, inputName, numOfErrors);
   }
 
+  protected void postExpectingFailureAndAssertErrorsDisplayForThatInput(String pageName,
+      String inputName,
+      String value, List<String> errorMessages) throws Exception {
+    postExpectingFailure(pageName, inputName, value);
+    assertInputHasErrors(pageName, inputName, errorMessages);
+  }
+
   protected void postExpectingFailureAndAssertErrorDisplaysForThatDateInput(String pageName,
       String inputName,
       List<String> values) throws Exception {
@@ -382,6 +390,12 @@ public abstract class AbstractMockMvcTest {
       throws Exception {
     var page = new FormScreen(getPage(pageName));
     assertEquals(numOfErrors, page.getInputErrors(inputName).size());
+  }
+
+  protected void assertInputHasErrors(String pageName, String inputName, List<String> errorMessages)
+      throws Exception {
+    var page = new FormScreen(getPage(pageName));
+    assertEquals(errorMessages, page.getInputErrors(inputName).stream().map(Element::ownText).toList());
   }
 
   protected void assertPageHasDateInputError(String pageName, String inputName) throws Exception {

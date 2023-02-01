@@ -40,7 +40,7 @@ public class FormScreen {
   }
 
   public Elements getInputErrors(String inputName) {
-    return html.select("input[name^='%s'] ~ p.text--error".formatted(inputName));
+    return html.select("[id^=\"%s-error-message\"]".formatted(inputName));
   }
 
   public Element getInputError(String inputName) {
