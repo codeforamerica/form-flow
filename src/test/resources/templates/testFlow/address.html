@@ -1,17 +1,8 @@
 <th:block th:replace="'fragments/form' :: form(action=${formAction}, content=~{::testAddress})">
-  <th:block th:ref="testValidatedAddress">
+  <th:block th:ref="testAddress">
     <div class="form-card__content">
-      <th:block th:replace="'fragments/inputs/address' :: address(validate=true, inputName='residentialAddress')"/>
+      <th:block
+          th:replace="'fragments/inputs/address' :: address(validate=true, inputName='address')"/>
     </div>
   </th:block>
-  <th:block th:ref="testUnvalidatedAddress">
-    <div class="form-card__content">
-      <th:block th:replace="'fragments/inputs/address' :: address(validate=false, inputName='residentialAddress')"/>
-    </div>
-  </th:block>
-  <th:block th:ref="testSmartyValidatedAddress">
-    <div class="form-card__content">
-      <th:block th:replace="'fragments/display/validatedAddress' :: validatedAddress(nameOfAddressFieldThatWasValidated='residentialAddress')"/>
-    </div>
-  </th:block>
- </th:block>
+</th:block>

@@ -52,8 +52,34 @@ public class TestFlow extends FlowInputs {
   @Positive()
   String validatePositiveIfNotEmpty;
 
-  HashMap<String, HashMap<String, String>> address;
-  HashMap<String, HashMap<String, String>> addressValidated;
+//    Old approach
+//  HashMap<String, HashMap<String, String>> address;
+//  HashMap<String, HashMap<String, String>> addressValidated;
+
+  // New approach
+  /* Thoughts: writing out all of this sucks. Especially since you would have to
+   * do this for each single address instance you want.
+   * Let's get the test working and then refactor.
+   */
+  @NotBlank
+  String addressStreetAddress1;
+  String addressStreetAddress2;
+  @NotBlank
+  String addressCity;
+  @NotBlank
+  String addressState;
+  @NotBlank
+  String addressZip;
+
+//  @NotBlank
+//  String addressValidatedStreetAddress1;
+//  String addressValidatedStreetAddress2;
+//  @NotBlank
+//  String addressValidatedCity;
+//  @NotBlank
+//  String addressValidatedState;
+//  @NotBlank
+//  String addressValidatedZip;
 
 //  "addressValidated" : {
 //    "testValidatedAddress": {

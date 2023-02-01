@@ -94,31 +94,29 @@ public class InputsTest extends AbstractMockMvcTest {
 
     postExpectingNextPageTitle("address",
         Map.ofEntries(
-            Map.entry("address[testValidatedAddress][streetAddress1]", List.of(streetAddress1)),
-            Map.entry("address[testValidatedAddress][streetAddress2]", List.of(streetAddress2)),
-            Map.entry("address[testValidatedAddress][city]", List.of(city)),
-            Map.entry("address[testValidatedAddress][state]", List.of(state)),
-            Map.entry("address[testValidatedAddress][zip]", List.of(zipCode)),
-            Map.entry("address[testUnvalidatedAddress][streetAddress1]", List.of(streetAddress1)),
-            Map.entry("address[testUnvalidatedAddress][streetAddress2]", List.of(streetAddress2)),
-            Map.entry("address[testUnvalidatedAddress][city]", List.of(city)),
-            Map.entry("address[testUnvalidatedAddress][state]", List.of(state)),
-            Map.entry("address[testUnvalidatedAddress][zip]", List.of(zipCode))
-        ),"Test");
+            Map.entry("addressStreetAddress1", List.of(streetAddress1)),
+            Map.entry("addressStreetAddress2", List.of(streetAddress2)),
+            Map.entry("addressCity", List.of(city)),
+            Map.entry("addressState", List.of(state)),
+            Map.entry("addressZip", List.of(zipCode))
+        ), "Test");
 
-    var addressScreen = goBackTo("address]");
+    var addressScreen = goBackTo("address");
 
-    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][streetAddress1]")).isEqualTo(streetAddress1);
-    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][streetAddress2]")).isEqualTo(streetAddress2);
-    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][city]")).isEqualTo(city);
-    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][state]")).isEqualTo(state);
-    assertThat(addressScreen.getInputValue("address[testUnvalidatedAddress][zip]")).isEqualTo(zipCode);
+    // Current goal: just if our field definitions worked
+    // Next steps: add a test that checks if a method call to smarty streets happens when smarty validation is set to true
 
-    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress1]")).isEqualTo(streetAddress1);
-    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress2]")).isEqualTo(streetAddress2);
-    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][city]")).isEqualTo(city);
-    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][state]")).isEqualTo(state);
-    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][zip]")).isEqualTo(zipCode);
+    assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
+    assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2);
+    assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city);
+    assertThat(addressScreen.getInputValue("addressState")).isEqualTo(state);
+    assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode);
+
+//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress1]")).isEqualTo(streetAddress1);
+//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress2]")).isEqualTo(streetAddress2);
+//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][city]")).isEqualTo(city);
+//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][state]")).isEqualTo(state);
+//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][zip]")).isEqualTo(zipCode);
   }
 
   @Test
