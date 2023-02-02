@@ -374,6 +374,25 @@ them the same way you would any other JavaX validator, like so:
 private String income;
 ```
 
+#### @Money
+
+Used to validate monetary values. Accepts values such as:
+```
+0
+0.5
+1
+1.2
+10.20
+```
+
+Does not accept values such as:
+```
+-1
+012
+12.123
+.5
+```
+
 ### Input Data JSON Structure
 
 As the end user walks through the flow entering data, their input data will get stored as JSON in
