@@ -7,19 +7,19 @@
 >
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'StreetAddress1'},
-                  label='Address 1')"/>
+                  label=#{homeAddress.street-address})"/>
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'StreetAddress2'},
-                  label='Address 2')"/>
+                  label=#{homeAddress.apartment})"/>
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'City'},
-                  label='City')"/>
+                  label=#{homeAddress.city})"/>
   <th:block th:replace="'fragments/inputs/state' ::
                   state(inputName=${inputName + 'State'},
-                  label='State')"/>
+                  label=#{homeAddress.state})"/>
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'Zip'},
-                  label='Zip')"/>
+                  label=#{homeAddress.zip})"/>
 </th:block>
 </body>
 </html>
