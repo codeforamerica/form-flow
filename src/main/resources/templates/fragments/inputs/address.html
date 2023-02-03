@@ -7,19 +7,20 @@
 >
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'StreetAddress1'},
-                  label=#{homeAddress.street-address})"/>
+                  label=#{address.street-address})"/>
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'StreetAddress2'},
-                  label=#{homeAddress.apartment})"/>
+                  label=#{address.apartment})"/>
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'City'},
-                  label=#{homeAddress.city})"/>
+                  label=#{address.city})"/>
   <th:block th:replace="'fragments/inputs/state' ::
                   state(inputName=${inputName + 'State'},
-                  label=#{homeAddress.state})"/>
+                  label=#{address.state})"/>
   <th:block th:replace="'fragments/inputs/text' ::
                   text(inputName=${inputName + 'Zip'},
-                  label=#{homeAddress.zip})"/>
+                  label=#{address.zip})"/>
+  <input type="hidden" th:name="${'_validate_' + inputName}" th:value="${validateAddress}"/>
 </th:block>
 </body>
 </html>

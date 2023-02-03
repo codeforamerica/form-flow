@@ -2,7 +2,6 @@ package formflow.library.inputs;
 
 import formflow.library.data.FlowInputs;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -70,27 +69,5 @@ public class TestFlow extends FlowInputs {
   String addressState;
   @NotBlank
   String addressZip;
-
-//  @NotBlank
-//  String addressValidatedStreetAddress1;
-//  String addressValidatedStreetAddress2;
-//  @NotBlank
-//  String addressValidatedCity;
-//  @NotBlank
-//  String addressValidatedState;
-//  @NotBlank
-//  String addressValidatedZip;
-
-//  "addressValidated" : {
-//    "testValidatedAddress": {
-//      "address1": "value 1",
-//      "city": "city value"
-//          "validate" : [true /false]
-//    },
-//
-//    "testUnvalidatedAddress": {
-//
-//    }
-//  }
 
 }

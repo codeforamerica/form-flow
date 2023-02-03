@@ -30,6 +30,8 @@ public class ValidationService {
   @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
 
+  private List<String> inputsNotNeedingValidation = List.of("_csrf", "_validate_");
+
   /**
    * Autoconfigured constructor.
    *
@@ -61,7 +63,7 @@ public class ValidationService {
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
-      if (!key.equals("_csrf")) {
+      if (inputsNotNeedingValidation.stream().noneMatch(key::contains)) {
         List<String> annotationNames = null;
         try {
           annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())

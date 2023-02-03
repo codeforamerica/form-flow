@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -84,39 +85,62 @@ public class InputsTest extends AbstractMockMvcTest {
     postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
   }
 
-  @Test
-  void addressFragmentValidatesByDefault() throws Exception {
+  @Nested
+  public class Address {
+
     String streetAddress1 = "1111 N State St";
     String streetAddress2 = "Apt 2";
     String city = "Roswell";
-    String state = "NM - New Mexico";
+    String state = "NM";
     String zipCode = "88201";
 
-    postExpectingNextPageTitle("address",
-        Map.ofEntries(
-            Map.entry("addressStreetAddress1", List.of(streetAddress1)),
-            Map.entry("addressStreetAddress2", List.of(streetAddress2)),
-            Map.entry("addressCity", List.of(city)),
-            Map.entry("addressState", List.of(state)),
-            Map.entry("addressZip", List.of(zipCode))
-        ), "Test");
+    @Test
+    void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
+      postExpectingNextPageTitle("address",
+          Map.ofEntries(
+              Map.entry("addressStreetAddress1", List.of(streetAddress1)),
+              Map.entry("addressStreetAddress2", List.of(streetAddress2)),
+              Map.entry("addressCity", List.of(city)),
+              Map.entry("addressState", List.of(state)),
+              Map.entry("addressZip", List.of(zipCode)),
+              Map.entry("addressValidate", List.of("true"))
+          ), "Test");
 
-    var addressScreen = goBackTo("address");
+      var addressScreen = goBackTo("address");
 
-    // Current goal: just if our field definitions worked
-    // Next steps: add a test that checks if a method call to smarty streets happens when smarty validation is set to true
+      assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
+      assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2);
+      assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city);
+      assertThat(addressScreen.getSelectValue("addressState")).isEqualTo(state);
+      assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode);
+    }
 
-    assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
-    assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2);
-    assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city);
-    assertThat(addressScreen.getInputValue("addressState")).isEqualTo(state);
-    assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode);
+    @Test
+    void doesNotValidateWhenInputNamePlusValidateIsFalse() throws Exception {
+      var addressScreen = goBackTo("address");
 
-//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress1]")).isEqualTo(streetAddress1);
-//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][streetAddress2]")).isEqualTo(streetAddress2);
-//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][city]")).isEqualTo(city);
-//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][state]")).isEqualTo(state);
-//    assertThat(addressScreen.getInputValue("validatedAddress[testValidatedAddress][zip]")).isEqualTo(zipCode);
+      assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
+      assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2);
+      assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city);
+      assertThat(addressScreen.getSelectValue("addressState")).isEqualTo(state);
+      assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode);
+
+      postExpectingNextPageTitle("address",
+          Map.ofEntries(
+              Map.entry("validatedAddressStreetAddress1", List.of(streetAddress1)),
+              Map.entry("validatedAddressStreetAddress2", List.of(streetAddress2)),
+              Map.entry("validatedAddressCity", List.of(city)),
+              Map.entry("validatedAddressState", List.of(state)),
+              Map.entry("validatedAddressZip", List.of(zipCode)),
+              Map.entry("validatedAddressValidate", List.of("false"))
+          ), "Test");
+
+      assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1 + "Validated");
+      assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2 + "Validated");
+      assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city + "Validated");
+      assertThat(addressScreen.getSelectValue("addressState")).isEqualTo(state + "Validated");
+      assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode + "Validated");
+    }
   }
 
   @Test
