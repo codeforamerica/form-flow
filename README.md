@@ -1394,24 +1394,6 @@ This library is created as a Web/Fat jar to include all the items this class dep
 Specifically it's created this way to ensure that all the resources are included in the
 distribution.
 
-[//]: # (# Help)
-
-[//]: # ()
-[//]: # (## IntelliJ Live Templates)
-
-[//]: # ()
-[//]: # (As a team, we use [IntelliJ]&#40;https://www.jetbrains.com/idea/&#41; and can use)
-
-[//]: # (the [Live Templates]&#40;https://www.jetbrains.com/help/idea/using-live-templates.html&#41; feature to)
-
-[//]: # (quickly build Thymeleaf templates.)
-
-[//]: # ()
-[//]: # (More information and example usage can be found in)
-
-[//]: # (our [starter application]&#40;#applying-live-templates-to-your-intellij-ide&#41;)
-
-[//]: # (.)
 
 # Developer Setup
 
