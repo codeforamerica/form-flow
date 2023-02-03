@@ -52,9 +52,6 @@ Table of Contents
         * [Thymeleaf Model Data](#thymeleaf-model-data)
         * [Conditions / Actions](#conditions--actions)
         * [Library Details](#library-details)
-* [Help](#help)
-    * [IntelliJ Live Templates](#intellij-live-templates)
-    * [Icons](#icons)
 * [Developer Setup](#developer-setup)
     * [Java Development Kit](#java-development-kit)
     * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
@@ -1397,17 +1394,6 @@ This library is created as a Web/Fat jar to include all the items this class dep
 Specifically it's created this way to ensure that all the resources are included in the
 distribution.
 
-# Help
-
-## IntelliJ Live Templates
-
-As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
-the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
-quickly build Thymeleaf templates.
-
-More information and example usage can be found in
-our [starter application](#applying-live-templates-to-your-intellij-ide)
-.
 
 # Developer Setup
 
@@ -1540,13 +1526,16 @@ our Live Templates by typing `cfa:` and a list of templates to autofill will sho
 
 ### Contribute new Live Templates ###
 
+If you have created a template which you feel is valuable outside the context of your specific app, you can contribute it to this project so that other teams can use it.
+
 1. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
-2. Find the Live Template you want to contribute
+2. Find or create the Live Template you want to contribute
 3. Right click and "Copy" (this will copy the Live Template in XML form)
-4. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
-5. Paste at the bottom of the file
-6. Commit to GitHub
-7. Now others can copy/paste your Live Templates
+4. Create a PR on this repository in GitHub which includes an update to the templates. 
+   a. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
+   b. Paste at the bottom of the file
+   c. Someone from the Platforms team will work with you to get this PR merged into the codebase.
+5. Now others can copy/paste your Live Templates
 
 ### Set Java SDK
 
