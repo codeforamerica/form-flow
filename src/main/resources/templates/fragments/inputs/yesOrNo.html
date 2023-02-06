@@ -12,23 +12,7 @@
        th:text="${helpText}"
        class="text--help spacing-below-25"></p>
   </div>
-  <button
-      th:name="${inputName}"
-      th:aria-describedby="${hasHelpText ? inputName + '-help-text' : ariaDescribe}"
-      type="submit"
-      value="true"
-      class="button">
-    <span class="button__icon--left emoji emoji--inline emoji--checkmark"></span>
-    <span th:text="#{general.inputs.yes}"></span>
-  </button>
-  <button
-      th:name="${inputName}"
-      th:aria-describedby="${hasHelpText ? inputName + '-help-text' : ariaDescribe}"
-      value="false"
-      class="button">
-    <span class="button__icon--left emoji emoji--inline emoji--crossmark"></span>
-    <span th:text="#{general.inputs.no}"></span>
-  </button>
+
 </th:block>
 </body>
 </html>
