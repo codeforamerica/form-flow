@@ -8,7 +8,6 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFileRepository;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,8 +53,6 @@ public class UploadController extends FormFlowController {
       HttpSession httpSession
   ) {
     try {
-      // TODO This is not validating anything right now other than that you included the inputName in the corresponding inputs file
-      HashMap<String, List<String>> errorMessages = validationService.validate(flow, inputName, file);
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
