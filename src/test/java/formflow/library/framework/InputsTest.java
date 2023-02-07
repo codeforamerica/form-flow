@@ -1,7 +1,12 @@
 package formflow.library.framework;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import formflow.library.address_validation.AddressValidationService;
+import formflow.library.address_validation.ValidationRequest;
+import formflow.library.address_validation.ValidationResponse;
 import formflow.library.data.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
@@ -94,6 +99,7 @@ public class InputsTest extends AbstractMockMvcTest {
     String city = "Roswell";
     String state = "NM";
     String zipCode = "88201";
+    AddressValidationService addressValidationService = mock(AddressValidationService.class);
 
     @Test
     void doesNotValidateWhenInputNamePlusValidateIsFalse() throws Exception {
@@ -118,6 +124,14 @@ public class InputsTest extends AbstractMockMvcTest {
 
     @Test
     void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
+      ValidationRequest addressValidationRequest = new ValidationRequest(streetAddress1, streetAddress2, city,
+          state, zipCode);
+      ValidationResponse addressValidationResponse = new ValidationResponse(streetAddress1 + "Validated",
+          streetAddress2 + "Validated",
+          city + "Validated",
+          state + "Validated",
+          zipCode + "Validated");
+      when(addressValidationService.validate(addressValidationRequest)).thenReturn(addressValidationResponse);
       var addressScreen = goBackTo("address");
 
       assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
