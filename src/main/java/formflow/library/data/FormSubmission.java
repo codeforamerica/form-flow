@@ -1,6 +1,7 @@
 package formflow.library.data;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.springframework.util.MultiValueMap;
 public class FormSubmission {
 
   public Map<String, Object> formData;
+  private List<String> unvalidatedFields = List.of(UnvalidatedField.CSRF, UnvalidatedField.VALIDATE_ADDRESS);
 
   public FormSubmission(MultiValueMap<String, String> formData) {
     this.formData = removeEmptyValuesAndFlatten(formData);
@@ -37,5 +39,12 @@ public class FormSubmission {
             entry -> entry.getValue().size() == 1 && !entry.getKey().contains("[]")
                 ? entry.getValue().get(0) : entry.getValue()
         ));
+  }
+
+  public Map<String, Object> removeUnvalidatedInputs(Map<String, Object> formData) {
+    return formData.entrySet().stream()
+        .filter(
+            formField -> unvalidatedFields.stream().noneMatch(unvalidatedField -> formField.getKey().contains(unvalidatedField)))
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
   }
 }

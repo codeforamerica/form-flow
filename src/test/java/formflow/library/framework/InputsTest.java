@@ -2,6 +2,7 @@ package formflow.library.framework;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.data.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +96,7 @@ public class InputsTest extends AbstractMockMvcTest {
     String zipCode = "88201";
 
     @Test
-    void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
+    void doesNotValidateWhenInputNamePlusValidateIsFalse() throws Exception {
       postExpectingNextPageTitle("address",
           Map.ofEntries(
               Map.entry("addressStreetAddress1", List.of(streetAddress1)),
@@ -103,7 +104,7 @@ public class InputsTest extends AbstractMockMvcTest {
               Map.entry("addressCity", List.of(city)),
               Map.entry("addressState", List.of(state)),
               Map.entry("addressZip", List.of(zipCode)),
-              Map.entry("addressValidate", List.of("true"))
+              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "address", List.of("false"))
           ), "Test");
 
       var addressScreen = goBackTo("address");
@@ -116,7 +117,7 @@ public class InputsTest extends AbstractMockMvcTest {
     }
 
     @Test
-    void doesNotValidateWhenInputNamePlusValidateIsFalse() throws Exception {
+    void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
       var addressScreen = goBackTo("address");
 
       assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
@@ -132,7 +133,7 @@ public class InputsTest extends AbstractMockMvcTest {
               Map.entry("validatedAddressCity", List.of(city)),
               Map.entry("validatedAddressState", List.of(state)),
               Map.entry("validatedAddressZip", List.of(zipCode)),
-              Map.entry("validatedAddressValidate", List.of("false"))
+              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "AddressValidate", List.of("false"))
           ), "Test");
 
       assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1 + "Validated");
