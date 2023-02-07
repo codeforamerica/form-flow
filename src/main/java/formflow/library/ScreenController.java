@@ -472,12 +472,12 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       HttpSession httpSession
   ) {
-    log.info("postScreen: flow: " + flow + ", screen: " + screen);
-    var formDataSubmission = removeEmptyValuesAndFlatten(formData);
+    log.info("submit postScreen: flow: " + flow + ", screen: " + screen);
+    FormSubmission formSubmission = new FormSubmission(formData);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
 
-    var errorMessages = validationService.validate(flow, formDataSubmission);
-    handleErrors(httpSession, errorMessages, formDataSubmission);
+    var errorMessages = validationService.validate(flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
 
     if (errorMessages.size() > 0) {
       return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
@@ -486,11 +486,11 @@ public class ScreenController extends FormFlowController {
 
     // if there's already a session
     if (submission.getId() != null) {
-      submission.mergeFormDataWithSubmissionData(formDataSubmission);
+      submission.mergeFormDataWithSubmissionData(formSubmission);
       saveToRepository(submission);
     } else {
       submission.setFlow(flow);
-      submission.setInputData(formDataSubmission);
+      submission.setInputData(formSubmission.getFormData());
       saveToRepository(submission);
       httpSession.setAttribute("id", submission.getId());
     }
