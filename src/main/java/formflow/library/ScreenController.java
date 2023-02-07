@@ -7,6 +7,7 @@ import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.data.FormSubmission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -120,10 +119,10 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
-    var formDataSubmission = removeEmptyValuesAndFlatten(formData);
+    FormSubmission formSubmission = new FormSubmission(formData); // Do this in the constructor of the FormSubmission class
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
-    var errorMessages = validationService.validate(flow, formDataSubmission);
-    handleErrors(httpSession, errorMessages, formDataSubmission);
+    var errorMessages = validationService.validate(flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
 
     if (errorMessages.size() > 0) {
       return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
@@ -131,11 +130,11 @@ public class ScreenController extends FormFlowController {
 
     // if there's already a session
     if (submission.getId() != null) {
-      submission.mergeFormDataWithSubmissionData(formDataSubmission);
+      submission.mergeFormDataWithSubmissionData(formSubmission);
       saveToRepository(submission);
     } else {
       submission.setFlow(flow);
-      submission.setInputData(formDataSubmission);
+      submission.setInputData(formSubmission.getFormData());
       saveToRepository(submission);
       httpSession.setAttribute("id", submission.getId());
     }
@@ -171,21 +170,21 @@ public class ScreenController extends FormFlowController {
   ) {
 //    Copy from OG /post request
     log.info("postScreen new subflow: flow: " + flow + ", screen: " + screen);
-    var formDataSubmission = removeEmptyValuesAndFlatten(formData);
+    FormSubmission formSubmission = new FormSubmission(formData);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var currentScreen = getScreenConfig(flow, screen);
     HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     String subflowName = subflows.entrySet().stream().filter(subflow ->
             subflow.getValue().getIterationStartScreen().equals(screen))
         .map(Entry::getKey).findFirst().orElse(null);
-    var errorMessages = validationService.validate(flow, formDataSubmission);
-    handleErrors(httpSession, errorMessages, formDataSubmission);
+    var errorMessages = validationService.validate(flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
       return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
     }
 
     UUID uuid = UUID.randomUUID();
-    formDataSubmission.put("uuid", uuid);
+    formSubmission.getFormData().put("uuid", uuid);
 
     // if there's already a session
     if (submission.getId() != null) {
@@ -194,13 +193,13 @@ public class ScreenController extends FormFlowController {
       }
       ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
       Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen);
-      formDataSubmission.put("iterationIsComplete", iterationIsComplete);
-      subflow.add(formDataSubmission);
+      formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
+      subflow.add(formSubmission.getFormData());
       saveToRepository(submission, subflowName);
     } else {
       submission.setFlow(flow);
-      // TODO: create the subflow here and add formDataSubmission to that
-      submission.setInputData(formDataSubmission);
+      // TODO: create the subflow here and add formSubmission to that
+      submission.setInputData(formSubmission.getFormData());
       saveToRepository(submission, subflowName);
       httpSession.setAttribute("id", submission.getId());
     }
@@ -263,11 +262,11 @@ public class ScreenController extends FormFlowController {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
     Long id = (Long) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
-    Map<String, Object> formDataSubmission = removeEmptyValuesAndFlatten(formData);
+    FormSubmission formSubmission = new FormSubmission(formData);
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
-    var errorMessages = validationService.validate(flow, formDataSubmission);
-    handleErrors(httpSession, errorMessages, formDataSubmission);
+    var errorMessages = validationService.validate(flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
       return new ModelAndView(String.format("redirect:/%s/%s/%s", flow, screen, uuid));
     }
@@ -277,8 +276,8 @@ public class ScreenController extends FormFlowController {
       var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
       if (iterationToEdit != null) {
         Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen);
-        formDataSubmission.put("iterationIsComplete", iterationIsComplete);
-        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formDataSubmission);
+        formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
+        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
         submission.removeIncompleteIterations(subflowName, uuid);
         handleBeforeSaveAction(currentScreen, submission, uuid);
         saveToRepository(submission, subflowName);
@@ -442,9 +441,9 @@ public class ScreenController extends FormFlowController {
     String subflowName = currentScreen.getSubflow();
     Long id = (Long) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
-    Map<String, Object> formDataSubmission = removeEmptyValuesAndFlatten(formData);
-    var errorMessages = validationService.validate(flow, formDataSubmission);
-    handleErrors(httpSession, errorMessages, formDataSubmission);
+    FormSubmission formSubmission = new FormSubmission(formData);
+    var errorMessages = validationService.validate(flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
       return new ModelAndView(String.format("redirect:/%s/%s/%s/edit", flow, screen, uuid));
     }
@@ -453,7 +452,7 @@ public class ScreenController extends FormFlowController {
       Submission submission = submissionOptional.get();
       var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
       if (iterationToEdit != null) {
-        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formDataSubmission);
+        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
         handleBeforeSaveAction(currentScreen, submission, uuid);
         saveToRepository(submission, subflowName);
       }
@@ -645,7 +644,8 @@ public class ScreenController extends FormFlowController {
 
     // If there are errors, merge form data that was submitted, with already existing inputData
     if (httpSession.getAttribute("formDataSubmission") != null) {
-      submission.mergeFormDataWithSubmissionData((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+      submission.mergeFormDataWithSubmissionData(
+          new FormSubmission((Map<String, Object>) httpSession.getAttribute("formDataSubmission")));
     }
 
     model.put("submission", submission);
@@ -656,34 +656,14 @@ public class ScreenController extends FormFlowController {
   }
 
   private void handleErrors(HttpSession httpSession, HashMap<String, ArrayList<String>> errorMessages,
-      Map<String, Object> formDataSubmission) {
+      FormSubmission formSubmission) {
     if (errorMessages.size() > 0) {
       httpSession.setAttribute("errorMessages", errorMessages);
-      httpSession.setAttribute("formDataSubmission", formDataSubmission);
+      httpSession.setAttribute("formDataSubmission", formSubmission.getFormData());
     } else {
       httpSession.removeAttribute("errorMessages");
       httpSession.removeAttribute("formDataSubmission");
     }
-  }
-
-  @NotNull
-  private Map<String, Object> removeEmptyValuesAndFlatten(MultiValueMap<String, String> formData) {
-    return formData.entrySet().stream()
-        .peek(entry -> {
-          // An empty checkbox/checkboxSet has a hidden value of "" which needs to be removed
-          if (entry.getKey().contains("[]") && entry.getValue().size() == 1) {
-            entry.setValue(new ArrayList<>());
-          }
-          if (entry.getValue().size() > 1 && entry.getValue().get(0).equals("")) {
-            entry.getValue().remove(0);
-          }
-        })
-        // Flatten arrays to be single values if the array contains one item
-        .collect(Collectors.toMap(
-            Entry::getKey,
-            entry -> entry.getValue().size() == 1 && !entry.getKey().contains("[]")
-                ? entry.getValue().get(0) : entry.getValue()
-        ));
   }
 
   private Boolean isDeleteConfirmationScreen(String flow, String screen) {
