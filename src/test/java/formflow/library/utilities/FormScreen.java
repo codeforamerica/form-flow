@@ -40,7 +40,7 @@ public class FormScreen {
   }
 
   public Elements getInputErrors(String inputName) {
-    return html.select("input[name^='%s'] ~ p.text--error".formatted(inputName));
+    return html.select("[id^=\"%s-error-message\"]".formatted(inputName));
   }
 
   public Element getInputError(String inputName) {
@@ -132,7 +132,7 @@ public class FormScreen {
   public String getSelectValue(String inputName) {
     var optionElements = html.select("select[name='%s']".formatted(inputName)).select("option");
     return optionElements.stream()
-        .filter(element -> element.hasAttr("selected"))
+        .filter(element -> element.hasAttr("selected") && !element.hasAttr("disabled"))
         .findFirst()
         .map(element -> element.attr("value"))
         .orElseThrow();

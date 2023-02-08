@@ -1,0 +1,5 @@
+spring:
+  flyway:
+    baselineOnMigrate: true
+    placeholders:
+      uuid_function: "random_uuid"

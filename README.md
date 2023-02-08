@@ -52,9 +52,6 @@ Table of Contents
         * [Thymeleaf Model Data](#thymeleaf-model-data)
         * [Conditions / Actions](#conditions--actions)
         * [Library Details](#library-details)
-* [Help](#help)
-    * [IntelliJ Live Templates](#intellij-live-templates)
-    * [Icons](#icons)
 * [Developer Setup](#developer-setup)
     * [Java Development Kit](#java-development-kit)
     * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
@@ -347,9 +344,21 @@ class ApplicationInformation extends FlowInputs {
 }
 ```
 
-Validations for inputs use the JSR-303 bean validation paradigm, more specifically, Hibernate
+### Validating Inputs
+
+Validations for inputs use the Java Bean Validation, more specifically, Hibernate
 validations. For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+
+Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
+`@NotNull` is used. That is to say if a validation annotation such as `@Email` is used, it will not
+actually
+validate the annotated input unless a user actually enters a value for that input. If you use
+`@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
+enter a value,
+validating both that they need to enter a value due to `@NotBlank` and because the blank value needs
+to be
+a validly formatted email address due to `@Email`.
 
 ### Custom Validations
 
@@ -360,6 +369,25 @@ them the same way you would any other JavaX validator, like so:
 ```java
 @Money(message = "Please make sure to enter a valid dollar amount.")
 private String income;
+```
+
+#### @Money
+
+Used to validate monetary values. Accepts values such as:
+```
+0
+0.5
+1
+1.2
+10.20
+```
+
+Does not accept values such as:
+```
+-1
+012
+12.123
+.5
 ```
 
 ### Input Data JSON Structure
@@ -660,15 +688,33 @@ A convenience live template for text area inputs is provided through `cfa:inputT
 
 ### Number
 
-Number inputs are used to gather numbers from users. The number input makes use of `type="number"`
+Number inputs are used to gather numbers from users. The number input makes use
+of `inputmode="numeric"`
 which
 will cause mobile devices to display the number pad when entering values into the input. The number
 input
 is useful for gathering numbers that don't already have a specific input type, such as the phone,
 money,
-date or SSN inputs. Number inputs have an optional `placeholder` parameter.
+date or SSN inputs.
 
-A convenience live template for date's is provided through `cfa:inputNumber`.
+Number inputs have an optional `title` parameter, which when passed will set the `title` attribute
+on the input
+The text given for the title will be displayed as a tooltip when the user hovers over the input as
+well as in
+client-side HTML based validation errors. The default title if one is not passed will
+be `Please make sure you are entering a positive, whole number or decimal value with 2 decimal places.`
+
+Number inputs also have an optional `pattern` parameter which represents a regex pattern that must
+be met for the input to be valid.
+The default regex pattern is `^\d*(\.\d{0,2})?$` which allows for any positive number with up to 2
+decimal places.
+A different pattern can be passed if you wish to change this default behavior. If you change
+the `pattern`
+make sure you also change the `title` to represent your new pattern.
+
+Number inputs have an optional `placeholder` parameter.
+
+A convenience live template for numbers is provided through `cfa:inputNumber`.
 
 ### Social Security Number
 
@@ -1348,17 +1394,6 @@ This library is created as a Web/Fat jar to include all the items this class dep
 Specifically it's created this way to ensure that all the resources are included in the
 distribution.
 
-# Help
-
-## IntelliJ Live Templates
-
-As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
-the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
-quickly build Thymeleaf templates.
-
-More information and example usage can be found in
-our [starter application](#applying-live-templates-to-your-intellij-ide)
-.
 
 # Developer Setup
 
@@ -1491,13 +1526,16 @@ our Live Templates by typing `cfa:` and a list of templates to autofill will sho
 
 ### Contribute new Live Templates ###
 
+If you have created a template which you feel is valuable outside the context of your specific app, you can contribute it to this project so that other teams can use it.
+
 1. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
-2. Find the Live Template you want to contribute
+2. Find or create the Live Template you want to contribute
 3. Right click and "Copy" (this will copy the Live Template in XML form)
-4. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
-5. Paste at the bottom of the file
-6. Commit to GitHub
-7. Now others can copy/paste your Live Templates
+4. Create a PR on this repository in GitHub which includes an update to the templates. 
+   a. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
+   b. Paste at the bottom of the file
+   c. Someone from the Platforms team will work with you to get this PR merged into the codebase.
+5. Now others can copy/paste your Live Templates
 
 ### Set Java SDK
 

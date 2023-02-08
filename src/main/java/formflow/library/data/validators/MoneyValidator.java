@@ -8,6 +8,7 @@ public class MoneyValidator implements ConstraintValidator<Money, String> {
 
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
-    return Pattern.matches("([1-9]\\d*)?(\\.\\d{2})?", value);
+    // Matches one or more digits, a dot and 2 digits after the dot.
+    return Pattern.matches("(^(0|[1-9][0-9]*)\\.?\\d{1,2}$)?", value);
   }
 }

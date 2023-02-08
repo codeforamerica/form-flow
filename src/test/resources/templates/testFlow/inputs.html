@@ -80,6 +80,10 @@
                   th:replace="'fragments/inputs/ssn' :: ssn(
                             inputName='ssnInput',
                             label='ssnInput')"/>
+              <th:block th:replace="'fragments/inputs/state' ::
+                          state(inputName='stateInput',
+                          label='stateInput',
+                          placeholderText='State')"/>
             </div>
             <div class="form-card__footer">
               <th:block th:replace="'fragments/continueButton' :: continue"/>

@@ -6,6 +6,12 @@ flow:
   test:
     nextScreens:
       - name: success
+  pageWithOptionalValidation:
+    nextScreens:
+      - name: success
+  pageWithMultipleValidationInput:
+    nextScreens:
+      - name: success
   success:
     nextScreens:
 subflows:

@@ -25,13 +25,12 @@ public class UploadJourneyTests extends AbstractBasePageTest {
   @Test
   void documentUploadFlow() {
     Assertions.assertThat(testPage.getTitle()).isEqualTo("Upload Documents");
-
     // Test accepted file types
     // Extension list comes from application.yaml -- form-flow.uploads.accepted-file-types
-    uploadFile("test.tif", "uploadTest");
+    uploadFile("test-platypus.gif", "uploadTest");
     Assertions.assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(
-            "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .fake");
+            "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .fake, .heic, .tif, .tiff");
     testPage.clickLink("remove");
     Assertions.assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
     // Upload a file that is too big and assert the correct error shows - max file size in test is 1MB

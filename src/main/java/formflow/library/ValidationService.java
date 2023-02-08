@@ -1,14 +1,16 @@
 package formflow.library;
 
+import formflow.library.data.FormSubmission;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
  * </p>
  */
 @Service
+@Slf4j
 public class ValidationService {
 
   private final Validator validator;
@@ -39,11 +42,11 @@ public class ValidationService {
   /**
    * Validates client inputs with java bean validation based on input definition.
    *
-   * @param flowName           The name of the current flow, not null
-   * @param formDataSubmission The input data from a form as a map of field name to field value(s), not null
+   * @param flowName       The name of the current flow, not null
+   * @param formSubmission The input data from a form as a map of field name to field value(s), not null
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
-  public HashMap<String, ArrayList<String>> validate(String flowName, Map<String, Object> formDataSubmission) {
+  public HashMap<String, ArrayList<String>> validate(String flowName, FormSubmission formSubmission) {
     Class<?> clazz;
     try {
       clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
@@ -53,10 +56,27 @@ public class ValidationService {
 
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
-    formDataSubmission.forEach((key, value) -> {
-      var messages = new ArrayList<String>();
+    var messages = new ArrayList<String>();
+    formSubmission.getFormData().forEach((key, value) -> {
       if (key.contains("[]")) {
         key = key.replace("[]", "");
+      }
+      if (!key.equals("_csrf")) {
+        List<String> annotationNames = null;
+        try {
+          annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
+              .map(annotation -> annotation.annotationType().getName()).toList();
+        } catch (NoSuchFieldException e) {
+          throw new RuntimeException(e);
+        }
+        // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
+        List<String> requireAnnotations = List.of("javax.validation.constraints.NotNull", "javax.validation.constraints.NotEmpty",
+            "javax.validation.constraints.NotBlank");
+        if (Collections.disjoint(annotationNames, requireAnnotations) &&
+            value.equals("")) {
+          log.info("skipping validation - found empty input for non-required field");
+          return;
+        }
       }
       validator.validateValue(flowClass, key, value)
           .forEach(violation -> messages.add(violation.getMessage()));
@@ -64,22 +84,6 @@ public class ValidationService {
         validationMessages.put(key, messages);
       }
     });
-
-    return validationMessages;
-  }
-
-  public HashMap<String, List<String>> validate(String flowName, String inputName, MultipartFile file) {
-    Class<?> clazz;
-    try {
-      clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
-
-    Class<?> flowClass = clazz;
-    HashMap<String, List<String>> validationMessages = new HashMap<>();
-    validator.validateValue(flowClass, inputName, file)
-        .forEach(violation -> validationMessages.put(inputName, List.of(violation.getMessage())));
 
     return validationMessages;
   }

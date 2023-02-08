@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +30,7 @@ public class TestFlow extends FlowInputs {
   String moneyInput;
   String phoneInput;
   String ssnInput;
+  String stateInput;
   @NotEmpty(message = "Please select at least one")
   List<String> favoriteFruitCheckbox;
 
@@ -42,4 +44,7 @@ public class TestFlow extends FlowInputs {
   String householdMemberRecentlyMovedToUS;
   MultipartFile testFile;
   String dropZoneTestInstance;
+
+  @Positive()
+  String validatePositiveIfNotEmpty;
 }
