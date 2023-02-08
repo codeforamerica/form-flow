@@ -110,11 +110,11 @@ public class Submission {
    * The Submission will be updated with the merged data.
    * </p>
    *
-   * @param formDataSubmission new data to be merged with data in the submission, may be empty but should not be null
+   * @param formSubmission new data to be merged with data in the submission, may be empty but should not be null
    */
-  public void mergeFormDataWithSubmissionData(Map<String, Object> formDataSubmission) {
-    inputData.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, oldValue) -> newValue));
-    inputData = formDataSubmission;
+  public void mergeFormDataWithSubmissionData(FormSubmission formSubmission) {
+    inputData.forEach((key, value) -> formSubmission.getFormData().merge(key, value, (newValue, oldValue) -> newValue));
+    inputData = formSubmission.getFormData();
   }
 
   /**
