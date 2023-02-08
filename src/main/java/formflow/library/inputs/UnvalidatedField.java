@@ -1,4 +1,4 @@
-package formflow.library.data;
+package formflow.library.inputs;
 
 public enum UnvalidatedField {
   ;

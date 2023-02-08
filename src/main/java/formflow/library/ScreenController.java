@@ -1,13 +1,16 @@
 package formflow.library;
 
+import com.smartystreets.api.exceptions.SmartyException;
+import formflow.library.address_validation.AddressValidationService;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
+import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.data.FormSubmission;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,14 +45,18 @@ public class ScreenController extends FormFlowController {
   private final List<FlowConfiguration> flowConfigurations;
   private final ValidationService validationService;
 
+  private final AddressValidationService addressValidationService;
+
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
       SubmissionRepositoryService submissionRepositoryService,
-      ValidationService validationService) {
+      ValidationService validationService,
+      AddressValidationService addressValidationService) {
 
     super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
     this.validationService = validationService;
+    this.addressValidationService = addressValidationService;
 
     log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
@@ -117,9 +124,12 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession
-  ) {
+  ) throws SmartyException, IOException, InterruptedException {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
-    FormSubmission formSubmission = new FormSubmission(formData); // Do this in the constructor of the FormSubmission class
+    FormSubmission formSubmission = new FormSubmission(formData);
+    if (formSubmission.shouldValidateAddress()) {
+      addressValidationService.validate(formSubmission);
+    }
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var errorMessages = validationService.validate(flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);

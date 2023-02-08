@@ -1,13 +1,14 @@
 package formflow.library.framework;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import formflow.library.address_validation.AddressValidationService;
-import formflow.library.address_validation.ValidationRequest;
-import formflow.library.address_validation.ValidationResponse;
-import formflow.library.data.UnvalidatedField;
+import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.data.FormSubmission;
+import formflow.library.inputs.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
 import java.util.Map;
@@ -124,14 +125,11 @@ public class InputsTest extends AbstractMockMvcTest {
 
     @Test
     void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
-      ValidationRequest addressValidationRequest = new ValidationRequest(streetAddress1, streetAddress2, city,
-          state, zipCode);
-      ValidationResponse addressValidationResponse = new ValidationResponse(streetAddress1 + "Validated",
-          streetAddress2 + "Validated",
+      ValidatedAddress addressValidatedAddress = new ValidatedAddress(streetAddress1 + "Validated",
           city + "Validated",
           state + "Validated",
           zipCode + "Validated");
-      when(addressValidationService.validate(addressValidationRequest)).thenReturn(addressValidationResponse);
+      when(addressValidationService.validate(any(FormSubmission.class))).thenReturn(Map.of("Validated", addressValidatedAddress));
       var addressScreen = goBackTo("address");
 
       assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
@@ -150,11 +148,12 @@ public class InputsTest extends AbstractMockMvcTest {
               Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "AddressValidate", List.of("false"))
           ), "Test");
 
-      assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1 + "Validated");
-      assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2 + "Validated");
-      assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city + "Validated");
-      assertThat(addressScreen.getSelectValue("addressState")).isEqualTo(state + "Validated");
-      assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode + "Validated");
+      assertThat(addressScreen.getElementTextById("validatedAddressvalidatedAddress")).contains(
+          streetAddress1 + "Validated",
+          streetAddress2 + "Validated",
+          city + "Validated",
+          state + "Validated",
+          zipCode + "Validated");
     }
   }
 

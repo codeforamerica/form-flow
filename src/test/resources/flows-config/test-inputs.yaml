@@ -3,7 +3,7 @@ flow:
   inputs:
     nextScreens:
       - name: test
-  address:
+  testAddressValidation:
     nextScreens:
       - name: test
   test:

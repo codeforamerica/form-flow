@@ -1,5 +1,6 @@
 package formflow.library.data;
 
+import formflow.library.inputs.UnvalidatedField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,5 +47,9 @@ public class FormSubmission {
         .filter(
             formField -> unvalidatedFields.stream().noneMatch(unvalidatedField -> formField.getKey().contains(unvalidatedField)))
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+  }
+
+  public boolean shouldValidateAddress() {
+    return formData.entrySet().stream().anyMatch(entry -> entry.getKey().contains(UnvalidatedField.VALIDATE_ADDRESS));
   }
 }
