@@ -1,11 +1,15 @@
 <th:block
-    th:fragment="screenWithYesOrNo"
+    th:fragment="screenWithYesAndNoButtons"
+    th:with="
+      hasHelpText=${!#strings.isEmpty(helpText)},
+      hasAriaDescribe=${!#strings.isEmpty(ariaDescribe)}"
     th:assert="
       ${!#strings.isEmpty(title)},
       ${!#strings.isEmpty(header)},
       ${!#strings.isEmpty(formAction)},
-      ${inputContent != null}">
-  <!DOCTYPE html>
+      ${!#strings.isEmpty(subText)},
+      ${!#strings.isEmpty(inputName)}">
+  <!DOCTYPE html>/
   <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="fragments/head :: head(title=${title})"></head>
   <body>
@@ -21,26 +25,13 @@
               th:replace="'fragments/form' :: form(action=${formAction}, content=~{::formContent})">
             <th:block th:ref="formContent">
               <div class="form-card__content">
-                <th:block th:replace="${inputContent}"/>
+                <p> gone for now </p>
               </div>
               <div class="form-card__footer">
-                <button
-                    th:name="${inputName}"
-                    th:aria-describedby="${hasHelpText ? inputName + '-help-text' : ariaDescribe}"
-                    type="submit"
-                    value="true"
-                    class="button">
-                  <span class="button__icon--left emoji emoji--inline emoji--checkmark"></span>
-                  <span th:text="#{general.inputs.yes}"></span>
-                </button>
-                <button
-                    th:name="${inputName}"
-                    th:aria-describedby="${hasHelpText ? inputName + '-help-text' : ariaDescribe}"
-                    value="false"
-                    class="button">
-                  <span class="button__icon--left emoji emoji--inline emoji--crossmark"></span>
-                  <span th:text="#{general.inputs.no}"></span>
-                </button>
+                <th:block th:replace="fragments/inputs/yesOrNo :: yesOrNo(
+                 inputName=${inputName},
+                 ariaDescribe='header-help-message',
+                 helpText='Pick yes or now')"/>
               </div>
             </th:block>
           </th:block>

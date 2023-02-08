@@ -215,7 +215,21 @@
   <option name="HTML" value="true" />
 </context>
 </template>
-<template name="cfa:screenWithOneInput" value="&lt;th:block&#10;  th:replace=&quot;fragments/screens/screenWithOneInput ::&#10;  screenWithOneInput(&#10;    title=#{$TITLE$},&#10;    header=#{$HEADER$},&#10;    subtext=#{$SUBTEXT$},&#10;    formAction=${formAction},&#10;    inputContent=~{::inputContent})&quot;&gt;&#10;  &lt;th:block th:ref=&quot;inputContent&quot;&gt;&#10;    &lt;!-- Be sure to have `ariaLabel='header'` to label the input with the header --&gt;&#10;    &lt;th:block th:replace=&quot;'fragments/inputs/text' ::&#10;      text(inputName='$INPUT_NAME$',&#10;      ariaLabel='header')&quot;/&gt;&#10;  &lt;/th:block&gt;&#10;&lt;/th:block&gt;" description="An entire screen that has one input and is labelled by the page header." toReformat="false" toShortenFQNames="true">
+<template name="cfa:screenWithOneInput"
+value="&lt;th:block&#10;
+th:replace=&quot;fragments/screens/screenWithOneInput ::&#10;
+screenWithOneInput(&#10;
+    title=#{$TITLE$},&#10;
+    header=#{$HEADER$},&#10;
+    subtext=#{$SUBTEXT$},&#10;
+    formAction=${formAction},&#10;
+    inputContent=~{::inputContent})&quot;&gt;&#10;
+&lt;th:block th:ref=&quot;inputContent&quot;&gt;&#10;
+&lt;!-- Be sure to have `ariaLabel='header'` to label the input with the header --&gt;&#10;
+&lt;th:block th:replace=&quot;'fragments/inputs/text' ::&#10;
+text(inputName='$INPUT_NAME$',&#10;      ariaLabel='header')
+&quot;/&gt;&#10;
+&lt;/th:block&gt;&#10;&lt;/th:block&gt;" description="An entire screen that has one input and is labelled by the page header." toReformat="false" toShortenFQNames="true">
 <variable name="TITLE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="HEADER" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="SUBTEXT" expression="" defaultValue="" alwaysStopAt="true" />
@@ -224,7 +238,8 @@
   <option name="HTML" value="true" />
 </context>
 </template>
-<template name="cfa:screenWithYesAndNoButtons" value="&lt;th:block&#10;  th:replace=&quot;fragments/screens/screenWithYesAndNoButtons ::&#10;  screenWithYesAndNoButtons(&#10;    title=#{$TITLE$},&#10;    header=#{$HEADER$},&#10;    subtext=#{$SUBTEXT$},&#10;    formAction=${formAction},&#10;    inputContent=~{::inputContent})&quot;&gt;&#10;  &lt;th:block th:ref=&quot;inputContent&quot;&gt;&#10;    &lt;!&#45;&#45; Be sure to have `ariaLabel='header'` to label the input with the header &#45;&#45;&gt;&#10;    &lt;th:block th:replace=&quot;'fragments/inputs/text' ::&#10;      text(inputName='$INPUT_NAME$',&#10;      ariaLabel='header')&quot;/&gt;&#10;  &lt;/th:block&gt;&#10;&lt;/th:block&gt;" description="An entire screen that has one input and is labelled by the page header." toReformat="false" toShortenFQNames="true">
+<template name="cfa:screenWithYesAndNoButtons" value="&lt;th:block&#10;  th:replace=&quot;fragments/screens/screenWithYesAndNoButtons ::&#10;  screenWithYesAndNoButtons(&#10;    title=#{$TITLE$},&#10;    header=#{$HEADER$},&#10;    subtext=#{$SUBTEXT$},&#10; formAction=${formAction},&#10;  inputName=${inputName})&quot;&gt;&#10;"
+description="An entire screen that has two buttons ('Yes' and 'No') and is labelled by the page header." toReformat="false" toShortenFQNames="true">
 <variable name="TITLE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="HEADER" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="SUBTEXT" expression="" defaultValue="" alwaysStopAt="true" />
