@@ -18,6 +18,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -464,6 +465,39 @@ public class ScreenController extends FormFlowController {
     return new ModelAndView(viewString);
   }
 
+  @PostMapping("{flow}/{screen}/submit")
+  ModelAndView submit(
+      @RequestParam(required = false) MultiValueMap<String, String> formData,
+      @PathVariable String flow,
+      @PathVariable String screen,
+      HttpSession httpSession
+  ) {
+    log.info("submit postScreen: flow: " + flow + ", screen: " + screen);
+    FormSubmission formSubmission = new FormSubmission(formData);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+
+    var errorMessages = validationService.validate(flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
+
+    if (errorMessages.size() > 0) {
+      return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
+    }
+    submission.setSubmittedAt(DateTime.now().toDate());
+
+    // if there's already a session
+    if (submission.getId() != null) {
+      submission.mergeFormDataWithSubmissionData(formSubmission);
+      saveToRepository(submission);
+    } else {
+      submission.setFlow(flow);
+      submission.setInputData(formSubmission.getFormData());
+      saveToRepository(submission);
+      httpSession.setAttribute("id", submission.getId());
+    }
+
+    return new ModelAndView(String.format("redirect:/%s/%s/navigation", flow, screen));
+  }
+
   /**
    * Chooses the next screen template and model to render based on what is next in the flow.
    *
@@ -661,4 +695,5 @@ public class ScreenController extends FormFlowController {
     }
     return null;
   }
+
 }
