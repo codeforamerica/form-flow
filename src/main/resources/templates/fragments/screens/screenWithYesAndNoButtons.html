@@ -7,9 +7,9 @@
       ${!#strings.isEmpty(title)},
       ${!#strings.isEmpty(header)},
       ${!#strings.isEmpty(formAction)},
-      ${!#strings.isEmpty(subText)},
-      ${!#strings.isEmpty(inputName)}">
-  <!DOCTYPE html>/
+      ${!#strings.isEmpty(inputName)},
+      ${inputContent != null}">
+  <!DOCTYPE html>
   <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="fragments/head :: head(title=${title})"></head>
   <body>
@@ -20,18 +20,17 @@
         <div th:replace="fragments/goBack :: goBackLink"></div>
         <main id="content" role="main" class="form-card spacing-above-35">
           <th:block
-              th:replace="'fragments/cardHeader' :: cardHeader(header=${header}, subtext=${subtext})"/>
+              th:replace="'fragments/cardHeader' :: cardHeader(header=${header})"/>
           <th:block
               th:replace="'fragments/form' :: form(action=${formAction}, content=~{::formContent})">
             <th:block th:ref="formContent">
               <div class="form-card__content">
-                <p> gone for now </p>
+                <th:block th:replace="${inputContent}"/>
               </div>
               <div class="form-card__footer">
                 <th:block th:replace="fragments/inputs/yesOrNo :: yesOrNo(
                  inputName=${inputName},
-                 ariaDescribe='header-help-message',
-                 helpText='Pick yes or now')"/>
+                 ariaDescribe='header')"/>
               </div>
             </th:block>
           </th:block>
