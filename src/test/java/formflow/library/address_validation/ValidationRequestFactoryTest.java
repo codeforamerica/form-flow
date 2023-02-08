@@ -27,7 +27,8 @@ class ValidationRequestFactoryTest {
         Map.entry("otherAddressCity", "San Mateo"),
         Map.entry("otherAddressState", "CA"),
         Map.entry("otherAddressZipCode", "94002"),
-        Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "testAddress", "true")
+        Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "testAddress", "true"),
+        Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "otherAddress", "true")
     ));
 
     Lookup lookup1 = new Lookup();
@@ -44,9 +45,21 @@ class ValidationRequestFactoryTest {
     lookup2.setState("CA");
     lookup2.setZipCode("94002");
 
+    Batch batch = validationRequestFactory.create(formSubmission);
     Batch testBatch = new Batch();
     testBatch.add(lookup1);
     testBatch.add(lookup2);
-    assertThat(validationRequestFactory.create(formSubmission).getAllLookups()).isEqualTo(testBatch.getAllLookups());
+
+    assertThat(batch.get("testAddress").getStreet()).isEqualTo(lookup1.getStreet());
+    assertThat(batch.get("testAddress").getStreet2()).isEqualTo(lookup1.getStreet2());
+    assertThat(batch.get("testAddress").getCity()).isEqualTo(lookup1.getCity());
+    assertThat(batch.get("testAddress").getState()).isEqualTo(lookup1.getState());
+    assertThat(batch.get("testAddress").getZipCode()).isEqualTo(lookup1.getZipCode());
+
+    assertThat(batch.get("otherAddress").getStreet()).isEqualTo(lookup2.getStreet());
+    assertThat(batch.get("otherAddress").getStreet2()).isEqualTo(lookup2.getStreet2());
+    assertThat(batch.get("otherAddress").getCity()).isEqualTo(lookup2.getCity());
+    assertThat(batch.get("otherAddress").getState()).isEqualTo(lookup2.getState());
+    assertThat(batch.get("otherAddress").getZipCode()).isEqualTo(lookup2.getZipCode());
   }
 }

@@ -16,11 +16,12 @@ public class ValidationRequestFactory {
   public Batch create(FormSubmission formSubmission) {
     Batch smartyBatch = new Batch();
     List<String> addressInputNames = formSubmission.getFormData().keySet().stream()
-        .filter(key -> key.startsWith(UnvalidatedField.VALIDATE_ADDRESS) && formSubmission.getFormData().get(key).equals(true))
+        .filter(key -> key.startsWith(UnvalidatedField.VALIDATE_ADDRESS) && formSubmission.getFormData().get(key).equals("true"))
         .map(key -> key.substring(UnvalidatedField.VALIDATE_ADDRESS.length())).toList();
 
     addressInputNames.forEach(inputName -> {
       Lookup lookup = new Lookup();
+      lookup.setInputId(inputName);
       lookup.setStreet(formSubmission.getFormData().get(inputName + Inputs.STREET_ADDRESS_1).toString());
       lookup.setStreet2(formSubmission.getFormData().get(inputName + Inputs.STREET_ADDRESS_2).toString());
       lookup.setCity(formSubmission.getFormData().get(inputName + Inputs.CITY).toString());
