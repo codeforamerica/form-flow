@@ -2,9 +2,7 @@ package formflow.library.address_validation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.smartystreets.api.exceptions.BatchFullException;
 import com.smartystreets.api.us_street.Batch;
-import com.smartystreets.api.us_street.Lookup;
 import formflow.library.data.FormSubmission;
 import formflow.library.inputs.UnvalidatedField;
 import java.util.Map;
@@ -15,51 +13,45 @@ class ValidationRequestFactoryTest {
   ValidationRequestFactory validationRequestFactory = new ValidationRequestFactory();
 
   @Test
-  void shouldCreateBatchFromFormSubmission() throws BatchFullException {
+  void shouldCreateBatchFromFormSubmission() {
+    String firstStreetAddress1 = "123 Main St";
+    String firstStreetAddress2 = "Apt 1";
+    String firstCity = "San Francisco";
+    String firstState = "CA";
+    String firstZipcode = "94105";
+    String secondStreetAddress1 = "1254 Fake St";
+    String secondStreetAddress2 = "Apt 2";
+    String secondCity = "San Mateo";
+    String secondState = "NV";
+    String secondZipcode = "94002";
+
     FormSubmission formSubmission = new FormSubmission(Map.ofEntries(
-        Map.entry("testAddressStreetAddress1", "123 Main St"),
-        Map.entry("testAddressStreetAddress2", "Apt 1"),
-        Map.entry("testAddressCity", "San Francisco"),
-        Map.entry("testAddressState", "CA"),
-        Map.entry("testAddressZipCode", "94105"),
-        Map.entry("otherAddressStreetAddress1", "1254 Fake St"),
-        Map.entry("otherAddressStreetAddress2", "Apt 2"),
-        Map.entry("otherAddressCity", "San Mateo"),
-        Map.entry("otherAddressState", "CA"),
-        Map.entry("otherAddressZipCode", "94002"),
+        Map.entry("testAddressStreetAddress1", firstStreetAddress1),
+        Map.entry("testAddressStreetAddress2", firstStreetAddress2),
+        Map.entry("testAddressCity", firstCity),
+        Map.entry("testAddressState", firstState),
+        Map.entry("testAddressZipCode", firstZipcode),
+        Map.entry("otherAddressStreetAddress1", secondStreetAddress1),
+        Map.entry("otherAddressStreetAddress2", secondStreetAddress2),
+        Map.entry("otherAddressCity", secondCity),
+        Map.entry("otherAddressState", secondState),
+        Map.entry("otherAddressZipCode", secondZipcode),
         Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "testAddress", "true"),
         Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "otherAddress", "true")
     ));
 
-    Lookup lookup1 = new Lookup();
-    lookup1.setStreet("123 Main St");
-    lookup1.setStreet2("Apt 1");
-    lookup1.setCity("San Francisco");
-    lookup1.setState("CA");
-    lookup1.setZipCode("94105");
-
-    Lookup lookup2 = new Lookup();
-    lookup2.setStreet("1254 Fake St");
-    lookup2.setStreet2("Apt 2");
-    lookup2.setCity("San Mateo");
-    lookup2.setState("CA");
-    lookup2.setZipCode("94002");
-
     Batch batch = validationRequestFactory.create(formSubmission);
-    Batch testBatch = new Batch();
-    testBatch.add(lookup1);
-    testBatch.add(lookup2);
 
-    assertThat(batch.get("testAddress").getStreet()).isEqualTo(lookup1.getStreet());
-    assertThat(batch.get("testAddress").getStreet2()).isEqualTo(lookup1.getStreet2());
-    assertThat(batch.get("testAddress").getCity()).isEqualTo(lookup1.getCity());
-    assertThat(batch.get("testAddress").getState()).isEqualTo(lookup1.getState());
-    assertThat(batch.get("testAddress").getZipCode()).isEqualTo(lookup1.getZipCode());
+    assertThat(batch.get("testAddress").getStreet()).isEqualTo(firstStreetAddress1);
+    assertThat(batch.get("testAddress").getStreet2()).isEqualTo(firstStreetAddress2);
+    assertThat(batch.get("testAddress").getCity()).isEqualTo(firstCity);
+    assertThat(batch.get("testAddress").getState()).isEqualTo(firstState);
+    assertThat(batch.get("testAddress").getZipCode()).isEqualTo(firstZipcode);
 
-    assertThat(batch.get("otherAddress").getStreet()).isEqualTo(lookup2.getStreet());
-    assertThat(batch.get("otherAddress").getStreet2()).isEqualTo(lookup2.getStreet2());
-    assertThat(batch.get("otherAddress").getCity()).isEqualTo(lookup2.getCity());
-    assertThat(batch.get("otherAddress").getState()).isEqualTo(lookup2.getState());
-    assertThat(batch.get("otherAddress").getZipCode()).isEqualTo(lookup2.getZipCode());
+    assertThat(batch.get("otherAddress").getStreet()).isEqualTo(secondStreetAddress1);
+    assertThat(batch.get("otherAddress").getStreet2()).isEqualTo(secondStreetAddress2);
+    assertThat(batch.get("otherAddress").getCity()).isEqualTo(secondCity);
+    assertThat(batch.get("otherAddress").getState()).isEqualTo(secondState);
+    assertThat(batch.get("otherAddress").getZipCode()).isEqualTo(secondZipcode);
   }
 }

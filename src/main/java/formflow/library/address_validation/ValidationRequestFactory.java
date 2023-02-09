@@ -9,9 +9,14 @@ import formflow.library.inputs.UnvalidatedField;
 import formflow.library.inputs.Inputs;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class ValidationRequestFactory {
+
+  public ValidationRequestFactory() {
+  }
 
   public Batch create(FormSubmission formSubmission) {
     Batch smartyBatch = new Batch();

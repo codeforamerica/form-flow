@@ -10,30 +10,37 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+
 @Service
 public class AddressValidationService {
 
-  private Client smartyClient;
-
   private ValidationRequestFactory validationRequestFactory;
+  private ClientFactory clientFactory;
+
   @Value("${form-flow.address-validation.smarty.auth-id}")
   private String authId;
   @Value("${form-flow.address-validation.smarty.auth-token}")
   private String authToken;
+  @Value("${form-flow.address-validation.smarty.license}")
+  private String license;
 
-  public AddressValidationService(Client smartyClient, ValidationRequestFactory validationRequestFactory, String authId,
-      String authToken) {
-    this.smartyClient = smartyClient;
+
+  public AddressValidationService(
+      ValidationRequestFactory validationRequestFactory,
+      ClientFactory clientFactory, String authId, String authToken, String license) {
     this.validationRequestFactory = validationRequestFactory;
+    this.clientFactory = clientFactory;
     this.authId = authId;
     this.authToken = authToken;
+    this.license = license;
   }
 
   public Map<String, ValidatedAddress> validate(FormSubmission formSubmission)
       throws SmartyException, IOException, InterruptedException {
     Batch smartyBatch = validationRequestFactory.create(formSubmission);
-//    TODO: add authId and authToken to the client
-    smartyClient.send(smartyBatch);
+    Client client = clientFactory.create(authId, authToken, license);
+
+    client.send(smartyBatch);
 
     Map<String, ValidatedAddress> validatedAddresses = new HashMap<>();
     smartyBatch.getAllLookups().forEach(lookup ->
@@ -43,7 +50,8 @@ public class AddressValidationService {
                 lookup.getResult(0).getDeliveryLine1(),
                 lookup.getResult(0).getComponents().getCityName(),
                 lookup.getResult(0).getComponents().getState(),
-                lookup.getResult(0).getComponents().getZipCode())));
+                lookup.getResult(0).getComponents().getZipCode()))
+    );
 
     return validatedAddresses;
   }

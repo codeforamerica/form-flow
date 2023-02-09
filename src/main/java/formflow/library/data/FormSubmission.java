@@ -1,5 +1,7 @@
 package formflow.library.data;
 
+import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.inputs.Inputs;
 import formflow.library.inputs.UnvalidatedField;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,5 +53,14 @@ public class FormSubmission {
 
   public boolean shouldValidateAddress() {
     return formData.entrySet().stream().anyMatch(entry -> entry.getKey().contains(UnvalidatedField.VALIDATE_ADDRESS));
+  }
+
+  public void setFormData(Map<String, ValidatedAddress> validatedAddresses) {
+    validatedAddresses.forEach((key, value) -> {
+      formData.put(key + Inputs.STREET_ADDRESS_1, value.getStreetAddress());
+      formData.put(key + Inputs.CITY, value.getCity());
+      formData.put(key + Inputs.STATE, value.getState());
+      formData.put(key + Inputs.ZIPCODE, value.getZipCode());
+    });
   }
 }

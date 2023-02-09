@@ -2,6 +2,7 @@ package formflow.library;
 
 import com.smartystreets.api.exceptions.SmartyException;
 import formflow.library.address_validation.AddressValidationService;
+import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
@@ -128,7 +129,9 @@ public class ScreenController extends FormFlowController {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
     FormSubmission formSubmission = new FormSubmission(formData);
     if (formSubmission.shouldValidateAddress()) {
-      addressValidationService.validate(formSubmission);
+      Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
+      formSubmission.setFormData(validatedAddresses);
+//      save result to repository
     }
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var errorMessages = validationService.validate(flow, formSubmission);

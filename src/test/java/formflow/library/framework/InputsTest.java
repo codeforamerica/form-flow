@@ -92,6 +92,14 @@ public class InputsTest extends AbstractMockMvcTest {
     postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
   }
 
+  @Test
+  void shouldShowMultipleErrorMessagesOnSingleInput() throws Exception {
+    postExpectingFailureAndAssertErrorsDisplaysForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
+        2);
+    postExpectingFailureAndAssertErrorsDisplayForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
+        List.of("You must enter a value 2 characters or longer", "Don't leave this blank"));
+  }
+
   @Nested
   public class Address {
 
@@ -172,4 +180,3 @@ public class InputsTest extends AbstractMockMvcTest {
         expectedErrors);
   }
 }
-
