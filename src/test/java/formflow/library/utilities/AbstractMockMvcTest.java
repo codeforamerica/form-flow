@@ -23,6 +23,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -43,6 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles("test")
@@ -295,6 +297,20 @@ public abstract class AbstractMockMvcTest {
     ).andExpect(redirectedUrl(postUrl));
   }
 
+  protected ResultActions postExpectingFailures(String pageName, Map<String, String> params)
+      throws Exception {
+
+    String postUrl = getUrlForPageName(pageName);
+    MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
+    params.forEach(multiValueMap::add);
+    return mockMvc.perform(
+        post(postUrl)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .params(multiValueMap)
+    ).andExpect(redirectedUrl(postUrl));
+  }
+
   protected void postExpectingFailureAndAssertErrorDisplaysForThatInput(String pageName,
       String inputName,
       String value) throws Exception {
@@ -334,7 +350,7 @@ public abstract class AbstractMockMvcTest {
   protected void postExpectingFailureAndAssertInputErrorMessages(String pageName,
       Map<String, String> inputParams,
       Map<String, List<String>> expectedErrorMessages) throws Exception {
-//    postExpectingFailure(pageName, inputParams);
+    postExpectingFailures(pageName, inputParams);
     for (String inputName : inputParams.keySet()) {
       assertInputHasErrors(pageName, inputName, expectedErrorMessages.get(inputName));
     }

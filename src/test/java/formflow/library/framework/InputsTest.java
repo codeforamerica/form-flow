@@ -87,8 +87,8 @@ public class InputsTest extends AbstractMockMvcTest {
   @Test
   void shouldShowCorrectNumberOfErrorMessagesOnInputs() throws Exception {
     var inputParams = Map.of(
-        "inputWithMultipleValidations", (""),
-        "inputWithSingleValidation", (""));
+        "inputWithMultipleValidations", "",
+        "inputWithSingleValidation", "");
 
     var expectedErrors = Map.of(
         "inputWithMultipleValidations",
