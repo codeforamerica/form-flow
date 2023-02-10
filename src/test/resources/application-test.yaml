@@ -9,8 +9,8 @@ form-flow:
     thumbnail-height: '50'
   address-validation:
     smarty:
-      auth_id: "authId"
-      auth_token: "authToken"
+      auth-id: "authId"
+      auth-token: "authToken"
       license: "license"
 spring:
   datasource:

@@ -1162,8 +1162,8 @@ address validation to work.
 ```yaml
   address-validation:
     smarty:
-      auth_id: ${SMARTY_AUTH_ID}
-      auth_token: ${SMARTY_AUTH_TOKEN}
+      auth-id: ${SMARTY_AUTH_ID}
+      auth-token: ${SMARTY_AUTH_TOKEN}
       license: "us-core-cloud" # This is the default license, but can be changed to any of the licenses listed here: https://smartystreets.com/docs/cloud/licensing
 ```
 
