@@ -404,7 +404,14 @@ public abstract class AbstractMockMvcTest {
   protected void assertInputHasErrors(String pageName, String inputName, List<String> errorMessages)
       throws Exception {
     var page = new FormScreen(getPage(pageName));
-    assertTrue(errorMessages.containsAll(page.getInputErrors(inputName).stream().map(Element::ownText).toList()));
+    // make sure there are errors returned
+    assertFalse(page.getInputErrors(inputName).isEmpty(), "Expected errors on page, but there were none");
+    // assert equal amount
+    assertEquals(errorMessages.size(), page.getInputErrors(inputName).size(),
+        "The page has a different number of errors than expected");
+    // now check if they match the expected ones.
+    assertTrue(errorMessages.containsAll(page.getInputErrors(inputName).stream().map(Element::ownText).toList()),
+        "The error messages expected do match what was returned");
   }
 
   protected void assertPageHasDateInputError(String pageName, String inputName) throws Exception {
