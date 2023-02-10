@@ -74,7 +74,7 @@ public class InputsTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldOnlyRunValidationIfItHasARequiredAnnoation() throws Exception {
+  void shouldOnlyRunValidationIfItHasARequiredAnnotation() throws Exception {
     // Should not validate when value is empty
     postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
     // Should validate when a value is entered
@@ -85,10 +85,17 @@ public class InputsTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldShowMultipleErrorMessagesOnSingleInput() throws Exception {
-    postExpectingFailureAndAssertErrorsDisplaysForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
-        2);
-    postExpectingFailureAndAssertErrorsDisplayForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
-        List.of("You must enter a value 2 characters or longer", "Don't leave this blank"));
+  void shouldShowCorrectNumberOfErrorMessagesOnInputs() throws Exception {
+    var inputParams = Map.of(
+        "inputWithMultipleValidations", "",
+        "inputWithSingleValidation", "");
+
+    var expectedErrors = Map.of(
+        "inputWithMultipleValidations",
+        List.of("You must enter a value 2 characters or longer", "Don't leave this blank"),
+        "inputWithSingleValidation", List.of("Enter a value"));
+
+    postExpectingFailureAndAssertInputErrorMessages("pageWithMultipleValidationInput", inputParams,
+        expectedErrors);
   }
 }

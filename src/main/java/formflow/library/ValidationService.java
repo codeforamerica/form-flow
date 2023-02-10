@@ -56,8 +56,8 @@ public class ValidationService {
 
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
-    var messages = new ArrayList<String>();
     formSubmission.getFormData().forEach((key, value) -> {
+      var messages = new ArrayList<String>();
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }

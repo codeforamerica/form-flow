@@ -38,6 +38,9 @@ public class TestFlow extends FlowInputs {
   @Size(min = 2, message = "You must enter a value 2 characters or longer")
   String inputWithMultipleValidations;
 
+  @NotBlank(message = "Enter a value")
+  String inputWithSingleValidation;
+
   String householdMemberFirstName;
   String householdMemberLastName;
   String householdMemberRelationship;
