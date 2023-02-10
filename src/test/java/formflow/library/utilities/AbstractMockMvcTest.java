@@ -331,6 +331,15 @@ public abstract class AbstractMockMvcTest {
     assertInputHasErrors(pageName, inputName, errorMessages);
   }
 
+  protected void postExpectingFailureAndAssertInputErrorMessages(String pageName,
+      Map<String, String> inputParams,
+      Map<String, List<String>> expectedErrorMessages) throws Exception {
+//    postExpectingFailure(pageName, inputParams);
+    for (String inputName : inputParams.keySet()) {
+      assertInputHasErrors(pageName, inputName, expectedErrorMessages.get(inputName));
+    }
+  }
+
   protected void postExpectingFailureAndAssertErrorDisplaysForThatDateInput(String pageName,
       String inputName,
       List<String> values) throws Exception {
