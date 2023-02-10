@@ -14,20 +14,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class AddressValidationService {
 
-  private ValidationRequestFactory validationRequestFactory;
-  private ClientFactory clientFactory;
+  private final ValidationRequestFactory validationRequestFactory;
+  private final ClientFactory clientFactory;
 
-  @Value("${form-flow.address-validation.smarty.auth-id}")
-  private String authId;
-  @Value("${form-flow.address-validation.smarty.auth-token}")
-  private String authToken;
-  @Value("${form-flow.address-validation.smarty.license}")
-  private String license;
+  private final String authId;
+  private final String authToken;
+  private final String license;
 
 
   public AddressValidationService(
       ValidationRequestFactory validationRequestFactory,
-      ClientFactory clientFactory, String authId, String authToken, String license) {
+      ClientFactory clientFactory, @Value("${form-flow.address-validation.smarty.auth-id}") String authId,
+      @Value("${form-flow.address-validation.smarty.auth-token}") String authToken,
+      @Value("${form-flow.address-validation.smarty.license}") String license) {
     this.validationRequestFactory = validationRequestFactory;
     this.clientFactory = clientFactory;
     this.authId = authId;
