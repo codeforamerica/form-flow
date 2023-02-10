@@ -76,15 +76,12 @@ public class InputsTest extends AbstractMockMvcTest {
   @Test
   void shouldOnlyRunValidationIfItHasARequiredAnnotation() throws Exception {
     // Should not validate when value is empty
-    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "",
-        "Success");
+    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
     // Should validate when a value is entered
-    postExpectingFailureAndAssertErrorDisplaysForThatInput("pageWithOptionalValidation",
-        "validatePositiveIfNotEmpty", "-2",
+    postExpectingFailureAndAssertErrorDisplaysForThatInput("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2",
         "must be greater than 0");
     // Should redirect when input is valid
-    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2",
-        "Success");
+    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
   }
 
   @Test
