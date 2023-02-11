@@ -2,12 +2,10 @@ package formflow.library.framework;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
-import formflow.library.data.FormSubmission;
 import formflow.library.inputs.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
@@ -15,11 +13,14 @@ import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-inputs.yaml"})
 @DirtiesContext()
 public class InputsTest extends AbstractMockMvcTest {
+  @MockBean
+  AddressValidationService addressValidationService;
 
   @Test
   void shouldPersistInputValuesWhenNavigatingBetweenScreens() throws Exception {
@@ -108,55 +109,51 @@ public class InputsTest extends AbstractMockMvcTest {
     String city = "Roswell";
     String state = "NM";
     String zipCode = "88201";
-    AddressValidationService addressValidationService = mock(AddressValidationService.class);
 
     @Test
     void doesNotValidateWhenInputNamePlusValidateIsFalse() throws Exception {
-      postExpectingNextPageTitle("address",
+      String inputName = "validationOff";
+      postExpectingNextPageTitle("testAddressValidation",
           Map.ofEntries(
-              Map.entry("addressStreetAddress1", List.of(streetAddress1)),
-              Map.entry("addressStreetAddress2", List.of(streetAddress2)),
-              Map.entry("addressCity", List.of(city)),
-              Map.entry("addressState", List.of(state)),
-              Map.entry("addressZip", List.of(zipCode)),
-              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "address", List.of("false"))
+              Map.entry(inputName + "StreetAddress1", List.of(streetAddress1)),
+              Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
+              Map.entry(inputName + "City", List.of(city)),
+              Map.entry(inputName + "State", List.of(state)),
+              Map.entry(inputName + "Zip", List.of(zipCode)),
+              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("false"))
           ), "Test");
 
-      var addressScreen = goBackTo("address");
+      var addressScreen = goBackTo("testAddressValidation");
 
-      assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
-      assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2);
-      assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city);
-      assertThat(addressScreen.getSelectValue("addressState")).isEqualTo(state);
-      assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode);
+      assertThat(addressScreen.getInputValue(inputName + "StreetAddress1")).isEqualTo(streetAddress1);
+      assertThat(addressScreen.getInputValue(inputName + "StreetAddress2")).isEqualTo(streetAddress2);
+      assertThat(addressScreen.getInputValue(inputName + "City")).isEqualTo(city);
+      assertThat(addressScreen.getSelectValue(inputName + "State")).isEqualTo(state);
+      assertThat(addressScreen.getInputValue(inputName + "Zip")).isEqualTo(zipCode);
     }
 
     @Test
     void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
+      String inputName = "validationOn";
       ValidatedAddress addressValidatedAddress = new ValidatedAddress(streetAddress1 + "Validated",
           city + "Validated",
           state + "Validated",
           zipCode + "Validated");
-      when(addressValidationService.validate(any(FormSubmission.class))).thenReturn(Map.of("Validated", addressValidatedAddress));
-      var addressScreen = goBackTo("address");
+      when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
 
-      assertThat(addressScreen.getInputValue("addressStreetAddress1")).isEqualTo(streetAddress1);
-      assertThat(addressScreen.getInputValue("addressStreetAddress2")).isEqualTo(streetAddress2);
-      assertThat(addressScreen.getInputValue("addressCity")).isEqualTo(city);
-      assertThat(addressScreen.getSelectValue("addressState")).isEqualTo(state);
-      assertThat(addressScreen.getInputValue("addressZip")).isEqualTo(zipCode);
+      var addressScreen = goBackTo("testAddressValidation");
 
-      postExpectingNextPageTitle("address",
+      postExpectingNextPageTitle("testAddressValidation",
           Map.ofEntries(
-              Map.entry("validatedAddressStreetAddress1", List.of(streetAddress1)),
-              Map.entry("validatedAddressStreetAddress2", List.of(streetAddress2)),
-              Map.entry("validatedAddressCity", List.of(city)),
-              Map.entry("validatedAddressState", List.of(state)),
-              Map.entry("validatedAddressZip", List.of(zipCode)),
-              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "AddressValidate", List.of("false"))
+              Map.entry(inputName + "StreetAddress1", List.of(streetAddress1)),
+              Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
+              Map.entry(inputName + "City", List.of(city)),
+              Map.entry(inputName + "State", List.of(state)),
+              Map.entry(inputName + "Zip", List.of(zipCode)),
+              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
           ), "Test");
 
-      assertThat(addressScreen.getElementTextById("validatedAddressvalidatedAddress")).contains(
+      assertThat(addressScreen.getElementTextById(inputName + "validatedAddress")).contains(
           streetAddress1 + "Validated",
           streetAddress2 + "Validated",
           city + "Validated",

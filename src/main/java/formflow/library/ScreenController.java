@@ -131,7 +131,6 @@ public class ScreenController extends FormFlowController {
     if (formSubmission.shouldValidateAddress()) {
       Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
       formSubmission.setFormData(validatedAddresses);
-//      save result to repository
     }
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var errorMessages = validationService.validate(flow, formSubmission);
@@ -141,6 +140,7 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
     }
 
+    log.info("submission = " + submission);
     // if there's already a session
     if (submission.getId() != null) {
       submission.mergeFormDataWithSubmissionData(formSubmission);
