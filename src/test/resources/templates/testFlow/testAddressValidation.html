@@ -2,7 +2,7 @@
   <th:block th:ref="testAddress">
     <div class="form-card__content">
       <th:block
-          th:replace="'fragments/inputs/address' :: address(validate=false , inputName='address')"/>
+          th:replace="'fragments/inputs/address' :: address(validate=false , inputName='validationOff')"/>
       <th:block
           th:replace="'fragments/inputs/address' :: address(validate=true, inputName='validationOn')"/>
       <!--      <th:block-->

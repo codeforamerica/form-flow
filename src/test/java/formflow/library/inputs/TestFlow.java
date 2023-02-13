@@ -61,13 +61,13 @@ public class TestFlow extends FlowInputs {
    * Let's get the test working and then refactor.
    */
   @NotBlank
-  String addressStreetAddress1;
-  String addressStreetAddress2;
+  String validateOffStreetAddress1;
+  String validateOffStreetAddress2;
   @NotBlank
-  String addressCity;
+  String validateOffCity;
   @NotBlank
-  String addressState;
+  String validateOffState;
   @NotBlank
-  String addressZip;
+  String validateOffZip;
 
 }
