@@ -5,6 +5,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import formflow.library.utilities.AbstractBasePageTest;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,8 +30,10 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     // Extension list comes from application.yaml -- form-flow.uploads.accepted-file-types
     uploadFile("test-platypus.gif", "uploadTest");
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
-        .isEqualTo(
-            "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .fake, .heic, .tif, .tiff, .pdf");
+
+        .isEqualTo(messageSource
+            .getMessage("upload-documents.error-invalid-file-type", null, Locale.ENGLISH)
+            + " .jpeg, .fake, .heic, .tif, .tiff, .pdf");
     testPage.clickLink("remove");
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
 
@@ -40,16 +43,15 @@ public class UploadJourneyTests extends AbstractBasePageTest {
         "$('#document-upload-uploadTest').get(0).dropzone.addFile({name: 'testFile.pdf', size: "
             + largeFilesize + ", type: 'not-an-image'})");
     int maxFileSize = 17;
-    assertThat(driver.findElement(By.className("text--error")).getText()).contains(
-        "This file is too large and cannot be uploaded (max size: " + maxFileSize + " MB)");
+    assertThat(driver.findElement(By.className("text--error")).getText()).contains(messageSource
+        .getMessage("upload-documents.this-file-is-too-large", new Object[]{maxFileSize}, Locale.ENGLISH));
     testPage.clickLink("remove");
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
 
     // Upload a password-protected file and assert the correct error shows
     uploadPasswordProtectedPdf("uploadTest");
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
-        .isEqualTo(
-            "We are unable to process password-protected PDF files. Please remove the password and try again or try another PDF file.");
+        .isEqualTo(messageSource.getMessage("upload-documents.error-password-protected", null, Locale.ENGLISH));
     testPage.clickLink("remove");
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
 
@@ -62,8 +64,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     uploadJpgFile("uploadTest"); // 5
     uploadJpgFile("uploadTest"); // Can't upload the 6th
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
-        .isEqualTo(
-            "You have uploaded the maximum number of files. You will have the opportunity to share more with a caseworker later.");
+        .isEqualTo(messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, Locale.ENGLISH));
     testPage.clickLink("remove");
     // Assert there are no longer any error after removing the errored item
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("5 files added");

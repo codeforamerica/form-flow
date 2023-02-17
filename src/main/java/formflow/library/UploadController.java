@@ -36,14 +36,18 @@ public class UploadController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final ValidationService validationService;
 
+  private final LocaleLibraryConfiguration localeLibraryConfiguration;
+
   public UploadController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      SubmissionRepositoryService submissionRepositoryService, ValidationService validationService) {
+      SubmissionRepositoryService submissionRepositoryService, ValidationService validationService,
+      LocaleLibraryConfiguration localeLibraryConfiguration) {
     super(submissionRepositoryService);
     this.uploadedFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.validationService = validationService;
+    this.localeLibraryConfiguration = localeLibraryConfiguration;
   }
 
   @PostMapping("/file-upload")
@@ -55,7 +59,6 @@ public class UploadController extends FormFlowController {
       @RequestParam("thumbDataURL") String thumbDataUrl,
       HttpSession httpSession
   ) {
-    LocaleLibraryConfiguration localeLibraryConfiguration = new LocaleLibraryConfiguration();
     try {
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
