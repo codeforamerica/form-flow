@@ -3,6 +3,7 @@ package formflow.library.utilities;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import formflow.library.config.LocaleLibraryConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,6 +17,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -24,12 +26,15 @@ import org.springframework.test.context.ActiveProfiles;
 public abstract class AbstractBasePageTest {
 
   private static final String UPLOADED_JPG_FILE_NAME = "test.jpeg";
+  private static final String PASSWORD_PROTECTED_PDF = "password-protected.pdf";
 
   @Autowired
   protected RemoteWebDriver driver;
 
   @Autowired
   protected Path path;
+
+  protected MessageSource messageSource = new LocaleLibraryConfiguration().messageSource();
 
   protected String baseUrl;
 
@@ -75,5 +80,11 @@ public abstract class AbstractBasePageTest {
     uploadFile(UPLOADED_JPG_FILE_NAME, dzName);
     assertThat(driver.findElement(By.id("dropzone-" + dzName)).getText().replace("\n", ""))
         .contains(UPLOADED_JPG_FILE_NAME);
+  }
+
+  protected void uploadPasswordProtectedPdf(String dzName) {
+    uploadFile(PASSWORD_PROTECTED_PDF, dzName);
+    assertThat(driver.findElement(By.id("dropzone-" + dzName)).getText().replace("\n", ""))
+        .contains(PASSWORD_PROTECTED_PDF);
   }
 }

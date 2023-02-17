@@ -5,7 +5,7 @@ QUnit.module('Dropzone', function () {
   QUnit.module('Configuration options', function () {
     QUnit.test('loads accepted files from application.yaml', assert => {
       assert.equal(window['myDropZoneuploadTest'].options.acceptedFiles,
-          ".jpeg, .fake, .heic, .tif, .tiff");
+          ".jpeg, .fake, .heic, .tif, .tiff, .pdf");
     });
 
     QUnit.test('loads max file size from application.yaml', assert => {

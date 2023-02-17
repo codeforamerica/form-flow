@@ -2,7 +2,7 @@ form-flow:
   path: 'flows-config.yaml'
   inputs: 'formflow.library.inputs.'
   uploads:
-    accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff'
+    accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
     max-files: '5'
     max-file-size: '17'
     thumbnail-width: '100'

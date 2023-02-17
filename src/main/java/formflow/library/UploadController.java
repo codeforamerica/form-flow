@@ -7,12 +7,15 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFileRepository;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,14 +36,18 @@ public class UploadController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final ValidationService validationService;
 
+  private final LocaleLibraryConfiguration localeLibraryConfiguration;
+
   public UploadController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      SubmissionRepositoryService submissionRepositoryService, ValidationService validationService) {
+      SubmissionRepositoryService submissionRepositoryService, ValidationService validationService,
+      LocaleLibraryConfiguration localeLibraryConfiguration) {
     super(submissionRepositoryService);
     this.uploadedFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.validationService = validationService;
+    this.localeLibraryConfiguration = localeLibraryConfiguration;
   }
 
   @PostMapping("/file-upload")
@@ -61,6 +68,21 @@ public class UploadController extends FormFlowController {
         httpSession.setAttribute("id", submission.getId());
       }
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+
+      if (fileExtension.equals("pdf")) {
+        try (PDDocument pdfFile = PDDocument.load(file.getInputStream())) {
+        } catch (InvalidPasswordException e) {
+          // TODO update when we add internationalization to use locale for message source
+          String message = localeLibraryConfiguration.messageSource()
+              .getMessage("upload-documents.error-password-protected", null, null);
+          return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (IOException e) {
+          String message = localeLibraryConfiguration.messageSource()
+              .getMessage("upload-documents.error-could-not-read-file", null, null);
+          return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
@@ -104,7 +126,6 @@ public class UploadController extends FormFlowController {
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
-      LocaleLibraryConfiguration localeLibraryConfiguration = new LocaleLibraryConfiguration();
       // TODO update when we add internationalization to use locale for message source
       String message = localeLibraryConfiguration.messageSource().getMessage("upload-documents.file-upload-error", null, null);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
