@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 public abstract class AbstractBasePageTest {
 
   private static final String UPLOADED_JPG_FILE_NAME = "test.jpeg";
+  private static final String PASSWORD_PROTECTED_PDF = "password-protected.pdf";
 
   @Autowired
   protected RemoteWebDriver driver;
@@ -75,5 +76,11 @@ public abstract class AbstractBasePageTest {
     uploadFile(UPLOADED_JPG_FILE_NAME, dzName);
     assertThat(driver.findElement(By.id("dropzone-" + dzName)).getText().replace("\n", ""))
         .contains(UPLOADED_JPG_FILE_NAME);
+  }
+
+  protected void uploadPasswordProtectedPdf(String dzName) {
+    uploadFile(PASSWORD_PROTECTED_PDF, dzName);
+    assertThat(driver.findElement(By.id("dropzone-" + dzName)).getText().replace("\n", ""))
+        .contains(PASSWORD_PROTECTED_PDF);
   }
 }

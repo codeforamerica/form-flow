@@ -66,6 +66,7 @@ dependencies {
     implementation 'net.coobird:thumbnailator:0.4.19'
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.27'
 
     compileOnly 'org.projectlombok:lombok'
 
