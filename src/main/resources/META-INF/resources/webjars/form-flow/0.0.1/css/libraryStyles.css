@@ -583,3 +583,7 @@ body,
 }
 
 /* end reveal */
+
+.demo-banner {
+  line-height: 3rem;
+}
