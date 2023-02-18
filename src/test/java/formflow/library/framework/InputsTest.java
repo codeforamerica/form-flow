@@ -19,6 +19,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-inputs.yaml"})
 @DirtiesContext()
 public class InputsTest extends AbstractMockMvcTest {
+
   @MockBean
   AddressValidationService addressValidationService;
 
@@ -119,7 +120,7 @@ public class InputsTest extends AbstractMockMvcTest {
               Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
               Map.entry(inputName + "City", List.of(city)),
               Map.entry(inputName + "State", List.of(state)),
-              Map.entry(inputName + "Zip", List.of(zipCode)),
+              Map.entry(inputName + "ZipCode", List.of(zipCode)),
               Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("false"))
           ), "Test");
 
@@ -129,19 +130,18 @@ public class InputsTest extends AbstractMockMvcTest {
       assertThat(addressScreen.getInputValue(inputName + "StreetAddress2")).isEqualTo(streetAddress2);
       assertThat(addressScreen.getInputValue(inputName + "City")).isEqualTo(city);
       assertThat(addressScreen.getSelectValue(inputName + "State")).isEqualTo(state);
-      assertThat(addressScreen.getInputValue(inputName + "Zip")).isEqualTo(zipCode);
+      assertThat(addressScreen.getInputValue(inputName + "ZipCode")).isEqualTo(zipCode);
     }
 
     @Test
     void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
       String inputName = "validationOn";
-      ValidatedAddress addressValidatedAddress = new ValidatedAddress(streetAddress1 + "Validated",
+      // TODO: Instead of adding "Validated" to the end of each field, we should use a corrected address
+      ValidatedAddress addressValidatedAddress = new ValidatedAddress(streetAddress1 + streetAddress2 + "Validated",
           city + "Validated",
-          state + "Validated",
+          state,
           zipCode + "Validated");
       when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
-
-      var addressScreen = goBackTo("testAddressValidation");
 
       postExpectingNextPageTitle("testAddressValidation",
           Map.ofEntries(
@@ -149,16 +149,18 @@ public class InputsTest extends AbstractMockMvcTest {
               Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
               Map.entry(inputName + "City", List.of(city)),
               Map.entry(inputName + "State", List.of(state)),
-              Map.entry(inputName + "Zip", List.of(zipCode)),
+              Map.entry(inputName + "ZipCode", List.of(zipCode)),
               Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
           ), "Test");
 
-      assertThat(addressScreen.getElementTextById(inputName + "validatedAddress")).contains(
-          streetAddress1 + "Validated",
-          streetAddress2 + "Validated",
-          city + "Validated",
-          state + "Validated",
-          zipCode + "Validated");
+      var addressScreen = goBackTo("testAddressValidation");
+
+      assertThat(addressScreen.getInputValue(inputName + "StreetAddress1")).isEqualTo(
+          streetAddress1 + streetAddress2 + "Validated");
+      assertThat(addressScreen.getInputValue(inputName + "StreetAddress2")).isEqualTo("");
+      assertThat(addressScreen.getInputValue(inputName + "City")).isEqualTo(city + "Validated");
+      assertThat(addressScreen.getSelectValue(inputName + "State")).isEqualTo(state);
+      assertThat(addressScreen.getInputValue(inputName + "ZipCode")).isEqualTo(zipCode + "Validated");
     }
   }
 

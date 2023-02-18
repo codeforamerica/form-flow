@@ -58,6 +58,7 @@ public class FormSubmission {
   public void setFormData(Map<String, ValidatedAddress> validatedAddresses) {
     validatedAddresses.forEach((key, value) -> {
       formData.put(key + Inputs.STREET_ADDRESS_1, value.getStreetAddress());
+      formData.put(key + Inputs.STREET_ADDRESS_2, "");
       formData.put(key + Inputs.CITY, value.getCity());
       formData.put(key + Inputs.STATE, value.getState());
       formData.put(key + Inputs.ZIPCODE, value.getZipCode());
