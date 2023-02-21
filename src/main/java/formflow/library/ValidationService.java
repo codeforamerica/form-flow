@@ -56,10 +56,10 @@ public class ValidationService {
 
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
-    var messages = new ArrayList<String>();
     var formData = formSubmission.getFormData();
     var formDataToBeValidated = formSubmission.removeUnvalidatedInputs(formData);
     formDataToBeValidated.forEach((key, value) -> {
+      var messages = new ArrayList<String>();
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
