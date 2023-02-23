@@ -99,7 +99,7 @@ public class Submission {
    */
   public Map<String, Object> getSubflowEntryByUuid(String subflowName, String uuid) {
     if (inputData.containsKey(subflowName)) {
-      ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) inputData.get(subflowName);
+      List<Map<String, Object>> subflow = (List<Map<String, Object>>) inputData.get(subflowName);
       return subflow.stream().filter(entry -> entry.get("uuid").equals(uuid)).toList().get(0);
     }
     return null;
@@ -130,7 +130,7 @@ public class Submission {
       Map<String, Object> formDataSubmission) {
 
     iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
-    var subflowArr = (ArrayList<Map<String, Object>>) inputData.get(subflowName);
+    var subflowArr = (List<Map<String, Object>>) inputData.get(subflowName);
     int indexToUpdate = subflowArr.indexOf(iterationToUpdate);
     subflowArr.set(indexToUpdate, formDataSubmission);
     inputData.replace(subflowName, subflowArr);
@@ -145,7 +145,7 @@ public class Submission {
    */
   public void removeIncompleteIterations(String subflowName, String currentUuid) {
     List<Map<String, Object>> toRemove = new ArrayList<>();
-    ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) inputData.get(subflowName);
+    List<Map<String, Object>> subflow = (List<Map<String, Object>>) inputData.get(subflowName);
     subflow.forEach(iteration -> {
       if (iteration.get("iterationIsComplete").equals(false) && !iteration.get("uuid").equals(currentUuid)) {
         toRemove.add(iteration);

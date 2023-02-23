@@ -149,6 +149,7 @@ public class ScreenController extends FormFlowController {
     // if there's already a session
     if (submission.getId() != null) {
       submission.mergeFormDataWithSubmissionData(formSubmission);
+      handleBeforeSaveAction(getScreenConfig(flow, screen), submission);
       saveToRepository(submission);
     } else {
       submission.setFlow(flow);
@@ -600,6 +601,12 @@ public class ScreenController extends FormFlowController {
   private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     if (currentScreen.getBeforeSave() != null) {
       currentScreen.getBeforeSaveAction().run(submission, uuid);
+    }
+  }
+
+  private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
+    if (currentScreen.getBeforeSave() != null) {
+      currentScreen.getBeforeSaveAction().run(submission);
     }
   }
 
