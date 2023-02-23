@@ -55,13 +55,15 @@ public class FormSubmission {
     return formData.entrySet().stream().anyMatch(entry -> entry.getKey().contains(UnvalidatedField.VALIDATE_ADDRESS));
   }
 
-  public void setFormData(Map<String, ValidatedAddress> validatedAddresses) {
+  public void setValidatedAddress(Map<String, ValidatedAddress> validatedAddresses) {
     validatedAddresses.forEach((key, value) -> {
-      formData.put(key + Inputs.STREET_ADDRESS_1, value.getStreetAddress());
-      formData.put(key + Inputs.STREET_ADDRESS_2, "");
-      formData.put(key + Inputs.CITY, value.getCity());
-      formData.put(key + Inputs.STATE, value.getState());
-      formData.put(key + Inputs.ZIPCODE, value.getZipCode());
+      if (value != null) {
+        formData.put(key + Inputs.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED, value.getStreetAddress());
+        formData.put(key + Inputs.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED, "");
+        formData.put(key + Inputs.CITY + UnvalidatedField.VALIDATED, value.getCity());
+        formData.put(key + Inputs.STATE + UnvalidatedField.VALIDATED, value.getState());
+        formData.put(key + Inputs.ZIPCODE + UnvalidatedField.VALIDATED, value.getZipCode());
+      }
     });
   }
 }

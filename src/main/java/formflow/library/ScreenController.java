@@ -130,7 +130,7 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     if (formSubmission.shouldValidateAddress()) {
       Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
-      formSubmission.setFormData(validatedAddresses);
+      formSubmission.setValidatedAddress(validatedAddresses);
     }
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var errorMessages = validationService.validate(flow, formSubmission);

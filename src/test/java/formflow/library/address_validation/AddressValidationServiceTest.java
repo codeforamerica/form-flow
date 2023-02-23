@@ -14,6 +14,7 @@ import com.smartystreets.api.us_street.Components;
 import com.smartystreets.api.us_street.Lookup;
 import formflow.library.data.FormSubmission;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -61,6 +62,35 @@ class AddressValidationServiceTest {
             "validatedState",
             "validatedZipCode")
     ));
+    verify(client, times(1)).send(batch);
+  }
+
+  @Test
+  void shouldReturnEmptyMapWhenNoAddressRecommendationIsFound() throws SmartyException, IOException, InterruptedException {
+    FormSubmission formSubmission = new FormSubmission(Map.of());
+    String authId = "authId";
+    String authToken = "authToken";
+    String license = "license";
+
+    AddressValidationService addressValidationService = new AddressValidationService(
+        validationRequestFactory,
+        clientFactory,
+        authId,
+        authToken,
+        license
+    );
+    Lookup lookup = mock(Lookup.class);
+
+    Batch batch = new Batch();
+    when(lookup.getInputId()).thenReturn("validatedInput");
+    batch.add(lookup);
+
+    when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
+    when(clientFactory.create(authId, authToken, license)).thenReturn(client);
+
+    var result = new HashMap<>();
+    result.put("validatedInput", null);
+    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(result);
     verify(client, times(1)).send(batch);
   }
 }

@@ -42,15 +42,19 @@ public class AddressValidationService {
     client.send(smartyBatch);
 
     Map<String, ValidatedAddress> validatedAddresses = new HashMap<>();
-    smartyBatch.getAllLookups().forEach(lookup ->
+    smartyBatch.getAllLookups().forEach(lookup -> {
+      if (lookup.getResult().isEmpty()) {
+        validatedAddresses.put(lookup.getInputId(), null);
+      } else {
         validatedAddresses.put(
             lookup.getInputId(),
             new ValidatedAddress(
                 lookup.getResult(0).getDeliveryLine1(),
                 lookup.getResult(0).getComponents().getCityName(),
                 lookup.getResult(0).getComponents().getState(),
-                lookup.getResult(0).getComponents().getZipCode()))
-    );
+                lookup.getResult(0).getComponents().getZipCode()));
+      }
+    });
 
     return validatedAddresses;
   }
