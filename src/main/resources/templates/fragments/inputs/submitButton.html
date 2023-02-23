@@ -5,7 +5,7 @@
     th:fragment="submitButton"
     th:with="text=${text} ? ${text} : #{general.inputs.submit}">
   <button id="form-submit-button"
-          class="button button--primary"
+          th:class="${classes != null ? classes : 'button button--primary'}"
           type="submit"
           th:text="${text}"></button>
 </th:block>

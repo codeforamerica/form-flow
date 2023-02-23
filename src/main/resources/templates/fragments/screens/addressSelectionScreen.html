@@ -4,7 +4,7 @@
 - [x] Use the above boolean to render or not the validated address and the correct notice message
 - [ ] Simplify control logic visualization?
 -->
-<th:block th:fragment="addressSelectionScreen(addressInputToCheck, inputName)"
+<th:block th:fragment="addressSelectionScreen(addressInputToCheck, inputName, editAddressURL)"
           th:with="foundValidatedAddress=${inputData.get(addressInputToCheck + 'StreetAddress1_validated') != null}"
 >
   <div class="grid__item spacing-above-35 spacing-below-35">
@@ -46,10 +46,13 @@
              th:checked="${foundValidatedAddress} ? false : true">
     </label>
   </div>
-  <button th:if="${foundValidatedAddress}" id="form-submit-button" class="button button--primary"
-          type="submit" th:text="#{general.inputs.continue}"></button>
-  <a th:href="'/pages/'+${pageName}+'/navigation?option=1'" th:if="${!foundValidatedAddress}"
-     class="button button--primary" th:text="#{address-validation.button.edit-my-address}"></a>
-  <button th:if="${!foundValidatedAddress}" id="form-submit-button" class="button" type="submit"
-          th:text="#{address-validation.button.use-this-address}"></button>
+  <th:block th:if="${foundValidatedAddress}">
+    <th:block th:replace="'fragments/continueButton' :: continue"/>
+  </th:block>
+  <th:block th:if="${!foundValidatedAddress}">
+    <a th:href="${editAddressURL}"
+       class="button button--primary" th:text="#{address-validation.button.edit-my-address}"></a>
+    <th:block th:replace="fragments/inputs/submitButton :: submitButton(
+      text=#{address-validation.button.use-this-address}, classes='button')"/>
+  </th:block>
 </th:block>
