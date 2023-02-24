@@ -79,5 +79,5 @@ public class TestFlow extends FlowInputs {
   String validationOnState;
   @NotBlank
   String validationOnZipCode;
-
+  Boolean useValidatedValidationOn;
 }

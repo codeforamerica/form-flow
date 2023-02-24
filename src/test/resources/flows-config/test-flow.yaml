@@ -5,6 +5,9 @@ flow:
       - name: test
   testAddressValidation:
     nextScreens:
+      - name: testAddressVerification
+  testAddressVerification:
+    nextScreens:
       - name: test
   test:
     nextScreens:

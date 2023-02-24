@@ -20,8 +20,10 @@
        class="notice--warning"></p>
   </div>
   <div class="grid__item address-validation spacing-below-60">
-    <label th:for="validated-address" class="radio-button"
-           th:if="${foundValidatedAddress}">
+    <label th:for="validated-address"
+           th:if="${foundValidatedAddress}"
+           class="radio-button"
+           id="validated-address-label">
       <p class="spacing-below-15"
          th:text="#{address-validation.suggested}"></p>
       <div th:text="${inputData.get(addressInputToCheck + 'StreetAddress1_validated')}"></div>
@@ -32,8 +34,10 @@
              th:value="true"
              th:checked="true">
     </label>
-    <label th:for="original-address" class="radio-button"
-           th:classappend="${foundValidatedAddress} ? '' : 'is-selected left-aligned'">
+    <label th:for="original-address"
+           class="radio-button"
+           th:classappend="${foundValidatedAddress} ? '' : 'is-selected left-aligned'"
+           id="original-address-label">
       <p class="spacing-below-15"
          th:text="#{address-validation.address-entered}"></p>
       <div th:text="${inputData.get(addressInputToCheck + 'StreetAddress1')}"></div>
