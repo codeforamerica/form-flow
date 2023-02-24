@@ -15,6 +15,7 @@ import com.smartystreets.api.us_street.Lookup;
 import formflow.library.data.FormSubmission;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -43,9 +44,19 @@ class AddressValidationServiceTest {
     Components components = mock(Components.class);
 
     Batch batch = new Batch();
+    when(lookup.getResult()).thenReturn(List.of(candidate));
     when(lookup.getInputId()).thenReturn("validatedInput");
     when(candidate.getComponents()).thenReturn(components);
     when(candidate.getDeliveryLine1()).thenReturn("validatedStreetAddress");
+    when(components.getSecondaryNumber()).thenReturn("validatedAptNumber");
+    when(components.getCityName()).thenReturn("validatedCity");
+    when(components.getState()).thenReturn("validatedState");
+    when(components.getZipCode()).thenReturn("validatedZipCode");
+    when(lookup.getResult(0)).thenReturn(candidate);
+    when(lookup.getInputId()).thenReturn("validatedInput");
+    when(candidate.getComponents()).thenReturn(components);
+    when(candidate.getDeliveryLine1()).thenReturn("validatedStreetAddress");
+    when(components.getSecondaryNumber()).thenReturn("validatedAptNumber");
     when(components.getCityName()).thenReturn("validatedCity");
     when(components.getState()).thenReturn("validatedState");
     when(components.getZipCode()).thenReturn("validatedZipCode");
@@ -58,6 +69,7 @@ class AddressValidationServiceTest {
     assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of(
         "validatedInput",
         new ValidatedAddress("validatedStreetAddress",
+            "validatedAptNumber",
             "validatedCity",
             "validatedState",
             "validatedZipCode")

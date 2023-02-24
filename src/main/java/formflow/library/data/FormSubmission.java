@@ -59,7 +59,7 @@ public class FormSubmission {
     validatedAddresses.forEach((key, value) -> {
       if (value != null) {
         formData.put(key + Inputs.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED, value.getStreetAddress());
-        formData.put(key + Inputs.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED, "");
+        formData.put(key + Inputs.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED, value.getApartmentNumber());
         formData.put(key + Inputs.CITY + UnvalidatedField.VALIDATED, value.getCity());
         formData.put(key + Inputs.STATE + UnvalidatedField.VALIDATED, value.getState());
         formData.put(key + Inputs.ZIPCODE + UnvalidatedField.VALIDATED, value.getZipCode());

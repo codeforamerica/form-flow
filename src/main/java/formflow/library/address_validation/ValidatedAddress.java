@@ -8,6 +8,7 @@ import lombok.Data;
 public class ValidatedAddress {
 
   String streetAddress;
+  String apartmentNumber;
   String city;
   String state;
   String zipCode;

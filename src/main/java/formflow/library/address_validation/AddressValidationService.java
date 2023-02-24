@@ -50,6 +50,8 @@ public class AddressValidationService {
             lookup.getInputId(),
             new ValidatedAddress(
                 lookup.getResult(0).getDeliveryLine1(),
+                lookup.getResult(0).getComponents().getSecondaryNumber() == null ? ""
+                    : lookup.getResult(0).getComponents().getSecondaryNumber(),
                 lookup.getResult(0).getComponents().getCityName(),
                 lookup.getResult(0).getComponents().getState(),
                 lookup.getResult(0).getComponents().getZipCode()));
