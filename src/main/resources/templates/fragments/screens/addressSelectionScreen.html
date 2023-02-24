@@ -37,6 +37,7 @@
       <p class="spacing-below-15"
          th:text="#{address-validation.address-entered}"></p>
       <div th:text="${inputData.get(addressInputToCheck + 'StreetAddress1')}"></div>
+      <div th:text="${inputData.getOrDefault(addressInputToCheck + 'StreetAddress2', '')}"></div>
       <div
           th:text="${inputData.get(addressInputToCheck + 'City')} + ', ' + ${inputData.get(addressInputToCheck + 'State')}"></div>
       <div th:text="${inputData.get(addressInputToCheck + 'ZipCode')}"></div>
@@ -47,7 +48,8 @@
     </label>
   </div>
   <th:block th:if="${foundValidatedAddress}">
-    <th:block th:replace="'fragments/continueButton' :: continue"/>
+    <th:block th:replace="fragments/inputs/submitButton :: submitButton(
+      text=#{general.inputs.continue})"/>
   </th:block>
   <th:block th:if="${!foundValidatedAddress}">
     <a th:href="${editAddressURL}"
