@@ -5,15 +5,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.inputs.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
+import formflow.library.utilities.FormScreen;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-inputs.yaml"})
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 @DirtiesContext()
 public class InputsTest extends AbstractMockMvcTest {
 
@@ -174,5 +176,21 @@ public class InputsTest extends AbstractMockMvcTest {
 
     postExpectingFailureAndAssertInputErrorMessages("pageWithMultipleValidationInput", inputParams,
         expectedErrors);
+  }
+
+  @Nested
+  public class SubmitButton {
+
+    @Test
+    void shouldHaveDefaultClasses() throws Exception {
+      var page = new FormScreen(getPage("pageWithDefaultSubmitButton"));
+      assertThat(page.getElementById("form-submit-button").classNames()).isEqualTo(Set.of("button", "button--primary"));
+    }
+
+    @Test
+    void shouldHaveCustomClasses() throws Exception {
+      var page = new FormScreen(getPage("pageWithCustomSubmitButton"));
+      assertThat(page.getElementById("form-submit-button").classNames()).isEqualTo(Set.of("custom"));
+    }
   }
 }

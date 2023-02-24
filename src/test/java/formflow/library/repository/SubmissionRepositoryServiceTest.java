@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-inputs.yaml"})
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 class SubmissionRepositoryServiceTest {
 
   @Autowired

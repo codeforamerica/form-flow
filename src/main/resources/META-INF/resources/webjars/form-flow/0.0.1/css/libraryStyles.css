@@ -600,6 +600,15 @@ body,
   background-color: unset;
 }
 
+.address-validation .radio-button {
+  border-radius: 5px;
+  border-color: transparent;
+}
+
+.address-validation .radio-button:hover {
+  border-color: #121111;
+}
+
 .hide-radio-circle {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;

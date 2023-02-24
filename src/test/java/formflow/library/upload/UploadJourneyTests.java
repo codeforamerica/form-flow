@@ -13,7 +13,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-upload.yaml"}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-upload-flow.yaml"}, webEnvironment = RANDOM_PORT)
 public class UploadJourneyTests extends AbstractBasePageTest {
 
   @Override
