@@ -105,4 +105,5 @@ class AddressValidationServiceTest {
     assertThat(addressValidationService.validate(formSubmission)).isEqualTo(result);
     verify(client, times(1)).send(batch);
   }
+
 }

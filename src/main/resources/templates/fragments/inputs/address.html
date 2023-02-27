@@ -4,11 +4,11 @@
 <th:block
     th:fragment="address(validate, inputName)"
     th:with="validateAddress=${validate ? validate : true},
-    streetAddress=${inputName + T(formflow.library.inputs.Inputs).STREET_ADDRESS_1},
-    streetAddress2=${inputName + T(formflow.library.inputs.Inputs).STREET_ADDRESS_2},
-    city=${inputName + T(formflow.library.inputs.Inputs).CITY},
-    state=${inputName + T(formflow.library.inputs.Inputs).STATE},
-    zipCode=${inputName + T(formflow.library.inputs.Inputs).ZIPCODE},
+    streetAddress=${inputName + T(formflow.library.inputs.AddressParts).STREET_ADDRESS_1},
+    streetAddress2=${inputName + T(formflow.library.inputs.AddressParts).STREET_ADDRESS_2},
+    city=${inputName + T(formflow.library.inputs.AddressParts).CITY},
+    state=${inputName + T(formflow.library.inputs.AddressParts).STATE},
+    zipCode=${inputName + T(formflow.library.inputs.AddressParts).ZIPCODE},
     validateAddressInputName=${T(formflow.library.inputs.UnvalidatedField).VALIDATE_ADDRESS + inputName}"
 >
   <th:block th:replace="'fragments/inputs/text' ::

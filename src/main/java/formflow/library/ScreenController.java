@@ -11,6 +11,7 @@ import formflow.library.config.TemplateManager;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.inputs.UnvalidatedField;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,12 +128,16 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) throws SmartyException, IOException, InterruptedException {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     FormSubmission formSubmission = new FormSubmission(formData);
-    if (formSubmission.shouldValidateAddress()) {
+
+    List<String> addressValidationFields = formSubmission.getAddressValidationFields();
+    if (!addressValidationFields.isEmpty()) {
       Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
       formSubmission.setValidatedAddress(validatedAddresses);
+      // clear lingering address(es) from the submission stored in the database.
+      cleanAddressesInSubmission(submission, addressValidationFields);
     }
-    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var errorMessages = validationService.validate(flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
 
@@ -709,4 +714,17 @@ public class ScreenController extends FormFlowController {
     return null;
   }
 
+  /**
+   * Clears out the Address Fields related to the list of input field names passed in. An example field name looks like this:
+   * "_validateresidentialAddress"
+   *
+   * @param submission              Submission data from the database
+   * @param addressValidationFields List of strings indicating which addresses are requesting validation
+   */
+  private void cleanAddressesInSubmission(Submission submission, List<String> addressValidationFields) {
+    addressValidationFields.forEach(item -> {
+      String inputName = item.replace(UnvalidatedField.VALIDATE_ADDRESS, "");
+      submission.clearAddressFields(inputName);
+    });
+  }
 }

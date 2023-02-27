@@ -515,6 +515,7 @@ Live templates are provided for the following input types:
 - `TextArea`
 - `Phone`
 - `Ssn`
+- `State`
 - `YesOrNo`
 - `Submit`
 - `FileUpload`
@@ -732,6 +733,34 @@ placeholder.
 
 A convenience live template for SSN inputs is provided through `cfa:inputSSN`.
 
+### State
+
+The state input provides a dropdown with all the US states pre-populated in it, in the format of
+state code to state name, like so:
+
+`MA - Massachusetts`
+
+The value saved from this input is the selected state's code. Example `MA`.
+
+### Submit Button
+
+Submit button will submit form data to the server and will move you along to the next screen,
+providing data validation was successful.
+
+Optional parameters:
+
+* `classes` - the CSS style(s) to use. Default is `button button--primary`
+* `text` - the name of the button. Default is `Submit`
+
+### Continue Button
+
+The Continue Button input will simply pass the user onto the next screen in the flow.
+No form data is submitted.
+
+Optional parameter:
+
+* `text` - the name of the button. Default is `Continue`
+
 ### Money
 
 Money inputs are used to gather monetary values. Visually, they are displayed as a single input with
@@ -804,7 +833,8 @@ For example:
 ```
 
 For icons not listed in Honeycrisp you can use
-the [character codepoint for the icon](https://github.com/google/material-design-icons/blob/f5f56570741833bdd36463f1f1b6b7d4edd3f9c1/font/MaterialIconsOutlined-Regular.codepoints).
+the [character codepoint for the icon](https://github.com/google/material-design-icons/blob/f5f56570741833bdd36463f1f1b6b7d4edd3f9c1/font/MaterialIconsOutlined-Regular.codepoints)
+.
 
 Below are examples of both types of checkboxes:
 

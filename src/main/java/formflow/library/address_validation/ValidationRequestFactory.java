@@ -6,7 +6,7 @@ import com.smartystreets.api.us_street.Batch;
 import com.smartystreets.api.us_street.Lookup;
 import formflow.library.data.FormSubmission;
 import formflow.library.inputs.UnvalidatedField;
-import formflow.library.inputs.Inputs;
+import formflow.library.inputs.AddressParts;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,11 +27,11 @@ public class ValidationRequestFactory {
     addressInputNames.forEach(inputName -> {
       Lookup lookup = new Lookup();
       lookup.setInputId(inputName);
-      lookup.setStreet(formSubmission.getFormData().get(inputName + Inputs.STREET_ADDRESS_1).toString());
-      lookup.setStreet2(formSubmission.getFormData().get(inputName + Inputs.STREET_ADDRESS_2).toString());
-      lookup.setCity(formSubmission.getFormData().get(inputName + Inputs.CITY).toString());
-      lookup.setState(formSubmission.getFormData().get(inputName + Inputs.STATE).toString());
-      lookup.setZipCode(formSubmission.getFormData().get(inputName + Inputs.ZIPCODE).toString());
+      lookup.setStreet(formSubmission.getFormData().get(inputName + AddressParts.STREET_ADDRESS_1).toString());
+      lookup.setStreet2(formSubmission.getFormData().get(inputName + AddressParts.STREET_ADDRESS_2).toString());
+      lookup.setCity(formSubmission.getFormData().get(inputName + AddressParts.CITY).toString());
+      lookup.setState(formSubmission.getFormData().get(inputName + AddressParts.STATE).toString());
+      lookup.setZipCode(formSubmission.getFormData().get(inputName + AddressParts.ZIPCODE).toString());
       try {
         smartyBatch.add(lookup);
       } catch (BatchFullException e) {

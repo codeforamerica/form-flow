@@ -9,10 +9,13 @@ import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.inputs.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -135,46 +138,113 @@ public class InputsTest extends AbstractMockMvcTest {
       assertThat(addressScreen.getInputValue(inputName + "ZipCode")).isEqualTo(zipCode);
     }
 
-    @Test
-    void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
-      String inputName = "validationOn";
-      ValidatedAddress addressValidatedAddress = new ValidatedAddress(
-          streetAddress1 + streetAddress2 + "Validated",
-          "",
-          city + "Validated",
-          state,
-          zipCode + "Validated");
-      when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
+    @Nested
+    public class AddressValidationSuccess {
 
-      var nextScreen = postAndFollowRedirect("testAddressValidation",
-          Map.ofEntries(
-              Map.entry(inputName + "StreetAddress1", List.of(streetAddress1)),
-              Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
-              Map.entry(inputName + "City", List.of(city)),
-              Map.entry(inputName + "State", List.of(state)),
-              Map.entry(inputName + "ZipCode", List.of(zipCode)),
-              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
-          ));
+      private FormScreen nextScreen;
 
-      assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
-      assertThat(nextScreen.getElementTextById("validated-address-label")).contains(
-          streetAddress1 + streetAddress2 + "Validated");
-      assertThat(nextScreen.getElementTextById("validated-address-label")).contains(city + "Validated");
-      assertThat(nextScreen.getElementTextById("validated-address-label")).contains(city + "Validated");
-      assertThat(nextScreen.getElementTextById("validated-address-label")).contains(state);
-      assertThat(nextScreen.getElementTextById("validated-address-label")).contains(zipCode + "Validated");
+      @BeforeEach
+      void beforeEach() throws Exception {
+        String inputName = "validationOn";
+        ValidatedAddress addressValidatedAddress = new ValidatedAddress(
+            streetAddress1 + streetAddress2 + "Validated",
+            "",
+            city + "Validated",
+            state,
+            zipCode + "Validated");
+        when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
 
-      assertThat(nextScreen.getElementTextById("original-address-label")).contains(streetAddress1);
-      assertThat(nextScreen.getElementTextById("original-address-label")).contains(streetAddress2);
-      assertThat(nextScreen.getElementTextById("original-address-label")).contains(city);
-      assertThat(nextScreen.getElementTextById("original-address-label")).contains(state);
-      assertThat(nextScreen.getElementTextById("original-address-label")).contains(zipCode);
+        nextScreen = postAndFollowRedirect("testAddressValidation",
+            Map.ofEntries(
+                Map.entry(inputName + "StreetAddress1", List.of(streetAddress1)),
+                Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
+                Map.entry(inputName + "City", List.of(city)),
+                Map.entry(inputName + "State", List.of(state)),
+                Map.entry(inputName + "ZipCode", List.of(zipCode)),
+                Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
+            ));
+      }
+
+      @Test
+      void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
+
+        assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains(
+            streetAddress1 + streetAddress2 + "Validated");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains(city + "Validated");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains(city + "Validated");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains(state);
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains(zipCode + "Validated");
+
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(streetAddress1);
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(streetAddress2);
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(city);
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(state);
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(zipCode);
+      }
+
+      @Test
+      void removesPreviousSuggestionWhenGoingBackAndEnteringInvalidAddress() throws Exception {
+        String inputName = "validationOn";
+        HashMap<String, ValidatedAddress> testMap = new HashMap();
+        testMap.put(inputName, null);
+        when(addressValidationService.validate(any())).thenReturn(testMap);
+
+        var nextScreen = postAndFollowRedirect("testAddressValidation",
+            Map.ofEntries(
+                Map.entry(inputName + "StreetAddress1", List.of("Total Junk")),
+                Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
+                Map.entry(inputName + "City", List.of("Fake")),
+                Map.entry(inputName + "State", List.of(state)),
+                Map.entry(inputName + "ZipCode", List.of(zipCode)),
+                Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
+            ));
+
+        assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
+        assertThat(nextScreen.getElementById("validated-address-label")).isNull();
+
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("Total Junk");
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(streetAddress2);
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("Fake");
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(state);
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains(zipCode);
+      }
+
+      @Test
+      void updatesSuggestionWhenGoingBackAndUpdatingNewAddress() throws Exception {
+        String inputName = "validationOn";
+        ValidatedAddress otherValidatedAddress = new ValidatedAddress(
+            "123 Other Main Street " + " Apt B" + "Validated",
+            "",
+            "Other City" + "Validated",
+            "OZ",
+            "12345" + "Validated");
+
+        when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, otherValidatedAddress));
+
+        var nextScreen = postAndFollowRedirect("testAddressValidation",
+            Map.ofEntries(
+                Map.entry(inputName + "StreetAddress1", List.of("123 Other Main Street")),
+                Map.entry(inputName + "StreetAddress2", List.of("Apt B")),
+                Map.entry(inputName + "City", List.of("Other City")),
+                Map.entry(inputName + "State", List.of("OZ")),
+                Map.entry(inputName + "ZipCode", List.of("12345")),
+                Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
+            ));
+
+        assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains("123 Other Main Street Apt BValidated");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains("Other CityValidated");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains("OZ");
+        assertThat(nextScreen.getElementTextById("validated-address-label")).contains("12345Validated");
+
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("123 Other Main Street");
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("Apt B");
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("Other City");
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("OZ");
+        assertThat(nextScreen.getElementTextById("original-address-label")).contains("12345");
+      }
     }
-
-    // TODO:
-    //    - Write two tests
-    //  1. You enter an address, get a suggestion, go back, change address with no suggestion, template should not show old (or any) suggestion
-    //  2. You enter an address, get a suggestion, go back, change something small, diff apt, template should show the updated suggestion
   }
 
   @Test
