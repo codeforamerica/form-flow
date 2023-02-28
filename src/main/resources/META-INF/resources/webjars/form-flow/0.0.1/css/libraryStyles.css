@@ -279,6 +279,18 @@ url('/webjars/form-flow/0.0.1/fonts/MaterialIcons-Regular.svg') format('svg');
   font-size: 1.6rem;
 }
 
+.list--checkmark li:before, .list--crossmark li:before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: .25em;
+  width: 2.5rem;
+  height: 1.5rem;
+  background-image: url('/webjars/form-flow/0.0.1/images/emojis/checkmark.png');
+  background-repeat: no-repeat;
+  background-size: auto 1.5rem; }
+
 /* TODO: delete/fix in other way */
 .page-wrapper {
   padding-bottom: 253px;
