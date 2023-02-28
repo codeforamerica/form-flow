@@ -1,13 +1,18 @@
 package formflow.library;
 
+import com.smartystreets.api.exceptions.SmartyException;
+import formflow.library.address_validation.AddressValidationService;
+import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.TemplateManager;
+import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.data.FormSubmission;
+import formflow.library.inputs.UnvalidatedField;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,14 +47,18 @@ public class ScreenController extends FormFlowController {
   private final List<FlowConfiguration> flowConfigurations;
   private final ValidationService validationService;
 
+  private final AddressValidationService addressValidationService;
+
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
       SubmissionRepositoryService submissionRepositoryService,
-      ValidationService validationService) {
+      ValidationService validationService,
+      AddressValidationService addressValidationService) {
 
     super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
     this.validationService = validationService;
+    this.addressValidationService = addressValidationService;
 
     log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
@@ -117,10 +126,18 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession
-  ) {
+  ) throws SmartyException, IOException, InterruptedException {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
-    FormSubmission formSubmission = new FormSubmission(formData); // Do this in the constructor of the FormSubmission class
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+    FormSubmission formSubmission = new FormSubmission(formData);
+
+    List<String> addressValidationFields = formSubmission.getAddressValidationFields();
+    if (!addressValidationFields.isEmpty()) {
+      Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
+      formSubmission.setValidatedAddress(validatedAddresses);
+      // clear lingering address(es) from the submission stored in the database.
+      cleanAddressesInSubmission(submission, addressValidationFields);
+    }
     var errorMessages = validationService.validate(flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
 
@@ -128,6 +145,7 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
     }
 
+    log.info("submission = " + submission);
     // if there's already a session
     if (submission.getId() != null) {
       submission.mergeFormDataWithSubmissionData(formSubmission);
@@ -696,4 +714,17 @@ public class ScreenController extends FormFlowController {
     return null;
   }
 
+  /**
+   * Clears out the Address Fields related to the list of input field names passed in. An example field name looks like this:
+   * "_validateresidentialAddress"
+   *
+   * @param submission              Submission data from the database
+   * @param addressValidationFields List of strings indicating which addresses are requesting validation
+   */
+  private void cleanAddressesInSubmission(Submission submission, List<String> addressValidationFields) {
+    addressValidationFields.forEach(item -> {
+      String inputName = item.replace(UnvalidatedField.VALIDATE_ADDRESS, "");
+      submission.clearAddressFields(inputName);
+    });
+  }
 }

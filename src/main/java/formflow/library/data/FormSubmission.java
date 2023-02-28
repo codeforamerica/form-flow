@@ -1,6 +1,10 @@
 package formflow.library.data;
 
+import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.inputs.UnvalidatedField;
+import formflow.library.inputs.AddressParts;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -11,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 public class FormSubmission {
 
   public Map<String, Object> formData;
+  private List<String> unvalidatedFields = List.of(UnvalidatedField.CSRF, UnvalidatedField.VALIDATE_ADDRESS);
 
   public FormSubmission(MultiValueMap<String, String> formData) {
     this.formData = removeEmptyValuesAndFlatten(formData);
@@ -21,8 +26,7 @@ public class FormSubmission {
   }
 
   private Map<String, Object> removeEmptyValuesAndFlatten(MultiValueMap<String, String> formData) {
-    return formData.entrySet().stream()
-        .peek(entry -> {
+    return formData.entrySet().stream().peek(entry -> {
           // An empty checkbox/checkboxSet has a hidden value of "" which needs to be removed
           if (entry.getKey().contains("[]") && entry.getValue().size() == 1) {
             entry.setValue(new ArrayList<>());
@@ -32,10 +36,36 @@ public class FormSubmission {
           }
         })
         // Flatten arrays to be single values if the array contains one item
-        .collect(Collectors.toMap(
-            Entry::getKey,
-            entry -> entry.getValue().size() == 1 && !entry.getKey().contains("[]")
-                ? entry.getValue().get(0) : entry.getValue()
-        ));
+        .collect(Collectors.toMap(Entry::getKey,
+            entry -> entry.getValue().size() == 1 && !entry.getKey().contains("[]") ? entry.getValue().get(0)
+                : entry.getValue()));
+  }
+
+  public Map<String, Object> removeUnvalidatedInputs(Map<String, Object> formData) {
+    return formData.entrySet().stream().filter(
+            formField -> unvalidatedFields.stream().noneMatch(unvalidatedField -> formField.getKey().contains(unvalidatedField)))
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+  }
+
+  /**
+   * Returns the list of keys that are for addresses that are requested to be validated
+   *
+   * @return List of Strings representing the validate field name
+   */
+  public List<String> getAddressValidationFields() {
+    return formData.entrySet().stream().filter(entry -> entry.getKey().startsWith(UnvalidatedField.VALIDATE_ADDRESS))
+        .filter(entry -> entry.getValue().toString().equalsIgnoreCase("true")).map(Entry::getKey).toList();
+  }
+
+  public void setValidatedAddress(Map<String, ValidatedAddress> validatedAddresses) {
+    validatedAddresses.forEach((key, value) -> {
+      if (value != null) {
+        formData.put(key + AddressParts.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED, value.getStreetAddress());
+        formData.put(key + AddressParts.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED, value.getApartmentNumber());
+        formData.put(key + AddressParts.CITY + UnvalidatedField.VALIDATED, value.getCity());
+        formData.put(key + AddressParts.STATE + UnvalidatedField.VALIDATED, value.getState());
+        formData.put(key + AddressParts.ZIPCODE + UnvalidatedField.VALIDATED, value.getZipCode());
+      }
+    });
   }
 }

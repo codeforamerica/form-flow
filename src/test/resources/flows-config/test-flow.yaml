@@ -3,6 +3,12 @@ flow:
   inputs:
     nextScreens:
       - name: test
+  testAddressValidation:
+    nextScreens:
+      - name: testAddressVerification
+  testAddressVerification:
+    nextScreens:
+      - name: test
   test:
     nextScreens:
       - name: success
@@ -10,6 +16,12 @@ flow:
     nextScreens:
       - name: success
   pageWithMultipleValidationInput:
+    nextScreens:
+      - name: pageWithDefaultSubmitButton
+  pageWithDefaultSubmitButton:
+    nextScreens:
+      - name: pageWithCustomSubmitButton
+  pageWithCustomSubmitButton:
     nextScreens:
       - name: success
   success:
