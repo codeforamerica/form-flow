@@ -89,7 +89,7 @@ dependencies {
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'com.h2database:h2'
-    testImplementation 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'org.projectlombok:lombok:1.18.26'
 }
 
 tasks.named('test') {
