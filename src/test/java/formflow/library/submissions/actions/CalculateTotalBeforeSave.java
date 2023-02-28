@@ -12,8 +12,8 @@ public class CalculateTotalBeforeSave implements Action {
     List<Map<String, Object>> subflow = (List<Map<String, Object>>) submission.getInputData()
         .get("income");
     var totalIncome = subflow.stream()
-        .map(e -> Integer.parseInt((String) e.get("textInput")))
-        .reduce(Integer::sum)
+        .map(e -> Double.parseDouble((String) e.get("textInput")))
+        .reduce(Double::sum)
         .get();
 
     submission.getInputData().put("totalIncome", totalIncome);

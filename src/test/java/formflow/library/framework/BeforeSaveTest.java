@@ -75,6 +75,6 @@ public class BeforeSaveTest extends AbstractMockMvcTest {
     postToUrlExpectingSuccess("/testFlow/next", "/testFlow/subflowReview",
         Map.of("textInput", List.of("1000")), subflowUuid);
 
-    assertThat(submission.getInputData().get("totalIncome")).isEqualTo(6530);
+    assertThat(submission.getInputData().get("totalIncome")).isEqualTo(6530.0);
   }
 }

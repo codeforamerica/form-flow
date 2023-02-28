@@ -322,7 +322,7 @@ An action can be added to a page in the flow-config to update the submission dat
 
 ```yaml
 expense:
-  beforeSave: actions.CalculateBeforeSave
+  beforeSave: java.path.to.actions.CalculateBeforeSave
   nextPages:
     - confirmation
 ```
