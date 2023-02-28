@@ -24,9 +24,10 @@ public class AddressValidationService {
 
   public AddressValidationService(
       ValidationRequestFactory validationRequestFactory,
-      ClientFactory clientFactory, @Value("${form-flow.address-validation.smarty.auth-id}") String authId,
-      @Value("${form-flow.address-validation.smarty.auth-token}") String authToken,
-      @Value("${form-flow.address-validation.smarty.license}") String license) {
+      ClientFactory clientFactory,
+      @Value("${form-flow.address-validation.smarty.auth-id:}") String authId,
+      @Value("${form-flow.address-validation.smarty.auth-token:}") String authToken,
+      @Value("${form-flow.address-validation.smarty.license:}") String license) {
     this.validationRequestFactory = validationRequestFactory;
     this.clientFactory = clientFactory;
     this.authId = authId;
