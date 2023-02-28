@@ -127,7 +127,7 @@ public class InputsTest extends AbstractMockMvcTest {
               Map.entry(inputName + "State", List.of(state)),
               Map.entry(inputName + "ZipCode", List.of(zipCode)),
               Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("false"))
-          ), "Test");
+          ), "testAddressVerification");
 
       var addressScreen = goBackTo("testAddressValidation");
 
