@@ -1,11 +1,13 @@
 package formflow.library;
 
+import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,13 +48,18 @@ public class ValidationService {
    * @param formSubmission The input data from a form as a map of field name to field value(s), not null
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
-  public HashMap<String, ArrayList<String>> validate(String flowName, FormSubmission formSubmission) {
+  public HashMap<String, ArrayList<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
+      FormSubmission formSubmission) {
     Class<?> clazz;
     try {
       clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }
+
+    log.info("Running pre validation hook now");
+    // run pre validation hook
+    currentScreen.handleBeforeValidationAction(formSubmission);
 
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
@@ -84,6 +91,10 @@ public class ValidationService {
         validationMessages.put(key, messages);
       }
     });
+
+    // validation hook for custom actions here
+    Map<String, List<String>> errors = currentScreen.handleValidationAction(formSubmission);
+    // merge with validation messages
 
     return validationMessages;
   }
