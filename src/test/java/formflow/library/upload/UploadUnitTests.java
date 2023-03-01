@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-upload.yaml"}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-upload-flow.yaml"}, webEnvironment = RANDOM_PORT)
 public class UploadUnitTests extends AbstractBasePageTest {
 
   @Override

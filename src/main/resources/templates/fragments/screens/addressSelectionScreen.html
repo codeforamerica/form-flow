@@ -1,0 +1,64 @@
+<!--
+- [x] This fragment needs to accept an inputName
+- [x] Needs to look for inputName + streetAddress1_validated and create boolean on if it finds it or not
+- [x] Use the above boolean to render or not the validated address and the correct notice message
+- [ ] Simplify control logic visualization?
+-->
+<th:block th:fragment="addressSelectionScreen(addressInputToCheck, inputName, editAddressURL)"
+          th:with="foundValidatedAddress=${inputData.get(addressInputToCheck + 'StreetAddress1_validated') != null}"
+>
+  <div class="grid__item spacing-above-35 spacing-below-35">
+    <h1 class="h2" th:if="${foundValidatedAddress}"
+        th:text="#{address-validation.header.check-your-address}"></h1>
+    <h1 class="h2" th:unless="${foundValidatedAddress}"
+        th:text="#{address-validation.header.make-sure-your-address-is-correct}"></h1>
+    <p th:if="${foundValidatedAddress}"
+       th:text="#{address-validation.warning.we-updated-the-address-you-entered}"
+       class="notice--warning"></p>
+    <p th:unless="${foundValidatedAddress}"
+       th:text="#{address-validation.warning.we-couldnt-find-your-address}"
+       class="notice--warning"></p>
+  </div>
+  <div class="grid__item address-validation spacing-below-60">
+    <label th:for="validated-address"
+           th:if="${foundValidatedAddress}"
+           class="radio-button"
+           id="validated-address-label">
+      <p class="spacing-below-15"
+         th:text="#{address-validation.suggested}"></p>
+      <div th:text="${inputData.get(addressInputToCheck + 'StreetAddress1_validated')}"></div>
+      <div
+          th:text="${inputData.get(addressInputToCheck + 'City_validated')} + ', ' + ${inputData.get(addressInputToCheck + 'State_validated')}"></div>
+      <div th:text="${inputData.get(addressInputToCheck + 'ZipCode_validated')}"></div>
+      <input type="radio" th:name="${inputName}" id="validated-address"
+             th:value="true"
+             th:checked="true">
+    </label>
+    <label th:for="original-address"
+           class="radio-button"
+           th:classappend="${foundValidatedAddress} ? '' : 'is-selected left-aligned'"
+           id="original-address-label">
+      <p class="spacing-below-15"
+         th:text="#{address-validation.address-entered}"></p>
+      <div th:text="${inputData.get(addressInputToCheck + 'StreetAddress1')}"></div>
+      <div th:text="${inputData.getOrDefault(addressInputToCheck + 'StreetAddress2', '')}"></div>
+      <div
+          th:text="${inputData.get(addressInputToCheck + 'City')} + ', ' + ${inputData.get(addressInputToCheck + 'State')}"></div>
+      <div th:text="${inputData.get(addressInputToCheck + 'ZipCode')}"></div>
+      <input type="radio" th:classappend="${foundValidatedAddress} ? '' : 'hide-radio-circle'"
+             th:name="${inputName}" id="original-address"
+             th:value="false"
+             th:checked="${foundValidatedAddress} ? false : true">
+    </label>
+  </div>
+  <th:block th:if="${foundValidatedAddress}">
+    <th:block th:replace="fragments/inputs/submitButton :: submitButton(
+      text=#{general.inputs.continue})"/>
+  </th:block>
+  <th:block th:if="${!foundValidatedAddress}">
+    <a th:href="${editAddressURL}"
+       class="button button--primary" th:text="#{address-validation.button.edit-my-address}"></a>
+    <th:block th:replace="fragments/inputs/submitButton :: submitButton(
+      text=#{address-validation.button.use-this-address}, classes='button')"/>
+  </th:block>
+</th:block>

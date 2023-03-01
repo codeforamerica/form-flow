@@ -374,6 +374,7 @@ private String income;
 #### @Money
 
 Used to validate monetary values. Accepts values such as:
+
 ```
 0
 0.5
@@ -383,6 +384,7 @@ Used to validate monetary values. Accepts values such as:
 ```
 
 Does not accept values such as:
+
 ```
 -1
 012
@@ -513,6 +515,7 @@ Live templates are provided for the following input types:
 - `TextArea`
 - `Phone`
 - `Ssn`
+- `State`
 - `YesOrNo`
 - `Submit`
 - `FileUpload`
@@ -730,6 +733,34 @@ placeholder.
 
 A convenience live template for SSN inputs is provided through `cfa:inputSSN`.
 
+### State
+
+The state input provides a dropdown with all the US states pre-populated in it, in the format of
+state code to state name, like so:
+
+`MA - Massachusetts`
+
+The value saved from this input is the selected state's code. Example `MA`.
+
+### Submit Button
+
+Submit button will submit form data to the server and will move you along to the next screen,
+providing data validation was successful.
+
+Optional parameters:
+
+* `classes` - the CSS style(s) to use. Default is `button button--primary`
+* `text` - the name of the button. Default is `Submit`
+
+### Continue Button
+
+The Continue Button input will simply pass the user onto the next screen in the flow.
+No form data is submitted.
+
+Optional parameter:
+
+* `text` - the name of the button. Default is `Continue`
+
 ### Money
 
 Money inputs are used to gather monetary values. Visually, they are displayed as a single input with
@@ -802,7 +833,8 @@ For example:
 ```
 
 For icons not listed in Honeycrisp you can use
-the [character codepoint for the icon](https://github.com/google/material-design-icons/blob/f5f56570741833bdd36463f1f1b6b7d4edd3f9c1/font/MaterialIconsOutlined-Regular.codepoints).
+the [character codepoint for the icon](https://github.com/google/material-design-icons/blob/f5f56570741833bdd36463f1f1b6b7d4edd3f9c1/font/MaterialIconsOutlined-Regular.codepoints)
+.
 
 Below are examples of both types of checkboxes:
 
@@ -1158,11 +1190,11 @@ A `smarty` auth-token and auth-id must be passed into our `application.yaml` fil
 address validation to work.
 
 ```yaml
-  address:
+  address-validation:
     smarty:
-      smarty_auth_id: ${SMARTY_AUTH_ID}
-      smarty_auth_token: ${SMARTY_AUTH_TOKEN}
-      smarty_url: "https://us-street.api.smartystreets.com/street-address"
+      auth-id: ${SMARTY_AUTH_ID}
+      auth-token: ${SMARTY_AUTH_TOKEN}
+      license: "us-core-cloud" # This is the default license, but can be changed to any of the licenses listed here: https://smartystreets.com/docs/cloud/licensing
 ```
 
 # How to use
@@ -1394,7 +1426,6 @@ This library is created as a Web/Fat jar to include all the items this class dep
 Specifically it's created this way to ensure that all the resources are included in the
 distribution.
 
-
 # Developer Setup
 
 _Note: these instructions are specific to macOS, but the same dependencies do need to be installed
@@ -1526,12 +1557,13 @@ our Live Templates by typing `cfa:` and a list of templates to autofill will sho
 
 ### Contribute new Live Templates ###
 
-If you have created a template which you feel is valuable outside the context of your specific app, you can contribute it to this project so that other teams can use it.
+If you have created a template which you feel is valuable outside the context of your specific app,
+you can contribute it to this project so that other teams can use it.
 
 1. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
 2. Find or create the Live Template you want to contribute
 3. Right click and "Copy" (this will copy the Live Template in XML form)
-4. Create a PR on this repository in GitHub which includes an update to the templates. 
+4. Create a PR on this repository in GitHub which includes an update to the templates.
    a. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
    b. Paste at the bottom of the file
    c. Someone from the Platforms team will work with you to get this PR merged into the codebase.

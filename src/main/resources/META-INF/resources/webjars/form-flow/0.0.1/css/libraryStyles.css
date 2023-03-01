@@ -599,3 +599,37 @@ body,
 .demo-banner {
   line-height: 3rem;
 }
+
+/* Address Verification Screen */
+
+.address-validation .radio-button.left-aligned {
+  padding-left: 2.5rem;
+}
+
+.address-validation .radio-button.is-selected {
+  border: 2px #008060 solid;
+  border-radius: 5px;
+  background-color: unset;
+}
+
+.address-validation .radio-button {
+  border-radius: 5px;
+  border-color: transparent;
+}
+
+.address-validation .radio-button:hover {
+  border-color: #121111;
+}
+
+.hide-radio-circle {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  -ms-appearance: none !important;
+  -o-appearance: none !important;
+  appearance: none !important;
+  display: none !important;
+}
+
+.address-validation .radio-button div {
+  font-weight: normal;
+}

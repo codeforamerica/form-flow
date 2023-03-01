@@ -56,27 +56,27 @@ public class ValidationService {
 
     Class<?> flowClass = clazz;
     HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
-    formSubmission.getFormData().forEach((key, value) -> {
+    var formData = formSubmission.getFormData();
+    var formDataToBeValidated = formSubmission.removeUnvalidatedInputs(formData);
+    formDataToBeValidated.forEach((key, value) -> {
       var messages = new ArrayList<String>();
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
-      if (!key.equals("_csrf")) {
-        List<String> annotationNames = null;
-        try {
-          annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
-              .map(annotation -> annotation.annotationType().getName()).toList();
-        } catch (NoSuchFieldException e) {
-          throw new RuntimeException(e);
-        }
-        // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
-        List<String> requireAnnotations = List.of("javax.validation.constraints.NotNull", "javax.validation.constraints.NotEmpty",
-            "javax.validation.constraints.NotBlank");
-        if (Collections.disjoint(annotationNames, requireAnnotations) &&
-            value.equals("")) {
-          log.info("skipping validation - found empty input for non-required field");
-          return;
-        }
+      List<String> annotationNames = null;
+      try {
+        annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
+            .map(annotation -> annotation.annotationType().getName()).toList();
+      } catch (NoSuchFieldException e) {
+        throw new RuntimeException(e);
+      }
+      // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
+      List<String> requireAnnotations = List.of("javax.validation.constraints.NotNull", "javax.validation.constraints.NotEmpty",
+          "javax.validation.constraints.NotBlank");
+      if (Collections.disjoint(annotationNames, requireAnnotations) &&
+          value.equals("")) {
+        log.info("skipping validation - found empty input for non-required field");
+        return;
       }
       validator.validateValue(flowClass, key, value)
           .forEach(violation -> messages.add(violation.getMessage()));

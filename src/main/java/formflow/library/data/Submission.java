@@ -3,6 +3,8 @@ package formflow.library.data;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
+import formflow.library.inputs.AddressParts;
+import formflow.library.inputs.UnvalidatedField;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -150,6 +152,20 @@ public class Submission {
       }
     });
     subflow.removeAll(toRemove);
+  }
+
+  /**
+   * Removes the data in the inputData pertaining to the inputName of the address passed in.
+   *
+   * @param inputName name of the address field to clear the data of
+   */
+  public void clearAddressFields(String inputName) {
+    // we want to clear out
+    inputData.remove(inputName + AddressParts.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED);
+    inputData.remove(inputName + AddressParts.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED);
+    inputData.remove(inputName + AddressParts.CITY + UnvalidatedField.VALIDATED);
+    inputData.remove(inputName + AddressParts.STATE + UnvalidatedField.VALIDATED);
+    inputData.remove(inputName + AddressParts.ZIPCODE + UnvalidatedField.VALIDATED);
   }
 
   @Override
