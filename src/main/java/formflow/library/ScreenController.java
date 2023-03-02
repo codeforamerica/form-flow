@@ -684,7 +684,7 @@ public class ScreenController extends FormFlowController {
     return model;
   }
 
-  private void handleErrors(HttpSession httpSession, HashMap<String, ArrayList<String>> errorMessages,
+  private void handleErrors(HttpSession httpSession, HashMap<String, List<String>> errorMessages,
       FormSubmission formSubmission) {
     if (errorMessages.size() > 0) {
       httpSession.setAttribute("errorMessages", errorMessages);
