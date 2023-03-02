@@ -59,6 +59,8 @@ public class ValidationService {
 
     Class<?> flowClass;
     HashMap<String, List<String>> validationMessages = new HashMap<>();
+    var formData = formSubmission.getFormData();
+    var formDataToBeValidated = formSubmission.removeUnvalidatedInputs(formData);
 
     try {
       flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
@@ -70,10 +72,6 @@ public class ValidationService {
     log.info("Running pre validation hook now");
     currentScreen.handleBeforeValidationAction(formSubmission);
 
-    Class<?> flowClass = clazz;
-    HashMap<String, ArrayList<String>> validationMessages = new HashMap<>();
-    var formData = formSubmission.getFormData();
-    var formDataToBeValidated = formSubmission.removeUnvalidatedInputs(formData);
     formDataToBeValidated.forEach((key, value) -> {
       var messages = new ArrayList<String>();
 
