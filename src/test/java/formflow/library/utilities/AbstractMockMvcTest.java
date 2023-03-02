@@ -43,6 +43,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -152,11 +153,22 @@ public abstract class AbstractMockMvcTest {
         .andExpect(redirectedUrl(getUrlForPageName(pageName) + "/navigation"));
   }
 
+  protected ResultActions postStartSubflowExpectingSuccess(String pageName) throws Exception {
+    String postUrl = getUrlForPageName(pageName, "new");
+    return postWithoutData(postUrl).andExpect(redirectedUrl(postUrl + "/navigation"));
+  }
+
   // Post to a page with an arbitrary number of multi-value inputs
   protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params)
       throws Exception {
     String postUrl = getUrlForPageName(pageName);
     return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
+  }
+
+  protected ResultActions postExpectingSuccess(String pageName, String id, Map<String, List<String>> params)
+          throws Exception {
+    String postUrl = getUrlForPageName(pageName);
+    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params, id);
   }
 
   // Post to a page with a single input that only accepts a single value
@@ -182,6 +194,17 @@ public abstract class AbstractMockMvcTest {
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
+    ).andExpect(redirectedUrl(redirectUrl));
+  }
+
+  protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
+                                                    Map<String, List<String>> params, String id) throws
+          Exception {
+    return mockMvc.perform(
+            post(postUrl + '/' + id)
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                    .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrl(redirectUrl));
   }
 
@@ -400,6 +423,10 @@ public abstract class AbstractMockMvcTest {
     );
   }
 
+  protected String getUrlForPageName(String pageName, String subflow) {
+    return "/testFlow/" + pageName + "/" + subflow;
+
+  }
   protected String getUrlForPageName(String pageName) {
     return "/testFlow/" + pageName;
   }
