@@ -31,6 +31,11 @@ public class ValidationService {
   private final Validator validator;
   @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
+  private final List<String> requiredAnnotationsList = List.of(
+      "javax.validation.constraints.NotNull",
+      "javax.validation.constraints.NotEmpty",
+      "javax.validation.constraints.NotBlank"
+  );
 
   /**
    * Autoconfigured constructor.
@@ -44,21 +49,25 @@ public class ValidationService {
   /**
    * Validates client inputs with java bean validation based on input definition.
    *
+   * @param currentScreen  The screen we are currently validating form data from
    * @param flowName       The name of the current flow, not null
    * @param formSubmission The input data from a form as a map of field name to field value(s), not null
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
-  public HashMap<String, ArrayList<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
+  public HashMap<String, List<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
       FormSubmission formSubmission) {
-    Class<?> clazz;
+
+    Class<?> flowClass;
+    HashMap<String, List<String>> validationMessages = new HashMap<>();
+
     try {
-      clazz = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+      flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }
 
-    log.info("Running pre validation hook now");
     // run pre validation hook
+    log.info("Running pre validation hook now");
     currentScreen.handleBeforeValidationAction(formSubmission);
 
     Class<?> flowClass = clazz;
@@ -67,9 +76,15 @@ public class ValidationService {
     var formDataToBeValidated = formSubmission.removeUnvalidatedInputs(formData);
     formDataToBeValidated.forEach((key, value) -> {
       var messages = new ArrayList<String>();
+
+      if (key.equals("_csrf")) {
+        return;
+      }
+
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
+
       List<String> annotationNames = null;
       try {
         annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
@@ -77,14 +92,13 @@ public class ValidationService {
       } catch (NoSuchFieldException e) {
         throw new RuntimeException(e);
       }
+
       // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
-      List<String> requireAnnotations = List.of("javax.validation.constraints.NotNull", "javax.validation.constraints.NotEmpty",
-          "javax.validation.constraints.NotBlank");
-      if (Collections.disjoint(annotationNames, requireAnnotations) &&
-          value.equals("")) {
+      if (Collections.disjoint(annotationNames, requiredAnnotationsList) && value.equals("")) {
         log.info("skipping validation - found empty input for non-required field");
         return;
       }
+
       validator.validateValue(flowClass, key, value)
           .forEach(violation -> messages.add(violation.getMessage()));
       if (!messages.isEmpty()) {
@@ -95,6 +109,10 @@ public class ValidationService {
     // validation hook for custom actions here
     Map<String, List<String>> errors = currentScreen.handleValidationAction(formSubmission);
     // merge with validation messages
+
+    if (!errors.isEmpty()) {
+      validationMessages.putAll(errors);
+    }
 
     return validationMessages;
   }
