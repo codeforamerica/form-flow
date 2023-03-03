@@ -1259,9 +1259,8 @@ of
 
 **Note that you will need to include all the associated fields in your Flow Inputs Class file.
 Meaning
-if you give the address fragment an inputName of `homeAddress` you will need to include all of the
-above-mentioned
-fields in your Flow Inputs Class file.**
+if you give the address fragment an inputName of `homeAddress` you will need to include all the
+above-mentioned fields in your Flow Inputs Class file.**
 
 ### Storage of Validated Addresses
 
@@ -1288,7 +1287,23 @@ The JSON will be in the form of:
 Note that both the original address and the validated address are stored, with the validated fields
 having the suffix `_validated`.
 
+Also note the input prefixed with `_validate` which appears here as `validatehomeAddress` with a
+value of true.
+This is a hidden field which is applied within the address fragment. This field is used to determine
+whether Smarty validation for that address should be performed. The before mentioned `validate`
+parameter
+of the address fragment is used to determine the value of this hidden field.
+
 ### Viewing the validated address
+
+We have provided a live template `cfa:addressValidationScreen` which will display a radio input with
+selections for the validated address that came back from Smarty if one was found, and the original
+address the user entered for them to select between. When using this live template you will be asked
+to enter values for the screen title, content replacement placeholder (this is a Thymeleaf variable
+used when replacing one fragments content with another, it just needs to be any descriptive name for
+the content held inside), the address input name of the address being verified, the input name for
+the verification input (the before mentioned radio input with selections for the validated address
+and original address).
 
 # How to use
 
