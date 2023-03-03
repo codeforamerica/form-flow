@@ -300,13 +300,14 @@ have access to it.
 
 ## Actions
 
-Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from the `currentSubmission` object.
+Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from
+the `currentSubmission` object.
 
 ```java
 public class CalculateBeforeSave implements Action {
-  
+
   float RATE = 0.59;
-  
+
   public void run(Submission submission) {
     int mileage = submission.getInputData()
         .get('mileage');
@@ -318,7 +319,8 @@ public class CalculateBeforeSave implements Action {
 
 ### beforeSave
 
-An action can be added to a page in the flow-config to update the submission data before saving to the database.
+An action can be added to a page in the flow-config to update the submission data before saving to
+the database.
 
 ```yaml
 expense:
@@ -1213,11 +1215,18 @@ permits.
 
 ### Smarty
 
+#### Registration with Smarty
+
+Create an account with Smarty at [Smarty](https://www.smarty.com/) and once setup, go to the API
+keys screen
+and make note of your `auth-id` and `auth-token`. You will need these to configure your application.
+
 #### How to configure
 
-Please use the `sample.env` as an example for creating the `.env` for a form-flow application.
-A `smarty` auth-token and auth-id must be passed into our `application.yaml` file in order for the
-address validation to work.
+You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
+the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
+file in the starter app repo has an example for creating the `.env` for a form-flow application.
+You will also need to add the following to your `application.yaml` file:
 
 ```yaml
   address-validation:
@@ -1226,6 +1235,60 @@ address validation to work.
       auth-token: ${SMARTY_AUTH_TOKEN}
       license: "us-core-cloud" # This is the default license, but can be changed to any of the licenses listed here: https://smartystreets.com/docs/cloud/licensing
 ```
+
+### Validating an Address
+
+We have provided a `cfa:address` live template which provides form fields for Street Address, Apt
+Number,
+City, State and Zipcode. The address fragment in the live template has two parameters, `validate`
+and
+`inputName`. The `validate` parameter is a boolean (true or false) that determines whether the
+address will be
+validated by Smarty. The `inputName` parameter is the name of the associated address that will be
+linked
+to each of the Street Address, Apartment Number (as Street Address 2), City, State and Zipcode
+fields. In example, a inputName
+of
+`homeAddress` will result in the following fields:
+
+- `homeAddressStreetAddress1`
+- `homeAddressStreetAddress2`
+- `homeAddressCity`
+- `homeAddressState`
+- `homeAddressZipcode`
+
+**Note that you will need to include all the associated fields in your Flow Inputs Class file.
+Meaning
+if you give the address fragment an inputName of `homeAddress` you will need to include all of the
+above-mentioned
+fields in your Flow Inputs Class file.**
+
+### Storage of Validated Addresses
+
+The validated address will be stored in the database in the `submissions` table's `input_data` JSON
+column.
+The JSON will be in the form of:
+
+```JSON
+{
+  "homeAddressStreetAddress1": "1719 5th Street",
+  "homeAddressStreetAddress2": "Apt D",
+  "homeAddressCity": "Berkeley",
+  "homeAddressState": "CA",
+  "homeAddressZipCode": "94710",
+  "_validatehomeAddress": "true",
+  "homeAddressStreetAddress1_validated": "1719 5th St Apt D",
+  "homeAddressStreetAddress2_validated": "D",
+  "homeAddressCity_validated": "Berkeley",
+  "homeAddressState_validated": "CA",
+  "homeAddressZipCode_validated": "94710-1738"
+}
+```
+
+Note that both the original address and the validated address are stored, with the validated fields
+having the suffix `_validated`.
+
+### Viewing the validated address
 
 # How to use
 
