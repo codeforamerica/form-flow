@@ -47,15 +47,19 @@ public class AddressValidationService {
       if (lookup.getResult().isEmpty()) {
         validatedAddresses.put(lookup.getInputId(), null);
       } else {
+        String secondaryNumber = lookup.getResult(0).getComponents().getSecondaryNumber() == null ? ""
+            : lookup.getResult(0).getComponents().getSecondaryNumber();
+        String zipPlus4 = lookup.getResult(0).getComponents().getPlus4Code() == null ? ""
+            : "-" + lookup.getResult(0).getComponents().getPlus4Code();
         validatedAddresses.put(
             lookup.getInputId(),
             new ValidatedAddress(
                 lookup.getResult(0).getDeliveryLine1(),
-                lookup.getResult(0).getComponents().getSecondaryNumber() == null ? ""
-                    : lookup.getResult(0).getComponents().getSecondaryNumber(),
+                secondaryNumber,
                 lookup.getResult(0).getComponents().getCityName(),
                 lookup.getResult(0).getComponents().getState(),
-                lookup.getResult(0).getComponents().getZipCode()));
+                lookup.getResult(0).getComponents().getZipCode() + zipPlus4
+            ));
       }
     });
 
