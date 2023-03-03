@@ -6,6 +6,13 @@
     <option name="HTML" value="true" />
   </context>
 </template>
+<template name="cfa:address" value="&lt;th:block th:replace=&quot;'fragments/inputs/address' ::&#10;                  address(&#10;                    validate=$TRUE_OR_FALSE$,&#10;                    inputName='$ADDRESS_NAME$'&#10;                  )&quot;/&gt;" description="An address fragment which provides inputs for Street Address, Apt Number, City, State and Zipcode. Placeholders for true or false value for wether or not to validate using smarty and name of the address (example: homeAddress)" toReformat="false" toShortenFQNames="true">
+<variable name="TRUE_OR_FALSE" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="ADDRESS_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+<context>
+  <option name="HTML" value="true" />
+</context>
+</template>
 <template name="cfa:addressValidationScreen" value="&lt;!DOCTYPE html&gt;&#10;&lt;html th:lang=&quot;${#locale.language}&quot;&gt;&#10;&lt;head th:replace=&quot;fragments/head :: head(title=#{$SCREEN_TITLE$})&quot;&gt;&lt;/head&gt;&#10;&lt;body&gt;&#10;&lt;div class=&quot;page-wrapper&quot;&gt;&#10;  &lt;div th:replace=&quot;fragments/toolbar :: toolbar&quot;&gt;&lt;/div&gt;&#10;  &lt;section class=&quot;slab&quot;&gt;&#10;    &lt;div class=&quot;grid&quot;&gt;&#10;      &lt;div th:replace=&quot;fragments/goBack :: goBackLink&quot;&gt;&lt;/div&gt;&#10;      &lt;main id=&quot;content&quot; role=&quot;main&quot; class=&quot;form-card spacing-above-35&quot;&gt;&#10;          &lt;th:block th:replace=&quot;'fragments/form' :: form(action=${formAction}, content=~{:: $FORM_CONTENT$})&quot;&gt;&#10;            &lt;th:block th:ref=&quot;$FORM_CONTENT$&quot;&gt;&#10;              &lt;th:block th:replace=&quot;'fragments/screens/addressSelectionScreen' ::&#10;                  addressSelectionScreen(&#10;                    addressInputToCheck='$NAME_OF_ADDRESS_INPUT_BEING_VERIFIED$',&#10;                    inputName='$NAME_OF_ADDRESS_VERIFICATION_INPUT$',&#10;                    editAddressURL=${'/' + flow + '/$NAME_OF_ORIGINAL_ADDRESS_INPUT_PAGE$'}&#10;                  )&quot;/&gt;&#10;          &lt;/th:block&gt;&#10;        &lt;/th:block&gt;&#10;      &lt;/main&gt;&#10;    &lt;/div&gt;&#10;  &lt;/section&gt;&#10;&lt;/div&gt;&#10;&lt;th:block th:replace=&quot;fragments/footer :: footer&quot; /&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;&#10;" description="A screen template for an address verification screen. Has placeholders for screen title, form content, address input being verified, verification input name, and URL of the original address page." toReformat="false" toShortenFQNames="true">
 <variable name="SCREEN_TITLE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="FORM_CONTENT" expression="" defaultValue="" alwaysStopAt="true" />
@@ -173,6 +180,11 @@
 <context>
   <option name="HTML" value="true" />
 </context>
+</template>
+<template name="cfa:inputStateSelect" value="&lt;th:block th:replace=&quot;'fragments/inputs/state' ::&#10;                  state(inputName=${$INPUT_NAME$},&#10;                  label=#{$INPUT_LABEL$},&#10;                  helpText=#{$OPTIONAL_HELP_TEXT$}&#10;                  )&quot;/&gt;" description="An select input for US states with placeholders for input name, input label and optional help text." toReformat="false" toShortenFQNames="true">
+<variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="INPUT_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="OPTIONAL_HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
 </template>
 <template name="cfa:inputSubmitButton" value="&lt;th:block th:replace=&quot;fragments/inputs/submitButton :: submitButton(&#10;  text=#{$TEXT$})&quot; /&gt;" description="A form submit button with text" toReformat="false" toShortenFQNames="true">
 <variable name="TEXT" expression="" defaultValue="" alwaysStopAt="true" />
