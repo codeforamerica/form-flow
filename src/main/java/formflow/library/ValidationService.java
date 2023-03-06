@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 public class ValidationService {
 
   private final Validator validator;
-  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
+  @Value("${form-flow.paths.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
   private final List<String> requiredAnnotationsList = List.of(
       "javax.validation.constraints.NotNull",
@@ -75,10 +75,6 @@ public class ValidationService {
     formDataToBeValidated.forEach((key, value) -> {
       var messages = new ArrayList<String>();
 
-      if (key.equals("_csrf")) {
-        return;
-      }
-
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
@@ -105,11 +101,10 @@ public class ValidationService {
     });
 
     // validation hook for custom actions here
-    Map<String, List<String>> errors = currentScreen.handleValidationAction(formSubmission);
-    // merge with validation messages
+    Map<String, List<String>> validationActionErrors = currentScreen.handleValidationAction(formSubmission);
 
-    if (!errors.isEmpty()) {
-      validationMessages.putAll(errors);
+    if (!validationActionErrors.isEmpty()) {
+      validationMessages.putAll(validationActionErrors);
     }
 
     return validationMessages;

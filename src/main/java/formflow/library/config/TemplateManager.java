@@ -11,15 +11,21 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 
 @Data
 @Slf4j
 public class TemplateManager {
 
+  @Value("${form-flow.paths.conditions:flows-config.yaml}")
+  private String conditionsClassPath;
+  @Value("${form-flow.paths.actions:flows-config.yaml}")
+  private String actionsClassPath;
+
   private HashMap<String, Condition> conditions = new HashMap<>();
   private HashMap<String, Action> actions = new HashMap<>();
 
-  public TemplateManager(String conditionsClassPath, String actionsClassPath) {
+  public TemplateManager() {
 
     log.info("In template manager and loading: \n\tConditions: {}\n\tActions: {}%n",
         conditionsClassPath, actionsClassPath);

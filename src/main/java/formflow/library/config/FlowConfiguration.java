@@ -16,10 +16,6 @@ public class FlowConfiguration {
 
   private HashMap<String, SubflowConfiguration> subflows;
 
-  private String conditionsPath;
-
-  private String actionsPath;
-
   private TemplateManager templateManager;
 
   /**

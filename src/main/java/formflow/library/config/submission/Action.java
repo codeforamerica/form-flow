@@ -2,6 +2,8 @@ package formflow.library.config.submission;
 
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An interface to define a particular Action.
@@ -16,6 +18,7 @@ public interface Action {
   public default void run(Submission submission) {
     throw new UnsupportedOperationException("Not implemented");
   }
+
 
   /**
    * Runs an action on a submission to potentially manipulate the data.
@@ -40,9 +43,17 @@ public interface Action {
    * Runs an action on form submission data to potentially manipulate the data.
    *
    * @param formSubmission form submission object the action is associated with, not null
-   * @param data           id for the iteration
+   * @param id             id for the iteration
    */
-  public default void run(FormSubmission formSubmission, String data) {
+  public default void run(FormSubmission formSubmission, String id) {
     throw new UnsupportedOperationException("Not implemented");
   }
+
+  /*
+   * Runs validation code with the expectation that error messages may be returned.
+   */
+  public default Map<String, List<String>> runValidation(FormSubmission formSubmission) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
 }

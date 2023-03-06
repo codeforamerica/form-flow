@@ -63,7 +63,7 @@ public class ScreenController extends FormFlowController {
     log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
       log.info("Creating TemplateManager for flow: " + f.getName());
-      TemplateManager tm = new TemplateManager(f.getConditionsPath(), f.getActionsPath());
+      TemplateManager tm = new TemplateManager();
       f.setTemplateManager(tm);
     });
   }
