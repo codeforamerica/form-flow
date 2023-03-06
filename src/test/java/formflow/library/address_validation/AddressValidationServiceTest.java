@@ -60,6 +60,7 @@ class AddressValidationServiceTest {
     when(components.getCityName()).thenReturn("validatedCity");
     when(components.getState()).thenReturn("validatedState");
     when(components.getZipCode()).thenReturn("validatedZipCode");
+    when(components.getPlus4Code()).thenReturn("1234");
     when(lookup.getResult(0)).thenReturn(candidate);
     batch.add(lookup);
 
@@ -72,7 +73,7 @@ class AddressValidationServiceTest {
             "validatedAptNumber",
             "validatedCity",
             "validatedState",
-            "validatedZipCode")
+            "validatedZipCode-1234")
     ));
     verify(client, times(1)).send(batch);
   }

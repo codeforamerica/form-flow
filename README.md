@@ -15,10 +15,11 @@ Table of Contents
     * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
-    * [Conditions and Actions](#conditions-and-actions)
+    * [Conditions](#conditions)
         * [Defining Conditions](#defining-conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
     * [Submission Object](#submission-object)
+    * [Actions](#actions)
     * [Defining Inputs](#defining-inputs)
         * [Input Class](#input-class)
         * [Custom Validations](#custom-validations)
@@ -234,7 +235,7 @@ This page is not technically part of the subflow and as such, does not need to b
 with `subflow: subflowName`
 in the `flows-config.yaml`.
 
-## Conditions and Actions
+## Conditions
 
 ### Defining Conditions
 
@@ -296,6 +297,35 @@ class Submission {
 The `inputData` field is a JSON object that stores data from the user's input as a given flow
 progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
 have access to it.
+
+## Actions
+
+Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from the `currentSubmission` object.
+
+```java
+public class CalculateBeforeSave implements Action {
+  
+  float RATE = 0.59;
+  
+  public void run(Submission submission) {
+    int mileage = submission.getInputData()
+        .get('mileage');
+    submission.getInputData()
+        .put('reimbursement', mileage * RATE);
+  }
+} 
+```
+
+### beforeSave
+
+An action can be added to a page in the flow-config to update the submission data before saving to the database.
+
+```yaml
+expense:
+  beforeSave: java.path.to.actions.CalculateBeforeSave
+  nextPages:
+    - confirmation
+```
 
 ## Defining Inputs
 

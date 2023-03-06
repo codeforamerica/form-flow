@@ -1,0 +1,35 @@
+name: testFlow
+actionsPath: formflow.library.submissions.actions
+flow:
+  inputs:
+    beforeSave: formflow.library.submissions.actions.FormatDateBeforeSave
+    nextScreens:
+      - name: subflowEntry
+  subflowEntry:
+    nextScreens:
+      - name: subflowIterationStart
+  subflowIterationStart:
+    subflow: income
+    nextScreens:
+      - name: next
+  next:
+    beforeSave: formflow.library.submissions.actions.CalculateTotalBeforeSave
+    subflow: income
+    nextScreens:
+      - name: subflowReview
+  subflowReview:
+    nextScreens:
+      - name: subflowComplete
+  subflowDeleteConfirmation:
+    nextScreens: null
+  subflowComplete:
+    nextScreens:
+      - name: last
+  last:
+    nextScreens: null
+subflows:
+  income:
+    entryScreen: subflowEntry
+    iterationStartScreen: subflowIterationStart
+    reviewScreen: subflowReview
+    deleteConfirmationScreen: subflowDeleteConfirmation

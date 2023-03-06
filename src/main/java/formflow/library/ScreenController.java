@@ -149,13 +149,13 @@ public class ScreenController extends FormFlowController {
     // if there's already a session
     if (submission.getId() != null) {
       submission.mergeFormDataWithSubmissionData(formSubmission);
-      saveToRepository(submission);
     } else {
       submission.setFlow(flow);
       submission.setInputData(formSubmission.getFormData());
-      saveToRepository(submission);
-      httpSession.setAttribute("id", submission.getId());
     }
+    handleBeforeSaveAction(getScreenConfig(flow, screen), submission);
+    saveToRepository(submission);
+    httpSession.setAttribute("id", submission.getId());
 
     return new ModelAndView(String.format("redirect:/%s/%s/navigation", flow, screen));
   }
@@ -600,6 +600,12 @@ public class ScreenController extends FormFlowController {
   private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     if (currentScreen.getBeforeSave() != null) {
       currentScreen.getBeforeSaveAction().run(submission, uuid);
+    }
+  }
+
+  private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
+    if (currentScreen.getBeforeSave() != null) {
+      currentScreen.getBeforeSaveAction().run(submission);
     }
   }
 
