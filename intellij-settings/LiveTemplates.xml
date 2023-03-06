@@ -185,6 +185,9 @@
 <variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="INPUT_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="OPTIONAL_HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
+<context>
+  <option name="HTML" value="true" />
+</context>
 </template>
 <template name="cfa:inputSubmitButton" value="&lt;th:block th:replace=&quot;fragments/inputs/submitButton :: submitButton(&#10;  text=#{$TEXT$})&quot; /&gt;" description="A form submit button with text" toReformat="false" toShortenFQNames="true">
 <variable name="TEXT" expression="" defaultValue="" alwaysStopAt="true" />
