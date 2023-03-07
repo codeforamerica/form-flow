@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 public class ValidationService {
 
   private final Validator validator;
-  @Value("${form-flow.paths.inputs: 'org.formflowstartertemplate.app.inputs'}")
+  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
   private final List<String> requiredAnnotationsList = List.of(
       "javax.validation.constraints.NotNull",
@@ -54,13 +54,28 @@ public class ValidationService {
    * @param formSubmission The input data from a form as a map of field name to field value(s), not null
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
-  public HashMap<String, List<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
+  public Map<String, List<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
       FormSubmission formSubmission) {
+
+    Map<String, List<String>> crossFieldValidationMessages;
+    FormSubmission filteredSubmission = new FormSubmission(formSubmission.getValidatableFields());
+
+    // perform field level validations
+    Map<String, List<String>> validationMessages = performFieldLevelValidation(flowName, filteredSubmission);
+
+    // peform cross-field validations, if supplied in action
+    crossFieldValidationMessages = currentScreen.handleCrossFieldValidationAction(filteredSubmission);
+
+    // combine messages and return them
+    validationMessages.putAll(crossFieldValidationMessages);
+
+    return validationMessages;
+  }
+
+  private Map<String, List<String>> performFieldLevelValidation(String flowName, FormSubmission formSubmission) {
 
     Class<?> flowClass;
     HashMap<String, List<String>> validationMessages = new HashMap<>();
-    var formData = formSubmission.getFormData();
-    var formDataToBeValidated = formSubmission.removeUnvalidatedInputs(formData);
 
     try {
       flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
@@ -68,18 +83,14 @@ public class ValidationService {
       throw new RuntimeException(e);
     }
 
-    // run pre validation hook
-    log.info("Running pre validation hook now");
-    currentScreen.handleBeforeValidationAction(formSubmission);
-
-    formDataToBeValidated.forEach((key, value) -> {
+    formSubmission.getFormData().forEach((key, value) -> {
       var messages = new ArrayList<String>();
+      List<String> annotationNames = null;
 
       if (key.contains("[]")) {
         key = key.replace("[]", "");
       }
 
-      List<String> annotationNames = null;
       try {
         annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
             .map(annotation -> annotation.annotationType().getName()).toList();
@@ -95,17 +106,11 @@ public class ValidationService {
 
       validator.validateValue(flowClass, key, value)
           .forEach(violation -> messages.add(violation.getMessage()));
+
       if (!messages.isEmpty()) {
         validationMessages.put(key, messages);
       }
     });
-
-    // validation hook for custom actions here
-    Map<String, List<String>> validationActionErrors = currentScreen.handleValidationAction(formSubmission);
-
-    if (!validationActionErrors.isEmpty()) {
-      validationMessages.putAll(validationActionErrors);
-    }
 
     return validationMessages;
   }

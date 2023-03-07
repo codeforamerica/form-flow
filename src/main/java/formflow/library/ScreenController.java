@@ -63,7 +63,7 @@ public class ScreenController extends FormFlowController {
     log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
       log.info("Creating TemplateManager for flow: " + f.getName());
-      TemplateManager tm = new TemplateManager();
+      TemplateManager tm = new TemplateManager(f.getConditionsPath(), f.getActionsPath());
       f.setTemplateManager(tm);
     });
   }
@@ -103,6 +103,7 @@ public class ScreenController extends FormFlowController {
         return nothingToDeleteModelAndView;
       }
     }
+
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
@@ -133,6 +134,12 @@ public class ScreenController extends FormFlowController {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     FormSubmission formSubmission = new FormSubmission(formData);
+    var currentScreen = getScreenConfig(flow, screen);
+
+    // run pre validation hook
+    log.info("Running pre validation hook now");
+
+    currentScreen.handleOnPostAction(formSubmission);
 
     List<String> addressValidationFields = formSubmission.getAddressValidationFields();
     if (!addressValidationFields.isEmpty()) {
@@ -141,7 +148,6 @@ public class ScreenController extends FormFlowController {
       // clear lingering address(es) from the submission stored in the database.
       cleanAddressesInSubmission(submission, addressValidationFields);
     }
-    var currentScreen = getScreenConfig(flow, screen);
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
 
@@ -684,7 +690,7 @@ public class ScreenController extends FormFlowController {
     return model;
   }
 
-  private void handleErrors(HttpSession httpSession, HashMap<String, List<String>> errorMessages,
+  private void handleErrors(HttpSession httpSession, Map<String, List<String>> errorMessages,
       FormSubmission formSubmission) {
     if (errorMessages.size() > 0) {
       httpSession.setAttribute("errorMessages", errorMessages);
