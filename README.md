@@ -396,6 +396,8 @@ We also
 implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use
 them the same way you would any other JavaX validator, like so:
 
+#### @Money
+
 ```java
 @Money(message = "Please make sure to enter a valid dollar amount.")
 private String income;
@@ -420,6 +422,75 @@ Does not accept values such as:
 012
 12.123
 .5
+```
+
+#### @FormFlowEmail
+
+Used to validate email addresses.
+
+```java
+@FormFlowEmail(message = "Please enter valid email")
+private String email;
+```
+
+Email addresses must consist of a valid string prefix followed by an `@`, followed by a valid string
+domain name and a top level domain indicator in the format of example@somedomain.com:
+
+```
+"formflow@gmail.com",
+"fce343@whis.edu",
+```
+
+Does not accept values such as:
+
+```
+"test..book@gmail.com",
+".hello@yahoo.org",
+"wha?tsssss23@.reatd?.com",
+"@book.com",
+"wakeup.com"
+```
+
+#### @Phone
+
+Used to validate 10-digit phone numbers.
+
+```java
+@Phone(message = "{contact-info.invalid-phone-number}")
+private String phoneNumber;
+```
+
+Phone numbers must consist of a String with 10-digits passed to the validator in the pattern
+of `(333) 451-7777`.
+Phone numbers can not start with a zero or one.
+
+**Note that if you are using the [phone number input fragment](#phone) provided by the Form Flow
+Library
+the
+fragment uses input masking which will automatically format 10 digits entered into the
+correct `(333) 451-7777`
+format**
+
+```
+"(333) 333-3333",
+"(923) 456-7890",
+"(823) 456-7890",
+"(707) 987-5266",
+"(829) 622-9048"
+```
+
+Does not accept values such as:
+
+```
+"+1(111)-1111",
+"(111)222-3333",
+"(111)111-11",
+"999999999",
+"(123) 456-7890",
+"(077) 987-5266",
+"(892) 622-9048",
+"22",
+"der"
 ```
 
 ### Input Data JSON Structure
