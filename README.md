@@ -1016,6 +1016,40 @@ They are visually displayed as three separate inputs for Month, Day and Year in 
 
 A convenience live template for date's is provided through `cfa:inputDate`.
 
+### Address
+
+We have provided an address fragment for convenience. This fragment is a combination of multiple
+fields including:
+
+- Street Address
+- Street Address 2 (Apt Number, Suite Number, etc.)
+- City
+- State
+- Zip Code
+
+The address fragment has two parameters, `validate` and `inputName`.
+
+- `validate` is a boolean value that determines whether the address should be validated by Smarty
+- `inputName` is the name that will be associated with all of the above inputs. For example, if the
+  `inputName` is homeAddress then the corresponding inputs will be homeAddressStreetAddress1,
+  homeAddressStreetAddress2,
+  homeAddressCity, homeAddressState, and homeAddressZipCode.
+
+Please note that when using the address fragment you will need to create corresponding fields in
+your
+flow inputs class for each of the above-mentioned inputs created by the fragment. For example, if
+your
+address fragments input name is mailingAddress, then you will need to create the following fields in
+your flow inputs class:
+
+```java
+String mailingAddressStreetAddress1;
+    String mailingAddressStreetAddress2;
+    String mailingAddressCity;
+    String mailingAddressState;
+    String mailingAddressZipCode;
+```
+
 ### Accessing Conditions
 
 ### Accessing Submission Object
@@ -1247,7 +1281,7 @@ address will be
 validated by Smarty. The `inputName` parameter is the name of the associated address that will be
 linked
 to each of the Street Address, Apartment Number (as Street Address 2), City, State and Zipcode
-fields. In example, a inputName
+fields. In example, an inputName
 of
 `homeAddress` will result in the following fields:
 
@@ -1287,7 +1321,7 @@ The JSON will be in the form of:
 Note that both the original address and the validated address are stored, with the validated fields
 having the suffix `_validated`.
 
-Also note the input prefixed with `_validate` which appears here as `validatehomeAddress` with a
+Also note the input prefixed with `_validate` which appears here as `_validatehomeAddress` with a
 value of true.
 This is a hidden field which is applied within the address fragment. This field is used to determine
 whether Smarty validation for that address should be performed. The before mentioned `validate`
@@ -1299,11 +1333,16 @@ of the address fragment is used to determine the value of this hidden field.
 We have provided a live template `cfa:addressValidationScreen` which will display a radio input with
 selections for the validated address that came back from Smarty if one was found, and the original
 address the user entered for them to select between. When using this live template you will be asked
-to enter values for the screen title, content replacement placeholder (this is a Thymeleaf variable
-used when replacing one fragments content with another, it just needs to be any descriptive name for
-the content held inside), the address input name of the address being verified, the input name for
-the verification input (the before mentioned radio input with selections for the validated address
-and original address).
+to provide a number of parameters:
+
+| Paramater           | Type                 | Description                                                                                                                                                                                                                                                                                                   |
+|---------------------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title               | String               | The HTML title of the screen. This is what displays in the browser tab for the screen.                                                                                                                                                                                                                        |
+| content             | Thymeleaf identifier | An identifier that matches the `ref`. Used by Thymeleaf for identifying the content of the form.                                                                                                                                                                                                              |
+| ref                 | String               | A unique identifier for the form content. Should match `content`                                                                                                                                                                                                                                              |
+| addressInputToCheck | String               | Name of the address input being verified.                                                                                                                                                                                                                                                                     |
+| inputName           | String               | Name of the radio input that will be displayed on the screen. This will either be the address that comes back from Smarty along with the original address entered, or just the original address entered if there is no address found by smarty or if the address entered matches what Smarty returns exactly. |
+| editAddressURL      | String               | The URL of the screen with the address being verified so the user can go back and edit if they need to.                                                                                                                                                                                                       |
 
 # How to use
 
