@@ -1,0 +1,37 @@
+name: testFlow
+actionsPath: formflow.library.submissions.actions
+flow:
+  inputs:
+    beforeSaveAction: formflow.library.submissions.actions.EncryptSSN
+    beforeDisplayAction: formflow.library.submissions.actions.DecryptSSN
+    nextScreens:
+      - name: subflowEntry
+  subflowEntry:
+    nextScreens:
+      - name: subflowIterationStart
+  subflowIterationStart:
+    subflow: householdMembers
+    nextScreens:
+      - name: pageWithSSNInput
+  pageWithSSNInput:
+    beforeSaveAction: formflow.library.submissions.actions.EncryptSSN
+    beforeDisplayAction: formflow.library.submissions.actions.DecryptSSN
+    subflow: householdMembers
+    nextScreens:
+      - name: subflowReview
+  subflowReview:
+    nextScreens:
+      - name: subflowComplete
+  subflowDeleteConfirmation:
+    nextScreens: ~
+  subflowComplete:
+    nextScreens:
+      - name: last
+  last:
+    nextScreens: ~
+subflows:
+  householdMembers:
+    entryScreen: subflowEntry
+    iterationStartScreen: subflowIterationStart
+    reviewScreen: subflowReview
+    deleteConfirmationScreen: subflowDeleteConfirmation

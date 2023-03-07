@@ -91,6 +91,9 @@ public class ScreenController extends FormFlowController {
     if (currentScreen == null) {
       return new ModelAndView("redirect:/error");
     }
+
+    currentScreen.handleBeforeDisplayAction(submission, uuid);
+
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
     String formAction = createFormActionString(flow, screen);
     model.put("formAction", formAction);
@@ -246,6 +249,8 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) {
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+    var currentScreen = getScreenConfig(flow, screen);
+    currentScreen.handleBeforeDisplayAction(submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
     model.put("formAction", String.format("/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
@@ -415,6 +420,8 @@ public class ScreenController extends FormFlowController {
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     if (submissionOptional.isPresent()) {
       Submission submission = submissionOptional.get();
+      var currentScreen = getScreenConfig(flow, screen);
+      currentScreen.handleBeforeDisplayAction(submission, uuid);
       model = createModel(flow, screen, httpSession, submission);
 
       var existingInputData = submission.getInputData();
@@ -598,15 +605,11 @@ public class ScreenController extends FormFlowController {
   }
 
   private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
-    if (currentScreen.getBeforeSave() != null) {
-      currentScreen.getBeforeSaveAction().run(submission, uuid);
-    }
+    currentScreen.handleBeforeSaveAction(submission, uuid);
   }
 
   private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
-    if (currentScreen.getBeforeSave() != null) {
-      currentScreen.getBeforeSaveAction().run(submission);
-    }
+    currentScreen.handleBeforeSaveAction(submission);
   }
 
   private NextScreen getNonConditionalNextScreen(ScreenNavigationConfiguration currentScreen) {

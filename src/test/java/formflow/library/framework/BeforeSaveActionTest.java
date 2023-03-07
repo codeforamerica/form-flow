@@ -22,8 +22,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-before-save.yaml"})
-public class BeforeSaveTest extends AbstractMockMvcTest {
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-before-save-action.yaml"})
+public class BeforeSaveActionTest extends AbstractMockMvcTest {
 
   Submission submission;
 
