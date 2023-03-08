@@ -16,13 +16,10 @@ import lombok.extern.slf4j.Slf4j;
  * Screen navigation configuration class used to store navigation information about a specific screen.
  */
 @Data
-@Slf4j
 public class ScreenNavigationConfiguration {
 
   private List<NextScreen> nextScreens = Collections.emptyList();
   private String subflow;
-  //TODO: Implement callback
-  private String callback;
 
   private Action onPostActionObject;
   private Action crossFieldValidationActionObject;
@@ -31,31 +28,26 @@ public class ScreenNavigationConfiguration {
 
   @SuppressWarnings("unused")
   public void setOnPostAction(String actionName) throws ConfigurationException {
-    log.info("onPostAction is set to: " + actionName);
     onPostActionObject = loadAction(actionName);
   }
 
   @SuppressWarnings("unused")
   public void setCrossFieldValidationAction(String actionName) throws ConfigurationException {
-    log.info("crossFieldValidationActionName is set to: " + actionName);
     crossFieldValidationActionObject = loadAction(actionName);
   }
 
   @SuppressWarnings("unused")
   public void setBeforeSaveAction(String actionName) throws ConfigurationException {
-    log.info("beforeSave is set to: " + actionName);
     beforeSaveActionObject = loadAction(actionName);
   }
 
   @SuppressWarnings("unused")
   public void setBeforeDisplayAction(String actionName) throws ConfigurationException {
-    log.info("beforeDisplayAction is set to: " + actionName);
     beforeDisplayActionObject = loadAction(actionName);
   }
 
   private Action loadAction(String actionName) throws ConfigurationException {
     try {
-      log.info("Loading action: " + actionName);
       Class<?> clazz = Class.forName(actionName);
       Constructor<?> ctor = clazz.getConstructor();
       return (Action) ctor.newInstance();
