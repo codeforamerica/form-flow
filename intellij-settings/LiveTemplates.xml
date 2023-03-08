@@ -6,7 +6,7 @@
     <option name="HTML" value="true" />
   </context>
 </template>
-<template name="cfa:address" value="&lt;th:block th:replace=&quot;'fragments/inputs/address' ::&#10;                  address(&#10;                    validate=$TRUE_OR_FALSE$,&#10;                    inputName='$ADDRESS_NAME$'&#10;                  )&quot;/&gt;" description="An address fragment which provides inputs for Street Address, Apt Number, City, State and Zipcode. Placeholders for true or false value for wether or not to validate using smarty and name of the address (example: homeAddress)" toReformat="false" toShortenFQNames="true">
+<template name="cfa:address" value="&lt;th:block th:replace=&quot;'fragments/inputs/address' ::&#10;                  address(&#10;                    validate=$TRUE_OR_FALSE$,&#10;                    inputName='$ADDRESS_NAME$'&#10;                  )&quot;/&gt;" description="An address fragment which provides inputs for Street Address, Apt Number, City, State and Zipcode. Placeholders for true or false value for whether or not to validate using smarty and name of the address (example: homeAddress)" toReformat="false" toShortenFQNames="true">
 <variable name="TRUE_OR_FALSE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="ADDRESS_NAME" expression="" defaultValue="" alwaysStopAt="true" />
 <context>

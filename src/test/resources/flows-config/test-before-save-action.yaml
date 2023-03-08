@@ -2,7 +2,7 @@ name: testFlow
 actionsPath: formflow.library.submissions.actions
 flow:
   inputs:
-    beforeSave: formflow.library.submissions.actions.FormatDateBeforeSave
+    beforeSaveAction: formflow.library.submissions.actions.FormatDateBeforeSave
     nextScreens:
       - name: subflowEntry
   subflowEntry:
@@ -13,7 +13,7 @@ flow:
     nextScreens:
       - name: next
   next:
-    beforeSave: formflow.library.submissions.actions.CalculateTotalBeforeSave
+    beforeSaveAction: formflow.library.submissions.actions.CalculateTotalBeforeSave
     subflow: income
     nextScreens:
       - name: subflowReview
