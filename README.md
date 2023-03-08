@@ -405,8 +405,6 @@ them the same way you would any other JavaX validator, like so:
 private String income;
 ```
 
-#### @Money
-
 Used to validate monetary values. Accepts values such as:
 
 ```
