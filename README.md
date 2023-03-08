@@ -535,6 +535,7 @@ on [live templates here.](#applying-live-templates-to-your-intellij-ide)
 
 Live templates are provided for the following input types:
 
+- `Address`
 - `Checkbox`
 - `Date`
 - `Fieldset`
@@ -1018,8 +1019,9 @@ A convenience live template for date's is provided through `cfa:inputDate`.
 
 ### Address
 
-We have provided an address fragment for convenience. This fragment is a combination of multiple
-fields including:
+For convenience, we have provided a `cfa:address` live template to quickly create an address
+fragment.
+The address fragment is a combination of multiple fields including:
 
 - Street Address
 - Street Address 2 (Apt Number, Suite Number, etc.)
@@ -1031,7 +1033,7 @@ The address fragment has two parameters, `validate` and `inputName`.
 
 - `validate` is a boolean value that determines whether the address should be validated by Smarty
 - `inputName` is the name that will be associated with all of the above inputs. For example, if the
-  `inputName` is homeAddress then the corresponding inputs will be homeAddressStreetAddress1,
+- `inputName` is homeAddress then the corresponding inputs will be homeAddressStreetAddress1,
   homeAddressStreetAddress2,
   homeAddressCity, homeAddressState, and homeAddressZipCode.
 
