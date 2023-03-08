@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -22,6 +23,10 @@ public class TestFlow extends FlowInputs {
   String dateDay;
   String dateMonth;
   String dateYear;
+  @NotBlank(message = "Date may not be empty")
+  @Pattern(regexp = "\\d/\\d/\\d\\d\\d\\d", message = "Date must be in the format of mm/dd/yyyy")
+  String dateFull;
+
   String numberInput;
   ArrayList<String> checkboxSet;
   ArrayList<String> checkboxInput;
