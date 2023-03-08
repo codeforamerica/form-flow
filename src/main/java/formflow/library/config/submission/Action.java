@@ -52,7 +52,7 @@ public interface Action {
   /*
    * Runs validation code with the expectation that error messages may be returned.
    */
-  public default Map<String, List<String>> runValidation(FormSubmission formSubmission) {
+  public default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
     throw new UnsupportedOperationException("Not implemented");
   }
 

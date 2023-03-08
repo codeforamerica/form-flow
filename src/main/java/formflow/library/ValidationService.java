@@ -63,7 +63,7 @@ public class ValidationService {
     // perform field level validations
     Map<String, List<String>> validationMessages = performFieldLevelValidation(flowName, filteredSubmission);
 
-    // peform cross-field validations, if supplied in action
+    // perform cross-field validations, if supplied in action
     crossFieldValidationMessages = currentScreen.handleCrossFieldValidationAction(filteredSubmission);
 
     // combine messages and return them
