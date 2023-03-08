@@ -68,4 +68,15 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
         assertPageHasInputError("contactInfoPreference", "phoneNumber", phoneErrorMessage);
     }
+
+    @Test
+    void shouldFailWithEmailPreferenceNoEmail() throws Exception {
+        final String emailErrorMessage = "please provide an email address";
+        postExpectingFailure("contactInfoPreference",
+                Map.of(
+                        "contactMethod", List.of("emailPreferred"),
+                        "emailAddress", List.of("")));
+
+        assertPageHasInputError("contactInfoPreference", "emailAddress", emailErrorMessage);
+    }
 }
