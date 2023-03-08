@@ -6,6 +6,7 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import formflow.library.inputs.AddressParts;
 import formflow.library.inputs.UnvalidatedField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -166,6 +167,14 @@ public class Submission {
     inputData.remove(inputName + AddressParts.CITY + UnvalidatedField.VALIDATED);
     inputData.remove(inputName + AddressParts.STATE + UnvalidatedField.VALIDATED);
     inputData.remove(inputName + AddressParts.ZIPCODE + UnvalidatedField.VALIDATED);
+  }
+
+  public boolean submittedAddressMatchesValidatedAddress(String addressInputToCheck) {
+    return Arrays.stream(AddressParts.values()).allMatch(addressPart -> {
+      String validatedAddressPart = addressInputToCheck + addressPart + UnvalidatedField.VALIDATED;
+      String unvalidatedAddressPart = addressInputToCheck + addressPart;
+      return inputData.get(validatedAddressPart).equals(inputData.get(unvalidatedAddressPart));
+    });
   }
 
   @Override

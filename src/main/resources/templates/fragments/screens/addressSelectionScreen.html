@@ -1,12 +1,8 @@
-<!--
-- [x] This fragment needs to accept an inputName
-- [x] Needs to look for inputName + streetAddress1_validated and create boolean on if it finds it or not
-- [x] Use the above boolean to render or not the validated address and the correct notice message
-- [ ] Simplify control logic visualization?
--->
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<body>
 <th:block th:fragment="addressSelectionScreen(addressInputToCheck, inputName, editAddressURL)"
-          th:with="foundValidatedAddress=${inputData.get(addressInputToCheck + 'StreetAddress1_validated') != null}"
->
+          th:with="foundValidatedAddress=${inputData.get(addressInputToCheck + 'StreetAddress1_validated') != null}">
   <div class="grid__item spacing-above-35 spacing-below-35">
     <h1 class="h2" th:if="${foundValidatedAddress}"
         th:text="#{address-validation.header.check-your-address}"></h1>
@@ -62,3 +58,5 @@
       text=#{address-validation.button.use-this-address}, classes='button')"/>
   </th:block>
 </th:block>
+</body>
+</html>
