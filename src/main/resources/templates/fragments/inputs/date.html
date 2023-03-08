@@ -21,7 +21,7 @@
     th:assert="${!#strings.isEmpty(inputName)}, ${hasLabel || hasAriaLabel}">
   <div
       th:class="'form-group' + ${((hasErrorMonth || hasErrorDay || hasErrorYear) ? ' form-group--error' : '')}">
-    <fieldset class="input-group input-group--inline">
+    <fieldset th:id="${groupName}" class="input-group input-group--inline">
       <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}" class="form-question"/>
       <p class="text--help">
         <label th:for="${inputName}+'-month'"
@@ -76,6 +76,8 @@
         th:replace="fragments/inputError :: validationError(inputName=${inputName} + 'Day')"></th:block>
     <th:block
         th:replace="fragments/inputError :: validationError(inputName=${inputName} + 'Year')"></th:block>
+    <th:block
+        th:replace="fragments/inputError :: validationError(inputName=${groupName})"></th:block>
   </div>
 </th:block>
 </body>
