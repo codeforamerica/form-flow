@@ -102,10 +102,4 @@ public class ScreenNavigationConfiguration {
     }
     return messageMap;
   }
-
-  public void handleBeforeDisplayAction(FormSubmission formSubmission) {
-    if (beforeDisplayActionObject != null) {
-      beforeDisplayActionObject.run(formSubmission);
-    }
-  }
 }
