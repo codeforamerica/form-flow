@@ -3,10 +3,8 @@ package formflow.library.inputs;
 import formflow.library.data.FlowInputs;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
+
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +20,10 @@ public class TestFlow extends FlowInputs {
   String dateDay;
   String dateMonth;
   String dateYear;
+  @NotBlank(message = "Date may not be empty")
+  @Pattern(regexp = "\\d/\\d/\\d\\d\\d\\d", message = "Date must be in the format of mm/dd/yyyy")
+  String dateFull;
+
   String numberInput;
   ArrayList<String> checkboxSet;
   ArrayList<String> checkboxInput;
@@ -50,6 +52,13 @@ public class TestFlow extends FlowInputs {
 
   @Positive()
   String validatePositiveIfNotEmpty;
+
+  @Email(message="please enter a valid email")
+  String emailAddress;
+
+  String phoneNumber;
+
+  String contactMethod;
 
 //    Old approach
 //  HashMap<String, HashMap<String, String>> address;
