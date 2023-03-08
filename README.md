@@ -300,13 +300,14 @@ have access to it.
 
 ## Actions
 
-Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from the `currentSubmission` object.
+Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from
+the `currentSubmission` object.
 
 ```java
 public class CalculateBeforeSave implements Action {
-  
+
   float RATE = 0.59;
-  
+
   public void run(Submission submission) {
     int mileage = submission.getInputData()
         .get('mileage');
@@ -318,7 +319,8 @@ public class CalculateBeforeSave implements Action {
 
 ### beforeSave
 
-An action can be added to a page in the flow-config to update the submission data before saving to the database.
+An action can be added to a page in the flow-config to update the submission data before saving to
+the database.
 
 ```yaml
 expense:
@@ -422,33 +424,6 @@ Does not accept values such as:
 012
 12.123
 .5
-```
-
-#### @FormFlowEmail
-
-Used to validate email addresses.
-
-```java
-@FormFlowEmail(message = "Please enter valid email")
-private String email;
-```
-
-Email addresses must consist of a valid string prefix followed by an `@`, followed by a valid string
-domain name and a top level domain indicator in the format of example@somedomain.com:
-
-```
-"formflow@gmail.com",
-"fce343@whis.edu",
-```
-
-Does not accept values such as:
-
-```
-"test..book@gmail.com",
-".hello@yahoo.org",
-"wha?tsssss23@.reatd?.com",
-"@book.com",
-"wakeup.com"
 ```
 
 #### @Phone
