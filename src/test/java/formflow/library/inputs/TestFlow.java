@@ -3,11 +3,8 @@ package formflow.library.inputs;
 import formflow.library.data.FlowInputs;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
+
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,6 +53,7 @@ public class TestFlow extends FlowInputs {
   @Positive()
   String validatePositiveIfNotEmpty;
 
+  @Email(message="please enter a valid email")
   String emailAddress;
 
   String phoneNumber;

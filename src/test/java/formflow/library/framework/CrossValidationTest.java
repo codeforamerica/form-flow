@@ -51,6 +51,15 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     }
 
     @Test
+    void shouldDisplayFieldAndCrossValidationMessages() throws Exception {
+        final String emailErrorMessage = "please enter a valid email";
+        postExpectingFailure("contactInfoPreference",
+                Map.of("emailAddress", List.of("malformed.com"), "contactMethod", List.of("emailPreferred")));
+        assertPageHasInputError("contactInfoPreference", "emailAddress", emailErrorMessage);
+
+    }
+
+    @Test
     void shouldAcceptPhoneNumberWithPreference() throws Exception {
         postExpectingSuccess("contactInfoPreference",
                 Map.of(
