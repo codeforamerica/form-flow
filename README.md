@@ -398,7 +398,7 @@ We also
 implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use
 them the same way you would any other JavaX validator, like so:
 
-```java
+```
 @Money(message = "Please make sure to enter a valid dollar amount.")
 private String income;
 ```
@@ -1044,8 +1044,8 @@ your
 address fragments input name is mailingAddress, then you will need to create the following fields in
 your flow inputs class:
 
-```java
-String mailingAddressStreetAddress1;
+```
+    String mailingAddressStreetAddress1;
     String mailingAddressStreetAddress2;
     String mailingAddressCity;
     String mailingAddressState;
@@ -1095,7 +1095,7 @@ for each file.
 Here is an example of what two files uploaded via the same input will look like in S3 (flow name
 is `ubi` and widget name is `homedoc`):
 
-```java
+```
     42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd.jpg
     42/ubi_homedoc_d612bc77-11de-419f-b7cc-71e4ab2ad571.jpg
 ```
