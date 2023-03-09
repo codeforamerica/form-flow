@@ -19,10 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-before-display-action.yaml"})
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-before-display-action.yaml","form-flow.actions.encryption_key='this-is-a-test-key'"})
 public class BeforeDisplayActionTest extends AbstractMockMvcTest {
-
-  Submission submission;
 
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;

@@ -1,6 +1,8 @@
 form-flow:
   path: 'flows-config.yaml'
   inputs: 'formflow.library.inputs.'
+  actions:
+    encryption_key: 'this-is-my-key'
   uploads:
     accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
     max-files: '5'
