@@ -34,6 +34,10 @@ public class SeleniumFactory implements FactoryBean<RemoteWebDriver> {
   }
 
   public void start() throws IOException {
+    // Warning: you may need this line to get a later version of the chromedriver.
+    // once you have the version, you don't seem to need to specify it anymore.
+    // (or maybe you can upgrade your driver outside of this)
+    // WebDriverManager.chromedriver().driverVersion("111.0.5563.64").setup();
     WebDriverManager.chromedriver().setup();
     ChromeOptions options = new ChromeOptions();
     HashMap<String, Object> chromePrefs = new HashMap<>();
@@ -41,6 +45,7 @@ public class SeleniumFactory implements FactoryBean<RemoteWebDriver> {
     options.setExperimentalOption("prefs", chromePrefs);
     options.addArguments("--window-size=1280,1600");
     options.addArguments("--headless");
+    options.addArguments("--remote-allow-origins=*");
     driver = new ChromeDriver(options);
   }
 

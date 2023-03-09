@@ -50,6 +50,15 @@ public class UploadJourneyTests extends AbstractBasePageTest {
 
     // Upload a password-protected file and assert the correct error shows
     uploadPasswordProtectedPdf("uploadTest");
+
+    //Race condition caused by uploadPasswordProtectedPdf waits until upload file has file details added instead
+    //of waiting until file upload is complete.
+    //TODO: Change uploadFile() to wait until file upload is complete.  Key off of delete link?
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource.getMessage("upload-documents.error-password-protected", null, Locale.ENGLISH));
     testPage.clickLink("remove");
