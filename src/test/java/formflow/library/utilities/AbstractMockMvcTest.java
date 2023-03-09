@@ -23,7 +23,6 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -43,7 +42,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -166,7 +164,7 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected ResultActions postExpectingSuccess(String pageName, String id, Map<String, List<String>> params)
-          throws Exception {
+      throws Exception {
     String postUrl = getUrlForPageName(pageName);
     return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params, id);
   }
@@ -198,13 +196,13 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-                                                    Map<String, List<String>> params, String id) throws
-          Exception {
+      Map<String, List<String>> params, String id) throws
+      Exception {
     return mockMvc.perform(
-            post(postUrl + '/' + id)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                    .params(new LinkedMultiValueMap<>(params))
+        post(postUrl + '/' + id)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrl(redirectUrl));
   }
 
@@ -308,19 +306,18 @@ public abstract class AbstractMockMvcTest {
 
   protected ResultActions postExpectingFailure(String pageName, String inputName,
       List<String> values) throws Exception {
-    return postExpectingFailure(pageName, Map.of(inputName, values));
+    return postExpectingFailure(pageName, fixInputNamesForParams(Map.of(inputName, values)));
   }
 
   protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params)
       throws Exception {
 
     String postUrl = getUrlForPageName(pageName);
-    var paramsWithProperInputNames = fixInputNamesForParams(params);
     return mockMvc.perform(
         post(postUrl)
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(paramsWithProperInputNames))
+            .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrl(postUrl));
   }
 
@@ -427,6 +424,7 @@ public abstract class AbstractMockMvcTest {
     return "/testFlow/" + pageName + "/" + subflow;
 
   }
+
   protected String getUrlForPageName(String pageName) {
     return "/testFlow/" + pageName;
   }

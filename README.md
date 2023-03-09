@@ -300,13 +300,14 @@ have access to it.
 
 ## Actions
 
-Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from the `currentSubmission` object.
+Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from
+the `currentSubmission` object.
 
 ```java
 public class CalculateBeforeSave implements Action {
-  
+
   float RATE = 0.59;
-  
+
   public void run(Submission submission) {
     int mileage = submission.getInputData()
         .get('mileage');
@@ -318,7 +319,8 @@ public class CalculateBeforeSave implements Action {
 
 ### beforeSave
 
-An action can be added to a page in the flow-config to update the submission data before saving to the database.
+An action can be added to a page in the flow-config to update the submission data before saving to
+the database.
 
 ```yaml
 expense:
@@ -396,12 +398,13 @@ We also
 implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use
 them the same way you would any other JavaX validator, like so:
 
+
+#### @Money
+
 ```java
 @Money(message = "Please make sure to enter a valid dollar amount.")
 private String income;
 ```
-
-#### @Money
 
 Used to validate monetary values. Accepts values such as:
 
@@ -420,6 +423,48 @@ Does not accept values such as:
 012
 12.123
 .5
+```
+
+#### @Phone
+
+Used to validate 10-digit phone numbers.
+
+```java
+@Phone(message = "{contact-info.invalid-phone-number}")
+private String phoneNumber;
+```
+
+Phone numbers must consist of a String with 10-digits passed to the validator in the pattern
+of `(333) 451-7777`.
+Phone numbers can not start with a zero or one.
+
+**Note that if you are using the [phone number input fragment](#phone) provided by the Form Flow
+Library
+the
+fragment uses input masking which will automatically format 10 digits entered into the
+correct `(333) 451-7777`
+format**
+
+```
+"(333) 333-3333",
+"(923) 456-7890",
+"(823) 456-7890",
+"(707) 987-5266",
+"(829) 622-9048"
+```
+
+Does not accept values such as:
+
+```
+"+1(111)-1111",
+"(111)222-3333",
+"(111)111-11",
+"999999999",
+"(123) 456-7890",
+"(077) 987-5266",
+"(892) 622-9048",
+"22",
+"der"
 ```
 
 ### Input Data JSON Structure
@@ -533,6 +578,7 @@ on [live templates here.](#applying-live-templates-to-your-intellij-ide)
 
 Live templates are provided for the following input types:
 
+- `Address`
 - `Checkbox`
 - `Date`
 - `Fieldset`
@@ -1014,6 +1060,41 @@ They are visually displayed as three separate inputs for Month, Day and Year in 
 
 A convenience live template for date's is provided through `cfa:inputDate`.
 
+### Address
+
+For convenience, we have provided a `cfa:address` live template to quickly create an address
+fragment.
+The address fragment is a combination of multiple fields including:
+
+- Street Address
+- Street Address 2 (Apt Number, Suite Number, etc.)
+- City
+- State
+- Zip Code
+
+The address fragment has two parameters, `validate` and `inputName`.
+
+- `validate` is a boolean value that determines whether the address should be validated by Smarty
+- `inputName` is the name that will be associated with all of the above inputs. For example, if the
+- `inputName` is homeAddress then the corresponding inputs will be homeAddressStreetAddress1,
+  homeAddressStreetAddress2,
+  homeAddressCity, homeAddressState, and homeAddressZipCode.
+
+Please note that when using the address fragment you will need to create corresponding fields in
+your
+flow inputs class for each of the above-mentioned inputs created by the fragment. For example, if
+your
+address fragments input name is mailingAddress, then you will need to create the following fields in
+your flow inputs class:
+
+```
+    String mailingAddressStreetAddress1;
+    String mailingAddressStreetAddress2;
+    String mailingAddressCity;
+    String mailingAddressState;
+    String mailingAddressZipCode;
+```
+
 ### Accessing Conditions
 
 ### Accessing Submission Object
@@ -1057,7 +1138,7 @@ for each file.
 Here is an example of what two files uploaded via the same input will look like in S3 (flow name
 is `ubi` and widget name is `homedoc`):
 
-```java
+```
     42/ubi_homedoc_1c43c9da-126e-126e-41c5-960e-08d84e3984bd.jpg
     42/ubi_homedoc_d612bc77-11de-419f-b7cc-71e4ab2ad571.jpg
 ```
@@ -1213,11 +1294,18 @@ permits.
 
 ### Smarty
 
+#### Registration with Smarty
+
+Create an account with Smarty at [Smarty](https://www.smarty.com/) and once setup, go to the API
+keys screen
+and make note of your `auth-id` and `auth-token`. You will need these to configure your application.
+
 #### How to configure
 
-Please use the `sample.env` as an example for creating the `.env` for a form-flow application.
-A `smarty` auth-token and auth-id must be passed into our `application.yaml` file in order for the
-address validation to work.
+You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
+the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
+file in the starter app repo has an example for creating the `.env` for a form-flow application.
+You will also need to add the following to your `application.yaml` file:
 
 ```yaml
   address-validation:
@@ -1226,6 +1314,80 @@ address validation to work.
       auth-token: ${SMARTY_AUTH_TOKEN}
       license: "us-core-cloud" # This is the default license, but can be changed to any of the licenses listed here: https://smartystreets.com/docs/cloud/licensing
 ```
+
+### Validating an Address
+
+We have provided a `cfa:address` live template which provides form fields for Street Address, Apt
+Number,
+City, State and Zipcode. The address fragment in the live template has two parameters, `validate`
+and
+`inputName`. The `validate` parameter is a boolean (true or false) that determines whether the
+address will be
+validated by Smarty. The `inputName` parameter is the name of the associated address that will be
+linked
+to each of the Street Address, Apartment Number (as Street Address 2), City, State and Zipcode
+fields. In example, an inputName
+of
+`homeAddress` will result in the following fields:
+
+- `homeAddressStreetAddress1`
+- `homeAddressStreetAddress2`
+- `homeAddressCity`
+- `homeAddressState`
+- `homeAddressZipcode`
+
+**Note that you will need to include all the associated fields in your Flow Inputs Class file.
+Meaning
+if you give the address fragment an inputName of `homeAddress` you will need to include all the
+above-mentioned fields in your Flow Inputs Class file.**
+
+### Storage of Validated Addresses
+
+The validated address will be stored in the database in the `submissions` table's `input_data` JSON
+column.
+The JSON will be in the form of:
+
+```JSON
+{
+  "homeAddressStreetAddress1": "1719 5th Street",
+  "homeAddressStreetAddress2": "Apt D",
+  "homeAddressCity": "Berkeley",
+  "homeAddressState": "CA",
+  "homeAddressZipCode": "94710",
+  "_validatehomeAddress": "true",
+  "homeAddressStreetAddress1_validated": "1719 5th St Apt D",
+  "homeAddressStreetAddress2_validated": "D",
+  "homeAddressCity_validated": "Berkeley",
+  "homeAddressState_validated": "CA",
+  "homeAddressZipCode_validated": "94710-1738"
+}
+```
+
+Note that both the original address and the validated address are stored, with the validated fields
+having the suffix `_validated`.
+
+Also note the input prefixed with `_validate` which appears here as `_validatehomeAddress` with a
+value of true.
+This is a hidden field which is applied within the address fragment. This field is used to determine
+whether Smarty validation for that address should be performed. The before mentioned `validate`
+parameter
+of the address fragment is used to determine the value of this hidden field.
+
+### Viewing the validated address
+
+We have provided a live template `cfa:addressValidationScreen` which will display a radio input with
+selections for the validated address that came back from Smarty if one was found, and the original
+address the user entered for them to select between. When using this live template you will be asked
+to provide a number of parameters:
+
+| Paramater           | Type                 | Description                                                                                                                                                                                                                                                                                                   |
+|---------------------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title               | String               | The HTML title of the screen. This is what displays in the browser tab for the screen.                                                                                                                                                                                                                        |
+| content             | Thymeleaf identifier | An identifier that matches the `ref`. Used by Thymeleaf for identifying the content of the form.                                                                                                                                                                                                              |
+| ref                 | String               | A unique identifier for the form content. Should match `content`                                                                                                                                                                                                                                              |
+| addressInputToCheck | String               | Name of the address input being verified.                                                                                                                                                                                                                                                                     |
+| inputName           | String               | Name of the radio input that will be displayed on the screen. This will either be the address that comes back from Smarty along with the original address entered, or just the original address entered if there is no address found by smarty or if the address entered matches what Smarty returns exactly. |
+| editAddressURL      | String               | The URL of the screen with the address being verified so the user can go back and edit if they need to.                                                                                                                                                                                                       |
 
 # How to use
 

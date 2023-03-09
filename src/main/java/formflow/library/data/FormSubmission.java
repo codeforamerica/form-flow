@@ -41,7 +41,7 @@ public class FormSubmission {
                 : entry.getValue()));
   }
 
-  public Map<String, Object> removeUnvalidatedInputs(Map<String, Object> formData) {
+  public Map<String, Object> getValidatableFields() {
     return formData.entrySet().stream().filter(
             formField -> unvalidatedFields.stream().noneMatch(unvalidatedField -> formField.getKey().contains(unvalidatedField)))
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
