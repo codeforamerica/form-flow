@@ -3,7 +3,7 @@
 <body>
 <th:block
     th:fragment="address(validate, inputName)"
-    th:with="validateAddress=${validate ? validate : true},
+    th:with="
     streetAddress=${inputName + T(formflow.library.inputs.AddressParts).STREET_ADDRESS_1},
     streetAddress2=${inputName + T(formflow.library.inputs.AddressParts).STREET_ADDRESS_2},
     city=${inputName + T(formflow.library.inputs.AddressParts).CITY},
@@ -28,7 +28,7 @@
                   label=#{address.zip})"/>
   <input type="hidden"
          th:name="${validateAddressInputName}"
-         th:value="${validateAddress}"/>
+         th:value="${validate}"/>
 </th:block>
 </body>
 </html>
