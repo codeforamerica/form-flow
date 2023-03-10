@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -243,6 +242,11 @@ public class InputsTest extends AbstractMockMvcTest {
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("Other City");
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("OZ");
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("12345");
+      }
+      
+      @Test
+      void onlyShowsOriginallyEnteredAddressForVerificationIfValidatedAddressIsAnExactMatch() {
+
       }
     }
   }
