@@ -20,6 +20,7 @@ public class AddressValidationService {
   private final String authId;
   private final String authToken;
   private final String license;
+  private final boolean isDisabled;
 
 
   public AddressValidationService(
@@ -27,19 +28,24 @@ public class AddressValidationService {
       ClientFactory clientFactory,
       @Value("${form-flow.address-validation.smarty.auth-id:}") String authId,
       @Value("${form-flow.address-validation.smarty.auth-token:}") String authToken,
-      @Value("${form-flow.address-validation.smarty.license:}") String license) {
+      @Value("${form-flow.address-validation.smarty.license:}") String license,
+      @Value("${form-flow.address-validation.disabled:false}") boolean isDisabled) {
     this.validationRequestFactory = validationRequestFactory;
     this.clientFactory = clientFactory;
     this.authId = authId;
     this.authToken = authToken;
     this.license = license;
+    this.isDisabled = isDisabled;
   }
 
   public Map<String, ValidatedAddress> validate(FormSubmission formSubmission)
       throws SmartyException, IOException, InterruptedException {
+
+    if (isDisabled) {
+      return Map.of();
+    }
     Batch smartyBatch = validationRequestFactory.create(formSubmission);
     Client client = clientFactory.create(authId, authToken, license);
-
     client.send(smartyBatch);
 
     Map<String, ValidatedAddress> validatedAddresses = new HashMap<>();
