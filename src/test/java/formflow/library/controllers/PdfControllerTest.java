@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import formflow.library.PdfController;
 import formflow.library.data.Submission;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setUp() throws Exception {
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
-    submission = Submission.builder().id(1L).build();
+    submission = Submission.builder().id(new UUID(1L, 2L)).build();
 
     super.setUp();
   }

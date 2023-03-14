@@ -305,7 +305,7 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
-    Long id = (Long) httpSession.getAttribute("id");
+    UUID id = (UUID) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     FormSubmission formSubmission = new FormSubmission(formData);
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
@@ -358,7 +358,7 @@ public class ScreenController extends FormFlowController {
   ) {
     String deleteConfirmationScreen = getFlowConfigurationByName(flow)
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
-    Long id = (Long) httpSession.getAttribute("id");
+    UUID id = (UUID) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
 
     if (submissionOptional.isPresent()) {
@@ -389,7 +389,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String uuid,
       HttpSession httpSession
   ) {
-    Long id = (Long) httpSession.getAttribute("id");
+    UUID id = (UUID) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     String subflowEntryScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getEntryScreen();
@@ -440,7 +440,7 @@ public class ScreenController extends FormFlowController {
   ) {
     ScreenNavigationConfiguration currentScreenConfig = getScreenConfig(flow, screen);
     String subflow = currentScreenConfig.getSubflow();
-    Long id = (Long) httpSession.getAttribute("id");
+    UUID id = (UUID) httpSession.getAttribute("id");
     Map<String, Object> model;
 
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
@@ -491,7 +491,7 @@ public class ScreenController extends FormFlowController {
   ) {
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
-    Long id = (Long) httpSession.getAttribute("id");
+    UUID id = (UUID) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     FormSubmission formSubmission = new FormSubmission(formData);
 

@@ -1,7 +1,0 @@
-spring:
-  flyway:
-    placeholders:
-      uuid_function: "gen_random_uuid"
-  messages:
-    encoding: ISO-8859-1
-    basename: messages, messages-form-flow

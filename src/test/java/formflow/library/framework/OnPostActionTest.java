@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import formflow.library.ScreenController;
-import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
@@ -13,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +37,8 @@ public class OnPostActionTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setUp() throws Exception {
     mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
-
-    submission = Submission.builder().id(1L).inputData(new HashMap<>()).build();
+    UUID submissionUUID = UUID.randomUUID();
+    submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
 
     super.setUp();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);

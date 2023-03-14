@@ -141,7 +141,7 @@ public class UploadController extends FormFlowController {
     try {
       log.info("\uD83D\uDD25 Try to delete: " + fileId);
 
-      Long submissionId = (Long) httpSession.getAttribute("id");
+      UUID submissionId = (UUID) httpSession.getAttribute("id");
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
       if (maybeSubmission.isEmpty()) {

@@ -55,8 +55,9 @@ public class UploadControllerTest extends AbstractMockMvcTest {
   @Override
   @BeforeEach
   public void setUp() throws Exception {
+    UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(uploadController).build();
-    submission = Submission.builder().id(1L).build();
+    submission = Submission.builder().id(submissionUUID).build();
     super.setUp();
   }
 
@@ -107,10 +108,12 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     @BeforeEach
     void setUp() {
       // reset submission.
-      submission = Submission.builder().id(1L).build();
+      UUID submissionUUID_1 = UUID.randomUUID();
+      UUID submissionUUID_2 = UUID.randomUUID();
+      submission = Submission.builder().id(submissionUUID_1).build();
       UserFile testUserFile = UserFile.builder().submission_id(submission).build();
-      when(submissionRepositoryService.findById(1L)).thenReturn(Optional.ofNullable(submission));
-      when(submissionRepositoryService.findById(2L)).thenReturn(Optional.ofNullable(submission));
+      when(submissionRepositoryService.findById(submissionUUID_1)).thenReturn(Optional.ofNullable(submission));
+      when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       doNothing().when(cloudFileRepository).delete(any());
       HashMap<String, HashMap<UUID, HashMap<String, String>>> dzWidgets = new HashMap<>();
@@ -152,8 +155,9 @@ public class UploadControllerTest extends AbstractMockMvcTest {
 
     @Test
     void endpointErrorsWhenIdOnRequestDoesntMatchIdInDb() throws Exception {
-      submission = Submission.builder().id(2L).build();
-      session.setAttribute("id", 2L);
+      UUID submissionUUID = UUID.randomUUID();
+      submission = Submission.builder().id(submissionUUID).build();
+      session.setAttribute("id", submissionUUID);
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
