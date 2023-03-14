@@ -16,7 +16,6 @@ Table of Contents
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
     * [Conditions](#conditions)
-        * [Defining Conditions](#defining-conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
     * [Submission Object](#submission-object)
     * [Actions](#actions)
@@ -235,35 +234,6 @@ This page is not technically part of the subflow and as such, does not need to b
 with `subflow: subflowName`
 in the `flows-config.yaml`.
 
-## Conditions
-
-### Defining Conditions
-
-Conditions are defined in Java as methods, and can read from the `currentSubmission` object. When
-defining new conditions as methods, the instance variable `inputData` is accessible.
-
-```java
-public class ApplyConditions extends FlowConditions {
-
-  public boolean isGmailUser() {
-    return inputData.get('emailAddress').contains("gmail.com");
-  }
-} 
-```
-
-### Using conditions in templates
-
-We have created a Java object that's part of the model handed to the Thymeleaf templates.
-named `templateManager` that is part of the
-
-```html
-
-<div
-    th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
-  <h1 th:if="showCondition">Conditionally show this element</h1>
-</div>
-```
-
 ## Submission Object
 
 Submission data is stored in the `Submission` object, persisted to PostgreSQL via the Hibernate ORM.
@@ -298,36 +268,102 @@ The `inputData` field is a JSON object that stores data from the user's input as
 progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
 have access to it.
 
-## Actions
+## Conditions
 
-Actions (like [conditions](#conditions)) are defined in Java as methods, and can read from
-the `currentSubmission` object.
+Conditions are intended to be small pieces of code that can be run from a template or from the
+form-flow configuration file. They are generally used to help determine template or page flow.
+
+Conditions are defined in Java and are objects that implement the `Condition`
+[interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Condition.java)
+. Conditions have the Submission object available to them, so when creating new conditions, the
+instance variable `inputData` is accessible.
+
+Here is a simple condition that looks at data in the submission to see if the email provided is a
+Google address.
 
 ```java
-public class CalculateBeforeSave implements Action {
+public class CheckGmailUser implements Condition {
 
-  float RATE = 0.59;
-
-  public void run(Submission submission) {
-    int mileage = submission.getInputData()
-        .get('mileage');
-    submission.getInputData()
-        .put('reimbursement', mileage * RATE);
+  public boolean run(Submission submission) {
+    return submission.getInputData().get('emailAddress').contains("gmail.com");
   }
 } 
 ```
 
-### beforeSave
+More examples of conditions can be found in our
+[starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/conditions)
+.
 
-An action can be added to a page in the flow-config to update the submission data before saving to
-the database.
+### Using conditions in templates
+
+We have created a Java object named `templateManager` that's part of the model data handed to the
+Thymeleaf templates. Template code can run conditions via this object, like so:
+
+```html
+
+<div
+    th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
+  <h1 th:if="showCondition">Conditionally show this element</h1>
+</div>
+```
+
+## Actions
+
+Actions provide the ability for an application using this library to inject application specific
+logic at strategic points in the POST and GET processing.
+
+Actions are defined in Java and are objects that implement the
+`Action` [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Action.java)
+. Actions have a `Submission` or `FormSubmission` object available to them, depending on the
+type of Action being created.
+
+There are four types of actions available in the Form Flow library:
+
+| Action Name | Data Available | Returns    | Action Definition |
+| ----------- |--------------- |------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onPostAction | FormSubmission | nothing    | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been done on the data. It's a way to inject/update any new data needed before any validation occurs. |
+| crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before database been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data. |
+| beforeSaveAction | Submission | nothing | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. |
+| beforeDisplayAction | Submission | nothing | HTTP GET: An action of this type is run on a call after data is retrieved from the database, in the case of a GET. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering. |
+
+`beforeDisplayActions` are run on an HTTP GET, _before_ the page it's attached to is actually
+rendered. The rest of the actions are called when the page's data is submitted to the server.
+
+Here is an example of a `beforeSaveAction` Action class:
+
+```java
+public class CalculateBeforeSave implements Action {
+
+  public void run(Submission submission) {
+    float rate = 0.59;
+    int mileage = submission.getInputData().get('mileage');
+    submission.getInputData().put('reimbursement', mileage * rate);
+  }
+} 
+```
+
+Actions are run by connecting them to a screen in the `flows-config.yaml` file. When data from that
+screen is submitted (or retrieved, in the case of `beforeDisplayAction`), any actions indicated
+would be run on the data, like so:
 
 ```yaml
-expense:
-  beforeSave: java.path.to.actions.CalculateBeforeSave
-  nextPages:
-    - confirmation
+name: exampleFlow
+flow:
+  firstScreen:
+    beforeSaveAction: path.to.class.CalculateBeforeSave
+    beforeDisplayAction: path.to.class.DecryptSSN
+    nextScreens:
+      - name: secondScreen
+  secondScreen:
+    nextScreens:
+      - name: Success
+  success:
+    nextScreens: null
 ```
+
+More example actions can be found in
+our [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/actions)
+.
 
 ## Defining Inputs
 
@@ -1796,7 +1832,8 @@ Install [Fake Filler for Chrome](https://chrome.google.com/webstore/detail/fake-
 or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake-filler/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search)
 
 - Go
-  to [fakeFillerConfig.txt](https://github.com/codeforamerica/form-flow/blob/main/fakeFillerConfig.txt),
+  to [fakeFillerConfig.txt](https://github.com/codeforamerica/form-flow/blob/main/fakeFillerConfig.txt)
+  ,
   click on "Raw", then save the file to your
   computer.
 - Open the Fake Filler Options then click
