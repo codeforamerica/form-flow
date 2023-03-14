@@ -15,9 +15,9 @@ Table of Contents
     * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
+    * [Submission Object](#submission-object)
     * [Conditions](#conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
-    * [Submission Object](#submission-object)
     * [Actions](#actions)
     * [Defining Inputs](#defining-inputs)
         * [Input Class](#input-class)
@@ -317,17 +317,25 @@ Actions are defined in Java and are objects that implement the
 . Actions have a `Submission` or `FormSubmission` object available to them, depending on the
 type of Action being created.
 
+Generally, actions are a place where the data can be manipulated, so they generally don't return a
+value, but rather just update the `Submission` or `FormSubmission` data.
+
+In the case of the `crossValidationAction`, error messages are returned so that they can be
+displayed on the screen with any other validation error messages.
+
 There are four types of actions available in the Form Flow library:
 
-| Action Name | Data Available | Returns    | Action Definition |
-| ----------- |--------------- |------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onPostAction | FormSubmission | nothing    | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been done on the data. It's a way to inject/update any new data needed before any validation occurs. |
-| crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before database been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data. |
-| beforeSaveAction | Submission | nothing | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. |
-| beforeDisplayAction | Submission | nothing | HTTP GET: An action of this type is run on a call after data is retrieved from the database, in the case of a GET. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering. |
+| Action Name | Data Available | Returns    | Action Definition                                                                                                                                                                                                                                                                                                    |
+| ----------- |--------------- |------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onPostAction | FormSubmission | nothing    | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                         |
+| crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                             |
+| beforeSaveAction | Submission | nothing | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **
+not** be validated before being saved. |
+| beforeDisplayAction | Submission | nothing | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                    |
 
-`beforeDisplayActions` are run on an HTTP GET, _before_ the page it's attached to is actually
-rendered. The rest of the actions are called when the page's data is submitted to the server.
+**Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
+actually rendered. The rest of the actions are called when the screen's data is submitted to the
+server, on an HTTP POST.
 
 Here is an example of a `beforeSaveAction` Action class:
 
@@ -344,7 +352,9 @@ public class CalculateBeforeSave implements Action {
 
 Actions are run by connecting them to a screen in the `flows-config.yaml` file. When data from that
 screen is submitted (or retrieved, in the case of `beforeDisplayAction`), any actions indicated
-would be run on the data, like so:
+would be run on the data.
+
+Here is the configuration setup for the above action:
 
 ```yaml
 name: exampleFlow
