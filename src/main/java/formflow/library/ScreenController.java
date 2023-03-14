@@ -53,19 +53,18 @@ public class ScreenController extends FormFlowController {
       List<FlowConfiguration> flowConfigurations,
       SubmissionRepositoryService submissionRepositoryService,
       ValidationService validationService,
-      AddressValidationService addressValidationService) {
+      AddressValidationService addressValidationService,
+      TemplateManager templateManager) {
 
     super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
-
-    log.info("Screen Controller Created!");
     this.flowConfigurations.forEach(f -> {
       log.info("Creating TemplateManager for flow: " + f.getName());
-      TemplateManager tm = new TemplateManager(f.getConditionsPath(), f.getActionsPath());
-      f.setTemplateManager(tm);
+      f.setTemplateManager(templateManager);
     });
+    log.info("Screen Controller Created!");
   }
 
   /**
