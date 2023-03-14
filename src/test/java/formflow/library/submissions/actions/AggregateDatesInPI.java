@@ -2,12 +2,12 @@ package formflow.library.submissions.actions;
 
 import formflow.library.config.submission.Action;
 import formflow.library.data.FormSubmission;
-import formflow.library.data.Submission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AggregateDatesInPI implements Action {
 
   public void run(FormSubmission formSubmission) {

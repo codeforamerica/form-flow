@@ -4,7 +4,9 @@ import formflow.library.config.submission.Action;
 import formflow.library.data.Submission;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
+@Component
 @SuppressWarnings("unused")
 public class CalculateTotalBeforeSave implements Action {
 
