@@ -233,7 +233,7 @@ public class ScreenController extends FormFlowController {
       saveToRepository(submission, subflowName);
       httpSession.setAttribute("id", submission.getId());
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/%s/%s/%s", flow, nextScreen, uuid) : String.format("redirect:/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
@@ -317,7 +317,7 @@ public class ScreenController extends FormFlowController {
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/%s/%s/%s", flow, nextScreen, uuid) : String.format("redirect:/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
@@ -493,7 +493,7 @@ public class ScreenController extends FormFlowController {
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/%s/%s/%s/edit", flow, nextScreen, uuid) : String.format("redirect:/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
@@ -552,17 +552,17 @@ public class ScreenController extends FormFlowController {
     if (currentScreen == null) {
       return new RedirectView("/error");
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new RedirectView("/%s/%s".formatted(flow, nextScreen));
   }
 
-  private String getNextScreenName(HttpSession httpSession,
+  private String getNextScreenName(String flow, HttpSession httpSession,
       ScreenNavigationConfiguration currentScreen) {
     NextScreen nextScreen;
 
-    List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, httpSession);
+    List<NextScreen> nextScreens = getConditionalNextScreen(flow, currentScreen, httpSession);
 
     if (isConditionalNavigation(currentScreen) && nextScreens.size() > 0) {
       nextScreen = nextScreens.get(0);
@@ -606,11 +606,13 @@ public class ScreenController extends FormFlowController {
    * @param httpSession   session
    * @return List<NextScreen> list of next screens
    */
-  private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
+  private List<NextScreen> getConditionalNextScreen(String flow, ScreenNavigationConfiguration currentScreen,
       HttpSession httpSession) {
+    TemplateManager templateManager = getFlowConfigurationByName(flow).getTemplateManager();
     return currentScreen.getNextScreens().stream()
         .filter(nextScreen -> nextScreen.getCondition() != null)
-        .filter(nextScreen -> nextScreen.getConditionObject().run(submissionRepositoryService.findOrCreate(httpSession)))
+        .filter(nextScreen -> templateManager.runCondition(nextScreen.getCondition(),
+            submissionRepositoryService.findOrCreate(httpSession)))
         .toList();
   }
 
@@ -637,7 +639,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Boolean isNextScreenInSubflow(String flow, HttpSession session, ScreenNavigationConfiguration currentScreen) {
-    String nextScreenName = getNextScreenName(session, currentScreen);
+    String nextScreenName = getNextScreenName(flow, session, currentScreen);
     return getScreenConfig(flow, nextScreenName).getSubflow() != null;
   }
 
