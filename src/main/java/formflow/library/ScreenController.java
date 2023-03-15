@@ -141,18 +141,21 @@ public class ScreenController extends FormFlowController {
 
     currentScreen.handleOnPostAction(formSubmission);
 
+    // Field validation
+    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
+    handleErrors(httpSession, errorMessages, formSubmission);
+
+    if (errorMessages.size() > 0) {
+      return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
+    }
+
+    // Address validation
     List<String> addressValidationFields = formSubmission.getAddressValidationFields();
     if (!addressValidationFields.isEmpty()) {
       Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
       formSubmission.setValidatedAddress(validatedAddresses);
       // clear lingering address(es) from the submission stored in the database.
       cleanAddressesInSubmission(submission, addressValidationFields);
-    }
-    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
-    handleErrors(httpSession, errorMessages, formSubmission);
-
-    if (errorMessages.size() > 0) {
-      return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
     }
 
     log.info("submission = " + submission);
