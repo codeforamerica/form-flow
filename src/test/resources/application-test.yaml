@@ -8,7 +8,6 @@ form-flow:
     thumbnail-width: '100'
     thumbnail-height: '50'
   address-validation:
-    disable: false
     smarty:
       auth-id: "authId"
       auth-token: "authToken"
