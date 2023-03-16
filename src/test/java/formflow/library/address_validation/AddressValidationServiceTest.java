@@ -121,6 +121,4 @@ class AddressValidationServiceTest {
     FormSubmission formSubmission = new FormSubmission(Map.of());
     assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of());
   }
-
-
 }
