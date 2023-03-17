@@ -282,6 +282,8 @@ Here is a simple condition that looks at data in the submission to see if the em
 Google address.
 
 ```java
+
+@Component
 public class CheckGmailUser implements Condition {
 
   public boolean run(Submission submission) {
@@ -289,6 +291,10 @@ public class CheckGmailUser implements Condition {
   }
 } 
 ```
+
+Note that when creating a condition, the `@Component` annotation is required. This is so that Spring
+registers the condition as a bean and makes it available to the application during component
+scanning.
 
 More examples of conditions can be found in our
 [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/conditions)
@@ -1443,7 +1449,7 @@ to provide a number of parameters:
 | inputName           | String               | Name of the radio input that will be displayed on the screen. This will either be the address that comes back from Smarty along with the original address entered, or just the original address entered if there is no address found by smarty or if the address entered matches what Smarty returns exactly. |
 | editAddressURL      | String               | The URL of the screen with the address being verified so the user can go back and edit if they need to.                                                                                                                                                                                                       |
 
-###   
+###     
 
 # How to use
 
