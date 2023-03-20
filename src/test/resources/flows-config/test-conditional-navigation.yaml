@@ -5,11 +5,11 @@ flow:
     nextScreens:
       - name: other
       - name: second
-        condition: TrueCondition
+        condition: formflow.library.submission.conditions.TrueCondition
   second:
     nextScreens:
       - name: other
-        condition: FalseCondition
+        condition: formflow.library.submission.conditions.FalseCondition
       - name: last
   other:
     nextScreens:
