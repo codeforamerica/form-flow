@@ -9,11 +9,10 @@
         <th:block
             th:replace="'fragments/form' :: form(action=${formAction}, content=~{:: verifyAddress})">
           <th:block th:ref="verifyAddress">
-            <th:block th:replace="'fragments/screens/addressSelectionScreen' ::
-                  addressSelectionScreen(
+            <th:block th:replace="'fragments/screens/addressSuggestionNotFound' ::
+                  addressSuggestionNotFound(
                     addressInputToCheck='validationOn',
-                    inputName='useValidatedValidationOn',
-                    editAddressURL=${'/testFlow/testAddressValidation'}
+                    inputName='useValidatedValidationOn'
                   )"/>
           </th:block>
         </th:block>
