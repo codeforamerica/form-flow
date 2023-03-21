@@ -282,6 +282,8 @@ Here is a simple condition that looks at data in the submission to see if the em
 Google address.
 
 ```java
+
+@Component
 public class CheckGmailUser implements Condition {
 
   public boolean run(Submission submission) {
@@ -289,6 +291,10 @@ public class CheckGmailUser implements Condition {
   }
 } 
 ```
+
+Note that when creating a condition, the `@Component` annotation is required. This is so that Spring
+registers the condition as a bean and makes it available to the application during component
+scanning.
 
 More examples of conditions can be found in our
 [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/conditions)
@@ -325,12 +331,12 @@ displayed on the screen with any other validation error messages.
 
 There are four types of actions available in the Form Flow library:
 
-| Action Name | Data Available | Returns    | Action Definition                                                                                                                                                                                                                                                                                                    |
-| ----------- |--------------- |------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onPostAction | FormSubmission | nothing    | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                         |
-| crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                             |
-| beforeSaveAction | Submission | nothing | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
-| beforeDisplayAction | Submission | nothing | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                    |
+| Action Name                | Data Available  | Returns                | Action Definition                                                                                                                                                                                                                                                                                                                                          |
+|----------------------------|-----------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onPostAction               | FormSubmission  | nothing                | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                                                               |
+| crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                                                                   |
+| beforeSaveAction           | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
+| beforeDisplayAction        | Submission      | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                                                                |
 
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
 actually rendered. The rest of the actions are called when the screen's data is submitted to the
@@ -1359,6 +1365,16 @@ You will also need to add the following to your `application.yaml` file:
       license: "us-core-cloud" # This is the default license, but can be changed to any of the licenses listed here: https://smartystreets.com/docs/cloud/licensing
 ```
 
+Additionally, address validation with Smarty is on by default. If you would like to disable it, you
+can add the following to your `application.yaml` file:
+
+```yaml
+  address-validation:
+    disabled: true
+```
+
+This will globally disable address validation for all address fields in your application.
+
 ### Validating an Address
 
 We have provided a `cfa:address` live template which provides form fields for Street Address, Apt
@@ -1432,6 +1448,8 @@ to provide a number of parameters:
 | addressInputToCheck | String               | Name of the address input being verified.                                                                                                                                                                                                                                                                     |
 | inputName           | String               | Name of the radio input that will be displayed on the screen. This will either be the address that comes back from Smarty along with the original address entered, or just the original address entered if there is no address found by smarty or if the address entered matches what Smarty returns exactly. |
 | editAddressURL      | String               | The URL of the screen with the address being verified so the user can go back and edit if they need to.                                                                                                                                                                                                       |
+
+###     
 
 # How to use
 

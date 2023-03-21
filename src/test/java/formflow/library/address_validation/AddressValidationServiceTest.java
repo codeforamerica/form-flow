@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class AddressValidationServiceTest {
@@ -25,20 +26,26 @@ class AddressValidationServiceTest {
   Client client = mock(Client.class);
   ClientFactory clientFactory = mock(ClientFactory.class);
 
+  String authId = "authId";
+  String authToken = "authToken";
+  String license = "license";
+
+  @BeforeEach
+  void setUp() {
+    when(clientFactory.create(authId, authToken, license)).thenReturn(client);
+  }
+
   @Test
   void validateShouldCallSmartyToValidateAddress() throws SmartyException, IOException, InterruptedException {
     FormSubmission formSubmission = new FormSubmission(Map.of());
-    String authId = "authId";
-    String authToken = "authToken";
-    String license = "license";
 
     AddressValidationService addressValidationService = new AddressValidationService(
         validationRequestFactory,
         clientFactory,
         authId,
         authToken,
-        license
-    );
+        license,
+        false);
     Lookup lookup = mock(Lookup.class);
     Candidate candidate = mock(Candidate.class);
     Components components = mock(Components.class);
@@ -65,7 +72,6 @@ class AddressValidationServiceTest {
     batch.add(lookup);
 
     when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
-    when(clientFactory.create(authId, authToken, license)).thenReturn(client);
 
     assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of(
         "validatedInput",
@@ -81,17 +87,14 @@ class AddressValidationServiceTest {
   @Test
   void shouldReturnEmptyMapWhenNoAddressRecommendationIsFound() throws SmartyException, IOException, InterruptedException {
     FormSubmission formSubmission = new FormSubmission(Map.of());
-    String authId = "authId";
-    String authToken = "authToken";
-    String license = "license";
 
     AddressValidationService addressValidationService = new AddressValidationService(
         validationRequestFactory,
         clientFactory,
         authId,
         authToken,
-        license
-    );
+        license,
+        false);
     Lookup lookup = mock(Lookup.class);
 
     Batch batch = new Batch();
@@ -99,7 +102,6 @@ class AddressValidationServiceTest {
     batch.add(lookup);
 
     when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
-    when(clientFactory.create(authId, authToken, license)).thenReturn(client);
 
     var result = new HashMap<>();
     result.put("validatedInput", null);
@@ -107,4 +109,16 @@ class AddressValidationServiceTest {
     verify(client, times(1)).send(batch);
   }
 
+  @Test
+  void shouldNotRunAddressValidationWhenFlagIsSetToOff() throws SmartyException, IOException, InterruptedException {
+    AddressValidationService addressValidationService = new AddressValidationService(
+        validationRequestFactory,
+        clientFactory,
+        authId,
+        authToken,
+        license,
+        true);
+    FormSubmission formSubmission = new FormSubmission(Map.of());
+    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of());
+  }
 }
