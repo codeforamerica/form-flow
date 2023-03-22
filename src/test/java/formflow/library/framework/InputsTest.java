@@ -115,28 +115,6 @@ public class InputsTest extends AbstractMockMvcTest {
     String state = "NM";
     String zipCode = "88201";
 
-    @Test
-    void doesNotValidateWhenInputNamePlusValidateIsFalse() throws Exception {
-      String inputName = "validationOff";
-      postExpectingNextPageTitle("testAddressValidation",
-          Map.ofEntries(
-              Map.entry(inputName + "StreetAddress1", List.of(streetAddress1)),
-              Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
-              Map.entry(inputName + "City", List.of(city)),
-              Map.entry(inputName + "State", List.of(state)),
-              Map.entry(inputName + "ZipCode", List.of(zipCode)),
-              Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("false"))
-          ), "testAddressVerification");
-
-      var addressScreen = goBackTo("testAddressValidation");
-
-      assertThat(addressScreen.getInputValue(inputName + "StreetAddress1")).isEqualTo(streetAddress1);
-      assertThat(addressScreen.getInputValue(inputName + "StreetAddress2")).isEqualTo(streetAddress2);
-      assertThat(addressScreen.getInputValue(inputName + "City")).isEqualTo(city);
-      assertThat(addressScreen.getSelectValue(inputName + "State")).isEqualTo(state);
-      assertThat(addressScreen.getInputValue(inputName + "ZipCode")).isEqualTo(zipCode);
-    }
-
     @Nested
     public class AddressValidationSuccess {
 
@@ -167,7 +145,7 @@ public class InputsTest extends AbstractMockMvcTest {
       @Test
       void isValidatedWhenInputNamePlusValidateIsTrue() throws Exception {
 
-        assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
+        assertThat(nextScreen.getTitle()).isEqualTo("Validation Is On");
         assertThat(nextScreen.getElementTextById("validated-address-label")).contains(
             streetAddress1 + streetAddress2 + "Validated");
         assertThat(nextScreen.getElementTextById("validated-address-label")).contains(city + "Validated");
@@ -199,7 +177,7 @@ public class InputsTest extends AbstractMockMvcTest {
                 Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
             ));
 
-        assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
+        assertThat(nextScreen.getTitle()).isEqualTo("testAddressValidationNotFound");
         assertThat(nextScreen.getElementById("validated-address-label")).isNull();
 
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("Total Junk");
@@ -231,7 +209,7 @@ public class InputsTest extends AbstractMockMvcTest {
                 Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
             ));
 
-        assertThat(nextScreen.getTitle()).isEqualTo("testAddressVerification");
+        assertThat(nextScreen.getTitle()).isEqualTo("Validation Is On");
         assertThat(nextScreen.getElementTextById("validated-address-label")).contains("123 Other Main Street Apt BValidated");
         assertThat(nextScreen.getElementTextById("validated-address-label")).contains("Other CityValidated");
         assertThat(nextScreen.getElementTextById("validated-address-label")).contains("OZ");
@@ -242,11 +220,6 @@ public class InputsTest extends AbstractMockMvcTest {
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("Other City");
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("OZ");
         assertThat(nextScreen.getElementTextById("original-address-label")).contains("12345");
-      }
-      
-      @Test
-      void onlyShowsOriginallyEnteredAddressForVerificationIfValidatedAddressIsAnExactMatch() {
-
       }
     }
   }

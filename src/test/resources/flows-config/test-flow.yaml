@@ -5,7 +5,16 @@ flow:
       - name: test
   testAddressValidation:
     nextScreens:
-      - name: testAddressVerification
+      - name: testAddressValidationFound
+        condition: formflow.library.submission.conditions.FoundAddressSuggestion
+      - name: testAddressValidationNotFound
+        condition: formflow.library.submission.conditions.DidNotFindAddressSuggestion
+  testAddressValidationFound:
+    nextScreens:
+      - name: test
+  testAddressValidationNotFound:
+    nextScreens:
+      - name: test
   testAddressVerification:
     nextScreens:
       - name: test
