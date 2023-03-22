@@ -1466,9 +1466,17 @@ show one version or the other depending on if Smarty finds an address to suggest
 of how
 this works using conditions can be found in the starter app.
 
-// TODO: Link to the starter app code once it has been merged
+- [Conditions in the starter app flows-config](https://github.com/codeforamerica/form-flow-starter-app/blob/03c9e8b698c116d0455ab619b9ce8b7f5d5926f4/src/main/resources/flows-config.yaml#L19)
+- [Condition for showing the `cfa:pickAddressScreen` based screen](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/conditions/SmartySuggestionFound.java)
+- [Condition for showing the `cfa:verifyAddressScreen` based screen](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/conditions/SmartySuggestionNotFound.java)
 
-###         
+Note how the conditions first check that Smarty validation is on by looking for the value of the
+hidden field `_validateresidentialAddress` and they check if a validated address line is present in
+Submission's input data. This is because `residentialAddressStreetAddress1_validated` would only be
+present
+if Smarty had performed address validation.
+
+###              
 
 # How to use
 
