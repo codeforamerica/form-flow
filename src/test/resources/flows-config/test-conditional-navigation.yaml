@@ -1,5 +1,4 @@
 name: testFlow
-conditionsPath: formflow.library.submission.conditions
 flow:
   first:
     nextScreens:

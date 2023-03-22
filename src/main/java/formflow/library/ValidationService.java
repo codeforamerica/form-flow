@@ -1,5 +1,6 @@
 package formflow.library;
 
+import formflow.library.config.ActionManager;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
 public class ValidationService {
 
   private final Validator validator;
+  private final ActionManager actionManager;
   @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
   private final List<String> requiredAnnotationsList = List.of(
@@ -42,8 +44,9 @@ public class ValidationService {
    *
    * @param validator Validator from javax package.
    */
-  public ValidationService(Validator validator) {
+  public ValidationService(Validator validator, ActionManager actionManager) {
     this.validator = validator;
+    this.actionManager = actionManager;
   }
 
   /**
@@ -64,7 +67,7 @@ public class ValidationService {
     Map<String, List<String>> validationMessages = performFieldLevelValidation(flowName, filteredSubmission);
 
     // perform cross-field validations, if supplied in action
-    crossFieldValidationMessages = currentScreen.handleCrossFieldValidationAction(filteredSubmission);
+    crossFieldValidationMessages = actionManager.handleCrossFieldValidationAction(currentScreen, filteredSubmission);
 
     // combine messages and return them
     validationMessages.putAll(crossFieldValidationMessages);

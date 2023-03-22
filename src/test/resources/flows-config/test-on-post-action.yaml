@@ -1,8 +1,7 @@
 name: testFlow
-actionsPath: formflow.library.submissions.actions
 flow:
   inputs:
-    onPostAction: formflow.library.submissions.actions.AggregateDatesInPI
+    onPostAction: AggregateDatesInPI
     nextScreens:
       - name: subflowEntry
   subflowEntry:

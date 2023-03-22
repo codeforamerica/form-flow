@@ -37,7 +37,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldSaveFormattedDate() throws Exception {
+  void shouldSaveEncryptedSSN() throws Exception {
     // beforeSave
     String ssnInput = "111-00-1234";
     postExpectingSuccess("inputs",
@@ -55,7 +55,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldSaveFormattedDateInSubflow() throws Exception {
+  void shouldSaveEncryptedSSNInSubflow() throws Exception {
     String subflowUuid = UUID.randomUUID().toString();
 
     List<Map<String, Object>> subflowList = new ArrayList<>();
