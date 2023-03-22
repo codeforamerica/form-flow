@@ -9,11 +9,6 @@
            th:text="#{footer.faq}"></a><br/>
         <a class="text--small font-white" target="_blank" rel="noopener noreferrer" href="/privacy"
            th:text="#{footer.privacy}"></a>
-        <th:block th:if="${codeCommitHashShort != null}">
-          <p class="text--small font-white"
-             th:text="${codeCommitHashShort} + ( (${codeCommitDateTime} != null) ? ' : ' + ${codeCommitDateTime} : '')">
-          </p>
-        </th:block>
       </div>
       <div class="main-footer__cfa-logo grid__item">
         <a href="https://www.codeforamerica.org" class="spacing-below-0">
