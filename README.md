@@ -1435,21 +1435,40 @@ of the address fragment is used to determine the value of this hidden field.
 
 ### Viewing the validated address
 
-We have provided a live template `cfa:addressValidationScreen` which will display a radio input with
+We have provided two live templates `cfa:pickAddressScreen` and `cfa:verifyAddressScreen`.
+The `cfa:pickAddressScreen` will display a radio input with
 selections for the validated address that came back from Smarty if one was found, and the original
-address the user entered for them to select between. When using this live template you will be asked
+address the user entered for them to select between. A continue button is included to submit the
+page
+and navigate to the next screen.
+
+The `cfa:verifyAddressScreen` will display the original address the user entered with a notice that
+Smarty could not find their address asking them if they want to use the address they entered or edit
+it.
+An edit button and a `use this address` button are provided to either go back and edit the entered
+address
+or submit the page with the original address.
+
+When using these live templates you will be asked
 to provide a number of parameters:
 
-| Paramater           | Type                 | Description                                                                                                                                                                                                                                                                                                   |
-|---------------------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| title               | String               | The HTML title of the screen. This is what displays in the browser tab for the screen.                                                                                                                                                                                                                        |
-| content             | Thymeleaf identifier | An identifier that matches the `ref`. Used by Thymeleaf for identifying the content of the form.                                                                                                                                                                                                              |
-| ref                 | String               | A unique identifier for the form content. Should match `content`                                                                                                                                                                                                                                              |
-| addressInputToCheck | String               | Name of the address input being verified.                                                                                                                                                                                                                                                                     |
-| inputName           | String               | Name of the radio input that will be displayed on the screen. This will either be the address that comes back from Smarty along with the original address entered, or just the original address entered if there is no address found by smarty or if the address entered matches what Smarty returns exactly. |
-| editAddressURL      | String               | The URL of the screen with the address being verified so the user can go back and edit if they need to.                                                                                                                                                                                                       |
+| Parameter           | Type                 | Description                                                                                                                                                                                                                                                                                                                                                                               |
+|---------------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title               | String               | The HTML title of the screen. This is what displays in the browser tab for the screen.                                                                                                                                                                                                                                                                                                    |
+| content             | Thymeleaf identifier | An identifier that matches the `ref`. Used by Thymeleaf for identifying the content of the form.                                                                                                                                                                                                                                                                                          |
+| ref                 | String               | A unique identifier for the form content. Should match `content`                                                                                                                                                                                                                                                                                                                          |
+| addressInputToCheck | String               | Name of the address input being verified.                                                                                                                                                                                                                                                                                                                                                 |
+| inputName           | String               | Name of the radio input that will be displayed on the screen. This will either be the address that comes back from Smarty along with the original address entered, or just the original address entered if there is no address found by smarty. Note that if no address was found by Smarty the `radio` will be hidden to make the screen appear visually as if no selection is possible. |
+| editAddressURL      | String               | This parameter is only needed for the `cfa:verifyAddressScreen` live template. This is the URL of the screen with the address being verified so the user can go back and edit if they need to.                                                                                                                                                                                            |
 
-###     
+Note that these live templates are provided for convenience, with the thought being you may want to
+show one version or the other depending on if Smarty finds an address to suggest or not. An example
+of how
+this works using conditions can be found in the starter app.
+
+// TODO: Link to the starter app code once it has been merged
+
+###         
 
 # How to use
 
