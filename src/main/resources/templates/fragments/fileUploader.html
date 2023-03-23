@@ -43,8 +43,8 @@
         </div>
       </div>
       <div th:id="${'upload-doc-div-' + inputName}" class="spacing-below-25 hidden">
-        <p th:id="${'upload-doc-text-' + inputName}" class="upload-doc-text">Uploaded
-          documents</p>
+        <p th:id="${'upload-doc-text-' + inputName}" class="upload-doc-text"
+           th:text="#{general.files.uploaded-documents}"></p>
       </div>
       <div th:id="${'file-preview-template-' + inputName}" class="file-preview-template">
         <div class="preview-container"></div>
@@ -142,8 +142,8 @@
       var numberOfAddedFiles = window[dropzonePrefix + [[${inputName}]]].files.length;
       var numberOfAddedFilesDiv = document.getElementById(
           "number-of-uploaded-files-" + [[${inputName}]]);
-      var numberOfUploadsString = numberOfAddedFiles !== 1 ? `${numberOfAddedFiles} files added`
-          : `${numberOfAddedFiles} file added`;
+      var numberOfUploadsString = numberOfAddedFiles === 1 ? [[#{general.files.file-added.one}]]
+          : `${numberOfAddedFiles} ` + [[#{general.files.file-added.other}]];
       numberOfAddedFilesDiv.innerHTML = numberOfUploadsString;
     }
 
