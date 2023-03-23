@@ -8,6 +8,7 @@ Table of Contents
      a reasonable size 
 -->
 
+* [Current release](#current-release)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
@@ -106,6 +107,14 @@ Out-of-the-box, integrations can be set up with common third-party services:
 
 An example project built off of this Form Flow library can be found in
 our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
+
+# Current release
+
+The latest version of Form flow library is using `0.0.2-SNAPSHOT`
+in [maven central](https://oss.sonatype.org/#nexus-search;quick~org.codeforamerica.org).
+
+There is a frozen release
+of `0.0.1-SNAPSHOT` [as well.](https://github.com/codeforamerica/form-flow/releases/tag/0.0.1-SNAPSHOT)
 
 # What is a form flow?
 
@@ -1476,7 +1485,7 @@ Submission's input data. This is because `residentialAddressStreetAddress1_valid
 present
 if Smarty had performed address validation.
 
-###              
+###                   
 
 # How to use
 
@@ -1693,7 +1702,7 @@ Currently, the Form Flow builder library is published on Sonatype. It can be pul
 file like so:
 
 ```text
-   implementation 'org.codeforamerica.platform:form-flow:0.0.1-SNAPSHOT'
+   implementation 'org.codeforamerica.platform:form-flow:0.0.2-SNAPSHOT'
 ```
 
 For an example of how to pull in the file as well a how one might pull in a local jar see the
