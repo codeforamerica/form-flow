@@ -3,7 +3,9 @@ package formflow.library.submissions.actions;
 import formflow.library.config.submission.Action;
 import formflow.library.data.Submission;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
+@Component
 @SuppressWarnings("unused")
 public class EncryptSSN implements Action {
 

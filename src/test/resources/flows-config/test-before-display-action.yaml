@@ -1,9 +1,8 @@
 name: testFlow
-actionsPath: formflow.library.submissions.actions
 flow:
   inputs:
-    beforeSaveAction: formflow.library.submissions.actions.EncryptSSN
-    beforeDisplayAction: formflow.library.submissions.actions.DecryptSSN
+    beforeSaveAction: EncryptSSN
+    beforeDisplayAction: DecryptSSN
     nextScreens:
       - name: subflowEntry
   subflowEntry:
@@ -14,8 +13,8 @@ flow:
     nextScreens:
       - name: pageWithSSNInput
   pageWithSSNInput:
-    beforeSaveAction: formflow.library.submissions.actions.EncryptSSN
-    beforeDisplayAction: formflow.library.submissions.actions.DecryptSSN
+    beforeSaveAction: EncryptSSN
+    beforeDisplayAction: DecryptSSN
     subflow: householdMembers
     nextScreens:
       - name: subflowReview

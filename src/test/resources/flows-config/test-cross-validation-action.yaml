@@ -1,8 +1,7 @@
 name: testFlow
-actionsPath: formflow.library.submissions.actions
 flow:
   contactInfoPreference:
-    crossFieldValidationAction: formflow.library.submissions.actions.CheckIndicatedContactMethodIsProvided
+    crossFieldValidationAction: CheckIndicatedContactMethodIsProvided
     nextScreens:
       - name: subflowEntry
   subflowEntry:
@@ -13,7 +12,7 @@ flow:
     nextScreens:
       - name: next
   next:
-    beforeSaveAction: formflow.library.submissions.actions.CalculateTotalBeforeSave
+    beforeSaveAction: CalculateTotalBeforeSave
     subflow: income
     nextScreens:
       - name: subflowReview

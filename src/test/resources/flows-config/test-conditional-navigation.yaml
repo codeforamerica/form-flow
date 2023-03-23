@@ -1,19 +1,23 @@
 name: testFlow
-conditionsPath: formflow.library.submission.conditions
 flow:
   first:
     nextScreens:
       - name: other
       - name: second
-        condition: formflow.library.submission.conditions.TrueCondition
+        condition: TrueCondition
   second:
     nextScreens:
       - name: other
-        condition: formflow.library.submission.conditions.FalseCondition
+        condition: FalseCondition
+      - name: last
+  third:
+    nextScreens:
+      - name: first
       - name: last
   other:
     nextScreens:
       - name: first
+        condition: DoesNotExist
       - name: last
   last:
     nextScreens: null

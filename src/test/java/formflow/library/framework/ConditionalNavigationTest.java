@@ -19,6 +19,11 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldGoToTheFirstPageInNextPagesIfThereAreTwoPagesWithNoConditions() throws Exception {
-    continueExpectingNextPageTitle("other", "First Page");
+    continueExpectingNextPageTitle("third", "First Page");
+  }
+
+  @Test
+  void shouldGoToOtherScreenIfOneHasNonExistentCondition() throws Exception {
+    continueExpectingNextPageTitle("other", "Last Page");
   }
 }

@@ -3,11 +3,12 @@ package formflow.library;
 import com.smartystreets.api.exceptions.SmartyException;
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.config.ActionManager;
+import formflow.library.config.ConditionManager;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
-import formflow.library.config.TemplateManager;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
@@ -49,23 +50,24 @@ public class ScreenController extends FormFlowController {
 
   private final AddressValidationService addressValidationService;
 
+  private final ConditionManager conditionManager;
+  private final ActionManager actionManager;
+
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
       SubmissionRepositoryService submissionRepositoryService,
       ValidationService validationService,
-      AddressValidationService addressValidationService) {
+      AddressValidationService addressValidationService,
+      ConditionManager conditionManager,
+      ActionManager actionManager) {
 
     super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
-
+    this.conditionManager = conditionManager;
+    this.actionManager = actionManager;
     log.info("Screen Controller Created!");
-    this.flowConfigurations.forEach(f -> {
-      log.info("Creating TemplateManager for flow: " + f.getName());
-      TemplateManager tm = new TemplateManager(f.getConditionsPath(), f.getActionsPath());
-      f.setTemplateManager(tm);
-    });
   }
 
   /**
@@ -92,9 +94,14 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("redirect:/error");
     }
 
-    currentScreen.handleBeforeDisplayAction(submission, uuid);
+    if (uuid != null) {
+      actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
+    } else {
+      actionManager.handleBeforeDisplayAction(currentScreen, submission);
+    }
 
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
+
     String formAction = createFormActionString(flow, screen);
     model.put("formAction", formAction);
     if (isDeleteConfirmationScreen(flow, screen)) {
@@ -136,10 +143,7 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     var currentScreen = getScreenConfig(flow, screen);
 
-    // run pre validation hook
-    log.info("Running pre validation hook now");
-
-    currentScreen.handleOnPostAction(formSubmission);
+    actionManager.handleOnPostAction(currentScreen, formSubmission);
 
     // Field validation
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
@@ -166,7 +170,8 @@ public class ScreenController extends FormFlowController {
       submission.setFlow(flow);
       submission.setInputData(formSubmission.getFormData());
     }
-    handleBeforeSaveAction(getScreenConfig(flow, screen), submission);
+
+    actionManager.handleBeforeSaveAction(currentScreen, submission);
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
 
@@ -208,7 +213,11 @@ public class ScreenController extends FormFlowController {
     String subflowName = subflows.entrySet().stream().filter(subflow ->
             subflow.getValue().getIterationStartScreen().equals(screen))
         .map(Entry::getKey).findFirst().orElse(null);
+
+    actionManager.handleOnPostAction(currentScreen, formSubmission);
+
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
+
     handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
       return new ModelAndView(String.format("redirect:/%s/%s", flow, screen));
@@ -234,7 +243,7 @@ public class ScreenController extends FormFlowController {
       saveToRepository(submission, subflowName);
       httpSession.setAttribute("id", submission.getId());
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/%s/%s/%s", flow, nextScreen, uuid) : String.format("redirect:/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
@@ -260,7 +269,7 @@ public class ScreenController extends FormFlowController {
   ) {
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     var currentScreen = getScreenConfig(flow, screen);
-    currentScreen.handleBeforeDisplayAction(submission, uuid);
+    actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
     model.put("formAction", String.format("/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
@@ -298,6 +307,9 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
+
+    actionManager.handleOnPostAction(currentScreen, formSubmission, uuid);
+
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
@@ -312,13 +324,13 @@ public class ScreenController extends FormFlowController {
         formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
         submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
         submission.removeIncompleteIterations(subflowName, uuid);
-        handleBeforeSaveAction(currentScreen, submission, uuid);
+        actionManager.handleBeforeSaveAction(currentScreen, submission, uuid);
         saveToRepository(submission, subflowName);
       }
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/%s/%s/%s", flow, nextScreen, uuid) : String.format("redirect:/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
@@ -431,7 +443,8 @@ public class ScreenController extends FormFlowController {
     if (submissionOptional.isPresent()) {
       Submission submission = submissionOptional.get();
       var currentScreen = getScreenConfig(flow, screen);
-      currentScreen.handleBeforeDisplayAction(submission, uuid);
+
+      actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
       model = createModel(flow, screen, httpSession, submission);
 
       var existingInputData = submission.getInputData();
@@ -477,6 +490,8 @@ public class ScreenController extends FormFlowController {
     Long id = (Long) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     FormSubmission formSubmission = new FormSubmission(formData);
+
+    actionManager.handleOnPostAction(currentScreen, formSubmission, uuid);
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
@@ -488,18 +503,28 @@ public class ScreenController extends FormFlowController {
       var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
       if (iterationToEdit != null) {
         submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
-        handleBeforeSaveAction(currentScreen, submission, uuid);
+        actionManager.handleBeforeSaveAction(currentScreen, submission, uuid);
         saveToRepository(submission, subflowName);
       }
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/%s/%s/%s/edit", flow, nextScreen, uuid) : String.format("redirect:/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
   }
 
+  /**
+   * This is the final submission endpoint where the submission is marked complete and the application is considered submitted to
+   * the system.
+   *
+   * @param formData
+   * @param flow
+   * @param screen
+   * @param httpSession
+   * @return
+   */
   @PostMapping("{flow}/{screen}/submit")
   ModelAndView submit(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
@@ -511,6 +536,8 @@ public class ScreenController extends FormFlowController {
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     FormSubmission formSubmission = new FormSubmission(formData);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+
+    actionManager.handleOnPostAction(currentScreen, formSubmission);
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
@@ -553,17 +580,17 @@ public class ScreenController extends FormFlowController {
     if (currentScreen == null) {
       return new RedirectView("/error");
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen);
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new RedirectView("/%s/%s".formatted(flow, nextScreen));
   }
 
-  private String getNextScreenName(HttpSession httpSession,
+  private String getNextScreenName(String flow, HttpSession httpSession,
       ScreenNavigationConfiguration currentScreen) {
     NextScreen nextScreen;
 
-    List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, httpSession);
+    List<NextScreen> nextScreens = getConditionalNextScreen(flow, currentScreen, httpSession);
 
     if (isConditionalNavigation(currentScreen) && nextScreens.size() > 0) {
       nextScreen = nextScreens.get(0);
@@ -607,20 +634,13 @@ public class ScreenController extends FormFlowController {
    * @param httpSession   session
    * @return List<NextScreen> list of next screens
    */
-  private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
+  private List<NextScreen> getConditionalNextScreen(String flow, ScreenNavigationConfiguration currentScreen,
       HttpSession httpSession) {
     return currentScreen.getNextScreens().stream()
-        .filter(nextScreen -> nextScreen.getCondition() != null)
-        .filter(nextScreen -> nextScreen.getConditionObject().run(submissionRepositoryService.findOrCreate(httpSession)))
+        .filter(nextScreen -> conditionManager.conditionExists(nextScreen.getCondition()))
+        .filter(nextScreen -> conditionManager.runCondition(nextScreen.getCondition(),
+            submissionRepositoryService.findOrCreate(httpSession)))
         .toList();
-  }
-
-  private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
-    currentScreen.handleBeforeSaveAction(submission, uuid);
-  }
-
-  private void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
-    currentScreen.handleBeforeSaveAction(submission);
   }
 
   private NextScreen getNonConditionalNextScreen(ScreenNavigationConfiguration currentScreen) {
@@ -638,7 +658,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Boolean isNextScreenInSubflow(String flow, HttpSession session, ScreenNavigationConfiguration currentScreen) {
-    String nextScreenName = getNextScreenName(session, currentScreen);
+    String nextScreenName = getNextScreenName(flow, session, currentScreen);
     return getScreenConfig(flow, nextScreenName).getSubflow() != null;
   }
 
@@ -652,10 +672,7 @@ public class ScreenController extends FormFlowController {
     FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
     model.put("flow", flow);
     model.put("screen", screen);
-
-    if (flowConfig.getTemplateManager() != null) {
-      model.put("templateManager", flowConfig.getTemplateManager());
-    }
+    model.put("conditionManager", conditionManager);
 
     if (flowConfig.getFlow().get(screen).getSubflow() != null) {
       model.put("subflow", flowConfig.getFlow().get(screen).getSubflow());
@@ -747,4 +764,5 @@ public class ScreenController extends FormFlowController {
       submission.clearAddressFields(inputName);
     });
   }
+
 }

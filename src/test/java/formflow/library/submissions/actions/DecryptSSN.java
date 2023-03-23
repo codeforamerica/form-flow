@@ -6,9 +6,12 @@ import formflow.library.data.Submission;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
+@Component
 @SuppressWarnings("unused")
 public class DecryptSSN implements Action {
+
   public void run(Submission submission) {
     String ssnEncrypted = (String) submission.getInputData().remove("ssnInputEncrypted");
     if (ssnEncrypted != null) {
