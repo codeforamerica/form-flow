@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConditionManager {
 
-  private HashMap<String, Condition> conditions = new HashMap<>();
+  private final HashMap<String, Condition> conditions = new HashMap<>();
 
   public ConditionManager(List<Condition> conditionsList) {
     conditionsList.forEach(condition -> this.conditions.put(condition.getClass().getSimpleName(), condition));
@@ -21,25 +21,26 @@ public class ConditionManager {
     return conditions.get(name);
   }
 
+  public Boolean conditionExists(String name) {
+    return conditions.containsKey(name);
+  }
 
   public Boolean runCondition(String conditionName, Submission submission) {
-    log.info("Running condition " + conditionName);
     Condition condition = getCondition(conditionName);
     if (condition == null) {
-      log.info("Condition not found: " + conditionName);
-      // TODO throw error?
-      return null;
+      log.warn("Condition not found: " + conditionName);
+      // TODO: an exception would be clearer, should we do that?
+      return false;
     }
     return condition.run(submission);
   }
 
   public Boolean runCondition(String conditionName, Submission submission, String uuid) {
-    log.info("Running condition " + conditionName + " data: " + uuid);
     Condition condition = getCondition(conditionName);
     if (condition == null) {
-      log.info("Condition not found: " + conditionName);
-      // TODO throw error?
-      return null;
+      log.warn("Condition not found: " + conditionName);
+      // TODO: an exception would be clearer, should we do that?
+      return false;
     }
     return condition.run(submission, uuid);
   }

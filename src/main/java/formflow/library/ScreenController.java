@@ -637,7 +637,7 @@ public class ScreenController extends FormFlowController {
   private List<NextScreen> getConditionalNextScreen(String flow, ScreenNavigationConfiguration currentScreen,
       HttpSession httpSession) {
     return currentScreen.getNextScreens().stream()
-        .filter(nextScreen -> nextScreen.getCondition() != null)
+        .filter(nextScreen -> conditionManager.conditionExists(nextScreen.getCondition()))
         .filter(nextScreen -> conditionManager.runCondition(nextScreen.getCondition(),
             submissionRepositoryService.findOrCreate(httpSession)))
         .toList();

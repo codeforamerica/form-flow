@@ -10,9 +10,14 @@ flow:
       - name: other
         condition: FalseCondition
       - name: last
+  third:
+    nextScreens:
+      - name: first
+      - name: last
   other:
     nextScreens:
       - name: first
+        condition: DoesNotExist
       - name: last
   last:
     nextScreens: null
