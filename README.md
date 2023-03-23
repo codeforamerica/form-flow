@@ -1485,8 +1485,6 @@ Submission's input data. This is because `residentialAddressStreetAddress1_valid
 present
 if Smarty had performed address validation.
 
-###                   
-
 # How to use
 
 ## Configuration Details
