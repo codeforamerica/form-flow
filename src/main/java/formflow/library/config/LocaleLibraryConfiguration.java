@@ -31,7 +31,6 @@ public class LocaleLibraryConfiguration {
     ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 
     messageSource.setBasenames("messages", "messages-form-flow");
-    messageSource.setDefaultEncoding("UTF-8");
 
     return messageSource;
   }
