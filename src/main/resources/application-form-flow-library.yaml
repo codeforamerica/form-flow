@@ -2,3 +2,5 @@ spring:
   flyway:
     placeholders:
       uuid_function: "gen_random_uuid"
+  messages:
+    encoding: UTF-8
