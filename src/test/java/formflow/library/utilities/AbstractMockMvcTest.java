@@ -421,12 +421,12 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected String getUrlForPageName(String pageName, String subflow) {
-    return "/testFlow/" + pageName + "/" + subflow;
+    return "/flow/testFlow/" + pageName + "/" + subflow;
 
   }
 
   protected String getUrlForPageName(String pageName) {
-    return "/testFlow/" + pageName;
+    return "/flow/testFlow/" + pageName;
   }
 
   protected void assertPageHasInputError(String pageName, String inputName) throws Exception {
@@ -478,7 +478,7 @@ public abstract class AbstractMockMvcTest {
 
   @NotNull
   protected ResultActions getPage(String pageName) throws Exception {
-    return mockMvc.perform(get("/testFlow/" + pageName));
+    return mockMvc.perform(get("/flow/testFlow/" + pageName));
   }
 
   @NotNull
@@ -499,7 +499,7 @@ public abstract class AbstractMockMvcTest {
 
   @NotNull
   private String followRedirectsForPageName(String currentPageName) throws Exception {
-    var nextPage = "/testFlow/" + currentPageName + "/navigation";
+    var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
       nextPage = mockMvc.perform(get(nextPage))
