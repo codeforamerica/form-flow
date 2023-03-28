@@ -1,8 +1,6 @@
 package formflow.library;
 
 import formflow.library.data.SubmissionRepositoryService;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,20 +25,13 @@ public class PdfController extends FormFlowController {
   }
 
   @GetMapping("{flow}/{submissionId}")
-  ResponseEntity<File> downloadPdf(
+  ResponseEntity<byte[]> downloadPdf(
       @PathVariable String flow,
       @PathVariable String submissionId,
       HttpSession httpSession
   ) throws IOException {
     log.info("Printing....PDF with submission_id: " + submissionId);
-    File outputFile = File.createTempFile("java", "pdf");
     byte[] bytesFromFile = Files.readAllBytes(Path.of("src/main/resources/pdfs/Page-1-UBI-form.pdf"));
-    try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-      outputStream.write(bytesFromFile);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(outputFile);
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(bytesFromFile);
   }
 }
