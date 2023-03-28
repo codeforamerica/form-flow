@@ -19,7 +19,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
   @Override
   @BeforeEach
   public void setUp() throws IOException {
-    startingPage = "uploadFlow/docUploadJourney";
+    startingPage = "flow/uploadFlow/docUploadJourney";
     super.setUp();
   }
 

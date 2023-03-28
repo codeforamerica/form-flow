@@ -12,6 +12,8 @@ form-flow:
       auth-id: "authId"
       auth-token: "authToken"
       license: "license"
+  pdf:
+    path: 'src/test/resources/pdfs/'
 spring:
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:test-schema-init.sql'

@@ -71,7 +71,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
 
     // beforeSave
     String ssnInput = "333-33-3333";
-    postToUrlExpectingSuccess("/testFlow/pageWithSSNInput", "/testFlow/subflowReview",
+    postToUrlExpectingSuccess("/flow/testFlow/pageWithSSNInput", "/flow/testFlow/subflowReview",
         Map.of("ssnInput", List.of(ssnInput)), subflowUuid);
 
     Map<String, Object> subflowEntry = submission.getSubflowEntryByUuid("householdMembers",

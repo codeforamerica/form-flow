@@ -1,5 +1,5 @@
 <a th:fragment="continue"
-   th:href="'/' + ${flow} + '/' + ${screen} + '/navigation'"
+   th:href="'/flow/' + ${flow} + '/' + ${screen} + '/navigation'"
    th:text="${text} ? ${text} : #{general.inputs.continue}"
    class="button button--primary"
    id="continue-link"></a>
