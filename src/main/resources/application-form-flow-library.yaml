@@ -3,5 +3,4 @@ spring:
     placeholders:
       uuid_function: "gen_random_uuid"
   messages:
-    encoding: UTF-8
-    basename: messages,messages-form-flow
+    basename: messages, messages-form-flow
