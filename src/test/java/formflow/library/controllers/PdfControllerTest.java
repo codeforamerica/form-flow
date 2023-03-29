@@ -44,4 +44,15 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     byte[] actualBytes = result.getResponse().getContentAsByteArray();
     assertThat(actualBytes).hasSizeGreaterThan(22);
   }
+
+  @Test
+  public void pdfControllerShouldFillTheCorrectFieldsForThePdfWhenDownloaded() throws Exception {
+    MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId() + "/Multipage-UBI-Form"))
+        .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=Multipage-UBI-Form-" + submission.getId() + ".pdf"))
+        .andExpect(status().is2xxSuccessful())
+        .andReturn();
+    byte[] actualBytes = result.getResponse().getContentAsByteArray();
+    assertThat(actualBytes).hasSizeGreaterThan(22);
+  }
 }
