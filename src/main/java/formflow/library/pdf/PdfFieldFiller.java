@@ -4,5 +4,5 @@ import java.util.Collection;
 
 public interface PdfFieldFiller {
 
-  ApplicationFile fill(Collection<PdfField> fields, String applicationId, String fileName);
+  ApplicationFile fill(Collection<PdfField> fields, String fileName);
 }

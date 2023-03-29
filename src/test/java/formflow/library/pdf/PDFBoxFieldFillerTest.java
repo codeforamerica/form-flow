@@ -17,8 +17,7 @@ class PDFBoxFieldFillerTest {
 
   private final PDFBoxFieldFiller PDFBoxFieldFiller = new PDFBoxFieldFiller(
       List.of(
-          new ClassPathResource("test-cover-pages.pdf"),
-          new ClassPathResource("test-caf.pdf")
+          new ClassPathResource("/pdfs/Multipage-UBI-Form.pdf")
       )
   );
 
@@ -29,7 +28,7 @@ class PDFBoxFieldFillerTest {
         new SimplePdfField("TEXT_FIELD", expectedFieldValue)
     );
 
-    ApplicationFile applicationFile = PDFBoxFieldFiller.fill(fields, "", "");
+    ApplicationFile applicationFile = PDFBoxFieldFiller.fill(fields, "");
 
     PDAcroForm acroForm = getPdAcroForm(applicationFile);
 
@@ -105,7 +104,7 @@ class PDFBoxFieldFillerTest {
 
   private PDAcroForm getPdAcroForm(ApplicationFile applicationFile) throws IOException {
     Path path = Files.createTempDirectory("");
-    File file = new File(path.toFile(), "test-caf.pdf");
+    File file = new File(path.toFile(), "Multipage-UBI-Form.pdf");
     Files.write(file.toPath(), applicationFile.getFileBytes());
 
     PDDocument pdDocument = PDDocument.load(file);
