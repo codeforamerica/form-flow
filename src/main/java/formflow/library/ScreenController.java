@@ -114,7 +114,7 @@ public class ScreenController extends FormFlowController {
     }
 
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
-    return new ModelAndView("/%s/%s".formatted(flow, screen), model);
+    return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
 
   /**
@@ -275,7 +275,7 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
-    return new ModelAndView(String.format("/%s/%s", flow, screen), model);
+    return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
 
   /**
@@ -461,7 +461,7 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
     }
 
-    return new ModelAndView(String.format("/%s/%s", flow, screen), model);
+    return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
 
   /**
@@ -751,7 +751,7 @@ public class ScreenController extends FormFlowController {
         model.put("subflowIsEmpty", true);
         model.put("entryScreen", getFlowConfigurationByName(flow).getSubflows().get(subflowName).getEntryScreen());
       }
-      return new ModelAndView("/%s/%s".formatted(flow, screen), model);
+      return new ModelAndView("%s/%s".formatted(flow, screen), model);
     }
     return null;
   }
