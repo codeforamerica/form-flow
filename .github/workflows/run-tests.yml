@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Set up JDK
         uses: actions/setup-java@v3.5.0
         with:
@@ -29,14 +31,22 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Test with Gradle
+        id: test
         run: ./gradlew clean test --stacktrace
       - name: Announce failures on Slack
-        if: failure()
+        if:  ${{ steps.test.conclusion == 'failure' }}
         uses: ravsamhq/notify-slack-action@v2
         with:
           status: ${{ job.status }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Report results to DeepSource
+        if:  ${{ steps.test.conclusion == 'success' }}
+        run: |
+           curl https://deepsource.io/cli | sh
+           ./bin/deepsource report --analyzer test-coverage --key java --value-file ./build/reports/jacoco/test/jacocoTestReport.xml
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
       - name: Cleanup Gradle Cache
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
