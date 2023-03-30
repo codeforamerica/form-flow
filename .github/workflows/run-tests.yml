@@ -44,7 +44,7 @@ jobs:
         if:  ${{ steps.test.conclusion == 'success' }}
         run: |
            curl https://deepsource.io/cli | sh
-           ./bin/deepsource report --analyzer test-coverage --key python --value-file ./coverage.xml
+           ./bin/deepsource report --analyzer test-coverage --key python --value-file ./build/reports/jacoco/test/jacocoTestReport.xml
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
       - name: Cleanup Gradle Cache
