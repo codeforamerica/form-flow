@@ -11,36 +11,34 @@ import org.jetbrains.annotations.NotNull;
 @Value
 public class DocumentField {
 
-  String groupName;
   String name;
   @NotNull
   List<String> value;
   DocumentFieldType type;
   Integer iteration;
 
-  public DocumentField(String groupName, String name, @NotNull List<String> value,
+  public DocumentField(String name, @NotNull List<String> value,
       DocumentFieldType type, Integer iteration) {
-    this.groupName = groupName;
     this.name = name;
     this.value = value;
     this.type = type;
     this.iteration = iteration;
   }
 
-  public DocumentField(String groupName, String name, @NotNull List<String> value,
+  public DocumentField(String name, @NotNull List<String> value,
       DocumentFieldType type) {
-    this(groupName, name, value, type, null);
+    this(name, value, type, null);
   }
 
   // Make an application input with only a single value
-  public DocumentField(String groupName, String name, String value, DocumentFieldType type) {
-    this(groupName, name, value, type, null);
+  public DocumentField(String name, String value, DocumentFieldType type) {
+    this(name, value, type, null);
   }
 
   // Make an application input for an iteration with only a single value
-  public DocumentField(String groupName, String name, String value, DocumentFieldType type,
+  public DocumentField(String name, String value, DocumentFieldType type,
       Integer iteration) {
-    this(groupName, name, value == null ? emptyList() : List.of(value), type, iteration);
+    this(name, value == null ? emptyList() : List.of(value), type, iteration);
   }
 
   public List<String> getPdfName(Map<String, List<String>> pdfFieldMap) {

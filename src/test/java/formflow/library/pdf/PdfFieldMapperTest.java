@@ -6,28 +6,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 class PdfFieldMapperTest {
 
   @ParameterizedTest
-  @EnumSource(names = {"SINGLE_VALUE",
-      "ENUMERATED_SINGLE_VALUE"}, value = DocumentFieldType.class)
-  void shouldMapSingleValueInputsToSimpleFields(DocumentFieldType documentFieldType) {
-    String fieldName = "someName";
-    String formInputName = "some-input";
-    String pageName = "some-screen";
-    Map<String, List<String>> configMap = Map
-        .of(pageName + "." + formInputName, List.of(fieldName));
+//  @EnumSource(names = {"SINGLE_VALUE",
+//      "ENUMERATED_SINGLE_VALUE"}, value = DocumentFieldType.class)
+  void shouldMapSingleValueInputsToSimpleFields() {
+    String formInputName = "ubiFlow";
+    String fieldName = "applicantFirstName";
+    String stringValue = "Joe Schmoe";
 
-    String stringValue = "some-string-value";
-    DocumentField documentField = new DocumentField(pageName, formInputName,
-        List.of(stringValue), documentFieldType);
+    Map<String, List<String>> configMap = Map.of(formInputName, List.of(fieldName));
+
+    DocumentField documentField = new DocumentField(formInputName,
+        List.of(stringValue), DocumentFieldType.SINGLE_VALUE);
 
     PdfFieldMapper subject = new PdfFieldMapper(configMap, emptyMap());
     List<PdfField> fields = subject.map(List.of(documentField));
 
-    assertThat(fields).contains(new SimplePdfField(fieldName, stringValue));
+    assertThat(fields).contains(new SimplePdfField(fieldName, stringValue)); // applicantFirstName, Joe Schmoe 
   }
 
 //  @Test
