@@ -9,10 +9,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class PdfFieldMapper {
 
-  private final Map<String, Map<String, List<String>>> pdfFieldMap;
+  private final Map<String, List<String>> pdfFieldMap;
 
-  public PdfFieldMapper(Map<String, Map<String, List<String>>> pdfFieldMap) {
-    this.pdfFieldMap = pdfFieldMap; // ubi -> inputs -> applicantFirstName: APPLICANT_FIRST_NAME
+  private final Map<String, String> enumMap;
+
+  public PdfFieldMapper(Map<String, List<String>> pdfFieldMap,
+      Map<String, String> enumMap) {
+    this.pdfFieldMap = pdfFieldMap; // inputs -> applicantFirstName: APPLICANT_FIRST_NAME
+    this.enumMap = enumMap;
   }
 
   public List<PdfField> map(List<DocumentField> documentFields) {

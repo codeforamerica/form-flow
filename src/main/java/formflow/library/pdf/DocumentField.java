@@ -42,13 +42,13 @@ public class DocumentField {
   }
 
   public List<String> getPdfName(Map<String, List<String>> pdfFieldMap) {
-    List<String> names = pdfFieldMap.get(String.join(".", this.getGroupName(), this.getName()));
+    List<String> names = pdfFieldMap.get(this.getName());
     return this.getNameWithIteration(names);
   }
 
   public String getMultiValuePdfName(Map<String, List<String>> pdfFieldMap, String value) {
     List<String> names = pdfFieldMap
-        .get(String.join(".", this.getGroupName(), this.getName(), value));
+        .get(String.join(".", this.getName(), value));
     if (getNameWithIteration(names).size() > 0) {
       return getNameWithIteration(names).get(0);
     } else {
