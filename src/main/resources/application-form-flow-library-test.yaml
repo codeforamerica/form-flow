@@ -3,3 +3,5 @@ spring:
     baselineOnMigrate: true
     placeholders:
       uuid_function: "random_uuid"
+  messages:
+    basename: messages, messages-form-flow

@@ -3,7 +3,6 @@ package formflow.library.utilities;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import formflow.library.config.LocaleLibraryConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,7 +33,8 @@ public abstract class AbstractBasePageTest {
   @Autowired
   protected Path path;
 
-  protected MessageSource messageSource = new LocaleLibraryConfiguration().messageSource();
+  @Autowired
+  protected MessageSource messageSource;
 
   protected String baseUrl;
 
