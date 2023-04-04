@@ -19,7 +19,14 @@ spring:
     url: jdbc:postgresql://localhost:5432/form-flow-test
     username: form-flow-test
     password: postgres
+  flyway:
+    baselineOnMigrate: true
+    clean-on-validation-error: true
+    placeholders:
+      uuid_function: "gen_random_uuid"
+  messages:
+    encoding: ISO-8859-1
+    basename: messages, messages-form-flow
   jpa:
     hibernate:
       ddl-auto: create-drop
-    allow-circular-references: true
