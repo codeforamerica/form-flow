@@ -40,8 +40,8 @@ public class DocumentFieldPreparers {
   @NotNull
   private List<DocumentField> getDefaultFields(Submission submission) {
     return List.of(
-        new DocumentField("submissionId", List.of(String.valueOf(submission.getId())),
-            SINGLE_VALUE)
+        new DocumentField("submissionId", String.valueOf(submission.getId()),
+            SINGLE_VALUE, null)
     );
   }
 }

@@ -4,50 +4,61 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PdfFieldMapper {
 
-  private final Map<String, List<String>> pdfFieldMap;
+  private final List<PdfMapConfiguration> pdfMapConfigurations;
 
-  private final Map<String, String> enumMap;
-
-  public PdfFieldMapper(Map<String, List<String>> pdfFieldMap,
-      Map<String, String> enumMap) {
-    this.pdfFieldMap = pdfFieldMap; // inputs -> applicantFirstName: APPLICANT_FIRST_NAME
-    this.enumMap = enumMap;
+  public PdfFieldMapper(List<PdfMapConfiguration> pdfMapConfigurations) {
+    this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
-  public List<PdfField> map(List<DocumentField> documentFields) {
+  public List<PdfField> map(List<DocumentField> documentFields, String flow) {
     return documentFields.stream()
         .filter(input -> !input.getValue().isEmpty())
-        .flatMap(this::makePdfFieldsForInput)
+        .map(documentField -> makePdfFieldsForInput(documentField, flow))
         .filter(pdfField -> pdfField.getName() != null)
         .collect(Collectors.toList());
   }
 
   @NotNull
-  private Stream<? extends PdfField> makePdfFieldsForInput(DocumentField input) {
+  private PdfField makePdfFieldsForInput(DocumentField input, String flow) {
     return switch (input.getType()) {
-      case DATE_VALUE -> simplePdfFields(input, this::getDateFormattedValue);
-      case ENUMERATED_MULTI_VALUE -> binaryPdfFields(input);
-      case UNUSED -> Stream.of();
-      default -> simplePdfFields(input, this::getOrDefaultInputValue);
+//      case DATE_VALUE -> simplePdfFields(input, this::getDateFormattedValue);
+//      case ENUMERATED_MULTI_VALUE -> binaryPdfFields(input);
+//      case UNUSED -> Stream.of();
+      default -> simplePdfField(input, this::getOrDefaultInputValue, flow);
     };
   }
 
   @NotNull
-  private Stream<SimplePdfField> simplePdfFields(DocumentField input,
-      Function<DocumentField, String> valueMapper) {
-    return input.getPdfName(pdfFieldMap).stream()
-        .map(pdfName -> new SimplePdfField(pdfName, valueMapper.apply(input)));
+  private SimplePdfField simplePdfField(DocumentField input,
+      Function<DocumentField, String> valueMapper, String flow) {
+
+    Map<String, String> pdfInputsMap = pdfMapConfigurations.stream()
+        .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
+        .getInputs();
+
+    String pdfInputName = input.getPdfName(pdfInputsMap);
+
+    return new SimplePdfField(pdfInputName, valueMapper.apply(input));
   }
 
   @NotNull
-  private Stream<BinaryPdfField> binaryPdfFields(DocumentField input) {
-    return input.getValue().stream()
-        .map(value -> new BinaryPdfField(input.getMultiValuePdfName(pdfFieldMap, value)));
+  private BinaryPdfField binaryPdfFields(DocumentField input, String flow) {
+
+    Map<String, String> pdfInputsMap = pdfMapConfigurations.stream()
+        .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
+        .getInputs();
+
+    return new BinaryPdfField(input.getMultiValuePdfName(pdfInputsMap, input.getValue()));
   }
 
   @NotNull
@@ -57,6 +68,13 @@ public class PdfFieldMapper {
 
   @NotNull
   private String getOrDefaultInputValue(DocumentField input) {
-    return enumMap.getOrDefault(input.getValue(0), input.getValue(0));
+    switch (input.getValue()) {
+      case "true":
+        return "Yes";
+      case "false":
+        return "No";
+      default:
+        return input.getValue();
+    }
   }
 }
