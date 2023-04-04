@@ -1,6 +1,5 @@
 package formflow.library;
 
-import formflow.library.data.SubmissionRepositoryService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,14 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @EnableAutoConfiguration
 @Slf4j
 @RequestMapping("/download")
-public class PdfController extends FormFlowController {
+public class PdfController {
 
   @Value("${form-flow.pdf.path}")
   String configPath;
-
-  PdfController(SubmissionRepositoryService submissionRepositoryService) {
-    super(submissionRepositoryService);
-  }
 
   @GetMapping("{flow}/{submissionId}/{nameOfDocument}")
   ResponseEntity<byte[]> downloadPdf(
