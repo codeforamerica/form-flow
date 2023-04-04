@@ -37,8 +37,9 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
 
   @BeforeEach
   public void setUp() throws Exception {
+    UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
-    submission = Submission.builder().id(1L).inputData(new HashMap<>()).build();
+    submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
 
     super.setUp();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);

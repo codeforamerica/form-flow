@@ -13,15 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 class SubmissionRepositoryServiceTest {
 
@@ -29,15 +27,13 @@ class SubmissionRepositoryServiceTest {
   private SubmissionRepositoryService submissionRepositoryService;
 
   @Test
-  void shouldSaveSubmissionsWithSequentialIds() {
+  void shouldSaveASubmissionWithUUID() {
     Submission firstSubmission = new Submission();
-    Submission secondSubmission = new Submission();
     firstSubmission.setFlow("testFlow");
-    secondSubmission.setFlow("testFlow");
+
     submissionRepositoryService.save(firstSubmission);
-    submissionRepositoryService.save(secondSubmission);
-    assertThat(firstSubmission.getId()).isEqualTo(1);
-    assertThat(secondSubmission.getId()).isEqualTo(2);
+
+    assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
   }
 
   @Test
@@ -53,10 +49,9 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-    submissionRepositoryService.save(submission);
+    UUID submissionId = submissionRepositoryService.save(submission);
 
-    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(
-        submission.getId());
+    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(submissionId);
     Submission savedSubmission = savedSubmissionOptional.orElseThrow();
     assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
     assertThat(savedSubmission.getInputData()).isEqualTo(inputData);

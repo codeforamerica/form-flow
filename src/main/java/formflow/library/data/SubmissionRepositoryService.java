@@ -3,6 +3,7 @@ package formflow.library.data;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,10 @@ public class SubmissionRepositoryService {
    * Saves the Submission in the database.
    *
    * @param submission the submission to save, not null
+   * @return UUID of the saved submission
    */
-  public void save(Submission submission) {
-    repository.save(submission);
+  public UUID save(Submission submission) {
+    return repository.save(submission).getId();
   }
 
   /**
@@ -35,7 +37,7 @@ public class SubmissionRepositoryService {
    * @param id id of submission to look for, not null
    * @return Optional containing Submission if found, else empty
    */
-  public Optional<Submission> findById(Long id) {
+  public Optional<Submission> findById(UUID id) {
     return repository.findById(id);
   }
 
@@ -74,7 +76,7 @@ public class SubmissionRepositoryService {
    * @return Submission
    */
   public Submission findOrCreate(HttpSession httpSession) {
-    var id = (Long) httpSession.getAttribute("id");
+    var id = (UUID) httpSession.getAttribute("id");
     if (id != null) {
       Optional<Submission> submissionOptional = findById(id);
       return submissionOptional.orElseGet(Submission::new);

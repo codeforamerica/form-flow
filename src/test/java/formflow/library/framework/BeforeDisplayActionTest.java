@@ -29,7 +29,8 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    submission = Submission.builder().id(1L).inputData(new HashMap<>()).build();
+    UUID submissionUUID = UUID.randomUUID();
+    submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
 
     super.setUp();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
