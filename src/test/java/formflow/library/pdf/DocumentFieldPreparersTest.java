@@ -18,17 +18,20 @@ class DocumentFieldPreparersTest {
 
   private DocumentFieldPreparers preparers;
 
+  private Submission testSubmission;
+
   @BeforeEach
   void setUp() {
     // TODO Setup SUbmission object here
     preparers = new DocumentFieldPreparers(List.of());
+    testSubmission = Submission.builder()
+        .id(1L)
+        .submittedAt(DateTime.parse("2020-09-02").toDate())
+        .build();
   }
 
   @Test
   void shouldIncludeSubmissionIdInput() {
-    Submission testSubmission = Submission.builder()
-        .id(1L)
-        .build();
     List<DocumentField> documentFields = preparers.prepareDocumentFields(testSubmission);
 
     assertThat(documentFields).contains(
@@ -37,40 +40,35 @@ class DocumentFieldPreparersTest {
 
   @Test
   void shouldIncludeSubmittedAtTime() {
-    Date date = DateTime.parse("2020-09-02").toDate();
-    Submission submission = Submission.builder()
-        .id(1L)
-        .submittedAt(date)
-        .build();
-
-    List<DocumentField> documentFields = preparers.prepareDocumentFields(submission);
+    List<DocumentField> documentFields = preparers.prepareDocumentFields(testSubmission);
 
     assertThat(documentFields).contains(
-        new DocumentField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_VALUE, null));
+        new DocumentField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null));
   }
 
-  @Test(llegalArgumentException.class)
+  @Test
   void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
     DocumentFieldPreparer successfulPreparer = mock(DocumentFieldPreparer.class);
     DocumentFieldPreparer failingPreparer = mock(DocumentFieldPreparer.class);
     DocumentFieldPreparers documentFieldPreparers = new DocumentFieldPreparers(
         List.of(failingPreparer, successfulPreparer));
     Date date = DateTime.parse("2020-09-02").toDate();
-    Submission submission = Submission.builder()
-        .id(1L)
-        .submittedAt(date)
-        .build();
 
     List<DocumentField> mockOutput = List.of();
-    when(successfulPreparer.prepareDocumentFields(eq(submission)))
+    when(successfulPreparer.prepareDocumentFields(eq(testSubmission)))
         .thenReturn(mockOutput);
-    when(failingPreparer.prepareDocumentFields(eq(submission)))
+    when(failingPreparer.prepareDocumentFields(eq(testSubmission)))
         .thenThrow(IllegalArgumentException.class);
 
     List<DocumentField> actualOutput = documentFieldPreparers
-        .prepareDocumentFields(submission);
+        .prepareDocumentFields(testSubmission);
     assertThat(actualOutput).isNotEmpty();
-    verify(successfulPreparer).prepareDocumentFields(eq(submission));
-    verify(failingPreparer).prepareDocumentFields(eq(submission));
+    // Default document fields
+    assertThat(actualOutput).containsExactly(
+        new DocumentField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null),
+        new DocumentField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null)
+    );
+    verify(successfulPreparer).prepareDocumentFields(eq(testSubmission));
+    verify(failingPreparer).prepareDocumentFields(eq(testSubmission));
   }
 }
