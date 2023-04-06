@@ -1,9 +1,5 @@
 set -e
 
-log_line() {
-  echo "$1"
-}
-
 install_jenv() {
     if ! grep -q jenv "$1"; then
       echo "export PATH=""$HOME"/.jenv/bin:"$PATH""" >> "$1"
@@ -12,7 +8,7 @@ install_jenv() {
     fi
 }
 
-log_line '--- FormFlow Setup Script ---'
+echo '--- FormFlow Setup Script ---'
 
 if ! brew --version; then
   curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
@@ -20,8 +16,9 @@ else
   brew update
 fi
 
-log_line 'Installing brew packages'
-brew install openjdk@17 jenv gradle postgresql@14
+echo 'Installing brew packages'
+brew tap homebrew/cask-versions
+brew install temurin17 jenv gradle postgresql@14
 
 # Install jenv in either the .bashrc or zshrc, whichever is present
 if [ -f ~/.bashrc ]; then
@@ -60,4 +57,4 @@ fi
 # Build the jar and run tests
 ./gradlew clean webJar jar test
 
-log_line '--- FormFlow Setup Script Complete ---'
+echo '--- FormFlow Setup Script Complete ---'
