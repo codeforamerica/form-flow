@@ -54,10 +54,8 @@ Table of Contents
         * [Conditions / Actions](#conditions--actions)
         * [Library Details](#library-details)
 * [Developer Setup](#developer-setup)
-    * [Java Development Kit](#java-development-kit)
-    * [Set up jenv to manage your jdk versions](#set-up-jenv-to-manage-your-jdk-versions)
-    * [Gradle](#gradle)
-        * [Build Web/Fat Jar](#build-webfat-jar)
+    * [Mac and Linux](#mac-and-linux)
+    * [Windows](#windows)
     * [Spring Profiles](#spring-profiles)
         * [DevController](#devcontroller)
         * [IntelliJ Configuration](#intellij-configuration)
@@ -1688,13 +1686,13 @@ There are spots in the templates where the `T` operator is used.
 
 ### Conditions / Actions
 
-#### Creating them
+#### Coming Soon!
 
 ### Library Details
 
-#### Publishing
+### Publishing
 
-##### Maven Central
+#### Maven Central
 
 Currently, the Form Flow builder library is published on Sonatype. It can be pulled into a gradle
 file like so:
@@ -1708,51 +1706,13 @@ form-flow-starter-app's
 [gradle.build](https://github.com/codeforamerica/form-flow-starter-app/blob/main/build.gradle)
 file.
 
-#### Building Fat Jars
-
-This library is created as a Web/Fat jar to include all the items this class depends on.
-Specifically it's created this way to ensure that all the resources are included in the
-distribution.
-
 # Developer Setup
 
-_Note: these instructions are specific to macOS, but the same dependencies do need to be installed
-on Windows as well._
+## Mac and Linux
+After cloning the repository, run `./setupsh` from the root of the repo's directory. 
 
-## Java Development Kit
-
-```
-brew install openjdk@17
-```
-
-Make sure that you follow the instructions printed for `Caveats` inside your terminal when the
-installation completes.
-
-## Set up jenv to manage your jdk versions
-
-First run `brew install jenv`.
-
-Add the following to your `~/.bashrc` or `~/.zshrc`:
-
-```
-export PATH="$HOME/.jenv/bin:$PATH"
-eval "$(jenv init -)"
-```
-
-Reload your terminal, then finally run this from the repo's root directory:
-
-```
-jenv add /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home/
-```
-
-## Gradle
-
-`brew install gradle`
-
-### Build Web/Fat Jar
-
-Go into `lib/build.gradle` and run the `webjar` task with IntelliJ. This will generate a build file
-that can be used for local development.
+## Windows
+Check the setup script for the most up to date list of dependencies and steps you'll need to install manually.
 
 ## Spring Profiles
 
@@ -1864,7 +1824,7 @@ you can contribute it to this project so that other teams can use it.
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
 - Set the Gradle JVM version to `17 Eclipse Temurin version 17.0.5`
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
-- Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.5`
+- Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.X`
   in `File > Project Structure`
 
 ### Setup Platform Flavored Google Styles for Java ##
@@ -1908,5 +1868,4 @@ or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake
 
 ## Maintainer information
 
-This form-flow library was created and is maintained by the Platform team at Code for America. Email
-addresses? More information about contacting us? Email list somewhere?
+This form-flow library was created and is maintained by the Platform team at Code for America.
