@@ -33,6 +33,9 @@ public class CrossValidationTest extends AbstractMockMvcTest {
   @Autowired
   private ScreenController screenController;
 
+  private final String EMAIL_ERROR_MESSAGE = "You indicated you would like to be contacted by email. Please make sure to provide an email address.";
+  private String PHONE_ERROR_MESSAGE = "You indicated you would like to be contacted by phone. Please make sure to provide a phone number.";
+
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
@@ -49,16 +52,15 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     postExpectingSuccess("contactInfoPreference",
         Map.of(
             "emailAddress", List.of("foo@bar.com"),
-            "contactMethod", List.of("emailPreferred")));
+            "contactMethod[]", List.of("emailPreferred")));
   }
 
   @Test
   void shouldDisplayFieldAndCrossValidationMessages() throws Exception {
-    final String emailErrorMessage = "please enter a valid email";
     postExpectingFailure("contactInfoPreference",
-        Map.of("emailAddress", List.of("malformed.com"), "contactMethod", List.of("emailPreferred")));
-    assertPageHasInputError("contactInfoPreference", "emailAddress", emailErrorMessage);
-
+        Map.of("emailAddress", List.of("malformed.com"), "contactMethod[]", List.of("emailPreferred")));
+    assertPageHasInputError("contactInfoPreference", "emailAddress", EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("contactInfoPreference", "emailAddress", EMAIL_ERROR_MESSAGE);
   }
 
   @Test
@@ -71,23 +73,21 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldFailWithPhoneNumberPreferenceNoPhone() throws Exception {
-    final String phoneErrorMessage = "please provide a phone number";
     postExpectingFailure("contactInfoPreference",
         Map.of(
-            "contactMethod", List.of("phonePreferred"),
+            "contactMethod[]", List.of("", "phonePreferred"),
             "phoneNumber", List.of("")));
 
-    assertPageHasInputError("contactInfoPreference", "phoneNumber", phoneErrorMessage);
+    assertPageHasInputError("contactInfoPreference", "phoneNumber", PHONE_ERROR_MESSAGE);
   }
 
   @Test
   void shouldFailWithEmailPreferenceNoEmail() throws Exception {
-    final String emailErrorMessage = "please provide an email address";
     postExpectingFailure("contactInfoPreference",
         Map.of(
-            "contactMethod", List.of("emailPreferred"),
+            "contactMethod[]", List.of("", "emailPreferred"),
             "emailAddress", List.of("")));
 
-    assertPageHasInputError("contactInfoPreference", "emailAddress", emailErrorMessage);
+    assertPageHasInputError("contactInfoPreference", "emailAddress", EMAIL_ERROR_MESSAGE);
   }
 }
