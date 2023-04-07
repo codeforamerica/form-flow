@@ -46,6 +46,8 @@ class DocumentFieldPreparersTest {
         new DocumentField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null));
   }
 
+
+  //how does this test verify the documents were successfully submitted?
   @Test
   void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
     DocumentFieldPreparer successfulPreparer = mock(DocumentFieldPreparer.class);
@@ -71,4 +73,6 @@ class DocumentFieldPreparersTest {
     verify(successfulPreparer).prepareDocumentFields(eq(testSubmission));
     verify(failingPreparer).prepareDocumentFields(eq(testSubmission));
   }
+
+
 }
