@@ -81,6 +81,7 @@ public class Submission {
 
   public Submission() {
     inputData = new HashMap<>();
+    urlParams = new HashMap<>();
   }
 
 
@@ -121,6 +122,10 @@ public class Submission {
   public void mergeFormDataWithSubmissionData(FormSubmission formSubmission) {
     inputData.forEach((key, value) -> formSubmission.getFormData().merge(key, value, (newValue, oldValue) -> newValue));
     inputData = formSubmission.getFormData();
+  }
+
+  public void mergeUrlParamsWithData(Map<String, String> passedParams){
+    urlParams.putAll(passedParams);
   }
 
   /**

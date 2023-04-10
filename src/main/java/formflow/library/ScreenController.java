@@ -85,13 +85,22 @@ public class ScreenController extends FormFlowController {
   ModelAndView getScreen(
       @PathVariable String flow,
       @PathVariable String screen,
+      @RequestParam(required = false) Map<String,String> query_params,
       @RequestParam(value = "uuid", required = false) String uuid,
       HttpSession httpSession
   ) {
-    log.info(String.format("/flow/%s/%s 🚀", flow, screen));
+    log.info(String.format("/flow/%s/%s 🚀su", flow, screen));
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+    if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())){
+      submission.mergeUrlParamsWithData(query_params);
+    } else {
+      submission.setUrlParams(query_params);
+    }
+    submission.setFlow(flow);
+    saveToRepository(submission);
+    httpSession.setAttribute("id", submission.getId());
     if (currentScreen == null) {
       return new ModelAndView("redirect:/error");
     }
@@ -136,7 +145,6 @@ public class ScreenController extends FormFlowController {
   @PostMapping("{flow}/{screen}")
   ModelAndView postScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
-      @RequestParam(required = false) Map<String,String> query_params,
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession
@@ -172,7 +180,6 @@ public class ScreenController extends FormFlowController {
     } else {
       submission.setFlow(flow);
       submission.setInputData(formSubmission.getFormData());
-      submission.setUrlParams(query_params);
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
