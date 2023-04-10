@@ -136,6 +136,7 @@ public class ScreenController extends FormFlowController {
   @PostMapping("{flow}/{screen}")
   ModelAndView postScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
+      @RequestParam(required = false) Map<String,String> query_params,
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession
@@ -171,6 +172,7 @@ public class ScreenController extends FormFlowController {
     } else {
       submission.setFlow(flow);
       submission.setInputData(formSubmission.getFormData());
+      submission.setUrlParams(query_params);
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);

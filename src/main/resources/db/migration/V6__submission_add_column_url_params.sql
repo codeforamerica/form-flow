@@ -1,0 +1,1 @@
+alter table submissions add column input_data JSONB NOT NULL;
