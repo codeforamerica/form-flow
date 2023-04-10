@@ -36,23 +36,20 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   @MockBean
   private AddressValidationService addressValidationService;
 
-  @Autowired
-  private SubmissionRepositoryService submissionRepositoryService;
-
-  @Autowired
-  private ScreenController screenController;
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
-    mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
     submission = Submission.builder().id(submissionUUID).build();
     super.setUp();
   }
 
   @Nested
   public class UrlParameterPersistence {
+
+    @MockBean
+    private SubmissionRepositoryService submissionRepositoryService;
 
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
