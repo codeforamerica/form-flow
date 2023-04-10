@@ -4,23 +4,63 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
+import formflow.library.ScreenController;
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.data.Submission;
+import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 public class ScreenControllerTest extends AbstractMockMvcTest {
 
   @MockBean
   private AddressValidationService addressValidationService;
+
+  @Autowired
+  private SubmissionRepositoryService submissionRepositoryService;
+
+  @Autowired
+  private ScreenController screenController;
+
+  @Override
+  @BeforeEach
+  public void setUp() throws Exception {
+    UUID submissionUUID = UUID.randomUUID();
+    mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
+    submission = Submission.builder().id(submissionUUID).build();
+    super.setUp();
+  }
+
+  @Nested
+  public class UrlParameterPersistence {
+
+    @Test
+    public void passedUrlParametersShouldBeSaved() throws Exception {
+//      session = new MockHttpSession();
+      when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+      getWithQueryParam("testAddressValidation", "lang", "en");
+    }
+  }
 
   @Nested
   public class AddressValidation {
