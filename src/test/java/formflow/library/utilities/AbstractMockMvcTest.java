@@ -48,7 +48,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = MOCK)
+@SpringBootTest(webEnvironment = MOCK, properties = {"form-flow.path=/flows-config/test-flow.yaml"})
 @AutoConfigureMockMvc
 @ContextConfiguration
 public abstract class AbstractMockMvcTest {

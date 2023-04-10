@@ -1,5 +1,6 @@
 package formflow.library.config;
 
+import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,7 +28,7 @@ public class FlowsConfigurationFactoryConfig {
    * @return list of flow configuration objects
    */
   @Bean
-  public List<FlowConfiguration> flowsConfiguration() {
+  public List<FlowConfiguration> flowsConfiguration() throws IOException {
     return flowsConfigurationFactory().getObject();
   }
 }
