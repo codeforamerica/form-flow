@@ -89,7 +89,7 @@ public class ScreenController extends FormFlowController {
       @RequestParam(value = "uuid", required = false) String uuid,
       HttpSession httpSession
   ) {
-    log.info(String.format("/flow/%s/%s 🚀su", flow, screen));
+    log.info(String.format("/flow/%s/%s 🚀", flow, screen));
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
