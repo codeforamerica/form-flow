@@ -52,15 +52,8 @@ public class TestFlow extends FlowInputs {
 
   @Positive()
   String validatePositiveIfNotEmpty;
-
-  @Email(message = "please enter a valid email")
-  String emailAddress;
-
-  String phoneNumber;
-
-  ArrayList<String> contactMethod;
-
-//    Old approach
+  
+  //    Old approach
 //  HashMap<String, HashMap<String, String>> address;
 //  HashMap<String, HashMap<String, String>> addressValidated;
 
