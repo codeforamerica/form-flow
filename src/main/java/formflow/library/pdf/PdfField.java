@@ -1,8 +1,12 @@
 package formflow.library.pdf;
 
-public interface PdfField {
+import java.util.Optional;
 
-  String getName();
+public record PdfField(String name, String value) {
 
-  String getValue();
+  public PdfField(String name, String value) {
+    this.name = name;
+    this.value = Optional.ofNullable(value).orElse("");
+  }
+
 }

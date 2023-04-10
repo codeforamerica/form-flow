@@ -27,7 +27,7 @@ class PDFBoxFieldFillerTest {
   void shouldMapTextFields() throws IOException {
     String expectedFieldValue = "Michael";
     Collection<PdfField> fields = List.of(
-        new SimplePdfField("TEXT_FIELD", expectedFieldValue)
+        new PdfField("TEXT_FIELD", expectedFieldValue)
     );
 
     ApplicationFile applicationFile = PDFBoxFieldFiller.fill(fields, "");
@@ -48,7 +48,7 @@ class PDFBoxFieldFillerTest {
   @Test
   void shouldSetTheAppropriateNonValueForTheFieldType() throws IOException {
     Collection<PdfField> fields = List.of(
-        new SimplePdfField("TEXT_FIELD", null)
+        new PdfField("TEXT_FIELD", null)
     );
 
     ApplicationFile applicationFile = PDFBoxFieldFiller.fill(fields, "");
@@ -75,7 +75,7 @@ class PDFBoxFieldFillerTest {
   void shouldReturnTheAppropriateFilename() {
     String fileName = "fileName.pdf";
     ApplicationFile applicationFile = PDFBoxFieldFiller.fill(emptyList(), fileName);
-    assertThat(applicationFile.getFileName()).isEqualTo(fileName);
+    assertThat(applicationFile.fileName()).isEqualTo(fileName);
   }
 
   @Test
@@ -84,16 +84,16 @@ class PDFBoxFieldFillerTest {
 
     Path path = Files.createTempDirectory("");
     File file = new File(path.toFile(), "test_file.pdf");
-    Files.write(file.toPath(), applicationFile.getFileBytes());
+    Files.write(file.toPath(), applicationFile.fileBytes());
     PDDocument pdDocument = PDDocument.load(file);
 
-    assertThat(pdDocument.getNumberOfPages()).isEqualTo(5);
+    assertThat(pdDocument.getNumberOfPages()).isEqualTo(4);
   }
 
   @Test
   void shouldNotThrowException_whenFieldIsNotFound() {
     assertThatCode(() -> PDFBoxFieldFiller.fill(List.of(
-            new SimplePdfField("definitely-not-a-field", "")),
+            new PdfField("definitely-not-a-field", "")),
         "test_file.txt")).doesNotThrowAnyException();
   }
 
@@ -103,7 +103,7 @@ class PDFBoxFieldFillerTest {
 //    String expectedValue = "Michael😃";
 //
 //    Collection<PdfField> fields = List.of(
-//        new SimplePdfField("TEXT_FIELD", submittedValue)
+//        new PdfField("TEXT_FIELD", submittedValue)
 //    );
 //    ApplicationFile applicationFile = PDFBoxFieldFiller.fill(fields, "", "");
 //    PDAcroForm acroForm = getPdAcroForm(applicationFile);
@@ -114,7 +114,7 @@ class PDFBoxFieldFillerTest {
   private PDAcroForm getPdAcroForm(ApplicationFile applicationFile) throws IOException {
     Path path = Files.createTempDirectory("");
     File file = new File(path.toFile(), "Multipage-UBI-Form.pdf");
-    Files.write(file.toPath(), applicationFile.getFileBytes());
+    Files.write(file.toPath(), applicationFile.fileBytes());
 
     PDDocument pdDocument = PDDocument.load(file);
     return pdDocument.getDocumentCatalog().getAcroForm();

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import formflow.library.data.Submission;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,9 @@ class DocumentFieldPreparersTest {
 
   @BeforeEach
   void setUp() {
-    // TODO Setup SUbmission object here
     preparers = new DocumentFieldPreparers(List.of());
     testSubmission = Submission.builder()
-        .id(1L)
+        .id(UUID.randomUUID())
         .submittedAt(DateTime.parse("2020-09-02").toDate())
         .build();
   }
@@ -47,7 +47,6 @@ class DocumentFieldPreparersTest {
   }
 
 
-  //how does this test verify the documents were successfully submitted?
   @Test
   void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
     DocumentFieldPreparer successfulPreparer = mock(DocumentFieldPreparer.class);

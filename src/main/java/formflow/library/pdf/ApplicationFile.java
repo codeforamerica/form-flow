@@ -1,12 +1,9 @@
 package formflow.library.pdf;
 
-import lombok.ToString;
-import lombok.Value;
+public record ApplicationFile(byte[] fileBytes, String fileName) {
 
-@Value
-@ToString(exclude = {"fileBytes"})
-public class ApplicationFile {
-
-  byte[] fileBytes;
-  String fileName;
+  @Override
+  public String toString() {
+    return fileName;
+  }
 }

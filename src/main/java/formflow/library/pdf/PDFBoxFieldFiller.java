@@ -76,15 +76,15 @@ public class PDFBoxFieldFiller implements PdfFieldFiller {
 
   private void fillAcroForm(Collection<PdfField> fields, PDAcroForm acroForm) {
     fields.forEach(field ->
-        Optional.ofNullable(acroForm.getField(field.getName())).ifPresent(pdField -> {
+        Optional.ofNullable(acroForm.getField(field.name())).ifPresent(pdField -> {
           try {
-            String fieldValue = field.getValue();
-            if (pdField instanceof PDCheckBox && field.getValue().equals("No")) {
+            String fieldValue = field.value();
+            if (pdField instanceof PDCheckBox && field.value().equals("No")) {
               fieldValue = "Off";
             }
             setPdfFieldWithoutUnsupportedUnicode(fieldValue, pdField);
           } catch (Exception e) {
-            throw new RuntimeException("Error setting field: " + field.getName(), e);
+            throw new RuntimeException("Error setting field: " + field.name(), e);
           }
         }));
   }

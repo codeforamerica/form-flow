@@ -28,7 +28,7 @@ class PdfFieldMapperTest {
     PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMapConfiguration));
     List<PdfField> fields = pdfFieldMapper.map(List.of(documentField), "testFlow");
 
-    assertThat(fields).contains(new SimplePdfField(pdfFieldName, stringValue)); // applicantFirstName, Joe Schmoe 
+    assertThat(fields).contains(new PdfField(pdfFieldName, stringValue)); // applicantFirstName, Joe Schmoe 
   }
 
   @Test
@@ -83,7 +83,7 @@ class PdfFieldMapperTest {
 //    PdfFieldMapper subject = new PdfFieldMapper(configMap, emptyMap());
 //    List<PdfField> fields = subject.map(List.of(documentField));
 //
-//    assertThat(fields).contains(new SimplePdfField(fieldName, "01/20/3312"));
+//    assertThat(fields).contains(new PdfField(fieldName, "01/20/3312"));
 //  }
 
 //  @Test
@@ -162,8 +162,8 @@ class PdfFieldMapperTest {
 //    assertThat(fields).contains(
 //        new BinaryPdfField(fieldName1 + "_0"),
 //        new BinaryPdfField(fieldName2 + "_0"),
-//        new SimplePdfField(fieldName3 + "_1", value1),
-//        new SimplePdfField(fieldName4 + "_2", "01/20/3312")
+//        new PdfField(fieldName3 + "_1", value1),
+//        new PdfField(fieldName4 + "_2", "01/20/3312")
 //    );
 //  }
 
@@ -186,6 +186,6 @@ class PdfFieldMapperTest {
 //
 //    List<PdfField> fields = subject.map(List.of(documentField));
 //
-//    assertThat(fields).contains(new SimplePdfField(fieldName, resultValue));
+//    assertThat(fields).contains(new PdfField(fieldName, resultValue));
 //  }
 }

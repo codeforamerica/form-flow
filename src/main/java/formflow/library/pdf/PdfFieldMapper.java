@@ -20,7 +20,7 @@ public class PdfFieldMapper {
     return documentFields.stream()
         .filter(input -> !input.getValue().isEmpty())
         .map(documentField -> makePdfFieldsForInput(documentField, flow))
-        .filter(pdfField -> pdfField.getName() != null)
+        .filter(pdfField -> pdfField.name() != null)
         .collect(Collectors.toList());
   }
 
@@ -30,12 +30,12 @@ public class PdfFieldMapper {
 //      case DATE_VALUE -> simplePdfFields(input, this::getDateFormattedValue);
 //      case ENUMERATED_MULTI_VALUE -> binaryPdfFields(input);
 //      case UNUSED -> Stream.of();
-      default -> simplePdfField(input, this::getOrDefaultInputValue, flow);
+      default -> mapFieldFromFlow(input, this::getOrDefaultInputValue, flow);
     };
   }
 
   @NotNull
-  private SimplePdfField simplePdfField(DocumentField input,
+  private PdfField mapFieldFromFlow(DocumentField input,
       Function<DocumentField, String> valueMapper, String flow) {
 
     Map<String, String> pdfInputsMap = pdfMapConfigurations.stream()
@@ -46,19 +46,7 @@ public class PdfFieldMapper {
 
     String pdfInputName = input.getPdfName(pdfInputsMap);
 
-    return new SimplePdfField(pdfInputName, valueMapper.apply(input));
-  }
-
-  @NotNull
-  private BinaryPdfField binaryPdfFields(DocumentField input, String flow) {
-
-    Map<String, String> pdfInputsMap = pdfMapConfigurations.stream()
-        .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
-        .getInputs();
-
-    return new BinaryPdfField(input.getMultiValuePdfName(pdfInputsMap, input.getValue()));
+    return new PdfField(pdfInputName, valueMapper.apply(input));
   }
 
   @NotNull

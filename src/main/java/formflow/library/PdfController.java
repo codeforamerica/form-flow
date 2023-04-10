@@ -1,8 +1,10 @@
 package formflow.library;
 
+import formflow.library.pdf.ApplicationFile;
+import formflow.library.pdf.PdfGenerator;
+import formflow.library.pdf.PdfLocationConfiguration;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +23,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/download")
 public class PdfController {
 
+
   @Value("${form-flow.pdf.path}")
-  String configPath;
+  private String configPath;
+
+  private final PdfGenerator pdfGenerator;
+  private final PdfLocationConfiguration pdfLocationConfiguration;
+
+  public PdfController(PdfGenerator pdfGenerator, PdfLocationConfiguration pdfLocationConfiguration) {
+    this.pdfGenerator = pdfGenerator;
+    this.pdfLocationConfiguration = pdfLocationConfiguration;
+  }
 
   @GetMapping("{flow}/{submissionId}/{nameOfDocument}")
   ResponseEntity<byte[]> downloadPdf(
@@ -32,9 +43,9 @@ public class PdfController {
       HttpSession httpSession
   ) throws IOException {
     log.info("Downloading PDF with submission_id: " + submissionId);
-    byte[] bytesFromFile = Files.readAllBytes(Path.of(configPath + "Multipage-UBI-Form.pdf"));
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + nameOfDocument + "-" + submissionId + ".pdf");
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(bytesFromFile);
+    ApplicationFile filledPdf = pdfGenerator.generate(pdfLocationConfiguration.get(nameOfDocument), UUID.fromString(submissionId));
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
   }
 }

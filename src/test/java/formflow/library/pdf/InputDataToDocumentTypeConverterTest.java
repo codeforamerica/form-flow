@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import formflow.library.data.Submission;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ class InputDataToDocumentTypeConverterTest {
   @BeforeEach
   void setUp() {
     testSubmission = Submission.builder()
-        .id(1L)
+        .id(UUID.randomUUID())
         .submittedAt(DateTime.parse("2020-09-02").toDate())
         .flow("testFlow")
         .build();
