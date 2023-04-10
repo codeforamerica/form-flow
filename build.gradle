@@ -55,7 +55,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:24.0.1'
     implementation 'com.vladmihalcea:hibernate-types-55:2.21.1'
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'org.flywaydb:flyway-core:9.15.2'
+    implementation 'org.flywaydb:flyway-core:9.16.3'
     implementation 'net.coobird:thumbnailator:0.4.19'
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
