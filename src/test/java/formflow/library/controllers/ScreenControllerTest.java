@@ -56,9 +56,11 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
-//      session = new MockHttpSession();
       when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+      Map<String, String> queryParams = new HashMap<>();
+      queryParams.put("lang", "en");
       getWithQueryParam("testAddressValidation", "lang", "en");
+      assert(submission.getUrlParams().equals(queryParams));
     }
   }
 
