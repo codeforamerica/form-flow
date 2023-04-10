@@ -41,7 +41,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
-    submission = Submission.builder().id(submissionUUID).build();
+    submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).build();
     super.setUp();
   }
 
@@ -56,7 +56,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
       Map<String, String> queryParams = new HashMap<>();
       queryParams.put("lang", "en");
-      getWithQueryParam("testAddressValidation", "lang", "en");
+      getWithQueryParam("test", "lang", "en");
       assert(submission.getUrlParams().equals(queryParams));
     }
   }
