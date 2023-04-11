@@ -4,7 +4,7 @@
 <th:block
     th:fragment="selectOptionPlaceholder"
     th:assert="${!#strings.isEmpty(optionText)}">
-  <option value="" disabled selected th:text="${optionText}"></option>
+  <option value="" th:text="${optionText}"></option>
 </th:block>
 </body>
 </html>
