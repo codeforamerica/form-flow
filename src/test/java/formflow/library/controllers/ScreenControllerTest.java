@@ -36,24 +36,28 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   @MockBean
   private AddressValidationService addressValidationService;
 
+  @MockBean
+  private SubmissionRepositoryService submissionRepositoryService;
+
+
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
-    submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).build();
+    submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
+    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     super.setUp();
   }
 
   @Nested
   public class UrlParameterPersistence {
 
-    @MockBean
-    private SubmissionRepositoryService submissionRepositoryService;
-
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
-      when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+//      UUID submissionUUID = UUID.randomUUID();
+//      Submission submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).build();
+//      when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
       Map<String, String> queryParams = new HashMap<>();
       queryParams.put("lang", "en");
       getWithQueryParam("test", "lang", "en");
