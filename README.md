@@ -1092,9 +1092,8 @@ Note that we use three seperate fragments here, `select`, `selectOptionPlacehold
 and `selectOption`.
 
 `select` wraps the internal options and provides a label and optional help text for the grouping.
-`selectOptionPlaceholder` is used to provide a placeholder option that will be displayed but
-not
-selectable. It will appear greyed out to the user. This should typically be the first item in the
+`selectOptionPlaceholder` is used to provide a placeholder option that will be displayed with an
+empty value. This should typically be the first item in the
 list of
 possible selections.
 `selectOption` represents a selectable option where value represents what will be submitted to the
@@ -1709,10 +1708,13 @@ file.
 # Developer Setup
 
 ## Mac and Linux
-After cloning the repository, run `./setupsh` from the root of the repo's directory. 
+
+After cloning the repository, run `./setupsh` from the root of the repo's directory.
 
 ## Windows
-Check the setup script for the most up to date list of dependencies and steps you'll need to install manually.
+
+Check the setup script for the most up to date list of dependencies and steps you'll need to install
+manually.
 
 ## Spring Profiles
 
