@@ -2,7 +2,7 @@ package formflow.library;
 
 import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
-import formflow.library.pdf.PdfLocationConfiguration;
+import formflow.library.pdf.PdfMapConfiguration;
 import java.io.IOException;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
@@ -28,24 +28,23 @@ public class PdfController {
   private String configPath;
 
   private final PdfGenerator pdfGenerator;
-  private final PdfLocationConfiguration pdfLocationConfiguration;
+  private final PdfMapConfiguration pdfMapConfiguration;
 
-  public PdfController(PdfGenerator pdfGenerator, PdfLocationConfiguration pdfLocationConfiguration) {
+  public PdfController(PdfGenerator pdfGenerator, PdfMapConfiguration pdfMapConfiguration) {
     this.pdfGenerator = pdfGenerator;
-    this.pdfLocationConfiguration = pdfLocationConfiguration;
+    this.pdfMapConfiguration = pdfMapConfiguration;
   }
 
-  @GetMapping("{flow}/{submissionId}/{nameOfDocument}")
+  @GetMapping("{flow}/{submissionId}")
   ResponseEntity<byte[]> downloadPdf(
       @PathVariable String flow,
       @PathVariable String submissionId,
-      @PathVariable String nameOfDocument,
       HttpSession httpSession
   ) throws IOException {
     log.info("Downloading PDF with submission_id: " + submissionId);
+    ApplicationFile filledPdf = pdfGenerator.generate(pdfMapConfiguration.getPdfFile(flow), UUID.fromString(submissionId));
     HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + nameOfDocument + "-" + submissionId + ".pdf");
-    ApplicationFile filledPdf = pdfGenerator.generate(pdfLocationConfiguration.get(nameOfDocument), UUID.fromString(submissionId));
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.fileName(), submissionId));
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
   }
 }

@@ -1,7 +1,6 @@
 package formflow.library.config;
 
 import formflow.library.pdf.PdfMapConfiguration;
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +21,7 @@ public class PdfMapConfigurationFactoryConfig {
    * @return list of flow configuration objects
    */
   @Bean
-  public List<PdfMapConfiguration> pdfMapConfiguration() {
-    return new PdfMapConfigurationFactory().getObject();
+  public PdfMapConfiguration pdfMapConfiguration() {
+    return new PdfMapConfiguration(new PdfMapConfigurationFactory().getObject());
   }
 }

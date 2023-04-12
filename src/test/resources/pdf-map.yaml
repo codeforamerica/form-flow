@@ -1,3 +1,7 @@
 flow: ubi
+pdf:
+    template: UBI-Application.pdf
 inputs:
-  firstName: APPLICANT_LEGAL_NAME_FIRST
+  firstName: FIRST_NAME
+  lastName: LAST_NAME
+---

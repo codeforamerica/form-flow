@@ -1,6 +1,7 @@
 package formflow.library.config;
 
 import formflow.library.pdf.PdfMapConfiguration;
+import formflow.library.pdf.PdfMapConfiguration.PdfMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +16,13 @@ import org.yaml.snakeyaml.representer.Representer;
 /**
  * Parses the pdf map yaml file and creates corresponding PdfFieldMap Beans.
  */
-public class PdfMapConfigurationFactory implements FactoryBean<List<PdfMapConfiguration>> {
+public class PdfMapConfigurationFactory implements FactoryBean<List<PdfMap>> {
 
   //  @Value("${form-flow.path:flows-config.yaml}")
   String configPath = "pdf-map.yaml";
 
   @Override
-  public List<PdfMapConfiguration> getObject() {
+  public List<PdfMap> getObject() {
     ClassPathResource classPathResource = new ClassPathResource(configPath);
 
     LoaderOptions loaderOptions = new LoaderOptions();
@@ -29,19 +30,19 @@ public class PdfMapConfigurationFactory implements FactoryBean<List<PdfMapConfig
     loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
     loaderOptions.setAllowRecursiveKeys(true);
 
-    Yaml yaml = new Yaml(new Constructor(PdfMapConfiguration.class), new Representer(),
+    Yaml yaml = new Yaml(new Constructor(PdfMap.class), new Representer(),
         new DumperOptions(), loaderOptions);
-    List<PdfMapConfiguration> pdfMapConfigurations = new ArrayList<>();
+    List<PdfMap> pdfMaps = new ArrayList<>();
     try {
       Iterable<Object> pdfMapConfigurationIterable = yaml.loadAll(classPathResource.getInputStream());
       pdfMapConfigurationIterable.forEach(pdfMapConfiguration -> {
-        pdfMapConfigurations.add((PdfMapConfiguration) pdfMapConfiguration);
+        pdfMaps.add((PdfMap) pdfMapConfiguration);
       });
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    return pdfMapConfigurations;
+    return pdfMaps;
   }
 
   @Override
