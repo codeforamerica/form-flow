@@ -2,7 +2,7 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-    th:fragment="date"
+    th:fragment="date(inputName, groupName)"
     th:with="
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
@@ -18,7 +18,7 @@
         errorMessages != null &&
         errorMessages.get(inputName + 'Year') != null &&
         #arrays.length(errorMessages.get(inputName + 'Year')) > 0 }"
-    th:assert="${!#strings.isEmpty(inputName)}, ${hasLabel || hasAriaLabel}">
+    th:assert="${hasLabel || hasAriaLabel}">
   <div
       th:class="'form-group' + ${((hasErrorMonth || hasErrorDay || hasErrorYear) ? ' form-group--error' : '')}">
     <fieldset th:id="${groupName}" class="input-group input-group--inline">
