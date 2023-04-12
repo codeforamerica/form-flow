@@ -61,6 +61,10 @@ public class Submission {
   @Column(name = "input_data", columnDefinition = "jsonb")
   private Map<String, Object> inputData;
 
+  @Type(type = "json")
+  @Column(name = "url_params", columnDefinition = "jsonb")
+  private Map<String, String> urlParams;
+
   @CreationTimestamp
   @Temporal(TIMESTAMP)
   @Column(name = "created_at")
@@ -77,6 +81,7 @@ public class Submission {
 
   public Submission() {
     inputData = new HashMap<>();
+    urlParams = new HashMap<>();
   }
 
 
@@ -117,6 +122,10 @@ public class Submission {
   public void mergeFormDataWithSubmissionData(FormSubmission formSubmission) {
     inputData.forEach((key, value) -> formSubmission.getFormData().merge(key, value, (newValue, oldValue) -> newValue));
     inputData = formSubmission.getFormData();
+  }
+
+  public void mergeUrlParamsWithData(Map<String, String> passedParams){
+    urlParams.putAll(passedParams);
   }
 
   /**
