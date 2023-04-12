@@ -92,7 +92,8 @@ public abstract class AbstractMockMvcTest {
 
   protected ResultActions getWithQueryParam(String pageName, String queryParam, String value)
       throws Exception {
-    return mockMvc.perform(get("/pages/" + pageName).queryParam(queryParam, value))
+    String getUrl = getUrlForPageName(pageName);
+    return mockMvc.perform(get(getUrl).queryParam(queryParam, value))
         .andExpect(status().isOk());
   }
 
