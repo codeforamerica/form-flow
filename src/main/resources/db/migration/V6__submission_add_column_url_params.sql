@@ -1,1 +1,2 @@
-alter table submissions add column url_params JSONB NOT NULL;
+alter table submissions
+    add column url_params JSONB;
