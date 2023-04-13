@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
+import formflow.library.pdf.PdfMap;
 import formflow.library.pdf.PdfMapConfiguration;
 import java.io.IOException;
 import java.util.List;
@@ -31,11 +32,13 @@ public class PdfController {
   private String configPath;
 
   private final PdfGenerator pdfGenerator;
-  private final List<PdfMapConfiguration> pdfMapConfigurations;
+  private final PdfMap pdfMap;
+//  private final List<PdfMapConfiguration> pdfMapConfigurations;
 
-  public PdfController(PdfGenerator pdfGenerator, List<PdfMapConfiguration> pdfMapConfigurations) {
+  public PdfController(PdfGenerator pdfGenerator, PdfMap pdfMap) {
     this.pdfGenerator = pdfGenerator;
-    this.pdfMapConfigurations = pdfMapConfigurations;
+    this.pdfMap = pdfMap;
+//    this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
   @GetMapping("{flow}/{submissionId}")
@@ -52,10 +55,11 @@ public class PdfController {
   }
 
   private ApplicationFile getPdfFromFlow(String flow) throws IOException {
-    PdfMapConfiguration pdfMap = pdfMapConfigurations.stream().filter(config -> config.getFlow().equals(flow))
+    List<PdfMapConfiguration> maps = pdfMap.getMaps();
+    PdfMapConfiguration pdfConfig = maps.stream().filter(config -> config.getFlow().equals(flow))
         .findFirst().orElseThrow(IOException::new);
 
-    return new ApplicationFile(requireNonNull(getClass().getResourceAsStream(pdfMap.getPdf())).readAllBytes(),
-        pdfMap.getPdf());
+    return new ApplicationFile(requireNonNull(getClass().getResourceAsStream(pdfConfig.getPdf())).readAllBytes(),
+        pdfConfig.getPdf());
   }
 }

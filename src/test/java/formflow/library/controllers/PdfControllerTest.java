@@ -13,6 +13,7 @@ import formflow.library.PdfController;
 import formflow.library.data.Submission;
 import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
+import formflow.library.pdf.PdfMap;
 import formflow.library.pdf.PdfMapConfiguration;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
@@ -36,13 +37,15 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   private String testPdf;
   private ApplicationFile emptyPdf;
   private ApplicationFile filledPdf;
+  private PdfMap pdfMap;
 
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
     testPdf = "Multipage-UBI-Form";
-    pdfController = new PdfController(pdfGenerator, pdfMapConfigurations);
+    pdfMap = new PdfMap(pdfMapConfigurations);
+    pdfController = new PdfController(pdfGenerator, pdfMap);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
     submission = Submission.builder().id(UUID.randomUUID()).build();
 

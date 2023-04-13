@@ -51,6 +51,6 @@ public class PdfMapConfigurationFactory implements FactoryBean<List<PdfMapConfig
 
   @Override
   public boolean isSingleton() {
-    return false;
+    return true;
   }
 }
