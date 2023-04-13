@@ -53,13 +53,13 @@ public class TestFlow extends FlowInputs {
   @Positive()
   String validatePositiveIfNotEmpty;
 
-  @Email(message = "please enter a valid email")
-  String emailAddress;
+  @Email(message = "Please enter a valid email address.")
+  String email;
 
   String phoneNumber;
 
   ArrayList<String> howToContactYou;
-  
+
   @NotBlank
   String validationOffStreetAddress1;
   String validationOffStreetAddress2;
