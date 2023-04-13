@@ -94,8 +94,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     userFiles.put(1L, UserFile.createFileInfo(testUserFile, "thumbnail"));
     testDzInstanceMap.put("dropZoneTestInstance", userFiles);
     session = new MockHttpSession();
-    session.putValue("id", fileId);
-    session.putValue("userFiles", testDzInstanceMap);
+    session.setAttribute("id", fileId);
+    session.setAttribute("userFiles", testDzInstanceMap);
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
@@ -130,8 +130,8 @@ public class UploadControllerTest extends AbstractMockMvcTest {
           ), "thumbnail"));
       dzWidgets.put(dzWidgetInputName, userFiles);
       session = new MockHttpSession();
-      session.putValue("id", submission.getId());
-      session.putValue("userFiles", dzWidgets);
+      session.setAttribute("id", submission.getId());
+      session.setAttribute("userFiles", dzWidgets);
     }
 
     @Test

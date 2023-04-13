@@ -1,10 +1,16 @@
 package formflow.library.data;
 
-import static javax.persistence.TemporalType.TIMESTAMP;
+import static jakarta.persistence.TemporalType.TIMESTAMP;
 
-import com.vladmihalcea.hibernate.type.json.JsonType;
 import formflow.library.inputs.AddressParts;
 import formflow.library.inputs.UnvalidatedField;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,12 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +26,6 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +36,7 @@ import org.springframework.stereotype.Component;
  * This class also provides a few static functions to work with Submissions.
  * </p>
  */
-@TypeDef(
-    name = "json", typeClass = JsonType.class
-)
+
 @Entity
 @Table(name = "submissions")
 @Getter
@@ -57,7 +54,7 @@ public class Submission {
   @Column(name = "flow")
   private String flow;
 
-  @Type(type = "json")
+  @Type(JsonType.class)
   @Column(name = "input_data", columnDefinition = "jsonb")
   private Map<String, Object> inputData;
 
