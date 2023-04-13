@@ -14,14 +14,12 @@ import formflow.library.data.Submission;
 import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
 import formflow.library.pdf.PdfMapConfiguration;
-import formflow.library.pdf.PdfMapConfiguration.PdfMap;
-import formflow.library.pdf.PdfMapConfiguration.TemplateConfiguration;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -32,22 +30,19 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   private Submission submission;
   private MockMvc mockMvc;
   private PdfController pdfController;
+  @Autowired
   private List<PdfMapConfiguration> pdfMapConfigurations;
   private PdfGenerator pdfGenerator = mock(PdfGenerator.class);
   private String testPdf;
   private ApplicationFile emptyPdf;
   private ApplicationFile filledPdf;
 
+
   @Override
   @BeforeEach
   public void setUp() throws Exception {
     testPdf = "Multipage-UBI-Form";
-    pdfController = new PdfController(pdfGenerator, new PdfMapConfiguration(
-        List.of(new PdfMap(
-            "ubi",
-            Map.of("firstName", "FIRST_NAME", "lastName", "LAST_NAME"),
-            new TemplateConfiguration(testPdf)
-    ))));
+    pdfController = new PdfController(pdfGenerator, pdfMapConfigurations);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
     submission = Submission.builder().id(UUID.randomUUID()).build();
 
@@ -63,7 +58,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   public void getDownloadGeneratesAndReturnsFilledPdf() throws Exception {
     MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()))
         .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=z%s-%s.pdf".formatted(filledPdf.fileName(), submission.getId())))
+            "attachment; filename=%s-%s.pdf".formatted(filledPdf.fileName(), submission.getId())))
         .andExpect(status().is2xxSuccessful())
         .andReturn();
     assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdf.fileBytes());

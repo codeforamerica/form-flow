@@ -3,8 +3,6 @@ package formflow.library.pdf;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import formflow.library.pdf.PdfMapConfiguration.PdfMap;
-import formflow.library.pdf.PdfMapConfiguration.TemplateConfiguration;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -20,12 +18,14 @@ class PdfFieldMapperTest {
     String inputName = "testInput";
     String pdfFieldName = "TEST_FIELD";
     String stringValue = "testValue";
-    PdfMap pdfMap = new PdfMap("testFlow", Map.of(inputName, pdfFieldName), new TemplateConfiguration(""));
+    PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration();
+    pdfMapConfiguration.setFlow("testFlow");
+    pdfMapConfiguration.setInputs(Map.of(inputName, pdfFieldName));
 
     DocumentField documentField = new DocumentField(inputName,
         stringValue, DocumentFieldType.SINGLE_VALUE, null);
 
-    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(new PdfMapConfiguration(List.of(pdfMap)));
+    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMapConfiguration));
     List<PdfField> fields = pdfFieldMapper.map(List.of(documentField), "testFlow");
 
     assertThat(fields).contains(new PdfField(pdfFieldName, stringValue)); // applicantFirstName, Joe Schmoe 
@@ -35,12 +35,14 @@ class PdfFieldMapperTest {
   public void shouldNotMapInputsWithoutPdfFieldMappings() {
     String formInputName = "some-input";
     String flowName = "testFlow";
-    PdfMap pdfMap = new PdfMap(flowName, emptyMap(), new TemplateConfiguration(""));
+    PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration();
+    pdfMapConfiguration.setFlow(flowName);
+    pdfMapConfiguration.setInputs(emptyMap());
 
     DocumentField documentField = new DocumentField(formInputName,
         "someValue", DocumentFieldType.SINGLE_VALUE, null);
 
-    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(new PdfMapConfiguration(List.of(pdfMap)));
+    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMapConfiguration));
     List<PdfField> fields = pdfFieldMapper.map(List.of(documentField), flowName);
 
     assertThat(fields).isEmpty();
@@ -54,11 +56,14 @@ class PdfFieldMapperTest {
     String stringValue = "";
     String pdfFieldName = "TEST_FIELD";
 
-    PdfMap pdfMap = new PdfMap(flowName, Map.of(formInputName, pdfFieldName), new TemplateConfiguration(""));
+    PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration();
+    pdfMapConfiguration.setFlow(flowName);
+    pdfMapConfiguration.setInputs(Map.of(formInputName, pdfFieldName));
+
     DocumentField documentField = new DocumentField(formInputName, stringValue,
         documentFieldType, null);
 
-    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(new PdfMapConfiguration(List.of(pdfMap)));
+    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMapConfiguration));
     List<PdfField> fields = pdfFieldMapper.map(List.of(documentField), flowName);
 
     assertThat(fields).isEmpty();

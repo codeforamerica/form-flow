@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PdfFieldMapper {
 
-  private final PdfMapConfiguration pdfMapConfiguration;
+  private final List<PdfMapConfiguration> pdfMapConfigurations;
 
-  public PdfFieldMapper(PdfMapConfiguration pdfMapConfiguration) {
-    this.pdfMapConfiguration = pdfMapConfiguration;
+  public PdfFieldMapper(List<PdfMapConfiguration> pdfMapConfigurations) {
+    this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
   public List<PdfField> map(List<DocumentField> documentFields, String flow) {
@@ -37,7 +37,12 @@ public class PdfFieldMapper {
   @NotNull
   private PdfField mapFieldFromFlow(DocumentField input,
       Function<DocumentField, String> valueMapper, String flow) {
-    Map<String, String> pdfInputsMap = pdfMapConfiguration.getMap(flow).inputs();
+
+    Map<String, String> pdfInputsMap = pdfMapConfigurations.stream()
+        .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
+        .getInputs();
 
     String pdfInputName = input.getPdfName(pdfInputsMap);
 

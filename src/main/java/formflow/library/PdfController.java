@@ -1,9 +1,12 @@
 package formflow.library;
 
+import static java.util.Objects.requireNonNull;
+
 import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
 import formflow.library.pdf.PdfMapConfiguration;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +31,11 @@ public class PdfController {
   private String configPath;
 
   private final PdfGenerator pdfGenerator;
-  private final PdfMapConfiguration pdfMapConfiguration;
+  private final List<PdfMapConfiguration> pdfMapConfigurations;
 
-  public PdfController(PdfGenerator pdfGenerator, PdfMapConfiguration pdfMapConfiguration) {
+  public PdfController(PdfGenerator pdfGenerator, List<PdfMapConfiguration> pdfMapConfigurations) {
     this.pdfGenerator = pdfGenerator;
-    this.pdfMapConfiguration = pdfMapConfiguration;
+    this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
   @GetMapping("{flow}/{submissionId}")
@@ -42,9 +45,17 @@ public class PdfController {
       HttpSession httpSession
   ) throws IOException {
     log.info("Downloading PDF with submission_id: " + submissionId);
-    ApplicationFile filledPdf = pdfGenerator.generate(pdfMapConfiguration.getPdfFile(flow), UUID.fromString(submissionId));
+    ApplicationFile filledPdf = pdfGenerator.generate(getPdfFromFlow(flow), UUID.fromString(submissionId));
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.fileName(), submissionId));
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
+  }
+
+  private ApplicationFile getPdfFromFlow(String flow) throws IOException {
+    PdfMapConfiguration pdfMap = pdfMapConfigurations.stream().filter(config -> config.getFlow().equals(flow))
+        .findFirst().orElseThrow(IOException::new);
+
+    return new ApplicationFile(requireNonNull(getClass().getResourceAsStream(pdfMap.getPdf())).readAllBytes(),
+        pdfMap.getPdf());
   }
 }

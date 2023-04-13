@@ -1,7 +1,9 @@
 flow: ubi
-pdf:
-    template: UBI-Application.pdf
+pdf: Multipage-UBI-Form.pdf
 inputs:
-  firstName: FIRST_NAME
-  lastName: LAST_NAME
+  firstName: APPLICANT_LEGAL_NAME_FIRST
 ---
+flow: test
+pdf: fake
+inputs:
+  whatever: fakeinput
