@@ -34,19 +34,17 @@ public class UploadController extends FormFlowController {
 
   private final UserFileRepositoryService uploadedFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
-  private final ValidationService validationService;
 
   private final MessageSource messageSource;
 
   public UploadController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      SubmissionRepositoryService submissionRepositoryService, ValidationService validationService,
+      SubmissionRepositoryService submissionRepositoryService,
       MessageSource messageSource) {
     super(submissionRepositoryService);
     this.uploadedFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
-    this.validationService = validationService;
     this.messageSource = messageSource;
   }
 
