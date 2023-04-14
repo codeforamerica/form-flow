@@ -18,7 +18,7 @@ class PdfFieldMapperTest {
     String inputName = "testInput";
     String pdfFieldName = "TEST_FIELD";
     String stringValue = "testValue";
-    PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration();
+    PdfMap pdfMapConfiguration = new PdfMap();
     pdfMapConfiguration.setFlow("testFlow");
     pdfMapConfiguration.setInputs(Map.of(inputName, pdfFieldName));
 
@@ -35,14 +35,14 @@ class PdfFieldMapperTest {
   public void shouldNotMapInputsWithoutPdfFieldMappings() {
     String formInputName = "some-input";
     String flowName = "testFlow";
-    PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration();
-    pdfMapConfiguration.setFlow(flowName);
-    pdfMapConfiguration.setInputs(emptyMap());
+    PdfMap pdfMap = new PdfMap();
+    pdfMap.setFlow(flowName);
+    pdfMap.setInputs(emptyMap());
 
     DocumentField documentField = new DocumentField(formInputName,
         "someValue", DocumentFieldType.SINGLE_VALUE, null);
 
-    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMapConfiguration));
+    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMap));
     List<PdfField> fields = pdfFieldMapper.map(List.of(documentField), flowName);
 
     assertThat(fields).isEmpty();
@@ -56,14 +56,14 @@ class PdfFieldMapperTest {
     String stringValue = "";
     String pdfFieldName = "TEST_FIELD";
 
-    PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration();
-    pdfMapConfiguration.setFlow(flowName);
-    pdfMapConfiguration.setInputs(Map.of(formInputName, pdfFieldName));
+    PdfMap pdfMap = new PdfMap();
+    pdfMap.setFlow(flowName);
+    pdfMap.setInputs(Map.of(formInputName, pdfFieldName));
 
     DocumentField documentField = new DocumentField(formInputName, stringValue,
         documentFieldType, null);
 
-    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMapConfiguration));
+    PdfFieldMapper pdfFieldMapper = new PdfFieldMapper(List.of(pdfMap));
     List<PdfField> fields = pdfFieldMapper.map(List.of(documentField), flowName);
 
     assertThat(fields).isEmpty();

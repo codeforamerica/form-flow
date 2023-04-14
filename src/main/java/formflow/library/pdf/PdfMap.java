@@ -1,18 +1,12 @@
 package formflow.library.pdf;
 
-import java.util.List;
-import org.springframework.stereotype.Component;
+import java.util.Map;
+import lombok.Data;
 
-@Component
+@Data
 public class PdfMap {
 
-  private final List<PdfMapConfiguration> maps;
-
-  public PdfMap(List<PdfMapConfiguration> maps) {
-    this.maps = maps;
-  }
-
-  public List<PdfMapConfiguration> getMaps() {
-    return maps;
-  }
+  String flow;
+  String pdf;
+  Map<String, String> inputs;
 }

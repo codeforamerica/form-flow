@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PdfFieldMapper {
 
-  private final List<PdfMapConfiguration> pdfMapConfigurations;
+  private final List<PdfMap> pdfMapConfigurations;
 
-  public PdfFieldMapper(List<PdfMapConfiguration> pdfMapConfigurations) {
+  public PdfFieldMapper(List<PdfMap> pdfMapConfigurations) {
     this.pdfMapConfigurations = pdfMapConfigurations;
   }
 

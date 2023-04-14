@@ -1,9 +1,9 @@
 flow: ubi
-pdf: Multipage-UBI-Form.pdf
+pdf: /pdfs/Multipage-UBI-Form.pdf
 inputs:
   firstName: APPLICANT_LEGAL_NAME_FIRST
 ---
 flow: test
-pdf: fake
+pdf: pdfs/fake
 inputs:
   whatever: fakeinput

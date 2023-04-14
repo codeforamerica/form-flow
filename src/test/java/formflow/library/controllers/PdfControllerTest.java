@@ -1,7 +1,10 @@
 package formflow.library.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.PdfController;
+import formflow.library.config.PdfMapFactoryConfig;
 import formflow.library.data.Submission;
 import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
@@ -31,29 +35,31 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   private Submission submission;
   private MockMvc mockMvc;
   private PdfController pdfController;
-  @Autowired
-  private List<PdfMapConfiguration> pdfMapConfigurations;
+  private List<PdfMap> pdfMaps;
   private PdfGenerator pdfGenerator = mock(PdfGenerator.class);
   private String testPdf;
   private ApplicationFile emptyPdf;
   private ApplicationFile filledPdf;
-  private PdfMap pdfMap;
+
+  @Autowired
+  PdfMapFactoryConfig pdfMapFactoryConfig;
 
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
+    pdfMaps = pdfMapFactoryConfig.pdfMaps();
     testPdf = "Multipage-UBI-Form";
-    pdfMap = new PdfMap(pdfMapConfigurations);
-    pdfController = new PdfController(pdfGenerator, pdfMap);
+    PdfMapConfiguration pdfMapConfiguration = spy(new PdfMapConfiguration(pdfMaps));
+    pdfController = new PdfController(pdfGenerator, pdfMapConfiguration);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
     submission = Submission.builder().id(UUID.randomUUID()).build();
 
     emptyPdf = new ApplicationFile(new byte[1], testPdf);
     filledPdf = new ApplicationFile(new byte[2], testPdf + "-filled");
 
+    doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
     when(pdfGenerator.generate(emptyPdf, submission.getId())).thenReturn(filledPdf);
-
     super.setUp();
   }
 
