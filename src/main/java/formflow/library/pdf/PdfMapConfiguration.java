@@ -15,10 +15,6 @@ public class PdfMapConfiguration {
     this.maps = maps;
   }
 
-  public List<PdfMap> getMaps() {
-    return maps;
-  }
-
   public ApplicationFile getPdfFromFlow(String flow) throws IOException {
     PdfMap pdfConfig = maps.stream().filter(config -> config.getFlow().equals(flow))
         .findFirst().orElseThrow(IOException::new);

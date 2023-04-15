@@ -1,5 +1,6 @@
 package formflow.library.pdf;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class PdfTest {
   }
 
   protected byte[] getBytesFromTestPdf(String path) throws IOException {
-    return getClass().getClassLoader().getResourceAsStream("pdfs/" + path).readAllBytes();
+    return requireNonNull(getClass().getClassLoader().getResourceAsStream("pdfs/" + path)).readAllBytes();
   }
 
   protected void preparePdfForAssertions(ApplicationFile filledPdf) throws IOException {
