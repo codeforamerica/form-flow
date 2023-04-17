@@ -22,7 +22,7 @@ public class DocumentField {
   }
 
 
-  public String getPdfName(Map<String, String> pdfFieldMap) {
+  public String getFieldNameForPdf(Map<String, String> pdfFieldMap) {
     String names = pdfFieldMap.get(this.getName());
     return this.getNameWithIteration(names);
   }

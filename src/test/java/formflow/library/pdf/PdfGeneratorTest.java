@@ -1,6 +1,8 @@
 package formflow.library.pdf;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import formflow.library.data.Submission;
@@ -22,30 +24,36 @@ class PdfGeneratorTest extends PdfTest {
   private DocumentFieldPreparers documentFieldPreparers = mock(DocumentFieldPreparers.class);
   private PdfFieldMapper pdfFieldMapper = mock(PdfFieldMapper.class);
 
-
   @BeforeEach
-  void setUp() {
-    pdfGenerator = new PdfGenerator(submissionRepositoryService, documentFieldPreparers, pdfFieldMapper);
+  void setUp() throws IOException {
+    PdfMapConfiguration pdfMapConfiguration = spy(new PdfMapConfiguration(List.of()));
+    pdfGenerator = new PdfGenerator(submissionRepositoryService, documentFieldPreparers, pdfFieldMapper, pdfMapConfiguration);
     submission = Submission.builder().id(UUID.randomUUID()).inputData(
-        Map.of("firstName", "Greatest", "lastName", "Ever")).build();
+        Map.of("firstName", "Greatest", "city", "Minneapolis")).build();
     testPdfName = "Multipage-UBI-Form.pdf";
-    when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
-    DocumentField firstNameField = new DocumentField("APPLICANT_LEGAL_NAME_FIRST", "Greatest", DocumentFieldType.SINGLE_VALUE, null);
-    DocumentField lastNameField = new DocumentField("APPLICANT_CITY", "Minneapolis", DocumentFieldType.SINGLE_VALUE, null);
+    ApplicationFile emptyPdf = new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName);
+    List<DocumentField> documentFields = List.of(
+        new DocumentField("APPLICANT_LEGAL_NAME_FIRST", "Greatest", DocumentFieldType.SINGLE_VALUE, null),
+        new DocumentField("APPLICANT_CITY", "Minneapolis", DocumentFieldType.SINGLE_VALUE, null)
+    );
 
-    when(documentFieldPreparers.prepareDocumentFields(submission)).thenReturn(List.of(firstNameField, lastNameField));
-    when(pdfFieldMapper.map(List.of(firstNameField), "ubi")).thenReturn(List.of(new PdfField("APPLICANT_LEGAL_NAME_FIRST", "Greatest")));
-    when(pdfFieldMapper.map(List.of(lastNameField), "ubi")).thenReturn(List.of(new PdfField("APPLICANT_CITY", "Minneapolis")));
+    doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
+    when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
+    when(documentFieldPreparers.prepareDocumentFields(submission)).thenReturn(documentFields);
+    when(pdfFieldMapper.map(documentFields, "ubi")).thenReturn(List.of(
+        new PdfField("APPLICANT_LEGAL_NAME_FIRST", "Greatest"),
+        new PdfField("APPLICANT_CITY", "Minneapolis")
+    ));
   }
 
   @Test
   void generateReturnsAFilledPdf() throws IOException {
     preparePdfForAssertions(
-        pdfGenerator.generate(new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName), submission.getId())
+        pdfGenerator.generate("ubi", submission.getId())
     );
 
     assertPdfFieldEquals("APPLICANT_LEGAL_NAME_FIRST", submission.getInputData().get("firstName").toString());
-    assertPdfFieldEquals("APPLICANT_CITY", submission.getInputData().get("lastName").toString());
+    assertPdfFieldEquals("APPLICANT_CITY", submission.getInputData().get("city").toString());
   }
 
 }

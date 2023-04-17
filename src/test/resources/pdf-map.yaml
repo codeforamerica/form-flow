@@ -1,7 +1,8 @@
 flow: ubi
-pdf: /pdfs/Multipage-UBI-Form.pdf
+pdf: pdfs/ubi/Multipage-UBI-Form.pdf
 inputs:
   firstName: APPLICANT_LEGAL_NAME_FIRST
+  city: APPLICANT_CITY
 ---
 flow: test
 pdf: pdfs/fake

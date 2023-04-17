@@ -44,9 +44,9 @@ public class PdfFieldMapper {
         .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
         .getInputs();
 
-    String pdfInputName = input.getPdfName(pdfInputsMap);
+    String pdfFieldName = input.getFieldNameForPdf(pdfInputsMap);
 
-    return new PdfField(pdfInputName, valueMapper.apply(input));
+    return new PdfField(pdfFieldName, valueMapper.apply(input));
   }
 
   @NotNull
