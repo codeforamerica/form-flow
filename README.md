@@ -42,7 +42,7 @@ Table of Contents
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
     * [Address Validation](#address-validation)
-    * [Email](#email)
+    * [Sending Email](#sending-email)
         * [Mailgun](#mailgun)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
@@ -1352,7 +1352,7 @@ permits.
 
 ## Address Validation
 
-`Form-flow` will support address validation through [Smarty](https://www.smarty.com/).
+Form-flow library will support address validation through [Smarty](https://www.smarty.com/).
 
 ### Smarty
 
@@ -1488,21 +1488,21 @@ Submission's input data. This is because `residentialAddressStreetAddress1_valid
 present
 if Smarty had performed address validation.
 
-## Email
+## Sending Email
 
-`form-flow` will use Mailgun to send email to applicants.
+Form-flow library will use Mailgun to send email to applicants.
 
 ### Mailgun
 
 #### Register an email account with Mailgun
 
-Go to the mailgun [site](https://www.mailgun.com/) and create a mailgun account. Update DNS records
-and verify your domain. Generate an api key for the mailgun account. Note your mailgun id and key.
+Go to the Mailgun [site](https://www.mailgun.com/) and create a Mailgun account. Update DNS records
+and verify your domain. Generate an API key for the Mailgun account. Note your Mailgun id and key.
 
 #### Configure Mailgun
 
-Pass in mailgun credentials from your .env file. Pass your mailgun id into `MAILGUN_ID` and the
-corresponding key into `MAILGUN_KEY`. Add your mailgun key to the application.yaml as seen below:
+Configure the Mailgun credentials in your .env file. Add your Mailgun key to the application.yaml as
+seen below:
 
 ```yaml
   email-client:
@@ -1510,7 +1510,7 @@ corresponding key into `MAILGUN_KEY`. Add your mailgun key to the application.ya
       key: ${MAILGUN_KEY}
 ```
 
-####            
+####              
 
 # How to use
 
