@@ -42,6 +42,8 @@ Table of Contents
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
     * [Address Validation](#address-validation)
+    * [Sending Email](#sending-email)
+        * [Mailgun](#mailgun)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -1350,7 +1352,7 @@ permits.
 
 ## Address Validation
 
-`Form-flow` will support address validation through [Smarty](https://www.smarty.com/).
+Form-flow library will support address validation through [Smarty](https://www.smarty.com/).
 
 ### Smarty
 
@@ -1485,6 +1487,30 @@ hidden field `_validateresidentialAddress` and they check if a validated address
 Submission's input data. This is because `residentialAddressStreetAddress1_validated` would only be
 present
 if Smarty had performed address validation.
+
+## Sending Email
+
+Form-flow library will use Mailgun to send email to applicants.
+
+### Mailgun
+
+#### Register an email account with Mailgun
+
+Go to the Mailgun [site](https://www.mailgun.com/) and create a Mailgun account. Update DNS records
+and verify your domain. Generate an API key for the Mailgun account. Note your Mailgun id and key.
+
+#### Configure Mailgun
+
+Configure the Mailgun credentials in your .env file. Add your Mailgun key to the application.yaml as
+seen below:
+
+```yaml
+  email-client:
+    mailgun:
+      key: ${MAILGUN_KEY}
+```
+
+####              
 
 # How to use
 
