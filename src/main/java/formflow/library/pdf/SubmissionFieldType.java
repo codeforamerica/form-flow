@@ -1,6 +1,6 @@
 package formflow.library.pdf;
 
-public enum DocumentFieldType {
+public enum SubmissionFieldType {
   SINGLE_VALUE,
   DATE_VALUE,
   ENUMERATED_SINGLE_VALUE,

@@ -12,22 +12,22 @@ import org.springframework.stereotype.Component;
 public class PdfGenerator {
 
   private final SubmissionRepositoryService submissionRepositoryService;
-  private final DocumentFieldPreparers documentFieldPreparers;
+  private final SubmissionFieldPreparers submissionFieldPreparers;
   private final PdfFieldMapper pdfFieldMapper;
   private final PdfMapConfiguration pdfMapConfiguration;
 
-  public PdfGenerator(SubmissionRepositoryService submissionRepositoryService, DocumentFieldPreparers documentFieldPreparers,
+  public PdfGenerator(SubmissionRepositoryService submissionRepositoryService, SubmissionFieldPreparers submissionFieldPreparers,
       PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration) {
     this.submissionRepositoryService = submissionRepositoryService;
-    this.documentFieldPreparers = documentFieldPreparers;
+    this.submissionFieldPreparers = submissionFieldPreparers;
     this.pdfFieldMapper = pdfFieldMapper;
     this.pdfMapConfiguration = pdfMapConfiguration;
   }
 
   public ApplicationFile generate(String flow, UUID id) throws IOException {
     Submission submission = submissionRepositoryService.findById(id).orElseThrow();
-    List<DocumentField> documentFields = documentFieldPreparers.prepareDocumentFields(submission);
-    List<PdfField> pdfFields = pdfFieldMapper.map(documentFields, flow);
+    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
+    List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     ApplicationFile emptyFile = pdfMapConfiguration.getPdfFromFlow(flow);
     ApplicationFile filledFile = new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
         emptyFile.fileName());

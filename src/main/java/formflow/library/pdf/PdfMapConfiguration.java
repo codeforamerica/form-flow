@@ -28,8 +28,8 @@ public class PdfMapConfiguration {
         pdfConfig.getPdf());
   }
 
-  public PdfMap getPdfMap(String flow) throws IOException {
+  public PdfMap getPdfMap(String flow) {
     return maps.stream().filter(config -> config.getFlow().equals(flow))
-        .findFirst().orElseThrow(IOException::new);
+        .findFirst().orElseThrow(RuntimeException::new);
   }
 }

@@ -1,6 +1,6 @@
 package formflow.library.pdf;
 
-import static formflow.library.pdf.DocumentFieldType.SINGLE_VALUE;
+import static formflow.library.pdf.SubmissionFieldType.SINGLE_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -15,15 +15,15 @@ import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class DocumentFieldPreparersTest {
+class SubmissionFieldPreparersTest {
 
-  private DocumentFieldPreparers preparers;
+  private SubmissionFieldPreparers preparers;
 
   private Submission testSubmission;
 
   @BeforeEach
   void setUp() {
-    preparers = new DocumentFieldPreparers(List.of());
+    preparers = new SubmissionFieldPreparers(List.of());
     testSubmission = Submission.builder()
         .id(UUID.randomUUID())
         .submittedAt(DateTime.parse("2020-09-02").toDate())
@@ -32,46 +32,50 @@ class DocumentFieldPreparersTest {
 
   @Test
   void shouldIncludeSubmissionIdInput() {
-    List<DocumentField> documentFields = preparers.prepareDocumentFields(testSubmission);
+    List<SubmissionField> submissionFields = preparers.prepareSubmissionFields(testSubmission);
 
-    assertThat(documentFields).contains(
-        new DocumentField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null));
+    assertThat(submissionFields).contains(
+        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null));
   }
 
   @Test
   void shouldIncludeSubmittedAtTime() {
-    List<DocumentField> documentFields = preparers.prepareDocumentFields(testSubmission);
+    List<SubmissionField> submissionFields = preparers.prepareSubmissionFields(testSubmission);
 
-    assertThat(documentFields).contains(
-        new DocumentField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null));
+    assertThat(submissionFields).contains(
+        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null));
   }
 
 
   @Test
   void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
-    DocumentFieldPreparer successfulPreparer = mock(DocumentFieldPreparer.class);
-    DocumentFieldPreparer failingPreparer = mock(DocumentFieldPreparer.class);
-    DocumentFieldPreparers documentFieldPreparers = new DocumentFieldPreparers(
+    SubmissionFieldPreparer successfulPreparer = mock(SubmissionFieldPreparer.class);
+    SubmissionFieldPreparer failingPreparer = mock(SubmissionFieldPreparer.class);
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
         List.of(failingPreparer, successfulPreparer));
     Date date = DateTime.parse("2020-09-02").toDate();
 
-    List<DocumentField> mockOutput = List.of();
+    List<SubmissionField> mockOutput = List.of();
     when(successfulPreparer.prepareDocumentFields(eq(testSubmission)))
         .thenReturn(mockOutput);
     when(failingPreparer.prepareDocumentFields(eq(testSubmission)))
         .thenThrow(IllegalArgumentException.class);
 
-    List<DocumentField> actualOutput = documentFieldPreparers
-        .prepareDocumentFields(testSubmission);
+    List<SubmissionField> actualOutput = submissionFieldPreparers
+        .prepareSubmissionFields(testSubmission);
     assertThat(actualOutput).isNotEmpty();
     // Default document fields
     assertThat(actualOutput).containsExactly(
-        new DocumentField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null),
-        new DocumentField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null)
+        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null),
+        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null)
     );
     verify(successfulPreparer).prepareDocumentFields(eq(testSubmission));
     verify(failingPreparer).prepareDocumentFields(eq(testSubmission));
   }
 
+  //  TODO: Add tests for single/multivalued fields
+  @Test
+  void prepareDocumentFieldsWorksWithMultipleValues() {
 
+  }
 }

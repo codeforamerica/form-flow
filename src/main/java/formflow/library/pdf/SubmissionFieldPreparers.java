@@ -1,6 +1,6 @@
 package formflow.library.pdf;
 
-import static formflow.library.pdf.DocumentFieldType.SINGLE_VALUE;
+import static formflow.library.pdf.SubmissionFieldType.SINGLE_VALUE;
 
 import formflow.library.data.Submission;
 import java.util.ArrayList;
@@ -11,18 +11,18 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class DocumentFieldPreparers {
+public class SubmissionFieldPreparers {
 
-  private final List<DocumentFieldPreparer> preparers;
+  private final List<SubmissionFieldPreparer> preparers;
 
-  public DocumentFieldPreparers(List<DocumentFieldPreparer> preparers) {
+  public SubmissionFieldPreparers(List<SubmissionFieldPreparer> preparers) {
     this.preparers = preparers;
   }
 
-  public List<DocumentField> prepareDocumentFields(Submission submission) {
+  public List<SubmissionField> prepareSubmissionFields(Submission submission) {
 
     // Add default fields
-    List<DocumentField> fields = new ArrayList<>(getDefaultFields(submission));
+    List<SubmissionField> fields = new ArrayList<>(getDefaultFields(submission));
 
     // Run all the preparers
     preparers.forEach(preparer -> {
@@ -38,10 +38,10 @@ public class DocumentFieldPreparers {
   }
 
   @NotNull
-  private List<DocumentField> getDefaultFields(Submission submission) {
+  private List<SubmissionField> getDefaultFields(Submission submission) {
     return List.of(
-        new DocumentField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_VALUE, null),
-        new DocumentField("submissionId", String.valueOf(submission.getId()), SINGLE_VALUE, null)
+        new SubmissionField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_VALUE, null),
+        new SubmissionField("submissionId", String.valueOf(submission.getId()), SINGLE_VALUE, null)
     );
   }
 }

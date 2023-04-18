@@ -9,7 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PdfMap {
+
   String flow;
   String pdf;
-  Map<String, String> inputs;
+  Map<String, Object> inputs;
 }
+
+//inputs:
+//    firstName: APPLICANT_LEGAL_NAME_FIRST
+//    residentialAddressCity: APPLICANT_CITY

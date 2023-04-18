@@ -1,7 +1,7 @@
 package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class PdfMapConfigurationTest {
+
   @Test
   void getPdfFromFlowReturnsPdfWithMatchingFlowName() throws IOException {
     String testPdfFilename = "/pdfs/testPdf.pdf";
@@ -24,6 +25,6 @@ class PdfMapConfigurationTest {
     PdfMapConfiguration config = new PdfMapConfiguration(List.of(
         new PdfMap("flow1", "pdf", Map.of())
     ));
-    assertThatIOException().isThrownBy(() -> config.getPdfFromFlow("flow2"));
+    assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> config.getPdfFromFlow("flow2"));
   }
 }

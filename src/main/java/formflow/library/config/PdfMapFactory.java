@@ -3,12 +3,14 @@ package formflow.library.config;
 import formflow.library.pdf.PdfMap;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -32,14 +34,17 @@ public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
     loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
     loaderOptions.setAllowRecursiveKeys(true);
 
-    Yaml yaml = new Yaml(new Constructor(PdfMap.class), new Representer(),
+    Constructor constructor = new Constructor(PdfMap.class, loaderOptions);
+    TypeDescription inputsDescription = new TypeDescription(HashMap.class);
+//    inputsDescription.addPropertyParameters("inputs", String.class, Object.class);
+    
+    constructor.addTypeDescription(inputsDescription);
+    Yaml yaml = new Yaml(constructor, new Representer(new DumperOptions()),
         new DumperOptions(), loaderOptions);
     List<PdfMap> pdfMap = new ArrayList<>();
     try {
       Iterable<Object> pdfMapConfigurationIterable = yaml.loadAll(classPathResource.getInputStream());
-      pdfMapConfigurationIterable.forEach(map -> {
-        pdfMap.add((PdfMap) map);
-      });
+      pdfMapConfigurationIterable.forEach(map -> pdfMap.add((PdfMap) map));
     } catch (IOException e) {
       e.printStackTrace();
     }

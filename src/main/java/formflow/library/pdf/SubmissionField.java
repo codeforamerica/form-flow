@@ -5,16 +5,16 @@ import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 
 @Value
-public class DocumentField {
+public class SubmissionField {
 
   String name;
   @NotNull
   String value;
-  DocumentFieldType type;
+  SubmissionFieldType type;
   Integer iteration;
 
-  public DocumentField(String name, @NotNull String value,
-      DocumentFieldType type, Integer iteration) {
+  public SubmissionField(String name, @NotNull String value,
+      SubmissionFieldType type, Integer iteration) {
     this.name = name;
     this.value = value;
     this.type = type;
@@ -22,9 +22,8 @@ public class DocumentField {
   }
 
 
-  public String getFieldNameForPdf(Map<String, String> pdfFieldMap) {
-    String names = pdfFieldMap.get(this.getName());
-    return this.getNameWithIteration(names);
+  public String getFieldNameForPdf(Map<String, Object> pdfFieldMap) {
+    return pdfFieldMap.get(this.getName()).toString();
   }
 
   public String getMultiValuePdfName(Map<String, String> pdfFieldMap, String value) {

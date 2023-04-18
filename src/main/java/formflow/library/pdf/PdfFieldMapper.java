@@ -16,8 +16,8 @@ public class PdfFieldMapper {
     this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
-  public List<PdfField> map(List<DocumentField> documentFields, String flow) {
-    return documentFields.stream()
+  public List<PdfField> map(List<SubmissionField> submissionFields, String flow) {
+    return submissionFields.stream()
         .filter(input -> !input.getValue().isEmpty())
         .map(documentField -> makePdfFieldsForInput(documentField, flow))
         .filter(pdfField -> pdfField.name() != null)
@@ -25,7 +25,7 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  private PdfField makePdfFieldsForInput(DocumentField input, String flow) {
+  private PdfField makePdfFieldsForInput(SubmissionField input, String flow) {
     return switch (input.getType()) {
 //      case DATE_VALUE -> simplePdfFields(input, this::getDateFormattedValue);
 //      case ENUMERATED_MULTI_VALUE -> binaryPdfFields(input);
@@ -35,10 +35,10 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  private PdfField mapFieldFromFlow(DocumentField input,
-      Function<DocumentField, String> valueMapper, String flow) {
+  private PdfField mapFieldFromFlow(SubmissionField input,
+      Function<SubmissionField, String> valueMapper, String flow) {
 
-    Map<String, String> pdfInputsMap = pdfMapConfigurations.stream()
+    Map<String, Object> pdfInputsMap = pdfMapConfigurations.stream()
         .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
         .findFirst()
         .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
@@ -50,12 +50,12 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  private String getDateFormattedValue(DocumentField input) {
+  private String getDateFormattedValue(SubmissionField input) {
     return String.join("/", input.getValue());
   }
 
   @NotNull
-  private String getOrDefaultInputValue(DocumentField input) {
+  private String getOrDefaultInputValue(SubmissionField input) {
     switch (input.getValue()) {
       case "true":
         return "Yes";
