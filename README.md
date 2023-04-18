@@ -42,6 +42,8 @@ Table of Contents
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
     * [Address Validation](#address-validation)
+    * [Email](#email)
+        * [Mailgun](#mailgun)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -1485,6 +1487,30 @@ hidden field `_validateresidentialAddress` and they check if a validated address
 Submission's input data. This is because `residentialAddressStreetAddress1_validated` would only be
 present
 if Smarty had performed address validation.
+
+## Email
+
+`form-flow` will use Mailgun to send email to applicants.
+
+### Mailgun
+
+#### Register an email account with Mailgun
+
+Go to the mailgun [site](https://www.mailgun.com/) and create a mailgun account. Update DNS records
+and verify your domain. Generate an api key for the mailgun account. Note your mailgun id and key.
+
+#### Configure Mailgun
+
+Pass in mailgun credentials from your .env file. Pass your mailgun id into `MAILGUN_ID` and the
+corresponding key into `MAILGUN_KEY`. Add your mailgun key to the application.yaml as seen below:
+
+```yaml
+  email-client:
+    mailgun:
+      key: ${MAILGUN_KEY}
+```
+
+####            
 
 # How to use
 
