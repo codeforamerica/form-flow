@@ -11,15 +11,25 @@ public class PdfMapConfiguration {
 
   private final List<PdfMap> maps;
 
+  List<PdfMap> getMaps() {
+    return maps;
+  }
+
   public PdfMapConfiguration(List<PdfMap> maps) {
     this.maps = maps;
   }
 
   public ApplicationFile getPdfFromFlow(String flow) throws IOException {
-    PdfMap pdfConfig = maps.stream().filter(config -> config.getFlow().equals(flow))
-        .findFirst().orElseThrow(IOException::new);
+    PdfMap pdfConfig = getPdfMap(flow);
 
-    return new ApplicationFile(requireNonNull(getClass().getResourceAsStream(pdfConfig.getPdf())).readAllBytes(),
+    String pdfPath = pdfConfig.getPdf().startsWith("/") ? pdfConfig.getPdf() : "/" + pdfConfig.getPdf();
+
+    return new ApplicationFile(requireNonNull(getClass().getResourceAsStream(pdfPath)).readAllBytes(),
         pdfConfig.getPdf());
+  }
+
+  public PdfMap getPdfMap(String flow) throws IOException {
+    return maps.stream().filter(config -> config.getFlow().equals(flow))
+        .findFirst().orElseThrow(IOException::new);
   }
 }

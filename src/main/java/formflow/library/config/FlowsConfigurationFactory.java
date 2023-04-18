@@ -19,7 +19,7 @@ import org.yaml.snakeyaml.representer.Representer;
 @Slf4j
 public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfiguration>> {
 
-  @Value("${form-flow.path:flows-foo.yaml}")
+  @Value("${form-flow.path:flows-config.yaml}")
   String configPath;
 
   @Override

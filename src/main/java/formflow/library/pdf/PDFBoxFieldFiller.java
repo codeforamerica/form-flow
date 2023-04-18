@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
 
 @Slf4j
-public class PDFBoxFieldFiller implements PdfFieldFiller {
+public class PDFBoxFieldFiller {
 
   private final List<Resource> pdfs;
 
@@ -24,7 +24,6 @@ public class PDFBoxFieldFiller implements PdfFieldFiller {
     this.pdfs = pdfs;
   }
 
-  @Override
   public ApplicationFile fill(Collection<PdfField> fields, String filename) {
     PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
 
