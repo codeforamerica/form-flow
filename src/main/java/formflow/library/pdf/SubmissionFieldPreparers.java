@@ -1,6 +1,6 @@
 package formflow.library.pdf;
 
-import static formflow.library.pdf.SubmissionFieldType.SINGLE_VALUE;
+import static formflow.library.pdf.SubmissionFieldValue.SINGLE_FIELD;
 
 import formflow.library.data.Submission;
 import java.util.ArrayList;
@@ -40,8 +40,8 @@ public class SubmissionFieldPreparers {
   @NotNull
   private List<SubmissionField> getDefaultFields(Submission submission) {
     return List.of(
-        new SubmissionField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_VALUE, null),
-        new SubmissionField("submissionId", String.valueOf(submission.getId()), SINGLE_VALUE, null)
+        new SubmissionField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_FIELD, null),
+        new SubmissionField("submissionId", String.valueOf(submission.getId()), SINGLE_FIELD, null)
     );
   }
 }

@@ -3,6 +3,9 @@ pdf: pdfs/ubi/Multipage-UBI-Form.pdf
 inputs:
   firstName: APPLICANT_LEGAL_NAME_FIRST
   city: APPLICANT_CITY
+  howToContactYou:
+    phone: PHONE
+    email: EMAIL
 ---
 flow: test
 pdf: pdfs/fake

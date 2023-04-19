@@ -10,11 +10,11 @@ public class SubmissionField {
   String name;
   @NotNull
   String value;
-  SubmissionFieldType type;
+  SubmissionFieldValue type;
   Integer iteration;
 
   public SubmissionField(String name, @NotNull String value,
-      SubmissionFieldType type, Integer iteration) {
+      SubmissionFieldValue type, Integer iteration) {
     this.name = name;
     this.value = value;
     this.type = type;

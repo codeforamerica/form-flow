@@ -29,10 +29,9 @@ public class PdfGenerator {
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     ApplicationFile emptyFile = pdfMapConfiguration.getPdfFromFlow(flow);
-    ApplicationFile filledFile = new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
-        emptyFile.fileName());
 
-    return filledFile;
+    return new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
+        emptyFile.fileName());
   }
 
 }

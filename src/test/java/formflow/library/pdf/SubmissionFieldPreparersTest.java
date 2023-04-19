@@ -1,6 +1,6 @@
 package formflow.library.pdf;
 
-import static formflow.library.pdf.SubmissionFieldType.SINGLE_VALUE;
+import static formflow.library.pdf.SubmissionFieldValue.SINGLE_FIELD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,7 +35,7 @@ class SubmissionFieldPreparersTest {
     List<SubmissionField> submissionFields = preparers.prepareSubmissionFields(testSubmission);
 
     assertThat(submissionFields).contains(
-        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null));
+        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null));
   }
 
   @Test
@@ -43,7 +43,7 @@ class SubmissionFieldPreparersTest {
     List<SubmissionField> submissionFields = preparers.prepareSubmissionFields(testSubmission);
 
     assertThat(submissionFields).contains(
-        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null));
+        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null));
   }
 
 
@@ -66,8 +66,8 @@ class SubmissionFieldPreparersTest {
     assertThat(actualOutput).isNotEmpty();
     // Default document fields
     assertThat(actualOutput).containsExactly(
-        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_VALUE, null),
-        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_VALUE, null)
+        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null),
+        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null)
     );
     verify(successfulPreparer).prepareDocumentFields(eq(testSubmission));
     verify(failingPreparer).prepareDocumentFields(eq(testSubmission));

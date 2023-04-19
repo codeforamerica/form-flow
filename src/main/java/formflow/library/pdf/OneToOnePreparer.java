@@ -24,7 +24,7 @@ public class OneToOnePreparer implements SubmissionFieldPreparer {
         field -> new SubmissionField(
             field,
             submission.getInputData().get(field).toString(),
-            SubmissionFieldType.SINGLE_VALUE, null
+            SubmissionFieldValue.SINGLE_FIELD, null
         )).collect(Collectors.toList());
   }
 }

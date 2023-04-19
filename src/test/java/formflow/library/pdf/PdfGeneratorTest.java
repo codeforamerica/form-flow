@@ -21,40 +21,49 @@ class PdfGeneratorTest extends PdfTest {
   private final SubmissionRepositoryService submissionRepositoryService = mock(SubmissionRepositoryService.class);
   private final SubmissionFieldPreparers submissionFieldPreparers = mock(SubmissionFieldPreparers.class);
   private final PdfFieldMapper pdfFieldMapper = mock(PdfFieldMapper.class);
-  private String city;
-  private String firstName;
+  private String radioButtonValue;
+  private String textFieldValue;
+  private String checkboxOptionValue;
 
   @BeforeEach
   void setUp() throws IOException {
     PdfMapConfiguration pdfMapConfiguration = spy(new PdfMapConfiguration(List.of()));
     pdfGenerator = new PdfGenerator(submissionRepositoryService, submissionFieldPreparers, pdfFieldMapper, pdfMapConfiguration);
     submission = Submission.builder().id(UUID.randomUUID()).build();
-    String testPdfName = "Multipage-UBI-Form.pdf";
-    firstName = "Greatest";
-    city = "Minneapolis";
+    String testPdfName = "testPdf.pdf";
+    textFieldValue = "Greatest Text";
+    radioButtonValue = "option2";
+    checkboxOptionValue = "On";
     ApplicationFile emptyPdf = new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName);
     List<SubmissionField> submissionFields = List.of(
-        new SubmissionField("APPLICANT_LEGAL_NAME_FIRST", firstName, SubmissionFieldType.SINGLE_VALUE, null),
-        new SubmissionField("APPLICANT_CITY", city, SubmissionFieldType.SINGLE_VALUE, null)
+        new SubmissionField("textField", textFieldValue, SubmissionFieldValue.SINGLE_FIELD, null),
+        new SubmissionField("radioButton", radioButtonValue, SubmissionFieldValue.SINGLE_FIELD, null),
+        new SubmissionField("checkboxOption1", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null),
+        new SubmissionField("checkboxOption2", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null)
     );
 
     doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
     when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
     when(submissionFieldPreparers.prepareSubmissionFields(submission)).thenReturn(submissionFields);
     when(pdfFieldMapper.map(submissionFields, "ubi")).thenReturn(List.of(
-        new PdfField("APPLICANT_LEGAL_NAME_FIRST", firstName),
-        new PdfField("APPLICANT_CITY", city)
+        new PdfField("TEXT_FIELD", textFieldValue),
+        new PdfField("RADIO_BUTTON", radioButtonValue),
+        new PdfField("CHECKBOX_OPTION_1", checkboxOptionValue),
+        new PdfField("CHECKBOX_OPTION_3", checkboxOptionValue)
     ));
   }
 
   @Test
-  void generateReturnsAFilledPdf() throws IOException {
+  void generateReturnsAFilledPdfForEveryFieldType() throws IOException {
     preparePdfForAssertions(
         pdfGenerator.generate("ubi", submission.getId())
     );
 
-    assertPdfFieldEquals("APPLICANT_LEGAL_NAME_FIRST", firstName);
-    assertPdfFieldEquals("APPLICANT_CITY", city);
+    assertPdfFieldEquals("TEXT_FIELD", textFieldValue);
+    assertPdfFieldEquals("RADIO_BUTTON", radioButtonValue);
+    assertPdfFieldEquals("CHECKBOX_OPTION_1", checkboxOptionValue);
+    assertPdfFieldEquals("CHECKBOX_OPTION_2", "Off");
+    assertPdfFieldEquals("CHECKBOX_OPTION_3", checkboxOptionValue);
   }
 
 }
