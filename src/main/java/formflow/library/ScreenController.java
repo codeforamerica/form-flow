@@ -85,7 +85,7 @@ public class ScreenController extends FormFlowController {
   ModelAndView getScreen(
       @PathVariable String flow,
       @PathVariable String screen,
-      @RequestParam(required = false) Map<String,String> query_params,
+      @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String uuid,
       HttpSession httpSession
   ) {
@@ -93,7 +93,7 @@ public class ScreenController extends FormFlowController {
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
-    if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())){
+    if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
       submission.mergeUrlParamsWithData(query_params);
     } else {
       submission.setUrlParams(query_params);
@@ -564,13 +564,13 @@ public class ScreenController extends FormFlowController {
     // if there's already a session
     if (submission.getId() != null) {
       submission.mergeFormDataWithSubmissionData(formSubmission);
-      saveToRepository(submission);
     } else {
       submission.setFlow(flow);
       submission.setInputData(formSubmission.getFormData());
-      saveToRepository(submission);
-      httpSession.setAttribute("id", submission.getId());
     }
+    actionManager.handleBeforeSaveAction(currentScreen, submission);
+    saveToRepository(submission);
+    httpSession.setAttribute("id", submission.getId());
 
     return new ModelAndView(String.format("redirect:/flow/%s/%s/navigation", flow, screen));
   }
