@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SubmissionFieldPreparersTest {
+class SingleFieldPreparersTest {
 
   private SubmissionFieldPreparers preparers;
 
@@ -32,18 +32,18 @@ class SubmissionFieldPreparersTest {
 
   @Test
   void shouldIncludeSubmissionIdInput() {
-    List<SubmissionField> submissionFields = preparers.prepareSubmissionFields(testSubmission);
+    List<SingleField> singleFields = preparers.prepareSubmissionFields(testSubmission);
 
-    assertThat(submissionFields).contains(
-        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null));
+    assertThat(singleFields).contains(
+        new SingleField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null));
   }
 
   @Test
   void shouldIncludeSubmittedAtTime() {
-    List<SubmissionField> submissionFields = preparers.prepareSubmissionFields(testSubmission);
+    List<SingleField> singleFields = preparers.prepareSubmissionFields(testSubmission);
 
-    assertThat(submissionFields).contains(
-        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null));
+    assertThat(singleFields).contains(
+        new SingleField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null));
   }
 
 
@@ -55,19 +55,19 @@ class SubmissionFieldPreparersTest {
         List.of(failingPreparer, successfulPreparer));
     Date date = DateTime.parse("2020-09-02").toDate();
 
-    List<SubmissionField> mockOutput = List.of();
+    List<SingleField> mockOutput = List.of();
     when(successfulPreparer.prepareDocumentFields(eq(testSubmission)))
         .thenReturn(mockOutput);
     when(failingPreparer.prepareDocumentFields(eq(testSubmission)))
         .thenThrow(IllegalArgumentException.class);
 
-    List<SubmissionField> actualOutput = submissionFieldPreparers
+    List<SingleField> actualOutput = submissionFieldPreparers
         .prepareSubmissionFields(testSubmission);
     assertThat(actualOutput).isNotEmpty();
     // Default document fields
     assertThat(actualOutput).containsExactly(
-        new SubmissionField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null),
-        new SubmissionField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null)
+        new SingleField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null),
+        new SingleField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null)
     );
     verify(successfulPreparer).prepareDocumentFields(eq(testSubmission));
     verify(failingPreparer).prepareDocumentFields(eq(testSubmission));

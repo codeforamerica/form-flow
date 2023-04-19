@@ -19,10 +19,10 @@ public class SubmissionFieldPreparers {
     this.preparers = preparers;
   }
 
-  public List<SubmissionField> prepareSubmissionFields(Submission submission) {
+  public List<SingleField> prepareSubmissionFields(Submission submission) {
 
     // Add default fields
-    List<SubmissionField> fields = new ArrayList<>(getDefaultFields(submission));
+    List<SingleField> fields = new ArrayList<>(getDefaultFields(submission));
 
     // Run all the preparers
     preparers.forEach(preparer -> {
@@ -38,10 +38,10 @@ public class SubmissionFieldPreparers {
   }
 
   @NotNull
-  private List<SubmissionField> getDefaultFields(Submission submission) {
+  private List<SingleField> getDefaultFields(Submission submission) {
     return List.of(
-        new SubmissionField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_FIELD, null),
-        new SubmissionField("submissionId", String.valueOf(submission.getId()), SINGLE_FIELD, null)
+        new SingleField("submittedAt", String.valueOf(submission.getSubmittedAt()), SINGLE_FIELD, null),
+        new SingleField("submissionId", String.valueOf(submission.getId()), SINGLE_FIELD, null)
     );
   }
 }

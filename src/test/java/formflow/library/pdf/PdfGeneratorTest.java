@@ -35,17 +35,17 @@ class PdfGeneratorTest extends PdfTest {
     radioButtonValue = "option2";
     checkboxOptionValue = "On";
     ApplicationFile emptyPdf = new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName);
-    List<SubmissionField> submissionFields = List.of(
-        new SubmissionField("textField", textFieldValue, SubmissionFieldValue.SINGLE_FIELD, null),
-        new SubmissionField("radioButton", radioButtonValue, SubmissionFieldValue.SINGLE_FIELD, null),
-        new SubmissionField("checkboxOption1", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null),
-        new SubmissionField("checkboxOption2", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null)
+    List<SingleField> singleFields = List.of(
+        new SingleField("textField", textFieldValue, SubmissionFieldValue.SINGLE_FIELD, null),
+        new SingleField("radioButton", radioButtonValue, SubmissionFieldValue.SINGLE_FIELD, null),
+        new SingleField("checkboxOption1", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null),
+        new SingleField("checkboxOption2", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null)
     );
 
     doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
     when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
-    when(submissionFieldPreparers.prepareSubmissionFields(submission)).thenReturn(submissionFields);
-    when(pdfFieldMapper.map(submissionFields, "ubi")).thenReturn(List.of(
+    when(submissionFieldPreparers.prepareSubmissionFields(submission)).thenReturn(singleFields);
+    when(pdfFieldMapper.map(singleFields, "ubi")).thenReturn(List.of(
         new PdfField("TEXT_FIELD", textFieldValue),
         new PdfField("RADIO_BUTTON", radioButtonValue),
         new PdfField("CHECKBOX_OPTION_1", checkboxOptionValue),

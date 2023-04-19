@@ -18,10 +18,10 @@ public class OneToOnePreparer implements SubmissionFieldPreparer {
   }
 
   @Override
-  public List<SubmissionField> prepareDocumentFields(Submission submission) {
+  public List<SingleField> prepareDocumentFields(Submission submission) {
     Map<String, Object> fieldMap = pdfMapConfiguration.getPdfMap(submission.getFlow()).getInputs();
     return fieldMap.keySet().stream().filter(field -> fieldMap.get(field) instanceof String).map(
-        field -> new SubmissionField(
+        field -> new SingleField(
             field,
             submission.getInputData().get(field).toString(),
             SubmissionFieldValue.SINGLE_FIELD, null

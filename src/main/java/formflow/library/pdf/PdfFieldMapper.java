@@ -16,17 +16,17 @@ public class PdfFieldMapper {
     this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
-  public List<PdfField> map(List<SubmissionField> submissionFields, String flow) {
-    return submissionFields.stream()
-        .filter(input -> !input.getValue().isEmpty())
+  public List<PdfField> map(List<SingleField> singleFields, String flow) {
+    return singleFields.stream()
+        .filter(input -> !input.value().isEmpty())
         .map(documentField -> makePdfFieldsForInput(documentField, flow))
         .filter(pdfField -> pdfField.name() != null)
         .collect(Collectors.toList());
   }
 
   @NotNull
-  private PdfField makePdfFieldsForInput(SubmissionField input, String flow) {
-    return switch (input.getType()) {
+  private PdfField makePdfFieldsForInput(SingleField input, String flow) {
+    return switch (input.type()) {
 //      case DATE_VALUE -> simplePdfFields(input, this::getDateFormattedValue);
 //      case ENUMERATED_MULTI_VALUE -> binaryPdfFields(input);
 //      case UNUSED -> Stream.of();
@@ -35,8 +35,8 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  private PdfField mapFieldFromFlow(SubmissionField input,
-      Function<SubmissionField, String> valueMapper, String flow) {
+  private PdfField mapFieldFromFlow(SingleField input,
+      Function<SingleField, String> valueMapper, String flow) {
 
     Map<String, Object> pdfInputsMap = pdfMapConfigurations.stream()
         .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
@@ -44,25 +44,25 @@ public class PdfFieldMapper {
         .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow))
         .getInputs();
 
-    String pdfFieldName = input.getFieldNameForPdf(pdfInputsMap);
+    String pdfFieldName = pdfInputsMap.get(input.name()).toString();
 
     return new PdfField(pdfFieldName, valueMapper.apply(input));
   }
 
   @NotNull
-  private String getDateFormattedValue(SubmissionField input) {
-    return String.join("/", input.getValue());
+  private String getDateFormattedValue(SingleField input) {
+    return String.join("/", input.value());
   }
 
   @NotNull
-  private String getOrDefaultInputValue(SubmissionField input) {
-    switch (input.getValue()) {
+  private String getOrDefaultInputValue(SingleField input) {
+    switch (input.value()) {
       case "true":
         return "Yes";
       case "false":
         return "No";
       default:
-        return input.getValue();
+        return input.value();
     }
   }
 }
