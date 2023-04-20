@@ -38,8 +38,8 @@
              th:checked="false">
     </label>
   </div>
-  <th:block th:replace="fragments/inputs/submitButton :: submitButton(
-      text=#{general.inputs.continue})"/>
+  <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+      text=#{general.inputs.continue})}"/>
 </th:block>
 </body>
 </html>

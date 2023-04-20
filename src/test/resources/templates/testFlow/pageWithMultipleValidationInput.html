@@ -13,13 +13,13 @@
             th:replace="~{fragments/form :: form(action='/flow/testFlow/pageWithMultipleValidationInput', content=~{::formContent})}">
           <th:block th:ref="formContent">
             <div class="form-card__content">
-              <th:block th:replace="fragments/inputs/text ::
+              <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='inputWithMultipleValidations',
-                  label='inputWithMultipleValidations')"/>
+                  label='inputWithMultipleValidations')}"/>
 
-              <th:block th:replace="fragments/inputs/text ::
+              <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='inputWithSingleValidation',
-                  label='inputWithSingleValidation')"/>
+                  label='inputWithSingleValidation')}"/>
             </div>
             <div class="form-card__footer">
               <th:block th:replace="~{fragments/continueButton :: continue}"/>

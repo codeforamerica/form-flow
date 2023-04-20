@@ -12,11 +12,11 @@
         <th:block
             th:replace="~{fragments/form :: form(action='/flow/testFlow/pageWithCheckboxSetInput', content=~{::formContent})}">
           <th:block th:ref="formContent">
-            <th:block th:replace="fragments/inputs/checkboxFieldset ::
+            <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
                 checkboxFieldset(inputName='favoriteFruitCheckbox',
                 label='favoriteFruit',
                 fieldsetHelpText='favoriteFruitGoesHere',
-                content=~{::favoriteFruit})">
+                content=~{::favoriteFruit})}">
               <th:block th:ref="favoriteFruit">
                 <!-- Copy the below input if you want to add more -->
                 <th:block

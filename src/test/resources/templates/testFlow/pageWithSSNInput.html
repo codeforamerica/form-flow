@@ -14,9 +14,9 @@
           <th:block th:ref="formContent">
             <div class="form-card__content">
               <th:block
-                  th:replace="fragments/inputs/ssn :: ssn(
+                  th:replace="~{fragments/inputs/ssn :: ssn(
                             inputName='ssnInput',
-                            label='ssnInput')"/>
+                            label='ssnInput')}"/>
             </div>
             <div class="form-card__footer">
               <th:block th:replace="~{fragments/continueButton :: continue}"/>

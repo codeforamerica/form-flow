@@ -16,18 +16,18 @@
             <div class="form-card__content">
 
               <th:block
-                  th:replace="fragments/inputs/phone :: phone(
+                  th:replace="~{fragments/inputs/phone :: phone(
                   inputName='phoneNumber',
-                  label='please enter a phone number')"/>
+                  label='please enter a phone number')}"/>
 
-              <th:block th:replace="fragments/inputs/text ::
+              <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='email',
-                  label='please enter an email address')"/>
+                  label='please enter an email address')}"/>
 
-              <th:block th:replace="fragments/inputs/checkboxFieldset ::
+              <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
                   checkboxFieldset(inputName='howToContactYou',
                   label='how to contact',
-                  content=~{::contactMethods})">
+                  content=~{::contactMethods})}">
                 <th:block th:ref="contactMethods">
                   <!-- Copy the below input if you want to add more -->
                   <th:block

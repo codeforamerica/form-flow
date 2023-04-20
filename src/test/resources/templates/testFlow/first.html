@@ -13,9 +13,9 @@
             th:replace="~{fragments/form :: form(action='/flow/testFlow/first', content=~{::formContent})}">
           <th:block th:ref="formContent">
             <div class="form-card__content">
-              <th:block th:replace="fragments/inputs/text ::
+              <th:block th:replace="~{fragments/inputs/text ::
             text(inputName='firstName',
-            label='First name')"/>
+            label='First name')}"/>
             </div>
             <div class="form-card__footer">
               <th:block th:replace="~{fragments/continueButton :: continue}"/>

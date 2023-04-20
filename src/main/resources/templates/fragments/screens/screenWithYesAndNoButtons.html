@@ -20,7 +20,7 @@
       <div class="grid">
         <div th:replace="~{fragments/goBack :: goBackLink}"></div>
         <main id="content" role="main" class="form-card spacing-above-35">
-          <th:block th:replace="${hasIconName} ? ~{'fragments/icons' :: ${iconName}} : _" />
+          <th:block th:replace="${hasIconName} ? ~{'fragments/icons' :: ${iconName}} : _"/>
           <th:block
               th:replace="~{fragments/cardHeader :: cardHeader(header=${header})}"/>
           <th:block
@@ -30,9 +30,9 @@
                 <th:block th:replace="${inputContent}"/>
               </div>
               <div class="form-card__footer">
-                <th:block th:replace="fragments/inputs/yesOrNo :: yesOrNo(
+                <th:block th:replace="~{fragments/inputs/yesOrNo :: yesOrNo(
                  inputName=${inputName},
-                 ariaDescribe='header')"/>
+                 ariaDescribe='header')}"/>
               </div>
             </th:block>
           </th:block>
