@@ -49,7 +49,7 @@ jobs:
       - name: Checkout Starter App repo
         uses: actions/checkout@v2
         with:
-          repository: codeforamerica/formflow-starter-app
+          repository: codeforamerica/form-flow-starter-app
           path: starter-app
       - name: Test Starter App
         run: cd starter-app && ./gradlew clean test --stacktrace
