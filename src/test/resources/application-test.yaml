@@ -27,6 +27,7 @@ spring:
     clean-on-validation-error: true
     placeholders:
       uuid_function: "gen_random_uuid"
+    clean-disabled: false
   messages:
     encoding: ISO-8859-1
     basename: messages, messages-form-flow
