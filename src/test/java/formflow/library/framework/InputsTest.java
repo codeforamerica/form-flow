@@ -11,6 +11,7 @@ import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +44,7 @@ public class InputsTest extends AbstractMockMvcTest {
     String moneyInput = "100";
     String phoneInput = "(555) 555-1234";
     String ssnInput = "333-22-4444";
-    String stateInput = "NH";
+    String stateInput = messageSource.getMessage("state.nh", null, Locale.ENGLISH).substring(0, 2);
 
     postExpectingNextPageTitle("inputs",
         Map.ofEntries(
