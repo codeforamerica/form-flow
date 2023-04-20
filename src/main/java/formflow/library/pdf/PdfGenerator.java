@@ -26,12 +26,11 @@ public class PdfGenerator {
 
   public ApplicationFile generate(String flow, UUID id) throws IOException {
     Submission submission = submissionRepositoryService.findById(id).orElseThrow();
-    List<SingleField> singleFields = submissionFieldPreparers.prepareSubmissionFields(submission);
-    List<PdfField> pdfFields = pdfFieldMapper.map(singleFields, flow);
+    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
+    List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     ApplicationFile emptyFile = pdfMapConfiguration.getPdfFromFlow(flow);
 
     return new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
         emptyFile.fileName());
   }
-
 }

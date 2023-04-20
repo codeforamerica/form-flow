@@ -1,6 +1,5 @@
 package formflow.library.pdf;
 
-import static formflow.library.pdf.SubmissionFieldValue.SINGLE_FIELD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -32,18 +31,18 @@ class SingleFieldPreparersTest {
 
   @Test
   void shouldIncludeSubmissionIdInput() {
-    List<SingleField> singleFields = preparers.prepareSubmissionFields(testSubmission);
+    List<SubmissionField> singleFields = preparers.prepareSubmissionFields(testSubmission);
 
     assertThat(singleFields).contains(
-        new SingleField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null));
+        new SingleField("submissionId", String.valueOf(testSubmission.getId()), null));
   }
 
   @Test
   void shouldIncludeSubmittedAtTime() {
-    List<SingleField> singleFields = preparers.prepareSubmissionFields(testSubmission);
+    List<SubmissionField> singleFields = preparers.prepareSubmissionFields(testSubmission);
 
     assertThat(singleFields).contains(
-        new SingleField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null));
+        new SingleField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), null));
   }
 
 
@@ -55,22 +54,22 @@ class SingleFieldPreparersTest {
         List.of(failingPreparer, successfulPreparer));
     Date date = DateTime.parse("2020-09-02").toDate();
 
-    List<SingleField> mockOutput = List.of();
-    when(successfulPreparer.prepareDocumentFields(eq(testSubmission)))
+    List<SubmissionField> mockOutput = List.of();
+    when(successfulPreparer.prepareSubmissionFields(eq(testSubmission)))
         .thenReturn(mockOutput);
-    when(failingPreparer.prepareDocumentFields(eq(testSubmission)))
+    when(failingPreparer.prepareSubmissionFields(eq(testSubmission)))
         .thenThrow(IllegalArgumentException.class);
 
-    List<SingleField> actualOutput = submissionFieldPreparers
+    List<SubmissionField> actualOutput = submissionFieldPreparers
         .prepareSubmissionFields(testSubmission);
     assertThat(actualOutput).isNotEmpty();
     // Default document fields
     assertThat(actualOutput).containsExactly(
-        new SingleField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), SINGLE_FIELD, null),
-        new SingleField("submissionId", String.valueOf(testSubmission.getId()), SINGLE_FIELD, null)
+        new SingleField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()), null),
+        new SingleField("submissionId", String.valueOf(testSubmission.getId()), null)
     );
-    verify(successfulPreparer).prepareDocumentFields(eq(testSubmission));
-    verify(failingPreparer).prepareDocumentFields(eq(testSubmission));
+    verify(successfulPreparer).prepareSubmissionFields(eq(testSubmission));
+    verify(failingPreparer).prepareSubmissionFields(eq(testSubmission));
   }
 
   //  TODO: Add tests for single/multivalued fields

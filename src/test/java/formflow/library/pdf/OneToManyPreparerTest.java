@@ -22,7 +22,7 @@ class OneToManyPreparerTest {
 
   @Test
   void preparesSubmissionFieldsForCheckboxInputs() {
-    map.setInputs(Map.of(
+    map.setInputFields(Map.of(
         "checkbox", Map.of(
             "option1", "CHECKBOX_OPTION_1",
             "option2", "CHECKBOX_OPTION_2",
@@ -33,8 +33,8 @@ class OneToManyPreparerTest {
     ));
     OneToManyPreparer oneToManyPreparer = new OneToManyPreparer(new PdfMapConfiguration(List.of(map)));
 
-    assertThat(oneToManyPreparer.prepareDocumentFields(submission)).containsExactlyInAnyOrder(
-        new CheckboxField("checkbox", List.of("option1", "option3"), SubmissionFieldValue.CHECKBOX, null)
+    assertThat(oneToManyPreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
+        new CheckboxField("checkbox", List.of("option1", "option3"), null)
     );
   }
 

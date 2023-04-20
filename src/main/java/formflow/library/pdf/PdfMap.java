@@ -12,7 +12,8 @@ public class PdfMap {
 
   String flow;
   String pdf;
-  Map<String, Object> inputs;
+  Map<String, Object> inputFields;
+  Map<String, Object> dbFields;
 }
 
 //inputs:

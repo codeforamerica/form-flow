@@ -14,8 +14,8 @@ class PdfMapConfigurationTest {
   void getPdfFromFlowReturnsPdfWithMatchingFlowName() throws IOException {
     String testPdfFilename = "/pdfs/testPdf.pdf";
     PdfMapConfiguration config = new PdfMapConfiguration(List.of(
-        new PdfMap("flow1", testPdfFilename, Map.of()),
-        new PdfMap("flow2", "/pdfs/Multipage-UBI-Form.pdf", Map.of())
+        new PdfMap("flow1", testPdfFilename, Map.of(), Map.of()),
+        new PdfMap("flow2", "/pdfs/Multipage-UBI-Form.pdf", Map.of(), Map.of())
     ));
     assertThat(config.getPdfFromFlow("flow1").fileName()).isEqualTo(testPdfFilename);
   }
@@ -23,7 +23,7 @@ class PdfMapConfigurationTest {
   @Test
   void getPdfFromFlowThrowsExceptionIfConfigMatchingFlowDoesntExist() {
     PdfMapConfiguration config = new PdfMapConfiguration(List.of(
-        new PdfMap("flow1", "pdf", Map.of())
+        new PdfMap("flow1", "pdf", Map.of(), Map.of())
     ));
     assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> config.getPdfFromFlow("flow2"));
   }

@@ -17,5 +17,5 @@ public interface SubmissionFieldPreparer {
     };
   }
 
-  List<SubmissionField> prepareDocumentFields(Submission submission);
+  List<SubmissionField> prepareSubmissionFields(Submission submission);
 }

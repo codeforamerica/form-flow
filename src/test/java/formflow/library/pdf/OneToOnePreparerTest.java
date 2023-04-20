@@ -22,7 +22,7 @@ class OneToOnePreparerTest {
 
   @Test
   void prepareReturnsDocumentFieldsForSingleValues() {
-    map.setInputs(Map.of(
+    map.setInputFields(Map.of(
         "inputName1", "PDF_FIELD_NAME_1",
         "inputName2", "PDF_FIELD_NAME_2"
     ));
@@ -32,15 +32,15 @@ class OneToOnePreparerTest {
     ));
     OneToOnePreparer oneToOnePreparer = new OneToOnePreparer(new PdfMapConfiguration(List.of(map)));
 
-    assertThat(oneToOnePreparer.prepareDocumentFields(submission)).containsExactlyInAnyOrder(
-        new SingleField("inputName1", "foo", SubmissionFieldValue.SINGLE_FIELD, null),
-        new SingleField("inputName2", "bar", SubmissionFieldValue.SINGLE_FIELD, null)
+    assertThat(oneToOnePreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
+        new SingleField("inputName1", "foo", null),
+        new SingleField("inputName2", "bar", null)
     );
   }
 
   @Test
   void prepareIgnoresNonStringPdfMapFields() {
-    map.setInputs(Map.of(
+    map.setInputFields(Map.of(
         "inputName1", "PDF_FIELD_NAME_1",
         "inputName2", Map.of(
             "checkboxOption1", "PDF_FIELD_NAME_3" // Ignored because it's not a string 
@@ -51,8 +51,8 @@ class OneToOnePreparerTest {
     ));
     OneToOnePreparer oneToOnePreparer = new OneToOnePreparer(new PdfMapConfiguration(List.of(map)));
 
-    assertThat(oneToOnePreparer.prepareDocumentFields(submission)).containsExactly(
-        new SingleField("inputName1", "foo", SubmissionFieldValue.SINGLE_FIELD, null)
+    assertThat(oneToOnePreparer.prepareSubmissionFields(submission)).containsExactly(
+        new SingleField("inputName1", "foo", null)
     );
   }
 }

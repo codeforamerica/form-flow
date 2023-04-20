@@ -33,13 +33,12 @@ class PdfGeneratorTest extends PdfTest {
     String testPdfName = "testPdf.pdf";
     textFieldValue = "Greatest Text";
     radioButtonValue = "option2";
-    checkboxOptionValue = "On";
+    checkboxOptionValue = "Yes";
     ApplicationFile emptyPdf = new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName);
-    List<SingleField> singleFields = List.of(
-        new SingleField("textField", textFieldValue, SubmissionFieldValue.SINGLE_FIELD, null),
-        new SingleField("radioButton", radioButtonValue, SubmissionFieldValue.SINGLE_FIELD, null),
-        new SingleField("checkboxOption1", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null),
-        new SingleField("checkboxOption2", checkboxOptionValue, SubmissionFieldValue.CHECKBOX, null)
+    List<SubmissionField> singleFields = List.of(
+        new SingleField("textField", textFieldValue, null),
+        new SingleField("radioButton", radioButtonValue, null),
+        new CheckboxField("checkbox", List.of("CheckboxOption1", "CheckboxOption3"), null)
     );
 
     doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
