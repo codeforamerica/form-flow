@@ -53,10 +53,12 @@ jobs:
           repository: codeforamerica/form-flow-starter-app
           path: starter-app
       - name: Test Starter App
-        run: cd starter-app && ./gradlew clean test --stacktrace
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/form-flow-test
-          SPRING_PROFILES_ACTIVE: dev
+        run: |
+          export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/form-flow-test
+          export SPRING_DATASOURCE_USERNAME=form-flow-test
+          export SPRING_DATASOURCE_PASSWORD=postgres
+          export SPRING_PROFILES_ACTIVE=dev
+          cd starter-app && ./gradlew clean test --stacktrace
       - name: Announce failures on Slack
         if:  ${{ steps.test.conclusion == 'failure' }}
         uses: ravsamhq/notify-slack-action@v2
