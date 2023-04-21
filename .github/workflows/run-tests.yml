@@ -46,7 +46,7 @@ jobs:
       - name: Test with Gradle
         id: test
 #        run: cd main && ./gradlew clean test --stacktrace
-        run: cd main && ./gradlew jar
+        run: cd form-flow && ./gradlew jar
       - name: Checkout Starter App repo
         uses: actions/checkout@v2
         with:
