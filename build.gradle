@@ -120,7 +120,7 @@ publishing {
                 url = "https://github.com/codeforamerica/form-flow/"
                 group = "org.codeforamerica.platform"
                 artifactId = "form-flow"
-                version = "0.0.2-SNAPSHOT"
+                version = "0.0.3-SNAPSHOT"
 
                 licenses {
                     license {
