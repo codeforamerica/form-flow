@@ -58,7 +58,7 @@ jobs:
           export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/form-flow-test
           export SPRING_DATASOURCE_USERNAME=form-flow-test
           export SPRING_DATASOURCE_PASSWORD=postgres
-          export USE_LOCAL_LIBRARY=true
+          export ORG_GRADLE_PROJECT_SPRING_PROFILES_ACTIVE=dev
           cd starter-app && ./gradlew clean test --stacktrace
       - name: Announce failures on Slack
         if:  ${{ steps.test.conclusion == 'failure' }}
