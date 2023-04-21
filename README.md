@@ -110,11 +110,13 @@ our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 # Current release
 
-The latest version of Form flow library is using `0.0.2-SNAPSHOT`
+The latest version of Form flow library is using `0.0.3-SNAPSHOT`
 in [maven central](https://oss.sonatype.org/#nexus-search;quick~org.codeforamerica.org).
 
-There is a frozen release
-of `0.0.1-SNAPSHOT` [as well.](https://github.com/codeforamerica/form-flow/releases/tag/0.0.1-SNAPSHOT)
+- [`0.0.2-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.2-SNAPSHOT) was
+  frozen with address validation.
+- [`0.0.1-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.1-SNAPSHOT) was
+  frozen for the doc-la project to do user testing.
 
 # What is a form flow?
 
@@ -1510,7 +1512,7 @@ seen below:
       key: ${MAILGUN_KEY}
 ```
 
-####              
+####                
 
 # How to use
 
