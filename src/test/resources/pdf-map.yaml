@@ -1,13 +1,17 @@
 flow: ubi
 pdf: pdfs/ubi/Multipage-UBI-Form.pdf
-inputs:
+inputFields:
   firstName: APPLICANT_LEGAL_NAME_FIRST
   city: APPLICANT_CITY
   howToContactYou:
     phone: PHONE
     email: EMAIL
+dbFields:
+  submittedAt: SUBMITTED_AT_DATE
 ---
 flow: test
 pdf: pdfs/fake
-inputs:
-  whatever: fakeinput
+inputFields:
+  whatever: FAKE_INPUT
+dbFields:
+  submittedAt: SUBMITTED_AT_DATE

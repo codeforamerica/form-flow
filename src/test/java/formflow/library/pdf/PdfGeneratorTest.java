@@ -35,7 +35,7 @@ class PdfGeneratorTest extends PdfTest {
     radioButtonValue = "option2";
     checkboxOptionValue = "Yes";
     ApplicationFile emptyPdf = new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName);
-    List<SubmissionField> singleFields = List.of(
+    List<SubmissionField> submissionFields = List.of(
         new SingleField("textField", textFieldValue, null),
         new SingleField("radioButton", radioButtonValue, null),
         new CheckboxField("checkbox", List.of("CheckboxOption1", "CheckboxOption3"), null)
@@ -43,8 +43,8 @@ class PdfGeneratorTest extends PdfTest {
 
     doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
     when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
-    when(submissionFieldPreparers.prepareSubmissionFields(submission)).thenReturn(singleFields);
-    when(pdfFieldMapper.map(singleFields, "ubi")).thenReturn(List.of(
+    when(submissionFieldPreparers.prepareSubmissionFields(submission)).thenReturn(submissionFields);
+    when(pdfFieldMapper.map(submissionFields, "ubi")).thenReturn(List.of(
         new PdfField("TEXT_FIELD", textFieldValue),
         new PdfField("RADIO_BUTTON", radioButtonValue),
         new PdfField("CHECKBOX_OPTION_1", checkboxOptionValue),
