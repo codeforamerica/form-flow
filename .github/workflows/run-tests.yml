@@ -52,12 +52,13 @@ jobs:
         with:
           repository: codeforamerica/form-flow-starter-app
           path: starter-app
+          ref: paralell-test-#184955913
       - name: Test Starter App
         run: |
           export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/form-flow-test
           export SPRING_DATASOURCE_USERNAME=form-flow-test
           export SPRING_DATASOURCE_PASSWORD=postgres
-          export SPRING_PROFILES_ACTIVE=dev
+          export USE_LOCAL_LIBRARY=true
           cd starter-app && ./gradlew clean test --stacktrace
       - name: Announce failures on Slack
         if:  ${{ steps.test.conclusion == 'failure' }}
