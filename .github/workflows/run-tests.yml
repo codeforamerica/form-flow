@@ -45,14 +45,13 @@ jobs:
         run: cd form-flow && chmod +x gradlew
       - name: Test with Gradle
         id: test
-#        run: cd main && ./gradlew clean test --stacktrace
-        run: cd form-flow && ./gradlew jar
+        run: cd main && ./gradlew clean test --stacktrace
       - name: Checkout Starter App repo
         uses: actions/checkout@v2
         with:
           repository: codeforamerica/form-flow-starter-app
           path: starter-app
-          ref: paralell-test-#184955913
+          ref: main
       - name: Test Starter App
         run: |
           export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/form-flow-test
