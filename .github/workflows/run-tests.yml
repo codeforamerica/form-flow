@@ -58,8 +58,8 @@ jobs:
           export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/form-flow-test
           export SPRING_DATASOURCE_USERNAME=form-flow-test
           export SPRING_DATASOURCE_PASSWORD=postgres
-          export ORG_GRADLE_PROJECT_USE_LOCAL_LIBRARY=true
-          cd starter-app && ./gradlew -PuseLocalLibrary=true clean test --stacktrace
+          export USE_LOCAL_LIBRARY=true
+          cd starter-app && ./gradlew -PUSE_LOCAL_LIBRARY=true clean test --stacktrace
       - name: Announce failures on Slack
         if:  ${{ steps.test.conclusion == 'failure' }}
         uses: ravsamhq/notify-slack-action@v2
