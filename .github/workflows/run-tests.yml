@@ -43,9 +43,9 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Grant execute permission for gradlew
         run: cd form-flow && chmod +x gradlew
-      - name: Test with Gradle
+      - name: Test + Jar with Gradle
         id: test
-        run: cd form-flow && ./gradlew clean test --stacktrace
+        run: cd form-flow && ./gradlew clean test jar --stacktrace
       - name: Checkout Starter App repo
         uses: actions/checkout@v2
         with:
