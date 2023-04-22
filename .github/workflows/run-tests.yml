@@ -53,6 +53,7 @@ jobs:
           path: starter-app
           ref: main
       - name: Test Starter App
+        id: test-starter-app
         run: |
           export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/form-flow-test
           export SPRING_DATASOURCE_USERNAME=form-flow-test
@@ -60,7 +61,7 @@ jobs:
           cd starter-app
           ./gradlew clean test --stacktrace
       - name: Announce failures on Slack
-        if:  ${{ steps.test.conclusion == 'failure' }}
+        if:  ${{ steps.test.conclusion == 'failure' || steps.test-starter-app.conclusion == 'failure' }}
         uses: ravsamhq/notify-slack-action@v2
         with:
           status: ${{ job.status }}
