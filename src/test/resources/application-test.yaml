@@ -1,6 +1,5 @@
 form-flow:
   path: 'test-flow.yaml'
-  pdf-map-file: 'pdf-map.yaml'
   inputs: 'formflow.library.inputs.'
   uploads:
     accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
@@ -15,6 +14,7 @@ form-flow:
       license: "license"
   pdf:
     path: 'src/test/resources/pdfs/'
+    map-file: 'pdf-map.yaml'
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/form-flow-test

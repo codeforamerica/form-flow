@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -20,11 +21,11 @@ import org.yaml.snakeyaml.representer.Representer;
  * Parses the pdf map yaml file and creates corresponding PdfFieldMap Beans.
  */
 @Slf4j
+@ConditionalOnProperty(name = "form-flow.pdf.map-file")
 public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
 
-  @Value("${form-flow.pdf-map-file:pdf-foo.yaml}")
+  @Value("${form-flow.pdf.map-file}")
   String configPath;
-  // String configPath = "pdf-map.yaml";
 
   @Override
   public List<PdfMap> getObject() {

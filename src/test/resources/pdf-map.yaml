@@ -7,7 +7,7 @@ inputFields:
     phone: PHONE
     email: EMAIL
 dbFields:
-  submittedAt: SUBMITTED_AT_DATE
+  
 ---
 flow: test
 pdf: pdfs/fake
