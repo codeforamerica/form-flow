@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -21,9 +22,9 @@ import org.yaml.snakeyaml.representer.Representer;
 @Slf4j
 public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
 
-  //@Value("${form-flow.pdf-map:pdf-foo.yaml}")
-  //String configPath;
-  String configPath = "pdf-map.yaml";
+  @Value("${form-flow.pdf-map-file:pdf-foo.yaml}")
+  String configPath;
+  // String configPath = "pdf-map.yaml";
 
   @Override
   public List<PdfMap> getObject() {
@@ -45,6 +46,7 @@ public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
       Iterable<Object> pdfMapConfigurationIterable = yaml.loadAll(classPathResource.getInputStream());
       pdfMapConfigurationIterable.forEach(map -> pdfMap.add((PdfMap) map));
     } catch (IOException e) {
+      log.error("Can't find the pdf map file: " + configPath, e);
       e.printStackTrace();
     }
 

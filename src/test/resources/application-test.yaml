@@ -1,5 +1,6 @@
 form-flow:
   path: 'test-flow.yaml'
+  pdf-map-file: 'pdf-map.yaml'
   inputs: 'formflow.library.inputs.'
   uploads:
     accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
