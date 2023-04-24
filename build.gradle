@@ -54,7 +54,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.jetbrains:annotations:24.0.1'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.3.1'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.3.2'
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.flywaydb:flyway-core:9.16.3'
     implementation 'net.coobird:thumbnailator:0.4.19'
