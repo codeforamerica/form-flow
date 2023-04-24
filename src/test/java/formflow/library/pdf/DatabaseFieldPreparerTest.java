@@ -3,7 +3,6 @@ package formflow.library.pdf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import formflow.library.data.Submission;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,10 +18,10 @@ class DatabaseFieldPreparerTest {
   @BeforeEach
   void setUp() {
     submission = Submission.builder().flow("flow1").build();
-    submission.setSubmittedAt(DateTime.now().toDate());
-    submission.setCreatedAt(DateTime.now().minusHours(1).toDate());
+    submission.setSubmittedAt(DateTime.parse("2020-09-15").toDate());
+    submission.setCreatedAt(DateTime.parse("2020-09-15").minusDays(1).toDate());
     submission.setId(UUID.randomUUID());
-    submission.setUpdatedAt(DateTime.now().toDate());
+    submission.setUpdatedAt(DateTime.parse("2020-09-15").toDate());
     PdfMap pdfMap = new PdfMap();
     pdfMap.setDbFields(Map.of(
             "submittedAt", "SUBMITTED_AT",
@@ -37,10 +36,9 @@ class DatabaseFieldPreparerTest {
 
   @Test
   void prepareReturnsDatabaseFieldsSubmittedAtDate() {
-    Date date = DateTime.now().toDate();
     DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer(pdfMapConfiguration);
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).contains(
-        new DatabaseField("submittedAt", date.toString())
+        new DatabaseField("submittedAt", "9/15/20")
     );
   }
 
@@ -49,13 +47,13 @@ class DatabaseFieldPreparerTest {
     DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer(pdfMapConfiguration);
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
         new DatabaseField("flow", submission.getFlow()),
-        new DatabaseField("submittedAt", submission.getSubmittedAt().toString()),
-        new DatabaseField("createdAt", submission.getCreatedAt().toString())
+        new DatabaseField("submittedAt", "9/15/20"),
+        new DatabaseField("createdAt", "9/14/20")
     );
 
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).doesNotContain(
         new DatabaseField("submissionId", submission.getId().toString()),
-        new DatabaseField("updatedAt", submission.getUpdatedAt().toString())
+        new DatabaseField("updatedAt", "9/15/20")
     );
   }
 }
