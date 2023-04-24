@@ -1,9 +1,9 @@
 package formflow.library;
 
-import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.pdf.ApplicationFile;
+import formflow.library.pdf.PdfGenerator;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.UUID;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,26 +20,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @EnableAutoConfiguration
 @Slf4j
 @RequestMapping("/download")
-public class PdfController extends FormFlowController {
+public class PdfController {
+
 
   @Value("${form-flow.pdf.path}")
-  String configPath;
+  private String configPath;
 
-  PdfController(SubmissionRepositoryService submissionRepositoryService) {
-    super(submissionRepositoryService);
+  private final PdfGenerator pdfGenerator;
+
+  public PdfController(PdfGenerator pdfGenerator) {
+    this.pdfGenerator = pdfGenerator;
   }
 
-  @GetMapping("{flow}/{submissionId}/{nameOfDocument}")
+  @GetMapping("{flow}/{submissionId}")
   ResponseEntity<byte[]> downloadPdf(
       @PathVariable String flow,
       @PathVariable String submissionId,
-      @PathVariable String nameOfDocument,
       HttpSession httpSession
   ) throws IOException {
     log.info("Downloading PDF with submission_id: " + submissionId);
-    byte[] bytesFromFile = Files.readAllBytes(Path.of(configPath + "Multipage-UBI-Form.pdf"));
+    ApplicationFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
     HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + nameOfDocument + "-" + submissionId + ".pdf");
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(bytesFromFile);
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.fileName(), submissionId));
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
   }
 }

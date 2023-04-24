@@ -31,7 +31,7 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
     loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
     loaderOptions.setAllowRecursiveKeys(true);
 
-    Yaml yaml = new Yaml(new Constructor(FlowConfiguration.class), new Representer(),
+    Yaml yaml = new Yaml(new Constructor(FlowConfiguration.class, loaderOptions), new Representer(new DumperOptions()),
         new DumperOptions(), loaderOptions);
     List<FlowConfiguration> appConfigs = new ArrayList<>();
     try {

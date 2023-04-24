@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
@@ -18,10 +17,6 @@ public class TestUtils {
     submission.setFlow(null);
   }
 
-  public static Path getAbsoluteFilepath(String resourceFilename) {
-    return Paths.get(getAbsoluteFilepathString(resourceFilename));
-  }
-
   public static String getAbsoluteFilepathString(String resourceFilename) {
     URL resource = TestUtils.class.getClassLoader().getResource(resourceFilename);
     if (resource != null) {
@@ -31,6 +26,6 @@ public class TestUtils {
   }
 
   public static byte[] getFileContentsAsByteArray(String filename) throws IOException {
-    return Files.readAllBytes(getAbsoluteFilepath(filename));
+    return Files.readAllBytes(Paths.get(getAbsoluteFilepathString(filename)));
   }
 }
