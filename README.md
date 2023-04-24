@@ -167,20 +167,20 @@ example using our [live templates for a form screen](#applying-live-templates-to
 
 ```html
 
-<th:block th:replace="'fragments/form' :: form(action=${formAction}, content=~{::formContent})">
+<th:block th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
   <th:block th:ref="formContent">
     <div class="form-card__content">
-      <th:block th:replace="'icons' :: 'clipboard'"></th:block>
-      <th:block th:replace="'content' :: cardHeader(header='Tell us about yourself')"/>
+      <th:block th:replace="'icons :: 'clipboard'"></th:block>
+      <th:block th:replace="'content :: cardHeader(header='Tell us about yourself')"/>
       <th:block
-          th:replace="'inputs' :: textInput(name='firstName', label='What's your first name?')"/>
+          th:replace="'inputs :: textInput(name='firstName', label='What's your first name?')"/>
       <th:block
-          th:replace="'inputs' :: textInput(name='lastName', label='What's your last name?')"/>
+          th:replace="'inputs :: textInput(name='lastName', label='What's your last name?')"/>
       <th:block
-          th:replace="'inputs' :: textInput(name='emailAddress', label='What's your email address?')"/>
+          th:replace="'inputs :: textInput(name='emailAddress', label='What's your email address?')"/>
     </div>
     <div class="form-card__footer">
-      <th:block th:replace="'fragments/continueButton' :: continue"/>
+      <th:block th:replace="~{fragments/continueButton :: continue}"/>
     </div>
   </th:block>
 </th:block>
@@ -680,11 +680,11 @@ The template HTML can look like:
 ```html
 <!DOCTYPE html>
 <html th:lang="${#locale.language}">
-<head th:replace="fragments/head :: head(title='')"></head>
+<head th:replace="~{fragments/head :: head(title='')}"></head>
 <body>
 <div class="page-wrapper">
-  <th:block th:replace="fragments/toolbar :: toolbar"/>
-  <th:block th:replace="fragments/demoBanner :: demoBanner"/>
+  <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
+  <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
   <section class="slab">
     <div class="grid">
       <div class="grid__item">
@@ -696,7 +696,7 @@ The template HTML can look like:
 
   </main>
 </div>
-<th:block th:replace="fragments/footer :: footer"/>
+<th:block th:replace="~{fragments/footer :: footer}"/>
 </body>
 </html>
 ```
@@ -737,7 +737,7 @@ Example form fragment:
 ```html
 
 <th:block
-    th:replace="'fragments/form' :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')">
+    th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
   <th:block th:ref="exampleForm">
     <div class="form-card__content">
       INPUTS GO HERE
@@ -756,8 +756,9 @@ A Fragment for the submit button is also provided through `cfa:inputSubmitButton
 If you need to see a reference of all icons from the form flow library, you can paste this fragment
 into your template to quickly see a preview and names of icons:
 
-```
-<th:block th:replace="fragments/icons :: icons-list"></th:block>
+```html
+
+<th:block th:replace="~{fragments/icons :: icons-list}"></th:block>
 ```
 
 ## Input Types
@@ -777,10 +778,10 @@ when you use the fragment like below:
 
 ```html
 
-<th:block th:replace="'fragments/inputs/text' ::
+<th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='firstName',
                   label=#{personal-info.first-name-label},
-                  helpText=#{personal-info.first-name-help})"/>
+                  helpText=#{personal-info.first-name-help})}"/>
 ```
 
 Notice that in this example both the label and the optional help text are using the `#{}` syntax to
@@ -805,10 +806,10 @@ Example of using a text input:
 
 ```html
 
-<th:block th:replace="'fragments/inputs/text' ::
+<th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='firstName',
                   label=#{personal-info.first-name-label},
-                  placeholder=#{personal-info.first-name-placeholder})"/>
+                  placeholder=#{personal-info.first-name-placeholder})}"/>
 ```
 
 A convenience fragment is provided through `cfa:inputText`.
@@ -963,10 +964,10 @@ For example:
 
 ```html
 
-<th:block th:replace="'fragments/inputs/checkbox' ::
+<th:block th:replace="~{fragments/inputs/checkbox ::
                   checkbox(inputName='agreeToTerms',
                   value='agree',
-                  icon='check')"/>
+                  icon='check')}"/>
 ```
 
 For icons not listed in Honeycrisp you can use
@@ -979,16 +980,16 @@ Below are examples of both types of checkboxes:
 
 ```html
 
-<th:block th:replace="'fragments/inputs/checkboxFieldset' ::
+<th:block th:replace="~{fragments/inputs/checkboxFieldset ::
                           checkboxFieldset(inputName='vehiclesOwned',
                           label='This label is actually a legend for the checkbox fieldset',
                           fieldsetHelpText='This help text will appear below the legend',
-                          content=~{::vehiclesOwnedContent})">
+                          content=~{::vehiclesOwnedContent})}">
   <th:block th:ref="vehiclesOwnedContent">
     <th:block
-        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')"/>
+        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
     <th:block
-        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')"/>
+        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
   </th:block>
 </th:block>
 ```
@@ -1004,10 +1005,10 @@ input.
 
 ```html
 
-<th:block th:replace="'fragments/inputs/checkbox' ::
+<th:block th:replace="~{fragments/inputs/checkbox ::
                   checkbox(inputName='agreeToTerms',
                   label='I agree to the terms of service',
-                  checkboxHelpText='This help text will appear next to the checkbox')"/>
+                  checkboxHelpText='This help text will appear next to the checkbox')}"/>
 ```
 
 For both checkbox types note the difference between checkboxHelpText and fieldsetHelpText where
@@ -1034,18 +1035,18 @@ An example of a radio input:
 
 ```html
 
-<th:block th:replace="'fragments/inputs/radioFieldset' ::
+<th:block th:replace="~{fragments/inputs/radioFieldset ::
                           radioFieldset(inputName='favoriteColor',
                           label='What\'s your favorite color?',
                           fieldsetHelpText='The only true answer is blue',
-                          content=~{::favoriteColorContent})">
+                          content=~{::favoriteColorContent})}">
   <th:block th:ref="favoriteColorContent">
     <th:block
-        th:replace="'fragments/inputs/radio' :: radio(inputName='favoriteColor',value='BLUE', label='Blue')"/>
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='BLUE', label='Blue')}"/>
     <th:block
-        th:replace="'fragments/inputs/radio' :: radio(inputName='favoriteColor',value='RED', label='Red')"/>
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
     <th:block
-        th:replace="'fragments/inputs/radio' :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')"/>
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')}"/>
   </th:block>
 </th:block>
 ```
@@ -1078,16 +1079,16 @@ An example select input:
 ```html
 
 <th:block
-    th:replace="'fragments/inputs/select' :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})">
+    th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
   <th:block th:ref="favoriteFruitContent">
     <th:block
-        th:replace="'fragments/inputs/selectOption' :: selectOption(value='', optionText='Choose one')"/>
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
     <th:block
-        th:replace="'fragments/inputs/selectOption' :: selectOption(value='APPLE', optionText='Apple')"/>
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
     <th:block
-        th:replace="'fragments/inputs/selectOption' :: selectOption(value='BANANA', optionText='Banana')"/>
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
     <th:block
-        th:replace="'fragments/inputs/selectOption' :: selectOption(value='KIWI', optionText='Kiwi')"/>
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
   </th:block>
 </th:block>
 ```
@@ -1511,8 +1512,6 @@ seen below:
     mailgun:
       key: ${MAILGUN_KEY}
 ```
-
-####                
 
 # How to use
 

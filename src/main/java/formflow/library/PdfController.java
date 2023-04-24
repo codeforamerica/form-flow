@@ -4,7 +4,7 @@ import formflow.library.pdf.ApplicationFile;
 import formflow.library.pdf.PdfGenerator;
 import java.io.IOException;
 import java.util.UUID;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

@@ -1,9 +1,9 @@
 package formflow.library.inputs;
 
 import formflow.library.data.FlowInputs;
+import jakarta.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.*;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,7 +59,7 @@ public class TestFlow extends FlowInputs {
   String phoneNumber;
 
   ArrayList<String> howToContactYou;
-  
+
   @NotBlank
   String validationOffStreetAddress1;
   String validationOffStreetAddress2;

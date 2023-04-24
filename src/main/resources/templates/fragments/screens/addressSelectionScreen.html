@@ -54,13 +54,13 @@
     </label>
   </div>
   <th:block th:if="${foundValidatedAddress && !isExactValidationMatch}">
-    <th:block th:replace="fragments/inputs/submitButton :: submitButton(
-      text=#{general.inputs.continue})"/>
+    <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+      text=#{general.inputs.continue})}"/>
   </th:block>
   <a th:if="${!foundValidatedAddress || isExactValidationMatch}" th:href="${editAddressURL}"
      class="button button--primary" th:text="#{address-validation.button.edit-my-address}"></a>
-  <th:block th:if="${foundValidatedAddress}" th:replace="fragments/inputs/submitButton :: submitButton(
-      text=#{address-validation.button.use-this-address}, classes='button')"/>
+  <th:block th:if="${foundValidatedAddress}" th:replace="~{fragments/inputs/submitButton :: submitButton(
+      text=#{address-validation.button.use-this-address}, classes='button')}"/>
 </th:block>
 </body>
 </html>

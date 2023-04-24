@@ -28,8 +28,8 @@
   </div>
   <a th:href="${editAddressURL}"
      class="button button--primary" th:text="#{address-validation.button.edit-my-address}"></a>
-  <th:block th:replace="fragments/inputs/submitButton :: submitButton(
-      text=#{address-validation.button.use-this-address}, classes='button')"/>
+  <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+      text=#{address-validation.button.use-this-address}, classes='button')}"/>
 </th:block>
 </body>
 </html>

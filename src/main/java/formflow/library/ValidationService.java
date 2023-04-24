@@ -3,13 +3,16 @@ package formflow.library;
 import formflow.library.config.ActionManager;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,15 +37,15 @@ public class ValidationService {
   @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
   private final List<String> requiredAnnotationsList = List.of(
-      "javax.validation.constraints.NotNull",
-      "javax.validation.constraints.NotEmpty",
-      "javax.validation.constraints.NotBlank"
+      NotNull.class.getName(),
+      NotEmpty.class.getName(),
+      NotBlank.class.getName()
   );
 
   /**
    * Autoconfigured constructor.
    *
-   * @param validator Validator from javax package.
+   * @param validator Validator from Jakarta package.
    */
   public ValidationService(Validator validator, ActionManager actionManager) {
     this.validator = validator;
