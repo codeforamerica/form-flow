@@ -537,7 +537,7 @@ the database. It is stored in a column named `inputData` on the `submissions` ta
 * The input fields on pages that are not part of a subflow will be stored in the main part of the
   JSON data. The keys will be the input fields name.
 * The input fields that are part of a subflow will be stored in an array under a key that is the
-  name of the subflow.
+  name of the subflow. To access the current item on a subflow page, use `currentSubflowItem`.
 * Field names are used as keys. We use them directly as they are and therefore they must be unique
   across a whole flow to avoid naming collisions. The example applies a prefix to the fields, but
   that's just for ease of being clear in the example. The system does not apply prefixes.
