@@ -28,10 +28,10 @@ public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
     dbFields.forEach((fieldName, value) -> {
       switch (fieldName) {
-        case "submittedAt" -> databaseFields.add(new DatabaseField(fieldName, formatDateTime(submission.getSubmittedAt())));
+        case "submittedAt" -> databaseFields.add(new DatabaseField(fieldName, formatDateWithNoTime(submission.getSubmittedAt())));
         case "submissionId" -> databaseFields.add(new DatabaseField(fieldName, submission.getId().toString()));
-        case "createdAt" -> databaseFields.add(new DatabaseField(fieldName, formatDateTime(submission.getCreatedAt())));
-        case "updatedAt" -> databaseFields.add(new DatabaseField(fieldName, formatDateTime(submission.getUpdatedAt())));
+        case "createdAt" -> databaseFields.add(new DatabaseField(fieldName, formatDateWithNoTime(submission.getCreatedAt())));
+        case "updatedAt" -> databaseFields.add(new DatabaseField(fieldName, formatDateWithNoTime(submission.getUpdatedAt())));
         case "flow" -> databaseFields.add(new DatabaseField(fieldName, submission.getFlow()));
         default -> log.error("Unable to map unknown database field: {}", fieldName);
       }
@@ -39,9 +39,11 @@ public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
     return databaseFields;
   }
 
-  private String formatDateTime(Date date) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(Locale.US).withZone(
-        java.time.ZoneId.systemDefault());
+  private String formatDateWithNoTime(Date date) {
+    DateTimeFormatter formatter = DateTimeFormatter
+        .ofPattern("MM/dd/yyyy")
+        .withLocale(Locale.US)
+        .withZone(java.time.ZoneId.systemDefault());
     return formatter.format(date.toInstant());
   }
 }

@@ -38,7 +38,7 @@ class DatabaseFieldPreparerTest {
   void prepareReturnsDatabaseFieldsSubmittedAtDate() {
     DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer(pdfMapConfiguration);
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).contains(
-        new DatabaseField("submittedAt", "9/15/20")
+        new DatabaseField("submittedAt", "09/15/2020")
     );
   }
 
@@ -47,13 +47,13 @@ class DatabaseFieldPreparerTest {
     DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer(pdfMapConfiguration);
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
         new DatabaseField("flow", submission.getFlow()),
-        new DatabaseField("submittedAt", "9/15/20"),
-        new DatabaseField("createdAt", "9/14/20")
+        new DatabaseField("submittedAt", "09/15/2020"),
+        new DatabaseField("createdAt", "09/14/2020")
     );
 
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).doesNotContain(
         new DatabaseField("submissionId", submission.getId().toString()),
-        new DatabaseField("updatedAt", "9/15/20")
+        new DatabaseField("updatedAt", "09/15/2020")
     );
   }
 }
