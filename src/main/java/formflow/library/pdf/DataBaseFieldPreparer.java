@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
+public class DataBaseFieldPreparer implements DefaultSubmissionFieldPreparer {
 
   private final PdfMapConfiguration pdfMapConfiguration;
 

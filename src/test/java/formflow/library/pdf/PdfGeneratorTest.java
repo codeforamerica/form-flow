@@ -64,5 +64,4 @@ class PdfGeneratorTest extends PdfTest {
     assertPdfFieldEquals("CHECKBOX_OPTION_2", "Off");
     assertPdfFieldEquals("CHECKBOX_OPTION_3", checkboxOptionValue);
   }
-
 }

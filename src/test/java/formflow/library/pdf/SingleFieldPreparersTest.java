@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 
 class SingleFieldPreparersTest {
 
-  private SubmissionFieldPreparers preparers;
-
   private Submission testSubmission;
 
   @BeforeEach
@@ -30,10 +28,10 @@ class SingleFieldPreparersTest {
 
   @Test
   void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
-    SubmissionFieldPreparer successfulPreparer = mock(SubmissionFieldPreparer.class);
-    SubmissionFieldPreparer failingPreparer = mock(SubmissionFieldPreparer.class);
+    DefaultSubmissionFieldPreparer successfulPreparer = mock(DefaultSubmissionFieldPreparer.class);
+    DefaultSubmissionFieldPreparer failingPreparer = mock(DefaultSubmissionFieldPreparer.class);
     SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
-        List.of(failingPreparer, successfulPreparer));
+        List.of(failingPreparer, successfulPreparer), List.of());
     Date date = DateTime.parse("2020-09-02").toDate();
 
     List<SubmissionField> mockOutput = List.of(

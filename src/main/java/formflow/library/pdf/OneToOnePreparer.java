@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OneToOnePreparer implements SubmissionFieldPreparer {
+public class OneToOnePreparer implements DefaultSubmissionFieldPreparer {
 
   private final PdfMapConfiguration pdfMapConfiguration;
 

@@ -10,19 +10,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubmissionFieldPreparers {
 
-  private final List<SubmissionFieldPreparer> preparers;
+  private final List<DefaultSubmissionFieldPreparer> defaultPreparers;
 
-  public SubmissionFieldPreparers(List<SubmissionFieldPreparer> preparers) {
-    this.preparers = preparers;
+  private final List<SubmissionFieldPreparer> customPreparers;
+
+  public SubmissionFieldPreparers(List<DefaultSubmissionFieldPreparer> defaultPreparers,
+      List<SubmissionFieldPreparer> customPreparers) {
+    this.defaultPreparers = defaultPreparers;
+    this.customPreparers = customPreparers;
   }
 
   public List<SubmissionField> prepareSubmissionFields(Submission submission) {
 
-    // Add default fields
     List<SubmissionField> fields = new ArrayList<>();
 
-    // Run all the preparers
-    preparers.forEach(preparer -> {
+    defaultPreparers.forEach(preparer -> {
+      try {
+        fields.addAll(preparer.prepareSubmissionFields(submission));
+      } catch (Exception e) {
+        String preparerClassName = preparer.getClass().getSimpleName();
+        log.error("There was an issue preparing submission data for " + preparerClassName, e);
+      }
+    });
+
+    customPreparers.forEach(preparer -> {
       try {
         fields.addAll(preparer.prepareSubmissionFields(submission));
       } catch (Exception e) {
