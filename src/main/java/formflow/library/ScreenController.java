@@ -173,7 +173,6 @@ public class ScreenController extends FormFlowController {
       cleanAddressesInSubmission(submission, addressValidationFields);
     }
 
-    log.info("submission = " + submission);
     // if there's already a session
     if (submission.getId() != null) {
       submission.mergeFormDataWithSubmissionData(formSubmission);
