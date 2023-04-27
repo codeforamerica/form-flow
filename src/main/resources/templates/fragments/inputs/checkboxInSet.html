@@ -7,16 +7,17 @@
       hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
       name=${inputName} + '[]',
-      checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(name, ''), value)}"
+      checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(inputData.getOrDefault(name, ''), value)},
+      id=${#bools.isTrue(noneOfTheAbove) ? 'none__checkbox' : inputName + '-' + value}"
     th:assert="
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},
       ${!#strings.isEmpty(label)}">
-  <label th:for="${inputName} + '-' + ${value}"
-         th:id="${inputName} + '-' + ${value} + '-label'"
+  <label th:for="${id}"
+         th:id="${id} + '-label'"
          class="checkbox display-flex">
     <input type="checkbox"
-           th:id="${inputName} + '-' + ${value}"
+           th:id="${id}"
            th:value="${value}"
            th:name="${name}"
            th:checked="${checked}"
@@ -29,7 +30,7 @@
     <div>
       <span th:text="${label}"></span>
       <p th:if="${hasHelpText}"
-         th:id="${inputName} + '-' + ${value} + '-help-text'"
+         th:id="${id} + '-help-text'"
          th:text="${checkboxHelpText}"
          class="text--help with-no-padding"></p>
     </div>

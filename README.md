@@ -996,10 +996,16 @@ Below are examples of both types of checkboxes:
 
 Note that the `checkboxInSet` fragment is used to provide multiple options within
 a `checkboxFieldset` fragment. Also note that the input name fo the `checkboxFieldset` and
-the `checkboxInSet`
-are the same. This is how the fieldset and internal checkbox options are grouped into a single
-multiple checkbox
-input.
+the `checkboxInSet` are the same. This is how the fieldset and internal checkbox options are grouped
+into a single multiple checkbox input.
+
+To support a "None of the Above" checkbox, add `noneOfTheAbove=true` to the arguments to `checkboxInSet()`:
+```html
+<th:block
+    th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
+```
+Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is selected. To enable it, you'll need to add `noneOfTheAbove.init()` to your JavaScript that runs after page load.
+
 
 #### Checkbox
 
