@@ -42,7 +42,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     driver.executeScript(
         "$('#document-upload-uploadTest').get(0).dropzone.addFile({name: 'testFile.pdf', size: "
             + largeFilesize + ", type: 'not-an-image'})");
-    int maxFileSize = 17;
+    Integer maxFileSize = Integer.valueOf(17);
     assertThat(driver.findElement(By.className("text--error")).getText()).contains(messageSource
         .getMessage("upload-documents.this-file-is-too-large", new Object[]{maxFileSize}, Locale.ENGLISH));
     testPage.clickLink("remove");

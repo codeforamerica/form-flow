@@ -14,6 +14,7 @@ form-flow:
       license: "license"
   pdf:
     path: 'src/test/resources/pdfs/'
+    map-file: 'pdf-map.yaml'
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/form-flow-test
@@ -26,6 +27,7 @@ spring:
     clean-on-validation-error: true
     placeholders:
       uuid_function: "gen_random_uuid"
+    clean-disabled: false
   messages:
     encoding: ISO-8859-1
     basename: messages, messages-form-flow
