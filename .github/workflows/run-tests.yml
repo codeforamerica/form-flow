@@ -70,3 +70,4 @@ jobs:
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-published
+          token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
