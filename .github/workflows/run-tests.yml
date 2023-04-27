@@ -11,63 +11,56 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-      contents: write
-#    services:
-#      postgres:
-#        image: postgres
-#        env:
-#          POSTGRES_USER: form-flow-test
-#          POSTGRES_PASSWORD: postgres
-#          POSTGRES_DB: form-flow-test
-#        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-#        ports:
-#          - 5432:5432
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: form-flow-test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: form-flow-test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
     steps:
-#      - uses: actions/checkout@v3
-#        with:
-#          ref: ${{ github.event.pull_request.head.sha }}
-#      - name: Set up JDK
-#        uses: actions/setup-java@v3.5.0
-#        with:
-#          distribution: 'adopt'
-#          java-version: '17'
-#          cache: 'gradle'
-#      - name: Cache Gradle packages
-#        uses: actions/cache@v3
-#        with:
-#          path: |
-#            ~/.gradle/caches
-#            ~/.gradle/wrapper
-#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-#          restore-keys: |
-#            ${{ runner.os }}-gradle-
-#      - name: Grant execute permission for gradlew
-#        run: chmod +x gradlew
-#      - name: Test + Jar with Gradle
-#        id: test
-#        run: ./gradlew clean test --stacktrace
-#      - name: Announce failures on Slack
-#        if:  ${{ steps.test.conclusion == 'failure'}}
-#        uses: ravsamhq/notify-slack-action@v2
-#        with:
-#          status: ${{ job.status }}
-#        env:
-#          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-#      - name: Report results to DeepSource
-#        continue-on-error: true
-#        if:  ${{ steps.test.conclusion == 'success' }}
-#        run: |
-#           curl https://deepsource.io/cli | sh
-#           ./bin/deepsource report --analyzer test-coverage --key java --value-file ./build/reports/jacoco/test/jacocoTestReport.xml
-#        env:
-#          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
-#      - name: Cleanup Gradle Cache
-#        run: |
-#          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-#          rm -f ~/.gradle/caches/modules-2/gc.properties
-      - name: Trigger starter-app tests on newly published version
-        uses: peter-evans/repository-dispatch@v2.1.1
+      - uses: actions/checkout@v3
         with:
-          repository: codeforamerica/form-flow-starter-app
-          event-type: form-flow-published
-          token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Set up JDK
+        uses: actions/setup-java@v3.5.0
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Test + Jar with Gradle
+        id: test
+        run: ./gradlew clean test --stacktrace
+      - name: Announce failures on Slack
+        if:  ${{ steps.test.conclusion == 'failure'}}
+        uses: ravsamhq/notify-slack-action@v2
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Report results to DeepSource
+        continue-on-error: true
+        if:  ${{ steps.test.conclusion == 'success' }}
+        run: |
+           curl https://deepsource.io/cli | sh
+           ./bin/deepsource report --analyzer test-coverage --key java --value-file ./build/reports/jacoco/test/jacocoTestReport.xml
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+      - name: Cleanup Gradle Cache
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties

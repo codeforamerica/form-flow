@@ -50,6 +50,12 @@ jobs:
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      - name: Trigger starter-app tests on newly published version
+        uses: peter-evans/repository-dispatch@v2.1.1
+        with:
+          repository: codeforamerica/form-flow-starter-app
+          event-type: form-flow-published
+          token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
       - name: Announce on Slack
         if: failure()
         uses: ravsamhq/notify-slack-action@v2
