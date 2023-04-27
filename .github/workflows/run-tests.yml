@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
+      contents: write
     services:
       postgres:
         image: postgres
@@ -65,6 +66,6 @@ jobs:
 #          rm -f ~/.gradle/caches/modules-2/modules-2.lock
 #          rm -f ~/.gradle/caches/modules-2/gc.properties
       - name: Trigger starter-app tests on newly published version
-        uses: peter-evans/repository-dispatch@v2
+        uses: peter-evans/repository-dispatch@v2.1.1
         with:
           event-type: form-flow-published
