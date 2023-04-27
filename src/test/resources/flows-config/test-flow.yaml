@@ -18,6 +18,10 @@ flow:
   testAddressVerification:
     nextScreens:
       - name: test
+  subflowAddItem:
+    subflow: testSubflow
+    nextScreens:
+      - name: test
   test:
     nextScreens:
       - name: success

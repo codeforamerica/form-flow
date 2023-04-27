@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 public class ScreenControllerTest extends AbstractMockMvcTest {
@@ -54,6 +56,19 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       queryParams.put("lang", "en");
       getWithQueryParam("test", "lang", "en");
       assert(submission.getUrlParams().equals(queryParams));
+    }
+  }
+
+  @Nested
+  public class SubflowParameters {
+    @Test
+    public void modelIncludesCurrentSubflowItem() throws Exception {
+      HashMap<String, String> subflowItem = new HashMap<>();
+      subflowItem.put("uuid", "aaa-bbb-ccc");
+      subflowItem.put("firstName", "foo bar baz");
+
+      submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
+      getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
     }
   }
 

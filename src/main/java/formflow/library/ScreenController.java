@@ -282,6 +282,8 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
+    var currentObject = submission.getSubflowEntryByUuid(currentScreen.getSubflow(), uuid);
+    model.put("currentSubflowItem", currentObject);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
