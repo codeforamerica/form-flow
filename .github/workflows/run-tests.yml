@@ -12,16 +12,16 @@ jobs:
     permissions:
       actions: read
       contents: write
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: form-flow-test
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: form-flow-test
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-        ports:
-          - 5432:5432
+#    services:
+#      postgres:
+#        image: postgres
+#        env:
+#          POSTGRES_USER: form-flow-test
+#          POSTGRES_PASSWORD: postgres
+#          POSTGRES_DB: form-flow-test
+#        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+#        ports:
+#          - 5432:5432
     steps:
 #      - uses: actions/checkout@v3
 #        with:
@@ -68,4 +68,5 @@ jobs:
       - name: Trigger starter-app tests on newly published version
         uses: peter-evans/repository-dispatch@v2.1.1
         with:
+          repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-published
