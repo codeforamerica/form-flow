@@ -1,7 +1,7 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,26 +10,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubmissionFieldPreparers {
 
-  private final List<SubmissionFieldPreparer> preparers;
+  private final List<DefaultSubmissionFieldPreparer> defaultPreparers;
 
-  public SubmissionFieldPreparers(List<SubmissionFieldPreparer> preparers) {
-    this.preparers = preparers;
+  private final List<SubmissionFieldPreparer> customPreparers;
+
+  public SubmissionFieldPreparers(List<DefaultSubmissionFieldPreparer> defaultPreparers,
+      List<SubmissionFieldPreparer> customPreparers) {
+    this.defaultPreparers = defaultPreparers;
+    this.customPreparers = customPreparers;
   }
 
   public List<SubmissionField> prepareSubmissionFields(Submission submission) {
 
-    // Add default fields
-    List<SubmissionField> fields = new ArrayList<>();
+    HashMap<String, SubmissionField> submissionFieldsMap = new HashMap<>();
 
-    // Run all the preparers
-    preparers.forEach(preparer -> {
+    defaultPreparers.forEach(preparer -> {
       try {
-        fields.addAll(preparer.prepareSubmissionFields(submission));
+        submissionFieldsMap.putAll(preparer.prepareSubmissionFields(submission));
       } catch (Exception e) {
         String preparerClassName = preparer.getClass().getSimpleName();
         log.error("There was an issue preparing submission data for " + preparerClassName, e);
       }
     });
-    return fields;
+
+    customPreparers.forEach(preparer -> {
+      try {
+        submissionFieldsMap.putAll(preparer.prepareSubmissionFields(submission));
+      } catch (Exception e) {
+        String preparerClassName = preparer.getClass().getSimpleName();
+        log.error("There was an issue preparing submission data for " + preparerClassName, e);
+      }
+    });
+
+    return submissionFieldsMap.values().stream().toList();
   }
 }

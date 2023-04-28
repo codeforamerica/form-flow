@@ -32,9 +32,9 @@ class OneToOnePreparerTest {
     ));
     OneToOnePreparer oneToOnePreparer = new OneToOnePreparer(new PdfMapConfiguration(List.of(map)));
 
-    assertThat(oneToOnePreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
-        new SingleField("inputName1", "foo", null),
-        new SingleField("inputName2", "bar", null)
+    assertThat(oneToOnePreparer.prepareSubmissionFields(submission)).containsExactly(
+        Map.entry("inputName1", new SingleField("inputName1", "foo", null)),
+        Map.entry("inputName2", new SingleField("inputName2", "bar", null))
     );
   }
 
@@ -52,7 +52,7 @@ class OneToOnePreparerTest {
     OneToOnePreparer oneToOnePreparer = new OneToOnePreparer(new PdfMapConfiguration(List.of(map)));
 
     assertThat(oneToOnePreparer.prepareSubmissionFields(submission)).containsExactly(
-        new SingleField("inputName1", "foo", null)
+        Map.entry("inputName1", new SingleField("inputName1", "foo", null))
     );
   }
 }

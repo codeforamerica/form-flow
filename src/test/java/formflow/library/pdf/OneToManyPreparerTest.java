@@ -33,9 +33,8 @@ class OneToManyPreparerTest {
     ));
     OneToManyPreparer oneToManyPreparer = new OneToManyPreparer(new PdfMapConfiguration(List.of(map)));
 
-    assertThat(oneToManyPreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
-        new CheckboxField("checkbox", List.of("option1", "option3"), null)
+    assertThat(oneToManyPreparer.prepareSubmissionFields(submission)).containsExactly(
+        Map.entry("checkbox", new CheckboxField("checkbox", List.of("option1", "option3"), null))
     );
   }
-
 }

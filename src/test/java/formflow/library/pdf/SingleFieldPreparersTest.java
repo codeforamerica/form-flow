@@ -9,14 +9,13 @@ import static org.mockito.Mockito.when;
 import formflow.library.data.Submission;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SingleFieldPreparersTest {
-
-  private SubmissionFieldPreparers preparers;
 
   private Submission testSubmission;
 
@@ -30,17 +29,16 @@ class SingleFieldPreparersTest {
 
   @Test
   void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
-    SubmissionFieldPreparer successfulPreparer = mock(SubmissionFieldPreparer.class);
-    SubmissionFieldPreparer failingPreparer = mock(SubmissionFieldPreparer.class);
+    DefaultSubmissionFieldPreparer successfulPreparer = mock(DefaultSubmissionFieldPreparer.class);
+    DefaultSubmissionFieldPreparer failingPreparer = mock(DefaultSubmissionFieldPreparer.class);
     SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
-        List.of(failingPreparer, successfulPreparer));
+        List.of(failingPreparer, successfulPreparer), List.of());
     Date date = DateTime.parse("2020-09-02").toDate();
 
-    List<SubmissionField> mockOutput = List.of(
-        new DatabaseField("submittedAt", String.valueOf(date))
+    Map<String, SubmissionField> mockOutput = Map.of(
+        "submittedAt", new DatabaseField("submittedAt", String.valueOf(date))
     );
-    when(successfulPreparer.prepareSubmissionFields(eq(testSubmission)))
-        .thenReturn(mockOutput);
+    when(successfulPreparer.prepareSubmissionFields(eq(testSubmission))).thenReturn(mockOutput);
     when(failingPreparer.prepareSubmissionFields(eq(testSubmission)))
         .thenThrow(IllegalArgumentException.class);
 
