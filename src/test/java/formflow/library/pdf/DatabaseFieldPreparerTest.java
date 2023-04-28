@@ -37,23 +37,23 @@ class DatabaseFieldPreparerTest {
   @Test
   void prepareReturnsDatabaseFieldsSubmittedAtDate() {
     DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer(pdfMapConfiguration);
-    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).contains(
-        new DatabaseField("submittedAt", "09/15/2020")
+    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).containsEntry(
+        "submittedAt", new DatabaseField("submittedAt", "09/15/2020")
     );
   }
 
   @Test
   void shouldNotCreateDbFieldsForItemsNotPresentInPdfMap() {
     DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer(pdfMapConfiguration);
-    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
-        new DatabaseField("flow", submission.getFlow()),
-        new DatabaseField("submittedAt", "09/15/2020"),
-        new DatabaseField("createdAt", "09/14/2020")
+    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).containsAllEntriesOf(
+        Map.of("flow", new DatabaseField("flow", submission.getFlow()),
+            "submittedAt", new DatabaseField("submittedAt", "09/15/2020"),
+            "createdAt", new DatabaseField("createdAt", "09/14/2020"))
     );
 
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission)).doesNotContain(
-        new DatabaseField("submissionId", submission.getId().toString()),
-        new DatabaseField("updatedAt", "09/15/2020")
+        Map.entry("submissionId", new DatabaseField("submissionId", submission.getId().toString())),
+        Map.entry("updatedAt", new DatabaseField("updatedAt", "09/15/2020"))
     );
   }
 }

@@ -34,24 +34,24 @@ public class PdfFieldMapper {
   @NotNull
   private PdfField mapDatabaseFieldFromFlow(DatabaseField input, String flow) {
     Map<String, Object> pdfDbMapForFlow = getPdfDbMapForFlow(flow);
-    String pdfFieldName = pdfDbMapForFlow.get(input.name()).toString();
-    return new PdfField(pdfFieldName, input.value());
+    String pdfFieldName = pdfDbMapForFlow.get(input.getName()).toString();
+    return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
   private PdfField mapSingleFieldFromFlow(SingleField input, String flow) {
     Map<String, Object> pdfInputsMap = getPdfInputMapForFlow(flow);
-    String pdfFieldName = pdfInputsMap.get(input.name()).toString();
-    return new PdfField(pdfFieldName, input.value());
+    String pdfFieldName = pdfInputsMap.get(input.getName()).toString();
+    return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
   private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, String flow) {
     Map<String, Object> pdfInputsMap = getPdfInputMapForFlow(flow);
 
-    Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(input.name());
+    Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(input.getName());
 
-    return input.value().stream()
+    return input.getValue().stream()
         .map(value -> new PdfField(pdfFieldMap.get(value), "Yes"))
         .collect(Collectors.toList());
   }

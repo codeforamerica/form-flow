@@ -27,11 +27,12 @@ class SubmissionFieldPreparersTest {
   }
 
   @Test
-  void customPreparerFieldsShouldComeAfterDefaultPreparerFields() {
+  void submissionFieldPreparersShouldCreateSubmissionFieldsForAllFieldsInAPdfMapConfigurationWhileOverwritingDefaultFieldsWithCustomFieldsThatPrepareTheSameInput() {
     submission = Submission.builder().flow("flow1")
         .inputData(
             Map.of(
-                "fieldThatGetsOverwritten", "willBeOverwritten"
+                "fieldThatGetsOverwritten", "willBeOverwritten",
+                "fieldThatDoesNotGetOverwritten", "willNotBeOverwritten"
             )).build();
 
     OneToOnePreparer defaultSingleFieldPreparer = new OneToOnePreparer(pdfMapConfiguration);
@@ -40,8 +41,15 @@ class SubmissionFieldPreparersTest {
     SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
         List.of(testCustomPreparer));
 
-    assertThat(submissionFieldPreparers.prepareSubmissionFields(submission)).containsExactly(
-        new SingleField("fieldThatGetsOverwritten", "willBeOverwritten", null),
+    assertThat(defaultSingleFieldPreparer.prepareSubmissionFields(submission)).containsExactly(
+        Map.entry("fieldThatGetsOverwritten", new SingleField("fieldThatGetsOverwritten", "willBeOverwritten", null)),
+        Map.entry("fieldThatDoesNotGetOverwritten", new SingleField("fieldThatGetsOverwritten", "willNotBeOverwritten", null))
+    );
+    assertThat(testCustomPreparer.prepareSubmissionFields(submission)).containsExactly(
+        Map.entry("fieldThatGetsOverwritten", new SingleField("fieldThatGetsOverwritten", "OVERWRITTEN", null))
+    );
+    assertThat(submissionFieldPreparers.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
+        new SingleField("fieldThatDoesNotGetOverwritten", "willNotBeOverwritten", null),
         new SingleField("fieldThatGetsOverwritten", "OVERWRITTEN", null)
     );
   }

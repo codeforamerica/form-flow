@@ -1,9 +1,9 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
-import java.util.List;
+import java.util.Map;
 
 public interface DefaultSubmissionFieldPreparer {
 
-  List<SubmissionField> prepareSubmissionFields(Submission submission);
+  Map<String, SubmissionField> prepareSubmissionFields(Submission submission);
 }
