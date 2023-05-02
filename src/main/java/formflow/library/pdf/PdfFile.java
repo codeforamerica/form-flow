@@ -8,6 +8,7 @@ import java.io.IOException;
 
 @Slf4j
 public record PdfFile(PDDocument pdDocument, String fileName) {
+
   public PdfFile(String filePath, String fileName) throws IOException {
     this(PDDocument.load(PdfFile.class.getResourceAsStream(filePath)), fileName);
   }
@@ -19,9 +20,7 @@ public record PdfFile(PDDocument pdDocument, String fileName) {
 
   public byte[] fileBytes() throws IOException {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
     pdDocument.save(outputStream);
-    pdDocument.close();
     return outputStream.toByteArray();
   }
 }

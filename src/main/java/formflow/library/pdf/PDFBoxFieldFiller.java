@@ -27,9 +27,9 @@ public class PDFBoxFieldFiller {
   public PDDocument fill(Collection<PdfField> fields, String filename) {
     PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
     PDDocument pdDocument = pdfs.stream()
-            .map(pdfResource -> fillOutPdfs(fields, pdfResource))
-            .reduce(mergePdfs(pdfMergerUtility))
-            .orElse(new PDDocument());
+        .map(pdfResource -> fillOutPdfs(fields, pdfResource))
+        .reduce(mergePdfs(pdfMergerUtility))
+        .orElse(new PDDocument());
 //    pdDocument.close();
     return pdDocument;
   }
