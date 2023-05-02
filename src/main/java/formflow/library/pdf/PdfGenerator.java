@@ -2,11 +2,13 @@ package formflow.library.pdf;
 
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PdfGenerator {
@@ -24,13 +26,13 @@ public class PdfGenerator {
     this.pdfMapConfiguration = pdfMapConfiguration;
   }
 
-  public ApplicationFile generate(String flow, UUID id) throws IOException {
+  public PdfFile generate(String flow, UUID id) throws IOException {
     Submission submission = submissionRepositoryService.findById(id).orElseThrow();
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
-    ApplicationFile emptyFile = pdfMapConfiguration.getPdfFromFlow(flow);
-
-    return new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
-        emptyFile.fileName());
+    PdfFile emptyFile = pdfMapConfiguration.getPdfFromFlow(flow);
+    PDDocument filledPdf = new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
+            emptyFile.fileName());
+    return new PdfFile(filledPdf, emptyFile.fileName());
   }
 }

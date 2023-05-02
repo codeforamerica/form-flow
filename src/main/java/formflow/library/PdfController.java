@@ -1,9 +1,7 @@
 package formflow.library;
 
-import formflow.library.pdf.ApplicationFile;
+import formflow.library.pdf.PdfFile;
 import formflow.library.pdf.PdfGenerator;
-import java.io.IOException;
-import java.util.UUID;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @Controller
 @EnableAutoConfiguration
@@ -39,7 +40,7 @@ public class PdfController {
       HttpSession httpSession
   ) throws IOException {
     log.info("Downloading PDF with submission_id: " + submissionId);
-    ApplicationFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
+    PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.fileName(), submissionId));
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());

@@ -1,12 +1,9 @@
 package formflow.library.pdf;
 
-import static java.util.Objects.requireNonNull;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PdfTest {
   private PDAcroForm pdf;
@@ -18,11 +15,7 @@ public class PdfTest {
     assertThat(pdfFieldText).isEqualTo(expectedValue);
   }
 
-  protected byte[] getBytesFromTestPdf(String path) throws IOException {
-    return requireNonNull(getClass().getClassLoader().getResourceAsStream("pdfs/" + path)).readAllBytes();
-  }
-
-  protected void preparePdfForAssertions(ApplicationFile filledPdf) throws IOException {
-    pdf = PDDocument.load(filledPdf.fileBytes()).getDocumentCatalog().getAcroForm();
+  protected void preparePdfForAssertions(PdfFile filledPdf) {
+    pdf = filledPdf.pdDocument().getDocumentCatalog().getAcroForm();
   }
 }

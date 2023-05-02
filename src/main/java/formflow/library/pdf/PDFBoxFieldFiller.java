@@ -1,11 +1,5 @@
 package formflow.library.pdf;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BinaryOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -14,6 +8,12 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
 
 @Slf4j
 public class PDFBoxFieldFiller {
@@ -24,27 +24,14 @@ public class PDFBoxFieldFiller {
     this.pdfs = pdfs;
   }
 
-  public ApplicationFile fill(Collection<PdfField> fields, String filename) {
+  public PDDocument fill(Collection<PdfField> fields, String filename) {
     PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
-
-    byte[] fileContents = pdfs.stream()
-        .map(pdfResource -> fillOutPdfs(fields, pdfResource))
-        .reduce(mergePdfs(pdfMergerUtility))
-        .map(this::outputByteArray)
-        .orElse(new byte[]{});
-
-    return new ApplicationFile(fileContents, filename);
-  }
-
-  private byte[] outputByteArray(PDDocument pdDocument) {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    try {
-      pdDocument.save(outputStream);
-      pdDocument.close();
-    } catch (IOException e) {
-      log.error("Unable to save output", e);
-    }
-    return outputStream.toByteArray();
+    PDDocument pdDocument = pdfs.stream()
+            .map(pdfResource -> fillOutPdfs(fields, pdfResource))
+            .reduce(mergePdfs(pdfMergerUtility))
+            .orElse(new PDDocument());
+//    pdDocument.close();
+    return pdDocument;
   }
 
   @NotNull
@@ -81,14 +68,14 @@ public class PDFBoxFieldFiller {
             if (pdField instanceof PDCheckBox && field.value().equals("No")) {
               fieldValue = "Off";
             }
-            setPdfFieldWithoutUnsupportedUnicode(fieldValue, pdField);
+            setPdfField(fieldValue, pdField);
           } catch (Exception e) {
             throw new RuntimeException("Error setting field: " + field.name(), e);
           }
         }));
   }
 
-  private void setPdfFieldWithoutUnsupportedUnicode(String field, PDField pdField)
+  private void setPdfField(String field, PDField pdField)
       throws IOException {
     try {
       pdField.setValue(field);
