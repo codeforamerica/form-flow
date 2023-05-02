@@ -168,6 +168,9 @@ publishing {
                         email = 'bseeger@codeforamerica.org'
                     }
                 }
+                scm {
+                    url = 'scm:git:https://github.com/codeforamerica/form-flow.git'
+                }
             }
         }
     }
