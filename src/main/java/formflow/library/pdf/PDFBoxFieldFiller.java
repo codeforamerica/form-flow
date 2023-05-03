@@ -30,7 +30,6 @@ public class PDFBoxFieldFiller {
         .map(pdfResource -> fillOutPdfs(fields, pdfResource))
         .reduce(mergePdfs(pdfMergerUtility))
         .orElse(new PDDocument());
-//    pdDocument.close();
     return pdDocument;
   }
 

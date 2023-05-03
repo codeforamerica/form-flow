@@ -1,27 +1,27 @@
 package formflow.library.pdf;
 
+import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-
 class PDFBoxFieldFillerTest {
 
   private PDFBoxFieldFiller pdfBoxFieldFiller;
+
   @BeforeEach
   void setUp() {
     pdfBoxFieldFiller = new PDFBoxFieldFiller(List.of(
-            new ClassPathResource("/pdfs/testPdf.pdf"),
-            new ClassPathResource("/pdfs/blankPdf.pdf")
+        new ClassPathResource("/pdfs/testPdf.pdf"),
+        new ClassPathResource("/pdfs/blankPdf.pdf")
     ));
   }
 
@@ -61,18 +61,17 @@ class PDFBoxFieldFillerTest {
         "test_file.txt")).doesNotThrowAnyException();
   }
 
-//  @Test
-//  void shouldSupportEmojis() throws IOException {
-//    String submittedValue = "Michael😃";
-//    String expectedValue = "Michael😃";
-//
-//    Collection<PdfField> fields = List.of(
-//        new PdfField("TEXT_FIELD", submittedValue)
-//    );
-//    ApplicationFile applicationFile = pdfBoxFieldFiller.fill(fields, "", "");
-//    PDAcroForm acroForm = getPdAcroForm(applicationFile);
-//
-//    assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedValue);
-//  }
+  @Test
+  void shouldSupportEmojis() {
+    String submittedValue = "Michael😃";
+    String expectedValue = "Michael😃";
+
+    Collection<PdfField> fields = List.of(
+        new PdfField("TEXT_FIELD", submittedValue)
+    );
+    PDAcroForm acroForm = pdfBoxFieldFiller.fill(fields, "").getDocumentCatalog().getAcroForm();
+
+    assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedValue);
+  }
 
 }
