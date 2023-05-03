@@ -1,18 +1,16 @@
 package formflow.library.pdf;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import static org.mockito.Mockito.*;
 
 class PdfGeneratorTest extends PdfTest {
 
@@ -34,7 +32,7 @@ class PdfGeneratorTest extends PdfTest {
     textFieldValue = "Greatest Text";
     radioButtonValue = "option2";
     checkboxOptionValue = "Yes";
-    ApplicationFile emptyPdf = new ApplicationFile(getBytesFromTestPdf(testPdfName), testPdfName);
+    PdfFile emptyPdf = new PdfFile("/pdfs/" + testPdfName, testPdfName);
     List<SubmissionField> submissionFields = List.of(
         new SingleField("textField", textFieldValue, null),
         new SingleField("radioButton", radioButtonValue, null),
