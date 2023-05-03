@@ -110,9 +110,15 @@ our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 # Current release
 
-The latest version of Form flow library is using `0.0.3-SNAPSHOT`
-in [maven central](https://oss.sonatype.org/#nexus-search;quick~org.codeforamerica.org).
+The latest released version of Form Flow library is `0.0.3`
 
+The latest SNAPSHOT version of Form Flow library is using `0.0.4-SNAPSHOT`
+
+Releases can be found in
+[maven central](https://oss.sonatype.org/#nexus-search;quick~org.codeforamerica.org).
+
+- [`0.0.3-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.3-SNAPSHOT) was
+  frozen with the beginning of PDF generation code being in.
 - [`0.0.2-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.2-SNAPSHOT) was
   frozen with address validation.
 - [`0.0.1-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.1-SNAPSHOT) was
@@ -346,7 +352,8 @@ There are four types of actions available in the Form Flow library:
 |----------------------------|-----------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | onPostAction               | FormSubmission  | nothing                | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                                                               |
 | crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                                                                   |
-| beforeSaveAction           | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
+| beforeSaveAction           | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **
+not** be validated before being saved. |
 | beforeDisplayAction        | Submission      | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                                                                |
 
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
@@ -999,13 +1006,18 @@ a `checkboxFieldset` fragment. Also note that the input name fo the `checkboxFie
 the `checkboxInSet` are the same. This is how the fieldset and internal checkbox options are grouped
 into a single multiple checkbox input.
 
-To support a "None of the Above" checkbox, add `noneOfTheAbove=true` to the arguments to `checkboxInSet()`:
+To support a "None of the Above" checkbox, add `noneOfTheAbove=true` to the arguments
+to `checkboxInSet()`:
+
 ```html
+
 <th:block
     th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
 ```
-Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is selected. To enable it, you'll need to add `noneOfTheAbove.init()` to your JavaScript that runs after page load.
 
+Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is
+selected. To enable it, you'll need to add `noneOfTheAbove.init()` to your JavaScript that runs
+after page load.
 
 #### Checkbox
 
@@ -1148,7 +1160,8 @@ The address fragment has two required parameters, `validate` and `inputName`.
   homeAddressCity, homeAddressState, and homeAddressZipCode.
 
 The address fragment has five optional
-parameters, `streetAddressHelpText`, `streetAddress2HelpText`, `cityHelpText`, `stateHelpText`, `zipCodeHelpText`.
+parameters, `streetAddressHelpText`, `streetAddress2HelpText`, `cityHelpText`, `stateHelpText`
+, `zipCodeHelpText`.
 These will pass helper text to each specific field.
 
 Please note that when using the address fragment you will need to create corresponding fields in
