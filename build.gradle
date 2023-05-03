@@ -7,6 +7,7 @@ plugins {
     id 'java'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'jacoco'
+    id 'signing'
 }
 
 targetCompatibility = JavaVersion.VERSION_17
@@ -98,32 +99,32 @@ jacocoTestReport {
     }
 }
 
+group = "org.codeforamerica.platform"
+version = "0.0.4-SNAPSHOT"
+
+java {
+    // we need to fix javadoc work before this will run successfully
+    //withJavadocJar()
+    withSourcesJar()
+}
 
 publishing {
-    repositories {
-        maven {
-            name = "MavenCentral"
-            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW 
-            // sonatype url, but we need the old one since we have an older account 
-            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
-            url = "https://oss.sonatype.org/content/repositories/snapshots"
-            credentials {
-                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
-                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
-            }
-        }
-    }
     publications {
         mavenJava(MavenPublication) {
+            artifactId = "form-flow"
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
             pom {
-                from(components.java)
                 name = "Form Flow Builder"
                 description = "A Java library placed in a Spring Boot app to generate form flows."
                 url = "https://github.com/codeforamerica/form-flow/"
-                group = "org.codeforamerica.platform"
-                artifactId = "form-flow"
-                version = "0.0.3-SNAPSHOT"
-
                 licenses {
                     license {
                         name = 'MIT License'
@@ -167,7 +168,46 @@ publishing {
                         email = 'bseeger@codeforamerica.org'
                     }
                 }
+                scm {
+                    url = 'scm:git:https://github.com/codeforamerica/form-flow.git'
+                }
+            }
+        }
+    }
+
+    repositories {
+
+        maven {
+            name = "MavenCentral"
+            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW
+            // sonatype url, but we need the old one since we have an older account
+            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
+            //def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+            //def snapshotsRepoUrl = layoutBuildDirectory.dir('repos/snapshots')
+            if (version.endsWith("-SNAPSHOT")) {
+                println("Creating a SNAPSHOT: ${version}")
+                url = "https://oss.sonatype.org/content/repositories/snapshots"
+            } else {
+                println("Creating a release version: ${version}")
+                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            }
+            credentials {
+                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
             }
         }
     }
 }
+
+signing {
+    if (!version.endsWith("-SNAPSHOT")) {
+        useGpgCmd()
+        sign publishing.publications.mavenJava
+    }
+}
+
+// javadoc {
+//    if (JavaVersion.current().isJava9Compatible()) {
+//         options.addBooleanOption('html5', true)
+//     }
+// }
