@@ -33,4 +33,8 @@ public class InputUtils {
 
     return false;
   }
+
+  public static String getFieldData() {
+
+  }
 }

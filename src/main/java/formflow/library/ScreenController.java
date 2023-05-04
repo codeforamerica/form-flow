@@ -450,7 +450,6 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) {
     ScreenNavigationConfiguration currentScreenConfig = getScreenConfig(flow, screen);
-    String subflow = currentScreenConfig.getSubflow();
     UUID id = (UUID) httpSession.getAttribute("id");
     Map<String, Object> model;
 
@@ -462,11 +461,11 @@ public class ScreenController extends FormFlowController {
       actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
       model = createModel(flow, screen, httpSession, submission);
 
-      var existingInputData = submission.getInputData();
-      var subflowArr = (ArrayList<Map<String, Object>>) existingInputData.get(subflow);
-      var entryToEdit = subflowArr.stream()
-          .filter(entry -> entry.get("uuid").equals(uuid)).findFirst();
-      entryToEdit.ifPresent(stringObjectMap -> model.put("inputData", stringObjectMap));
+      var entryToEdit = submission.getSubflowEntryByUuid(
+          currentScreenConfig.getSubflow(), uuid);
+      if (entryToEdit != null) {
+        model.put("currentSubflowItem", entryToEdit);
+      }
       model.put("formAction", String.format("/flow/%s/%s/%s/edit", flow, screen, uuid));
     } else {
       return new ModelAndView("error", HttpStatus.BAD_REQUEST);
@@ -712,8 +711,19 @@ public class ScreenController extends FormFlowController {
     HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     if (subflows != null) {
       List<String> subflowFromDeleteConfirmationConfig = subflows
-          .entrySet().stream().filter(entry ->
-              entry.getValue().getDeleteConfirmationScreen().equals(screen)).map(Entry::getKey).toList();
+          .entrySet()
+          .stream()
+          .filter(entry ->
+              entry
+                  .getValue()
+                  .getDeleteConfirmationScreen()
+                  .equals(screen))
+          .map(Entry::getKey)
+          .toList();
+
+      if (!subflowFromDeleteConfirmationConfig.isEmpty()) {
+        model.put("subflow", subflowFromDeleteConfirmationConfig.get(0));
+      }
 
       // Add the iteration start page to the model if we are on the review page for a subflow so we have it for the edit button
       subflows.forEach((key, value) -> {
@@ -721,10 +731,6 @@ public class ScreenController extends FormFlowController {
           model.put("iterationStartScreen", value.getIterationStartScreen());
         }
       });
-
-      if (!subflowFromDeleteConfirmationConfig.isEmpty()) {
-        model.put("subflow", subflowFromDeleteConfirmationConfig.get(0));
-      }
     }
 
     // If there are errors, merge form data that was submitted, with already existing inputData
@@ -735,8 +741,8 @@ public class ScreenController extends FormFlowController {
 
     model.put("submission", submission);
     model.put("inputData", submission.getInputData());
-
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
+
     return model;
   }
 
