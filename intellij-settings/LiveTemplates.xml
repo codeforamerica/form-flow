@@ -84,7 +84,7 @@
   <option name="HTML" value="true" />
 </context>
 </template>
-<template name="cfa:icon" value="&lt;th:block th:replace=&quot;~{fragments/icons' :: $ICON$}&quot;&gt;&lt;/th:block&gt;" description="Insert an icon" toReformat="false" toShortenFQNames="true">
+<template name="cfa:icon" value="&lt;th:block th:replace=&quot;~{fragments/icons :: $ICON$}&quot;&gt;&lt;/th:block&gt;" description="Insert an icon" toReformat="false" toShortenFQNames="true">
 <variable name="ICON" expression="" defaultValue="" alwaysStopAt="true" />
 <context>
   <option name="HTML" value="true" />
