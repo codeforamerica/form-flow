@@ -17,13 +17,15 @@ public class PdfGenerator {
   private final SubmissionFieldPreparers submissionFieldPreparers;
   private final PdfFieldMapper pdfFieldMapper;
   private final PdfMapConfiguration pdfMapConfiguration;
+  private final PDFBoxFieldFiller pdfBoxFieldFiller;
 
   public PdfGenerator(SubmissionRepositoryService submissionRepositoryService, SubmissionFieldPreparers submissionFieldPreparers,
-      PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration) {
+      PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration, PDFBoxFieldFiller pdfBoxFieldFiller) {
     this.submissionRepositoryService = submissionRepositoryService;
     this.submissionFieldPreparers = submissionFieldPreparers;
     this.pdfFieldMapper = pdfFieldMapper;
     this.pdfMapConfiguration = pdfMapConfiguration;
+    this.pdfBoxFieldFiller = pdfBoxFieldFiller;
   }
 
   public PdfFile generate(String flow, UUID id) throws IOException {
@@ -31,7 +33,7 @@ public class PdfGenerator {
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     PdfFile emptyFile = pdfMapConfiguration.getPdfFromFlow(flow);
-    PDDocument filledPdf = new PDFBoxFieldFiller(List.of(new ByteArrayResource(emptyFile.fileBytes()))).fill(pdfFields,
+    PDDocument filledPdf = pdfBoxFieldFiller.fill(List.of(new ByteArrayResource(emptyFile.fileBytes())), pdfFields,
         emptyFile.fileName());
     filledPdf.close();
     return new PdfFile(filledPdf, emptyFile.fileName());
