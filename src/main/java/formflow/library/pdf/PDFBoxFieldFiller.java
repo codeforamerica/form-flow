@@ -1,5 +1,10 @@
 package formflow.library.pdf;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -8,23 +13,13 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BinaryOperator;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class PDFBoxFieldFiller {
 
-  private final List<Resource> pdfs;
-
-  public PDFBoxFieldFiller(List<Resource> pdfs) {
-    this.pdfs = pdfs;
-  }
-
-  public PDDocument fill(Collection<PdfField> fields, String filename) {
+  public PDDocument fill(List<Resource> pdfs, Collection<PdfField> fields, String filename) {
     PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
     PDDocument pdDocument = pdfs.stream()
         .map(pdfResource -> fillOutPdfs(fields, pdfResource))
