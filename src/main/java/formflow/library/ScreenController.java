@@ -246,16 +246,16 @@ public class ScreenController extends FormFlowController {
       Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen, uuid.toString());
       formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
       subflow.add(formSubmission.getFormData());
-      saveToRepository(submission, subflowName);
     } else {
       submission.setFlow(flow);
-      // TODO: create the subflow here and add formSubmission to that
       submission.setInputData(formSubmission.getFormData());
-      saveToRepository(submission, subflowName);
-      httpSession.setAttribute("id", submission.getId());
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen, uuid.toString());
-    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, uuid.toString()) ?
+    actionManager.handleBeforeSaveAction(currentScreen, submission, uuid.toString());
+    saveToRepository(submission, subflowName);
+    httpSession.setAttribute("id", submission.getId());
+
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
+    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
         String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, uuid)
         : String.format("redirect:/flow/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
@@ -653,7 +653,7 @@ public class ScreenController extends FormFlowController {
    *
    * @param currentScreen screen you're on
    * @param httpSession   session
-   * @param subflowUuid current subflow uuid
+   * @param subflowUuid   current subflow uuid
    * @return List<NextScreen> list of next screens
    */
   private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
@@ -662,7 +662,8 @@ public class ScreenController extends FormFlowController {
         .filter(nextScreen -> conditionManager.conditionExists(nextScreen.getCondition()))
         .filter(nextScreen -> {
           if (currentScreen.getSubflow() != null) {
-            return conditionManager.runCondition(nextScreen.getCondition(), submissionRepositoryService.findOrCreate(httpSession), subflowUuid);
+            return conditionManager.runCondition(nextScreen.getCondition(), submissionRepositoryService.findOrCreate(httpSession),
+                subflowUuid);
           } else {
             return conditionManager.runCondition(nextScreen.getCondition(),
                 submissionRepositoryService.findOrCreate(httpSession));

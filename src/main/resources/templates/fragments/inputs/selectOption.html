@@ -2,15 +2,15 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-        th:fragment="selectOption"
-        th:with="fieldData=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)}"
-        th:assert="
+    th:fragment="selectOption"
+    th:with="fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)}"
+    th:assert="
       ${value != null},
       ${!#strings.isEmpty(optionText)}">
-    <option
-            th:value="${value}"
-            th:selected="${fieldData.getOrDefault(inputName, '').equals(value)}"
-            th:text="${optionText}"></option>
+  <option
+      th:value="${value}"
+      th:selected="${fieldData.getOrDefault(inputName, '').equals(value)}"
+      th:text="${optionText}"></option>
 </th:block>
 </body>
 </html>
