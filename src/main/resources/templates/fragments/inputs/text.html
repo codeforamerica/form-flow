@@ -4,7 +4,7 @@
 <th:block
         th:fragment="text"
         th:with="
-      data=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)},
+      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)},
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
@@ -27,7 +27,7 @@
             aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
             aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
             aria-invalid=${hasError}"
-               th:value="${data.getOrDefault(inputName, '')}">
+               th:value="${fieldData.getOrDefault(inputName, '')}">
         <th:block
                 th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
     </div>

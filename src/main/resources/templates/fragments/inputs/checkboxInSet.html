@@ -4,11 +4,11 @@
 <th:block
         th:fragment="checkboxInSet"
         th:with="
-      data=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)},
+      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)},
       hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
       name=${inputName} + '[]',
-      checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(data.getOrDefault(name, ''), value)},
+      checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(fieldData.getOrDefault(name, ''), value)},
       id=${#bools.isTrue(noneOfTheAbove) ? 'none__checkbox' : inputName + '-' + value}"
         th:assert="
       ${!#strings.isEmpty(inputName)},
