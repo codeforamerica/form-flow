@@ -1,22 +1,22 @@
 package formflow.library.pdf;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 
 class PDFBoxFieldFillerTest {
 
   private PDFBoxFieldFiller pdfBoxFieldFiller = new PDFBoxFieldFiller();
+  private PdfFile pdf = new PdfFile("/pdfs/testPdf.pdf", "testPdf.pdf");
 
   @Test
-  void shouldMapAllFieldTypes() {
+  void shouldMapAllFieldTypes() throws IOException {
     String expectedFieldValue = "Michael";
     String radioValue = "option2";
     String checkboxSelectedValue = "Yes";
@@ -29,65 +29,52 @@ class PDFBoxFieldFillerTest {
         new PdfField("CHECKBOX_OPTION_3", checkboxSelectedValue)
     );
 
-    PDDocument pdfFile = pdfBoxFieldFiller.fill(List.of(
-        new ClassPathResource("/pdfs/testPdf.pdf"),
-        new ClassPathResource("/pdfs/blankPdf.pdf")
-    ), fields, "");
-    PDAcroForm acroForm = pdfFile.getDocumentCatalog().getAcroForm();
+    PdfFile pdfFile = pdfBoxFieldFiller.fill(pdf, fields);
+    PDDocument pdDocument = pdfFile.loadPdDocument();
+    PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
 
     assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedFieldValue);
     assertThat(acroForm.getField("RADIO_BUTTON").getValueAsString()).isEqualTo(radioValue);
     assertThat(acroForm.getField("CHECKBOX_OPTION_1").getValueAsString()).isEqualTo(checkboxSelectedValue);
     assertThat(acroForm.getField("CHECKBOX_OPTION_2").getValueAsString()).isEqualTo(unselectedCheckboxValue);
     assertThat(acroForm.getField("CHECKBOX_OPTION_3").getValueAsString()).isEqualTo(checkboxSelectedValue);
+
+    pdDocument.close();
   }
 
   @Test
-  void shouldSetNullTextFieldsAsEmptyString() {
+  void shouldSetNullTextFieldsAsEmptyString() throws IOException {
     Collection<PdfField> fields = List.of(
         new PdfField("TEXT_FIELD", null)
     );
-    PDDocument pdfFile = pdfBoxFieldFiller.fill(List.of(
-        new ClassPathResource("/pdfs/testPdf.pdf"),
-        new ClassPathResource("/pdfs/blankPdf.pdf")
-    ), fields, "");
+    PdfFile pdfFile = pdfBoxFieldFiller.fill(pdf, fields);
 
-    PDAcroForm acroForm = pdfFile.getDocumentCatalog().getAcroForm();
-    assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo("");
-  }
-
-  @Test
-  void shouldConcatenateAllResourcePDFs() {
-    assertThat(pdfBoxFieldFiller.fill(List.of(
-        new ClassPathResource("/pdfs/testPdf.pdf"),
-        new ClassPathResource("/pdfs/blankPdf.pdf")
-    ), emptyList(), "").getNumberOfPages()).isEqualTo(2);
+    PDDocument pdDocument = pdfFile.loadPdDocument();
+    assertThat(pdDocument.getDocumentCatalog().getAcroForm().getField("TEXT_FIELD").getValueAsString()).isEqualTo("");
+    pdDocument.close();
   }
 
   @Test
   void shouldNotThrowException_whenFieldIsNotFound() {
-    assertThatCode(() -> pdfBoxFieldFiller.fill(List.of(
-            new ClassPathResource("/pdfs/testPdf.pdf"),
-            new ClassPathResource("/pdfs/blankPdf.pdf")
-        ),
-        List.of(new PdfField("definitely-not-a-field", "")),
-        "test_file.txt")
+    assertThatCode(() -> pdfBoxFieldFiller.fill(pdf,
+        List.of(new PdfField("definitely-not-a-field", ""))
+        )
     ).doesNotThrowAnyException();
   }
 
   @Test
-  void shouldSupportEmojis() {
+  void shouldSupportEmojis() throws IOException {
     String submittedValue = "Michael😃";
     String expectedValue = "Michael😃";
 
     Collection<PdfField> fields = List.of(
         new PdfField("TEXT_FIELD", submittedValue)
     );
-    PDAcroForm acroForm = pdfBoxFieldFiller.fill(List.of(
-        new ClassPathResource("/pdfs/testPdf.pdf"),
-        new ClassPathResource("/pdfs/blankPdf.pdf")
-    ), fields, "").getDocumentCatalog().getAcroForm();
+
+    PDDocument pdDocument = pdfBoxFieldFiller.fill(pdf, fields).loadPdDocument();
+    PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
 
     assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedValue);
+    pdDocument.close();
   }
 }

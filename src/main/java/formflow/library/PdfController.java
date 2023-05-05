@@ -41,8 +41,9 @@ public class PdfController {
   ) throws IOException {
     log.info("Downloading PDF with submission_id: " + submissionId);
     PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
+    filledPdf.finalizeForSending();
     HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.fileName(), submissionId));
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.path(), submissionId));
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
   }
 }

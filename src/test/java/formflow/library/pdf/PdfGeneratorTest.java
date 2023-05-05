@@ -12,11 +12,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ByteArrayResource;
 
 class PdfGeneratorTest {
 
@@ -29,26 +26,29 @@ class PdfGeneratorTest {
   private String textFieldValue;
   private String checkboxOptionValue;
   private PDFBoxFieldFiller pdfBoxFieldFiller = mock(PDFBoxFieldFiller.class);
-  private PDDocument filledPdf;
-  private String testPdfName;
+  private PdfFile filledPdf;
+  private String testPdfPath;
 
   @BeforeEach
   void setUp() throws IOException {
     PdfMapConfiguration pdfMapConfiguration = spy(new PdfMapConfiguration(List.of()));
     pdfGenerator = new PdfGenerator(submissionRepositoryService, submissionFieldPreparers, pdfFieldMapper, pdfMapConfiguration, pdfBoxFieldFiller);
     submission = Submission.builder().id(UUID.randomUUID()).build();
-    testPdfName = "testPdf.pdf";
+    testPdfPath = "/pdfs/testPdf.pdf";
     textFieldValue = "Greatest Text";
     radioButtonValue = "option2";
     checkboxOptionValue = "Yes";
-    PdfFile emptyPdf = new PdfFile("/pdfs/" + testPdfName, testPdfName);
+    PdfFile testPdf = mock(PdfFile.class);
+    when(testPdf.fileBytes()).thenReturn(new byte[10]);
+    when(testPdf.path()).thenReturn(testPdfPath);
+
     List<SubmissionField> submissionFields = List.of(
         new SingleField("textField", textFieldValue, null),
         new SingleField("radioButton", radioButtonValue, null),
         new CheckboxField("checkbox", List.of("CheckboxOption1", "CheckboxOption3"), null)
     );
 
-    doReturn(emptyPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
+    doReturn(testPdf).when(pdfMapConfiguration).getPdfFromFlow("ubi");
     when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
     when(submissionFieldPreparers.prepareSubmissionFields(submission)).thenReturn(submissionFields);
     List<PdfField> pdfFields = List.of(
@@ -58,19 +58,13 @@ class PdfGeneratorTest {
         new PdfField("CHECKBOX_OPTION_3", checkboxOptionValue)
     );
     when(pdfFieldMapper.map(submissionFields, "ubi")).thenReturn(pdfFields);
-    filledPdf = PDDocument.load(emptyPdf.fileBytes());
-    when(pdfBoxFieldFiller.fill(List.of(new ByteArrayResource(emptyPdf.fileBytes())), pdfFields, emptyPdf.fileName())).thenReturn(
+    filledPdf = mock(PdfFile.class);
+    when(pdfBoxFieldFiller.fill(new PdfFile(testPdfPath, "testPdf.pdf"), pdfFields)).thenReturn(
         filledPdf);
   }
-
-  @AfterEach
-  void tearDown() throws IOException {
-    filledPdf.close();
-  }
-
   @Test
   void generateReturnsAFileFilledByPdfBox() throws IOException {
     PdfFile pdf = pdfGenerator.generate("ubi", submission.getId());
-    assertThat(pdf).isEqualTo(new PdfFile(filledPdf, testPdfName));
+    assertThat(pdf).isEqualTo(new PdfFile(testPdfPath, "testPdf.pdf"));
   }
 }

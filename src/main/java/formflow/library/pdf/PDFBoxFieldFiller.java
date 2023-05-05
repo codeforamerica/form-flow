@@ -2,16 +2,14 @@ package formflow.library.pdf;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.BinaryOperator;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -19,26 +17,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class PDFBoxFieldFiller {
 
-  public PDDocument fill(List<Resource> pdfs, Collection<PdfField> fields, String filename) {
-    PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
-    PDDocument pdDocument = pdfs.stream()
-        .map(pdfResource -> fillOutPdfs(fields, pdfResource))
-        .reduce(mergePdfs(pdfMergerUtility))
-        .orElse(new PDDocument());
-    return pdDocument;
-  }
+  public PdfFile fill(PdfFile emptyFile, Collection<PdfField> fields)  {
+    PdfFile tempFile = PdfFile.copyToTempFile(emptyFile);
+    try {
+      ByteArrayResource pdfResource = new ByteArrayResource(tempFile.fileBytes());
+      PDDocument pdDocument = fillOutPdfs(fields, pdfResource);
+      pdDocument.save(emptyFile.path());
+      pdDocument.close();
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot read temp file: " + e);
+    }
 
-  @NotNull
-  private BinaryOperator<@NotNull PDDocument> mergePdfs(PDFMergerUtility pdfMergerUtility) {
-    return (pdDocument1, pdDocument2) -> {
-      try {
-        pdfMergerUtility.appendDocument(pdDocument1, pdDocument2);
-        pdDocument2.close();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      return pdDocument1;
-    };
+    return tempFile;
   }
 
   @NotNull

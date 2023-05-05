@@ -17,7 +17,7 @@ class PdfMapConfigurationTest {
         new PdfMap("flow1", testPdfFilename, Map.of(), Map.of()),
         new PdfMap("flow2", "/pdfs/Multipage-UBI-Form.pdf", Map.of(), Map.of())
     ));
-    assertThat(config.getPdfFromFlow("flow1").fileName()).isEqualTo(testPdfFilename);
+    assertThat(config.getPdfFromFlow("flow1").path()).isEqualTo(testPdfFilename);
   }
 
   @Test

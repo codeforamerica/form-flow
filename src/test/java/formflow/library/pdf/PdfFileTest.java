@@ -1,18 +1,32 @@
 package formflow.library.pdf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.system.ApplicationTemp;
 
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 class PdfFileTest {
-    @Test
-    void constructingPdfFileWithPathToResourceCopiesToTmpDir() throws IOException {
-        String filePath = "/pdfs/blankPdf.pdf";
-        PdfFile pdfFile = new PdfFile(filePath, "blank.pdf");
+    String filePath;
+    PdfFile pdfFile;
+    @BeforeEach
+    void setUp() {
+        filePath = "/pdfs/testPdf.pdf";
+        pdfFile = new PdfFile(filePath, "testPdf.pdf");
+    }
 
-        assertThat(pdfFile.fileName()).contains(new ApplicationTemp().getDir().getAbsolutePath(), "/blankPdf.pdf");
+    @Test
+    void copyToTempFileCopiesFileToTempDirectory() throws IOException {
+        PdfFile tempFile = PdfFile.copyToTempFile(pdfFile);
+        assertThat(tempFile.path()).contains(new ApplicationTemp().getDir().getAbsolutePath(), "/testPdf.pdf");
+        assertThat(tempFile.fileBytes()).isEqualTo(pdfFile.fileBytes());
+    }
+
+    @Test
+    void finalizeForSendingRemovesFieldsToLockEditingAndPreserveViewCompatibility() throws IOException {
+        pdfFile.finalizeForSending();
+        assertThat(PDDocument.load(PdfFile.class.getResourceAsStream(pdfFile.path())).getDocumentCatalog().getAcroForm().getFields()).isEmpty();
     }
 }

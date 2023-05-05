@@ -1,39 +1,49 @@
 package formflow.library.pdf;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.springframework.boot.system.ApplicationTemp;
+import static java.util.Objects.requireNonNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.springframework.boot.system.ApplicationTemp;
 
 @Slf4j
-public record PdfFile(PDDocument pdDocument, String fileName) {
-  public PdfFile(String filePath, String fileName) throws IOException {
-    this(PDDocument.load(PdfFile.class.getResourceAsStream(filePath)), createTmpFile(filePath));
-  }
+public record PdfFile(String path, String name) {
 
-  private static String createTmpFile(String filePath) throws IOException {
-    InputStream blankPdf = PdfFile.class.getResourceAsStream(filePath);
-    int fileExtension = filePath.length() - 3;
-    File tempFile = File.createTempFile(filePath, String.valueOf(fileExtension), new ApplicationTemp().getDir());
-    Path pdfToBeWritten = Files.write(tempFile.toPath(), Objects.requireNonNull(blankPdf).readAllBytes());
-    return pdfToBeWritten.toAbsolutePath().toString();
+  public static PdfFile copyToTempFile(PdfFile file) {
+    InputStream blankPdf = PdfFile.class.getResourceAsStream(file.path());
+    int fileExtension = file.path.length() - 3;
+    File tempFile = null;
+    Path pathToTempFile;
+    try {
+      tempFile = File.createTempFile(file.name(), String.valueOf(fileExtension), new ApplicationTemp().getDir());
+      pathToTempFile = Files.write(tempFile.toPath(), requireNonNull(blankPdf).readAllBytes());
+    } catch (IOException e) {
+      throw new RuntimeException("Could not copy pdf resource to temp file: " + e);
+    }
+    return new PdfFile(pathToTempFile.toAbsolutePath().toString(), file.name());
   }
 
   @Override
   public String toString() {
-    return fileName;
+    return path;
   }
 
   public byte[] fileBytes() throws IOException {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    pdDocument.save(outputStream);
-    return outputStream.toByteArray();
+    return requireNonNull(PdfFile.class.getResourceAsStream(this.path)).readAllBytes();
+  }
+
+  public PDDocument loadPdDocument() throws IOException {
+    return PDDocument.load(PdfFile.class.getResourceAsStream(this.path));
+  }
+
+  public void finalizeForSending() throws IOException {
+    PDDocument pdDocument = loadPdDocument();
+    pdDocument.getDocumentCatalog().getAcroForm().flatten();
+    pdDocument.close();
   }
 }
