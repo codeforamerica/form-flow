@@ -4,8 +4,8 @@ import com.mailgun.api.v3.MailgunMessagesApi;
 import com.mailgun.client.MailgunClient;
 import com.mailgun.model.message.Message;
 import com.mailgun.model.message.MessageResponse;
-import lombok.Value;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,7 +29,6 @@ public class MailgunEmailClient implements EmailClient {
     @Override
     public void sendEmail() {
         // Mailgun API - https://github.com/mailgun/mailgun-java
-//        MailgunClient.config(mailgunKey);
         MailgunMessagesApi mailgunMessagesApi = MailgunClient.config(mailgunKey)
                 .createApi(MailgunMessagesApi.class);
         Message message = Message.builder()
