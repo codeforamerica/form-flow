@@ -14,6 +14,12 @@ flow:
     nextScreens:
       - name: first
       - name: last
+  fourth:
+    subflow: testSubflow
+    nextScreens:
+      - name: first
+      - name: last
+        condition: SubflowCondition
   other:
     nextScreens:
       - name: first
@@ -21,3 +27,8 @@ flow:
       - name: last
   last:
     nextScreens: null
+subflows:
+  testSubflow:
+    iterationStartScreen: fourth
+    deleteConfirmationScreen: other
+    reviewScreen: third
