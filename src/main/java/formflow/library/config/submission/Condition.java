@@ -25,10 +25,10 @@ public interface Condition {
    * Runs a condition check on a submission's subflow iteration.
    *
    * @param submission submission object the condition is associated with, not null
-   * @param data       uuid of the subflow iteration this should operate on
+   * @param subflowUuid       uuid of the subflow iteration this should operate on
    * @return true if the condition check passes, else false
    */
-  default Boolean run(Submission submission, String data) {
+  default Boolean run(Submission submission, String subflowUuid) {
     throw new UnsupportedOperationException("Not implemented");
   }
 }
