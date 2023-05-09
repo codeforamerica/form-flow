@@ -22,11 +22,7 @@ class PdfGeneratorTest {
   private final SubmissionRepositoryService submissionRepositoryService = mock(SubmissionRepositoryService.class);
   private final SubmissionFieldPreparers submissionFieldPreparers = mock(SubmissionFieldPreparers.class);
   private final PdfFieldMapper pdfFieldMapper = mock(PdfFieldMapper.class);
-  private String radioButtonValue;
-  private String textFieldValue;
-  private String checkboxOptionValue;
-  private PDFBoxFieldFiller pdfBoxFieldFiller = mock(PDFBoxFieldFiller.class);
-  private PdfFile filledPdf;
+  private final PDFBoxFieldFiller pdfBoxFieldFiller = mock(PDFBoxFieldFiller.class);
   private String testPdfPath;
 
   @BeforeEach
@@ -35,9 +31,9 @@ class PdfGeneratorTest {
     pdfGenerator = new PdfGenerator(submissionRepositoryService, submissionFieldPreparers, pdfFieldMapper, pdfMapConfiguration, pdfBoxFieldFiller);
     submission = Submission.builder().id(UUID.randomUUID()).build();
     testPdfPath = "/pdfs/testPdf.pdf";
-    textFieldValue = "Greatest Text";
-    radioButtonValue = "option2";
-    checkboxOptionValue = "Yes";
+    String textFieldValue = "Greatest Text";
+    String radioButtonValue = "option2";
+    String checkboxOptionValue = "Yes";
     PdfFile testPdf = mock(PdfFile.class);
     when(testPdf.fileBytes()).thenReturn(new byte[10]);
     when(testPdf.path()).thenReturn(testPdfPath);
@@ -58,12 +54,12 @@ class PdfGeneratorTest {
         new PdfField("CHECKBOX_OPTION_3", checkboxOptionValue)
     );
     when(pdfFieldMapper.map(submissionFields, "ubi")).thenReturn(pdfFields);
-    filledPdf = mock(PdfFile.class);
-    when(pdfBoxFieldFiller.fill(new PdfFile(testPdfPath, "testPdf.pdf"), pdfFields)).thenReturn(
+    PdfFile filledPdf = new PdfFile(testPdfPath, "testPdf.pdf");
+    when(pdfBoxFieldFiller.fill(testPdf, pdfFields)).thenReturn(
         filledPdf);
   }
   @Test
-  void generateReturnsAFileFilledByPdfBox() throws IOException {
+  void generateReturnsAFileFilledByPdfBox() {
     PdfFile pdf = pdfGenerator.generate("ubi", submission.getId());
     assertThat(pdf).isEqualTo(new PdfFile(testPdfPath, "testPdf.pdf"));
   }

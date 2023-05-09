@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
+import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -22,7 +23,7 @@ public class PDFBoxFieldFiller {
     try {
       ByteArrayResource pdfResource = new ByteArrayResource(tempFile.fileBytes());
       PDDocument pdDocument = fillOutPdfs(fields, pdfResource);
-      pdDocument.save(emptyFile.path());
+      pdDocument.save(tempFile.path());
       pdDocument.close();
     } catch (IOException e) {
       throw new RuntimeException("Cannot read temp file: " + e);
@@ -62,6 +63,9 @@ public class PDFBoxFieldFiller {
   private void setPdfField(String field, PDField pdField)
       throws IOException {
     try {
+      if (pdField instanceof PDTextField textField) {
+        textField.setActions(null);
+      }
       pdField.setValue(field);
     } catch (IllegalArgumentException e) {
       log.error(

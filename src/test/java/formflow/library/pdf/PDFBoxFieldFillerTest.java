@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 
 class PDFBoxFieldFillerTest {
 
-  private PDFBoxFieldFiller pdfBoxFieldFiller = new PDFBoxFieldFiller();
-  private PdfFile pdf = new PdfFile("/pdfs/testPdf.pdf", "testPdf.pdf");
+  private final PDFBoxFieldFiller pdfBoxFieldFiller = new PDFBoxFieldFiller();
+  private final PdfFile pdf = new PdfFile("/pdfs/testPdf.pdf", "testPdf.pdf");
 
   @Test
   void shouldMapAllFieldTypes() throws IOException {
@@ -30,7 +30,7 @@ class PDFBoxFieldFillerTest {
     );
 
     PdfFile pdfFile = pdfBoxFieldFiller.fill(pdf, fields);
-    PDDocument pdDocument = pdfFile.loadPdDocument();
+    PDDocument pdDocument = PDDocument.load(pdfFile.fileBytes());
     PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
 
     assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedFieldValue);
@@ -49,7 +49,7 @@ class PDFBoxFieldFillerTest {
     );
     PdfFile pdfFile = pdfBoxFieldFiller.fill(pdf, fields);
 
-    PDDocument pdDocument = pdfFile.loadPdDocument();
+    PDDocument pdDocument = PDDocument.load(pdfFile.fileBytes());
     assertThat(pdDocument.getDocumentCatalog().getAcroForm().getField("TEXT_FIELD").getValueAsString()).isEqualTo("");
     pdDocument.close();
   }
@@ -71,7 +71,8 @@ class PDFBoxFieldFillerTest {
         new PdfField("TEXT_FIELD", submittedValue)
     );
 
-    PDDocument pdDocument = pdfBoxFieldFiller.fill(pdf, fields).loadPdDocument();
+    PdfFile pdfFile = pdfBoxFieldFiller.fill(pdf, fields);
+    PDDocument pdDocument = PDDocument.load(pdfFile.fileBytes());
     PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
 
     assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedValue);
