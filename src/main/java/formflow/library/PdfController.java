@@ -24,26 +24,26 @@ import java.util.UUID;
 public class PdfController {
 
 
-  @Value("${form-flow.pdf.path}")
-  private String configPath;
+    @Value("${form-flow.pdf.path}")
+    private String configPath;
 
-  private final PdfGenerator pdfGenerator;
+    private final PdfGenerator pdfGenerator;
 
-  public PdfController(PdfGenerator pdfGenerator) {
-    this.pdfGenerator = pdfGenerator;
-  }
+    public PdfController(PdfGenerator pdfGenerator) {
+        this.pdfGenerator = pdfGenerator;
+    }
 
-  @GetMapping("{flow}/{submissionId}")
-  ResponseEntity<byte[]> downloadPdf(
-      @PathVariable String flow,
-      @PathVariable String submissionId,
-      HttpSession httpSession
-  ) throws IOException {
-    log.info("Downloading PDF with submission_id: " + submissionId);
-    PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
-    filledPdf.finalizeForSending();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.path(), submissionId));
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
-  }
+    @GetMapping("{flow}/{submissionId}")
+    ResponseEntity<byte[]> downloadPdf(
+            @PathVariable String flow,
+            @PathVariable String submissionId,
+            HttpSession httpSession
+    ) throws IOException {
+        log.info("Downloading PDF with submission_id: " + submissionId);
+        PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
+        filledPdf.finalizeForSending();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submissionId));
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
+    }
 }
