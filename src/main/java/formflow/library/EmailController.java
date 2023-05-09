@@ -11,7 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
 // TODO: delete
 @Controller
@@ -20,19 +23,22 @@ import java.io.IOException;
 @RequestMapping("/email")
 public class EmailController {
 
-    private final MailgunEmailClient mailgunEmailClient;
+  private final MailgunEmailClient mailgunEmailClient;
 
-    public EmailController(MailgunEmailClient mailgunEmailClient) {
-        this.mailgunEmailClient = mailgunEmailClient;
-    }
+  public EmailController(MailgunEmailClient mailgunEmailClient) {
+    this.mailgunEmailClient = mailgunEmailClient;
+  }
 
-    @GetMapping("/test")
-    ResponseEntity<String> sendTestEmail(
-            HttpSession httpSession
-    ) throws IOException {
-        log.info("/email sendTestEmail ✨");
-        HttpHeaders headers = new HttpHeaders();
-        mailgunEmailClient.sendEmail();
-        return new ResponseEntity<>("Send test email", headers, HttpStatus.OK);
-    }
+  @GetMapping("/test")
+  ResponseEntity<String> sendTestEmail(
+    HttpSession httpSession
+  ) throws IOException {
+    HttpHeaders headers = new HttpHeaders();
+    mailgunEmailClient.sendEmail(
+      "Subject \uD83D\uDD25",
+      "cborg@codeforamerica.org",
+      "This is a test \uD83D\uDC38"
+    );
+    return new ResponseEntity<>("Send test email", headers, HttpStatus.OK);
+  }
 }

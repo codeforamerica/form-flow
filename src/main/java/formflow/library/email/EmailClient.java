@@ -1,30 +1,30 @@
 package formflow.library.email;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-
+import java.io.File;
 import java.util.List;
 
 public interface EmailClient {
 
-    void sendEmail();
+  void sendEmail(
+    String subject,
+    String recipientEmail,
+    String emailBody
+  );
 
-    void sendEmail(String subject,
-                   String senderEmail,
-                   String recipientEmail,
-                   String emailBody);
+  void sendEmail(
+    String subject,
+    String recipientEmail,
+    String emailBody,
+    List<File> attachments
+  );
 
-    void sendEmail(String subject,
-                   String senderEmail,
-                   String recipientEmail,
-                   String emailBody,
-                   List<PDDocument> attachments);
-
-    void sendEmail(
-            String subject,
-            String senderEmail,
-            String recipientEmail,
-            List<String> emailsToCC,
-            String emailBody,
-            List<PDDocument> attachments,
-            boolean requireTls);
+  void sendEmail(
+    String subject,
+    String recipientEmail,
+    List<String> emailsToCC,
+    List<String> emailsToBCC,
+    String emailBody,
+    List<File> attachments,
+    boolean requireTls
+  );
 }
