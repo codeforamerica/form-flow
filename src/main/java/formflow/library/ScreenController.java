@@ -92,6 +92,7 @@ public class ScreenController extends FormFlowController {
   ) {
     log.info(String.format("/flow/%s/%s 🚀", flow, screen));
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
+
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
@@ -99,6 +100,7 @@ public class ScreenController extends FormFlowController {
     } else {
       submission.setUrlParams(query_params);
     }
+
     submission.setFlow(flow);
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
@@ -166,13 +168,7 @@ public class ScreenController extends FormFlowController {
     }
 
     // Address validation
-    List<String> addressValidationFields = formSubmission.getAddressValidationFields();
-    if (!addressValidationFields.isEmpty()) {
-      Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
-      formSubmission.setValidatedAddress(validatedAddresses);
-      // clear lingering address(es) from the submission stored in the database.
-      cleanAddressesInSubmission(submission, addressValidationFields);
-    }
+    handleAddressValidation(submission, formSubmission);
 
     // if there's already a session
     if (submission.getId() != null) {
@@ -190,78 +186,6 @@ public class ScreenController extends FormFlowController {
   }
 
   /**
-   * Processes input data from the first page of a subflow screen.
-   *
-   * <p>
-   * If validation of input data passes this will redirect to move the client to the next screen.
-   * </p>
-   * <p>
-   * If validation of input data fails this will redirect the client to the same subflow screen so they can fix the data.
-   * </p>
-   * <p>
-   * A newly created UUID will be stored with the entire subflow data as unique id to reference the data by.
-   * </p>
-   *
-   * @param formData    The input data from current screen, can be null
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param httpSession The HTTP session if it exists, can be null
-   * @return a redirect to next screen
-   */
-  @PostMapping("{flow}/{screen}/new")
-  ModelAndView postNewSubflow(
-      @RequestParam(required = false) MultiValueMap<String, String> formData,
-      @PathVariable String flow,
-      @PathVariable String screen,
-      HttpSession httpSession
-  ) {
-//    Copy from OG /post request
-    log.info("postScreen new subflow: flow: " + flow + ", screen: " + screen);
-    FormSubmission formSubmission = new FormSubmission(formData);
-    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
-    var currentScreen = getScreenConfig(flow, screen);
-    HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
-    String subflowName = subflows.entrySet().stream().filter(subflow ->
-            subflow.getValue().getIterationStartScreen().equals(screen))
-        .map(Entry::getKey).findFirst().orElse(null);
-
-    actionManager.handleOnPostAction(currentScreen, formSubmission);
-
-    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
-
-    handleErrors(httpSession, errorMessages, formSubmission);
-    if (errorMessages.size() > 0) {
-      return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, screen));
-    }
-
-    UUID uuid = UUID.randomUUID();
-    formSubmission.getFormData().put("uuid", uuid);
-
-    // if there's already a session
-    if (submission.getId() != null) {
-      if (!submission.getInputData().containsKey(subflowName)) {
-        submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
-      }
-      ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
-      Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen, uuid.toString());
-      formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
-      subflow.add(formSubmission.getFormData());
-    } else {
-      submission.setFlow(flow);
-      submission.setInputData(formSubmission.getFormData());
-    }
-    actionManager.handleBeforeSaveAction(currentScreen, submission, uuid.toString());
-    saveToRepository(submission, subflowName);
-    httpSession.setAttribute("id", submission.getId());
-
-    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
-    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
-        String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, uuid)
-        : String.format("redirect:/flow/%s/%s", flow, nextScreen);
-    return new ModelAndView(viewString);
-  }
-
-  /**
    * Chooses which screen template and model data to render in a subflow.
    *
    * @param flow        The current flow name, not null
@@ -270,16 +194,22 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The current httpSession, not null
    * @return the screen template with model data
    */
-  // 😭 If we could use a method: <string>.replaceFirst("\\{([^}]*)}", "flow:(?!assets).*")
-  // We have to put the regex inline because spring boot must have a compile-time available string
-  @GetMapping("{flow:(?!assets).*}/{screen}/{uuid}")
+  @GetMapping("{flow}/{screen}/{uuid}")
   ModelAndView getSubflowScreen(
       @PathVariable String flow,
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
   ) {
-    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+    Optional<Submission> maybeSubmission = submissionRepositoryService.findById((UUID) httpSession.getAttribute("id"));
+
+    if (!maybeSubmission.isPresent()) {
+      // we have issues! We should not get here, really.
+      log.error("There is no submission associated with request!");
+      return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+    }
+
+    Submission submission = maybeSubmission.get();
     var currentScreen = getScreenConfig(flow, screen);
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
@@ -290,8 +220,8 @@ public class ScreenController extends FormFlowController {
   }
 
   /**
-   * Processes input data from a page of a subflow screen that is not the first page of the subflow. The data from the first page
-   * of a subflow is processed by {@link #postNewSubflow}, every subsequent page of the subflow is processed by this method.
+   * Processes input data from a page of a subflow screen. If `new` is supplied for UUID, then it is assumed this is a new
+   * iteration of the subflow and a new UUID is created.
    *
    * <p>
    * If validation of input data passes this will redirect to move the client to the next screen.
@@ -303,11 +233,11 @@ public class ScreenController extends FormFlowController {
    * @param formData    The input data from current screen, can be null
    * @param flow        The current flow name, not null
    * @param screen      The current screen name in the flow, not null
-   * @param uuid        Unique id associated with the subflow's data, not null
+   * @param uuid        Unique id associated with the subflow's data, or `new` if it is a new iteration of the subflow. Not null.
    * @param httpSession The HTTP session if it exists, not null
    * @return a redirect to next screen
    */
-  @PostMapping("{flow:(?!assets).*}/{screen}/{uuid}")
+  @PostMapping("{flow}/{screen}/{uuid}")
   ModelAndView addToIteration(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
@@ -316,37 +246,73 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession
   ) {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
-    UUID id = (UUID) httpSession.getAttribute("id");
-    Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
+    boolean isNewIteration = uuid.equalsIgnoreCase("new");
+    String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
     FormSubmission formSubmission = new FormSubmission(formData);
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
 
-    actionManager.handleOnPostAction(currentScreen, formSubmission, uuid);
+    actionManager.handleOnPostAction(currentScreen, formSubmission, iterationUuid);
+
+    if (isNewIteration) {
+      // handle start iteration page, if new flow
+      HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+      subflowName = subflows.entrySet().stream()
+          .filter(subflow -> subflow.getValue().getIterationStartScreen().equals(screen))
+          .map(Entry::getKey)
+          .findFirst()
+          .orElse(null);
+    }
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
     handleErrors(httpSession, errorMessages, formSubmission);
     if (errorMessages.size() > 0) {
-      return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, screen, uuid));
+      if (isNewIteration) {
+        return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, screen));
+      } else {
+        return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, screen, iterationUuid));
+      }
     }
 
-    if (submissionOptional.isPresent()) {
-      Submission submission = submissionOptional.get();
-      var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
-      if (iterationToEdit != null) {
-        Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen, uuid);
-        formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
-        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
-        submission.removeIncompleteIterations(subflowName, uuid);
-        actionManager.handleBeforeSaveAction(currentScreen, submission, uuid);
-        saveToRepository(submission, subflowName);
+    // TODO: validate addresses
+
+    if (httpSession.getAttribute("id") != null) {
+      // have we submitted any data to the subflow yet?
+      if (!submission.getInputData().containsKey(subflowName)) {
+        submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
       }
+      if (isNewIteration) {
+        ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+        formSubmission.getFormData().put("uuid", iterationUuid);
+        subflow.add(formSubmission.getFormData());
+      } else {
+        var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
+        if (iterationToEdit != null) {
+          submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
+          submission.removeIncompleteIterations(subflowName, iterationUuid);
+        }
+      }
+      Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen);
+      formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
     } else {
-      return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+      if (isNewIteration) {
+        submission.setFlow(flow);
+        submission.setInputData(formSubmission.getFormData());
+      } else {
+        // We are not in a current session, so this implies we are on the first page
+        // of a flow. If it's not a new iteration, then where _are_ we?
+        return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+      }
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen, uuid);
-    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, uuid) ?
-        String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, uuid)
+
+    actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
+    saveToRepository(submission, subflowName);
+    httpSession.setAttribute("id", submission.getId());
+
+    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
+    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
+        String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, iterationUuid)
         : String.format("redirect:/flow/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
   }
@@ -789,17 +755,25 @@ public class ScreenController extends FormFlowController {
   }
 
   /**
-   * Clears out the Address Fields related to the list of input field names passed in. An example field name looks like this:
-   * "_validateresidentialAddress"
+   * Runs address validation on the form submission data, but only if there is an address present in the form submission that
+   * validation is requested for. This also clears out any fields in the submission that are related to the validated version of
+   * that were previously set.
    *
-   * @param submission              Submission data from the database
-   * @param addressValidationFields List of strings indicating which addresses are requesting validation
+   * @param submission     Submission data from the database
+   * @param formSubmission Form data from current POST
    */
-  private void cleanAddressesInSubmission(Submission submission, List<String> addressValidationFields) {
-    addressValidationFields.forEach(item -> {
-      String inputName = item.replace(UnvalidatedField.VALIDATE_ADDRESS, "");
-      submission.clearAddressFields(inputName);
-    });
-  }
+  private void handleAddressValidation(Submission submission, FormSubmission formSubmission)
+      throws SmartyException, IOException, InterruptedException {
 
+    List<String> addressValidationFields = formSubmission.getAddressValidationFields();
+    if (!addressValidationFields.isEmpty()) {
+      Map<String, ValidatedAddress> validatedAddresses = addressValidationService.validate(formSubmission);
+      formSubmission.setValidatedAddress(validatedAddresses);
+      // clear lingering address(es) from the submission stored in the database.
+      formSubmission.getAddressValidationFields().forEach(item -> {
+        String inputName = item.replace(UnvalidatedField.VALIDATE_ADDRESS, "");
+        submission.clearAddressFields(inputName);
+      });
+    }
+  }
 }

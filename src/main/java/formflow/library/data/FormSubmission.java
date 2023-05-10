@@ -53,8 +53,10 @@ public class FormSubmission {
    * @return List of Strings representing the validate field name
    */
   public List<String> getAddressValidationFields() {
-    return formData.entrySet().stream().filter(entry -> entry.getKey().startsWith(UnvalidatedField.VALIDATE_ADDRESS))
-        .filter(entry -> entry.getValue().toString().equalsIgnoreCase("true")).map(Entry::getKey).toList();
+    return formData.entrySet().stream()
+        .filter(entry -> entry.getKey().startsWith(UnvalidatedField.VALIDATE_ADDRESS))
+        .filter(entry -> entry.getValue().toString().equalsIgnoreCase("true"))
+        .map(Entry::getKey).toList();
   }
 
   public void setValidatedAddress(Map<String, ValidatedAddress> validatedAddresses) {
