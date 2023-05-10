@@ -33,7 +33,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     @BeforeEach
     public void setUp() throws Exception {
         flow = "ubi";
-        PdfController pdfController = new PdfController(pdfGenerator);
+        PdfController pdfController = new PdfController(messageSource, pdfGenerator);
         mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
         submission = Submission.builder().id(UUID.randomUUID()).build();
         filledPdf = mock(PdfFile.class);
@@ -53,5 +53,18 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
         verify(pdfGenerator, times(1)).generate(flow, submission.getId());
         verify(filledPdf, times(1)).finalizeForSending();
+    }
+
+    @Test
+    public void shouldNotAllowDownloadingAPdfWithADifferentSubmissionIdThanTheActiveSession() throws Exception {
+        session.setAttribute("id", UUID.randomUUID());
+
+        mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
+                .andExpect(status().is4xxClientError());
+
+        session.setAttribute("id", submission.getId());
+
+        mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
+                .andExpect(status().is2xxSuccessful());
     }
 }
