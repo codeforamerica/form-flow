@@ -2,7 +2,6 @@ package formflow.library.pdf;
 
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -18,10 +17,9 @@ public class PdfMapConfiguration {
         this.maps = maps;
     }
 
-    public PdfFile getPdfFromFlow(String flow) throws IOException {
-        PdfMap pdfConfig = getPdfMap(flow);
-        String pdfPath = pdfConfig.getPdf().startsWith("/") ? pdfConfig.getPdf() : "/" + pdfConfig.getPdf();
-        return new PdfFile(pdfPath, pdfConfig.getPdf());
+    public String getPdfFromFlow(String flow) {
+        String pdf = getPdfMap(flow).getPdf();
+        return pdf.startsWith("/") ? pdf : "/" + pdf;
     }
 
     public PdfMap getPdfMap(String flow) {

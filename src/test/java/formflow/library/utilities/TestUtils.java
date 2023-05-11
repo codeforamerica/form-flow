@@ -2,10 +2,7 @@ package formflow.library.utilities;
 
 import formflow.library.data.Submission;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class TestUtils {
@@ -23,9 +20,5 @@ public class TestUtils {
       return (new File(resource.getFile())).getAbsolutePath();
     }
     return "";
-  }
-
-  public static byte[] getFileContentsAsByteArray(String filename) throws IOException {
-    return Files.readAllBytes(Paths.get(getAbsoluteFilepathString(filename)));
   }
 }
