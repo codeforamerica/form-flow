@@ -44,7 +44,8 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void getDownloadGeneratesAndReturnsFilledFlattenedPdf() throws Exception {
-        MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()))
+        session.setAttribute("id", submission.getId());
+        MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submission.getId())))
                 .andExpect(status().is2xxSuccessful())
