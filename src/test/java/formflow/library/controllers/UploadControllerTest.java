@@ -68,6 +68,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     doNothing().when(cloudFileRepository).upload(any(), any());
     MockMultipartFile testImage = new MockMultipartFile("file.jpeg", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    session.setAttribute("foo", 1);
     session = new MockHttpSession();
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
