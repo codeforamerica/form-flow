@@ -13,6 +13,7 @@ import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.inputs.UnvalidatedField;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -145,12 +146,13 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The HTTP session if it exists, can be null
    * @return a redirect to endpoint that gets the next screen in the flow
    */
-  @PostMapping("{flow}/{screen}")
+  @PostMapping({"{flow}/{screen}", "{flow}/{screen}/submit"})
   ModelAndView postScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
       @PathVariable String screen,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest httpServletRequest
   ) throws SmartyException, IOException, InterruptedException {
     log.info("postScreen: flow: " + flow + ", screen: " + screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
@@ -169,6 +171,17 @@ public class ScreenController extends FormFlowController {
 
     // Address validation
     handleAddressValidation(submission, formSubmission);
+
+    // handle submit actions, if requested
+    if (httpServletRequest.getRequestURI().toLowerCase().contains("submit")) {
+      log.info(
+          String.format(
+              "Marking the application (%s) as submitted",
+              submission.getId()
+          )
+      );
+      submission.setSubmittedAt(DateTime.now().toDate());
+    }
 
     // if there's already a session
     if (submission.getId() != null) {
@@ -194,7 +207,7 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The current httpSession, not null
    * @return the screen template with model data
    */
-  @GetMapping("{flow}/{screen}/{uuid}")
+  @GetMapping({"{flow}/{screen}/{uuid}", "{flow}/{screen}/{uuid}/edit"})
   ModelAndView getSubflowScreen(
       @PathVariable String flow,
       @PathVariable String screen,
@@ -221,7 +234,7 @@ public class ScreenController extends FormFlowController {
 
   /**
    * Processes input data from a page of a subflow screen. If `new` is supplied for UUID, then it is assumed this is a new
-   * iteration of the subflow and a new UUID is created.
+   * iteration of the subflow and a new UUID is created and associated with the iteration's data.
    *
    * <p>
    * If validation of input data passes this will redirect to move the client to the next screen.
@@ -237,8 +250,8 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The HTTP session if it exists, not null
    * @return a redirect to next screen
    */
-  @PostMapping("{flow}/{screen}/{uuid}")
-  ModelAndView addToIteration(
+  @PostMapping({"{flow}/{screen}/{uuid}", "{flow}/{screen}/{uuid}/edit"})
+  ModelAndView updateOrCreateIteration(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
       @PathVariable String screen,
@@ -302,6 +315,13 @@ public class ScreenController extends FormFlowController {
       } else {
         // We are not in a current session, so this implies we are on the first page
         // of a flow. If it's not a new iteration, then where _are_ we?
+        // Maybe the only way to get here is if the session expired on the client in the middle of a subflow
+        log.error(
+            String.format(
+                "Session information for subflow iteration id (%s) not set. Did the session expire?",
+                iterationUuid
+            )
+        );
         return new ModelAndView("error", HttpStatus.BAD_REQUEST);
       }
     }
@@ -397,149 +417,6 @@ public class ScreenController extends FormFlowController {
     String reviewScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getReviewScreen();
     return new ModelAndView(String.format("redirect:/flow/%s/" + reviewScreen, flow));
-  }
-
-  /**
-   * Returns the template and model for a subflow's screen, filled in with previously supplied values.
-   *
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param uuid        Unique id associated with the subflow's data, not null
-   * @param httpSession The HTTP session if it exists, not null
-   * @return the screen template with model data, or error page if data not found
-   */
-  @GetMapping("{flow}/{screen}/{uuid}/edit")
-  ModelAndView getEditScreen(
-      @PathVariable String flow,
-      @PathVariable String screen,
-      @PathVariable String uuid,
-      HttpSession httpSession
-  ) {
-    ScreenNavigationConfiguration currentScreenConfig = getScreenConfig(flow, screen);
-    UUID id = (UUID) httpSession.getAttribute("id");
-    Map<String, Object> model;
-
-    Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
-    if (submissionOptional.isPresent()) {
-      Submission submission = submissionOptional.get();
-      var currentScreen = getScreenConfig(flow, screen);
-
-      actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
-      model = createModel(flow, screen, httpSession, submission);
-
-      var entryToEdit = submission.getSubflowEntryByUuid(
-          currentScreenConfig.getSubflow(), uuid);
-      if (entryToEdit != null) {
-        model.put("currentSubflowItem", entryToEdit);
-      }
-      model.put("formAction", String.format("/flow/%s/%s/%s/edit", flow, screen, uuid));
-    } else {
-      return new ModelAndView("error", HttpStatus.BAD_REQUEST);
-    }
-
-    return new ModelAndView(String.format("%s/%s", flow, screen), model);
-  }
-
-  /**
-   * Processes input data from a page of a subflow screen.
-   *
-   * <p>
-   * If validation of input data passes this will redirect to move the client to the next screen.
-   * </p>
-   * <p>
-   * If validation of input data fails this will redirect the client to the same subflow screen so they can fix the data.
-   * </p>
-   *
-   * @param formData    The input data from current screen, can be null
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param uuid        Unique id associated with the subflow's data, not null
-   * @param httpSession The HTTP session if it exists, not null
-   * @return a redirect to next screen
-   */
-  @PostMapping("{flow}/{screen}/{uuid}/edit")
-  ModelAndView edit(
-      @RequestParam(required = false) MultiValueMap<String, String> formData,
-      @PathVariable String flow,
-      @PathVariable String screen,
-      @PathVariable String uuid,
-      HttpSession httpSession
-  ) {
-    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
-    String subflowName = currentScreen.getSubflow();
-    UUID id = (UUID) httpSession.getAttribute("id");
-    Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
-    FormSubmission formSubmission = new FormSubmission(formData);
-
-    actionManager.handleOnPostAction(currentScreen, formSubmission, uuid);
-    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
-    handleErrors(httpSession, errorMessages, formSubmission);
-    if (errorMessages.size() > 0) {
-      return new ModelAndView(String.format("redirect:/flow/%s/%s/%s/edit", flow, screen, uuid));
-    }
-
-    if (submissionOptional.isPresent()) {
-      Submission submission = submissionOptional.get();
-      var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, uuid);
-      if (iterationToEdit != null) {
-        submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
-        actionManager.handleBeforeSaveAction(currentScreen, submission, uuid);
-        saveToRepository(submission, subflowName);
-      }
-    } else {
-      return new ModelAndView("error", HttpStatus.BAD_REQUEST);
-    }
-    String nextScreen = getNextScreenName(httpSession, currentScreen, uuid);
-    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, uuid) ?
-        String.format("redirect:/flow/%s/%s/%s/edit", flow, nextScreen, uuid)
-        : String.format("redirect:/flow/%s/%s", flow, nextScreen);
-    return new ModelAndView(viewString);
-  }
-
-  /**
-   * This is the final submission endpoint where the submission is marked complete and the application is considered submitted to
-   * the system.
-   *
-   * @param formData
-   * @param flow
-   * @param screen
-   * @param httpSession
-   * @return
-   */
-  @PostMapping("{flow}/{screen}/submit")
-  ModelAndView submit(
-      @RequestParam(required = false) MultiValueMap<String, String> formData,
-      @PathVariable String flow,
-      @PathVariable String screen,
-      HttpSession httpSession
-  ) {
-    log.info("submit postScreen: flow: " + flow + ", screen: " + screen);
-    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
-    FormSubmission formSubmission = new FormSubmission(formData);
-    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
-
-    actionManager.handleOnPostAction(currentScreen, formSubmission);
-
-    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
-    handleErrors(httpSession, errorMessages, formSubmission);
-
-    if (errorMessages.size() > 0) {
-      return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, screen));
-    }
-    submission.setSubmittedAt(DateTime.now().toDate());
-
-    // if there's already a session
-    if (submission.getId() != null) {
-      submission.mergeFormDataWithSubmissionData(formSubmission);
-    } else {
-      submission.setFlow(flow);
-      submission.setInputData(formSubmission.getFormData());
-    }
-    actionManager.handleBeforeSaveAction(currentScreen, submission);
-    saveToRepository(submission);
-    httpSession.setAttribute("id", submission.getId());
-
-    return new ModelAndView(String.format("redirect:/flow/%s/%s/navigation", flow, screen));
   }
 
   /**
