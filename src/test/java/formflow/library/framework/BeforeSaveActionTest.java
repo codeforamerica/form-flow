@@ -61,8 +61,7 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
   @Test
   void shouldSaveTotalIncome() throws Exception {
     String subflowUuid = UUID.randomUUID().toString();
-    session.setAttribute("id", submission.getId());
-
+    Map<String, Object> sessionAttrs = new HashMap<>();
     List<Map<String, Object>> subflowList = new ArrayList<>();
 
     subflowList.add(Map.of("uuid", subflowUuid));
@@ -74,9 +73,10 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
         "iterationIsComplete", true));
 
     submission.getInputData().put("income", subflowList);
+    sessionAttrs.put("id", submission.getId());
 
     postToUrlExpectingSuccess("/flow/testFlow/next", "/flow/testFlow/subflowReview",
-        Map.of("textInput", List.of("1000")), subflowUuid);
+        Map.of("textInput", List.of("1000")), subflowUuid, sessionAttrs);
 
     assertThat(submission.getInputData().get("totalIncome")).isEqualTo(6530.0);
   }

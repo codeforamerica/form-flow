@@ -13,6 +13,7 @@ import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +36,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
   }
 
@@ -46,12 +48,13 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       Map<String, String> queryParams = new HashMap<>();
       queryParams.put("lang", "en");
       getWithQueryParam("test", "lang", "en");
-      assert(submission.getUrlParams().equals(queryParams));
+      assert (submission.getUrlParams().equals(queryParams));
     }
   }
 
   @Nested
   public class SubflowParameters {
+
     @Test
     public void modelIncludesCurrentSubflowItem() throws Exception {
       HashMap<String, String> subflowItem = new HashMap<>();
@@ -59,6 +62,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       subflowItem.put("firstName", "foo bar baz");
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
+
       getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
     }
   }
