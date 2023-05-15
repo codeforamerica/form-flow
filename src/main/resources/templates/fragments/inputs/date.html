@@ -2,9 +2,9 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-        th:fragment="date(inputName, groupName)"
-        th:with="
-      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)},
+    th:fragment="date(inputName, groupName)"
+    th:with="
+      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
       hasErrorMonth=${
@@ -19,11 +19,12 @@
         errorMessages != null &&
         errorMessages.get(inputName + 'Year') != null &&
         #arrays.length(errorMessages.get(inputName + 'Year')) > 0 }"
-        th:assert="${hasLabel || hasAriaLabel}">
+    th:assert="${hasLabel || hasAriaLabel}">
     <div
-            th:class="'form-group' + ${((hasErrorMonth || hasErrorDay || hasErrorYear) ? ' form-group--error' : '')}">
+        th:class="'form-group' + ${((hasErrorMonth || hasErrorDay || hasErrorYear) ? ' form-group--error' : '')}">
         <fieldset th:id="${groupName}" class="input-group input-group--inline">
-            <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}" class="form-question"/>
+            <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}"
+                   class="form-question"/>
             <p class="text--help">
                 <label th:for="${inputName}+'-month'"
                        th:id="${inputName}+'-month-label'"
@@ -72,13 +73,13 @@
                    th:value="${fieldData.getOrDefault(inputName + 'Year', '')}"/>
         </fieldset>
         <th:block
-                th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
+            th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
         <th:block
-                th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
+            th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
         <th:block
-                th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
+            th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
         <th:block
-                th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
+            th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
     </div>
 </th:block>
 </body>

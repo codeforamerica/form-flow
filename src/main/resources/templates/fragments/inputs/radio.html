@@ -2,29 +2,29 @@
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block
-        th:fragment="radio"
-        th:with="
-      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(currentSubflowItem, inputData)}"
-        th:assert="
+    th:fragment="radio"
+    th:with="
+      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)}"
+    th:assert="
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},
       ${!#strings.isEmpty(label)}">
-    <label th:for="${inputName} + '-' + ${value}"
-           th:id="${inputName} + '-' + ${value} + '-label'"
-           th:classappend="${#bools.isTrue(disabled) ? 'disabled' : ''}"
-           class="radio-button">
-        <input type="radio"
-               th:id="${inputName} + '-' + ${value}"
-               th:value="${value}"
-               th:name="${inputName}"
-               th:checked="${fieldData.getOrDefault(inputName, '').equals(value)}"
-               th:disabled="${disabled}"
-               th:aria-disabled="${disabled}"
-               th:attr="
+  <label th:for="${inputName} + '-' + ${value}"
+         th:id="${inputName} + '-' + ${value} + '-label'"
+         th:classappend="${#bools.isTrue(disabled) ? 'disabled' : ''}"
+         class="radio-button">
+    <input type="radio"
+           th:id="${inputName} + '-' + ${value}"
+           th:value="${value}"
+           th:name="${inputName}"
+           th:checked="${fieldData.getOrDefault(inputName, '').equals(value)}"
+           th:disabled="${disabled}"
+           th:aria-disabled="${disabled}"
+           th:attr="
             aria-invalid=${hasError},
             data-follow-up=${followUpId}">
-        <span th:text="${label}"></span>
-    </label>
+    <span th:text="${label}"></span>
+  </label>
 </th:block>
 </body>
 </html>
