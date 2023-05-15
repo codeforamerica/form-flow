@@ -291,6 +291,8 @@ public class ScreenController extends FormFlowController {
     // TODO: validate addresses
 
     if (httpSession.getAttribute("id") != null) {
+      Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid);
+      formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
       // have we submitted any data to the subflow yet?
       if (!submission.getInputData().containsKey(subflowName)) {
         submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
@@ -306,8 +308,6 @@ public class ScreenController extends FormFlowController {
           submission.removeIncompleteIterations(subflowName, iterationUuid);
         }
       }
-      Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen);
-      formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
     } else {
       if (isNewIteration) {
         submission.setFlow(flow);
@@ -330,8 +330,8 @@ public class ScreenController extends FormFlowController {
     saveToRepository(submission, subflowName);
     httpSession.setAttribute("id", submission.getId());
 
-    String nextScreen = getNextScreenName(flow, httpSession, currentScreen);
-    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen) ?
+    String nextScreen = getNextScreenName(httpSession, currentScreen, iterationUuid);
+    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid) ?
         String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, iterationUuid)
         : String.format("redirect:/flow/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
