@@ -554,12 +554,9 @@ public class ScreenController extends FormFlowController {
     // Put subflow on model if on subflow delete confirmation screen
     HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     if (subflows != null) {
-      List<String> subflowFromDeleteConfirmationConfig = subflows
-          .entrySet()
-          .stream()
+      List<String> subflowFromDeleteConfirmationConfig = subflows.entrySet().stream()
           .filter(entry ->
-              entry
-                  .getValue()
+              entry.getValue()
                   .getDeleteConfirmationScreen()
                   .equals(screen))
           .map(Entry::getKey)

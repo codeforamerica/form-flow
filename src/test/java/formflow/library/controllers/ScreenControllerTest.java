@@ -62,7 +62,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       subflowItem.put("firstName", "foo bar baz");
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
-
       getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
     }
   }
