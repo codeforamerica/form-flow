@@ -1,15 +1,10 @@
 package formflow.library.utils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
-import java.util.Map;
-import org.thymeleaf.context.WebEngineContext;
 
 /**
  * Utility class to help with parsing input from forms
  */
-@Slf4j
 public class InputUtils {
 
   /**
