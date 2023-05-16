@@ -3,7 +3,6 @@
 <body>
 <th:block
     th:fragment="selectOption"
-    th:with="fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)}"
     th:assert="
       ${value != null},
       ${!#strings.isEmpty(optionText)}">

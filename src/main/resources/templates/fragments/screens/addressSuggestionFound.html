@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <body>
-<th:block th:fragment="addressSuggestionFound(addressInputToCheck, inputName)"
-          th:with="fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)}">
+<th:block th:fragment="addressSuggestionFound(addressInputToCheck, inputName)">
   <div class="grid__item spacing-above-35 spacing-below-35">
     <h1 class="h2"
         th:text="${header != null ? header : #messages.msg('address-validation.check-your-address')}"></h1>

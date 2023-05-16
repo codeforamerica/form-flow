@@ -228,6 +228,8 @@ public class ScreenController extends FormFlowController {
     Map<String, Object> model = createModel(flow, screen, httpSession, submission);
     var currentObject = submission.getSubflowEntryByUuid(currentScreen.getSubflow(), uuid);
     model.put("currentSubflowItem", currentObject);
+    // createModel sets fieldData to submission.inputData; override fieldData with the subflow's data
+    model.put("fieldData", currentObject);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
@@ -582,6 +584,8 @@ public class ScreenController extends FormFlowController {
 
     model.put("submission", submission);
     model.put("inputData", submission.getInputData());
+    // default fieldData to "inputData", but it might be replaced with subflow data later on
+    model.put("fieldData", submission.getInputData());
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
 
     return model;

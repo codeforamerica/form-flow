@@ -3,7 +3,7 @@
 <body>
 <th:block th:fragment="addressSelectionScreen(addressInputToCheck, inputName, editAddressURL)"
           th:with="
-          fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)},
+
           foundValidatedAddress=${fieldData.get(addressInputToCheck + 'StreetAddress1_validated') != null},
           isExactValidationMatch=${submission.submittedAddressMatchesValidatedAddress(addressInputToCheck)}">
   <div class="grid__item spacing-above-35 spacing-below-35">
