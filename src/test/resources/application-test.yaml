@@ -15,6 +15,11 @@ form-flow:
   pdf:
     path: 'src/test/resources/pdfs/'
     map-file: 'pdf-map.yaml'
+  email-client:
+    mailgun:
+      key: testing-fake-key
+      domain: 'mail.forms-starter.cfa-platforms.org'
+      sender-email: 'Testing <test@mail.forms-starter.cfa-platforms.org>'
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/form-flow-test
