@@ -6,7 +6,7 @@ import java.util.List;
 public interface EmailClient {
 
     /**
-     * The smallest amount of information to give to send an email.
+     * This sends an email with the least amount of information needed to be provided.
      *
      * @param subject        The subject line of the email
      * @param recipientEmail The email address that will get the email, aka the To field
@@ -19,7 +19,7 @@ public interface EmailClient {
     );
 
     /**
-     * The smallest amount of information plus attachments.
+     * This sends an email with the least amount of information needed to be provided, but with attachments.
      *
      * @param subject        The subject line of the email
      * @param recipientEmail The email address that will get the email, aka the To field
@@ -34,7 +34,7 @@ public interface EmailClient {
     );
 
     /**
-     * The most customizable method to send email.
+     * This sends an email with the most customizations.
      *
      * @param subject        The subject line of the email
      * @param recipientEmail The email address that will get the email, aka the To field

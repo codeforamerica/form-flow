@@ -57,6 +57,36 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     }
 
     @Test
+    public void mailgunWillSendWithDifferentSenderEmail() throws Exception {
+        final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+
+        String expectedSubject = "sendEmail with no CC's or attachments";
+        String expectedRecipient = "test@example.com";
+        String expectedBody = "Email body";
+        String expectedSenderEmail = "Another Sender <test@example.org>";
+
+        mailgunEmailClient.setSenderEmail(expectedSenderEmail);
+        mailgunEmailClient.sendEmail(
+                expectedSubject,
+                expectedRecipient,
+                expectedBody
+        );
+
+        final Message builtMessage = captor.getValue();
+        assertThat(builtMessage).isNotNull();
+        assertThat(builtMessage.getFrom()).isEqualTo(expectedSenderEmail);
+        assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
+        assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
+        assertThat(builtMessage.getText()).isEqualTo(expectedBody);
+        assertThat(builtMessage.getCc()).isNull();
+        assertThat(builtMessage.getBcc()).isNull();
+        assertThat(builtMessage.getAttachment()).isNull();
+        assertThat(builtMessage.getRequireTls()).isEqualTo("no");
+    }
+
+
+    @Test
     public void mailgunWillSendWithMinimumInfoAndAttachments() throws Exception {
         final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
         doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());

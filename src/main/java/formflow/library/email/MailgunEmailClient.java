@@ -17,7 +17,7 @@ import static java.util.Collections.emptyList;
 @Slf4j
 public class MailgunEmailClient implements EmailClient {
 
-    private final String senderEmail;
+    private String senderEmail;
     private final String mailgunDomain;
     private MailgunMessagesApi mailgunMessagesApi;
 
@@ -32,7 +32,7 @@ public class MailgunEmailClient implements EmailClient {
     }
 
     /**
-     * The smallest amount of information to give to send an email.
+     * This sends an email with the least amount of information needed to be provided.
      * Sets empty or defaults to the rest of the parameters.
      *
      * @param subject        The subject line of the email
@@ -55,7 +55,7 @@ public class MailgunEmailClient implements EmailClient {
     }
 
     /**
-     * The smallest amount of information plus attachments to give to send an email.
+     * This sends an email with the least amount of information needed to be provided, but with attachments.
      * Sets empty or defaults to the rest of the parameters.
      *
      * @param subject        The subject line of the email
@@ -132,5 +132,15 @@ public class MailgunEmailClient implements EmailClient {
      */
     public void setMailgunMessagesApi(MailgunMessagesApi mailgunMessageApi) {
         this.mailgunMessagesApi = mailgunMessageApi;
+    }
+
+    /**
+     * This setter allows you to change the senderEmail.
+     * By default, senderEmail is defined in application.yaml.
+     *
+     * @param senderEmail The email that is used to fill the from field.
+     */
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
     }
 }
