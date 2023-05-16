@@ -3,8 +3,6 @@
 <body>
 <th:block
     th:fragment="radio"
-    th:with="
-      fieldData=${T(formflow.library.utils.InputUtils).getFieldData(#vars)}"
     th:assert="
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},

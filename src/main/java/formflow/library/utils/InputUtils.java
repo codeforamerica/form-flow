@@ -38,23 +38,4 @@ public class InputUtils {
 
     return false;
   }
-
-  /**
-   * Static function that returns a Map of input data for use in the current thymeleaf template. If you are in a subflow, the Map
-   * will be set to Submission's `currentSubflowItem` data, otherwise the Map will be set to the Submission's `inputData`.
-   *
-   * @param uiData the WebEngineContext that includes all data passed to the thymeleaf template
-   * @return `currentSubflowItem`'s data if it is not null, otherwise it will be the full `inputData` map
-   */
-  public static Map<String, Object> getFieldData(WebEngineContext uiData) {
-    if (uiData != null) {
-      if (uiData.getVariable("currentSubflowItem") != null) {
-        return (Map) uiData.getVariable("currentSubflowItem");
-      } else if (uiData.getVariable("inputData") != null) {
-        return (Map) uiData.getVariable("inputData");
-      }
-    }
-    log.warn("No data could be found for use in templates.");
-    return Map.of();
-  }
 }
