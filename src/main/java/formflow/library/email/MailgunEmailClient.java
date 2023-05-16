@@ -125,6 +125,11 @@ public class MailgunEmailClient implements EmailClient {
         }
     }
 
+    /**
+     * This setter allows us to replace mailgunMessageApi with a mock for testing.
+     *
+     * @param mailgunMessageApi The mailgunMessageApi you want to use to interface with Mailgun.
+     */
     public void setMailgunMessagesApi(MailgunMessagesApi mailgunMessageApi) {
         this.mailgunMessagesApi = mailgunMessageApi;
     }
