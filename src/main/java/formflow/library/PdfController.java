@@ -24,31 +24,43 @@ import java.util.UUID;
 @RequestMapping("/download")
 public class PdfController {
 
-    private final MessageSource messageSource;
-    private final PdfGenerator pdfGenerator;
+  private final MessageSource messageSource;
+  private final PdfGenerator pdfGenerator;
 
-    public PdfController(MessageSource messageSource,
-                         PdfGenerator pdfGenerator) {
-        this.messageSource = messageSource;
-        this.pdfGenerator = pdfGenerator;
-    }
+  public PdfController(MessageSource messageSource,
+      PdfGenerator pdfGenerator) {
+    this.messageSource = messageSource;
+    this.pdfGenerator = pdfGenerator;
+  }
 
-    @GetMapping("{flow}/{submissionId}")
-    ResponseEntity<?> downloadPdf(
-            @PathVariable String flow,
-            @PathVariable String submissionId,
-            HttpSession httpSession
-    ) throws IOException {
-        if (httpSession.getAttribute("id").toString().equals(submissionId)) {
-            log.info("Downloading PDF with submission_id: " + submissionId);
-            PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
-            filledPdf.finalizeForSending();
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submissionId));
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(filledPdf.fileBytes());
-        } else {
-            log.error("Attempted to download PDF with submission_id: " + submissionId + " but session_id was: " + httpSession.getAttribute("id"));
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(messageSource.getMessage("error.forbidden", null, null));
-        }
+  @GetMapping("{flow}/{submissionId}")
+  ResponseEntity<?> downloadPdf(
+      @PathVariable String flow,
+      @PathVariable String submissionId,
+      HttpSession httpSession
+  ) throws IOException {
+    if (httpSession.getAttribute("id").toString().equals(submissionId)) {
+      log.info("Downloading PDF with submission_id: " + submissionId);
+      HttpHeaders headers = new HttpHeaders();
+      PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
+
+      filledPdf.finalizeForSending();
+      byte[] data = filledPdf.fileBytes();
+      filledPdf.deleteFile();
+
+      headers.add(HttpHeaders.CONTENT_DISPOSITION,
+          "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submissionId));
+      return ResponseEntity
+          .ok()
+          .contentType(MediaType.APPLICATION_OCTET_STREAM)
+          .headers(headers)
+          .body(data);
+    } else {
+      log.error(
+          "Attempted to download PDF with submission_id: " + submissionId + " but session_id was: "
+              + httpSession.getAttribute(
+              "id"));
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(messageSource.getMessage("error.forbidden", null, null));
     }
+  }
 }

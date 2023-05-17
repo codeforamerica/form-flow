@@ -1,5 +1,6 @@
 package formflow.library.pdf;
 
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.boot.system.ApplicationTemp;
@@ -14,37 +15,44 @@ import java.nio.file.Paths;
 @Slf4j
 public record PdfFile(String path, String name) {
 
-    public static PdfFile copyToTempFile(String path) {
-        InputStream unfilledPdf = PdfFile.class.getResourceAsStream(path);
-        int fileExtension = path.length() - 4;
-        File tempFile;
-        Path pathToTempFile;
-        try {
-            tempFile = File.createTempFile(path, path.substring(fileExtension), new ApplicationTemp().getDir());
-            pathToTempFile = Files.write(tempFile.toPath(), unfilledPdf.readAllBytes());
-        } catch (NullPointerException | IOException e) {
-            throw new RuntimeException("Could not copy pdf resource to temp file: " + e);
-        }
-        return new PdfFile(pathToTempFile.toAbsolutePath().toString(), getNameFromPath(path));
-    }
+  // put all the file in the same tmp java location
+  private static final File tmpFileDir = new ApplicationTemp().getDir();
 
-    private static String getNameFromPath(String path) {
-        return path.substring(path.lastIndexOf('/') + 1, path.length() - 4);
-    }
+  public static PdfFile copyToTempFile(String pathToResource) {
+    InputStream unfilledPdf = PdfFile.class.getResourceAsStream(pathToResource);
+    Path resourcePath = Path.of(pathToResource);
+    String fileNameWithExtension = resourcePath.getFileName().toString();
+    String fileExtension = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf('.'));
+    String fileName = fileNameWithExtension.replaceAll(fileExtension + "$", "");
 
-    @Override
-    public String toString() {
-        return path;
+    File tempFile;
+    Path pathToTempFile;
+    try {
+      tempFile = File.createTempFile(fileName, fileExtension, tmpFileDir);
+      pathToTempFile = Files.write(tempFile.toPath(), unfilledPdf.readAllBytes());
+    } catch (NullPointerException | IOException e) {
+      throw new RuntimeException("Could not copy pdf resource to temp file: " + e);
     }
+    return new PdfFile(pathToTempFile.toAbsolutePath().toString(), fileName);
+  }
 
-    public byte[] fileBytes() throws IOException {
-        return Files.readAllBytes(Paths.get(this.path));
-    }
+  @Override
+  public String toString() {
+    return path;
+  }
 
-    public void finalizeForSending() throws IOException {
-        PDDocument pdDocument = PDDocument.load(fileBytes());
-        pdDocument.getDocumentCatalog().getAcroForm().flatten();
-        pdDocument.save(path);
-        pdDocument.close();
-    }
+  public byte[] fileBytes() throws IOException {
+    return Files.readAllBytes(Paths.get(this.path));
+  }
+
+  public void finalizeForSending() throws IOException {
+    PDDocument pdDocument = PDDocument.load(fileBytes());
+    pdDocument.getDocumentCatalog().getAcroForm().flatten();
+    pdDocument.save(path);
+    pdDocument.close();
+  }
+
+  public void deleteFile() throws IOException {
+    Files.delete(Path.of(this.path));
+  }
 }

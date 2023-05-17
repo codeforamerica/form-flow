@@ -19,59 +19,59 @@ import java.util.Optional;
 @Component
 public class PDFBoxFieldFiller {
 
-    public PdfFile fill(String pathToPdfResource, Collection<PdfField> fields) {
-        PdfFile tempFile = PdfFile.copyToTempFile(pathToPdfResource);
-        try {
-            ByteArrayResource pdfResource = new ByteArrayResource(tempFile.fileBytes());
-            PDDocument pdDocument = fillOutPdfs(fields, pdfResource);
-            pdDocument.save(tempFile.path());
-            pdDocument.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot read temp file: " + e);
-        }
-
-        return tempFile;
+  public PdfFile fill(String pathToPdfResource, Collection<PdfField> fields) {
+    PdfFile tempFile = PdfFile.copyToTempFile(pathToPdfResource);
+    try {
+      ByteArrayResource pdfResource = new ByteArrayResource(tempFile.fileBytes());
+      PDDocument pdDocument = fillOutPdfs(fields, pdfResource);
+      pdDocument.save(tempFile.path());
+      pdDocument.close();
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot read temp file: " + e);
     }
 
-    @NotNull
-    private PDDocument fillOutPdfs(Collection<PdfField> fields, Resource pdfResource) {
-        try {
-            PDDocument loadedDoc = PDDocument.load(pdfResource.getInputStream());
-            PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
-            acroForm.setNeedAppearances(true);
-            fillAcroForm(fields, acroForm);
-            return loadedDoc;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    return tempFile;
+  }
 
-    private void fillAcroForm(Collection<PdfField> fields, PDAcroForm acroForm) {
-        fields.forEach(field ->
-                Optional.ofNullable(acroForm.getField(field.name())).ifPresent(pdField -> {
-                    try {
-                        String fieldValue = field.value();
-                        if (pdField instanceof PDCheckBox && field.value().equals("No")) {
-                            fieldValue = "Off";
-                        }
-                        setPdfField(fieldValue, pdField);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error setting field: " + field.name(), e);
-                    }
-                }));
+  @NotNull
+  private PDDocument fillOutPdfs(Collection<PdfField> fields, Resource pdfResource) {
+    try {
+      PDDocument loadedDoc = PDDocument.load(pdfResource.getInputStream());
+      PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
+      acroForm.setNeedAppearances(true);
+      fillAcroForm(fields, acroForm);
+      return loadedDoc;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    private void setPdfField(String field, PDField pdField)
-            throws IOException {
-        try {
-            if (pdField instanceof PDTextField textField) {
-                textField.setActions(null);
+  private void fillAcroForm(Collection<PdfField> fields, PDAcroForm acroForm) {
+    fields.forEach(field ->
+        Optional.ofNullable(acroForm.getField(field.name())).ifPresent(pdField -> {
+          try {
+            String fieldValue = field.value();
+            if (pdField instanceof PDCheckBox && field.value().equals("No")) {
+              fieldValue = "Off";
             }
-            pdField.setValue(field);
-        } catch (IllegalArgumentException e) {
-            log.error(
-                    "Error setting value '%s' for field %s".formatted(field,
-                            pdField.getFullyQualifiedName()));
-        }
+            setPdfField(fieldValue, pdField);
+          } catch (Exception e) {
+            throw new RuntimeException("Error setting field: " + field.name(), e);
+          }
+        }));
+  }
+
+  private void setPdfField(String field, PDField pdField)
+      throws IOException {
+    try {
+      if (pdField instanceof PDTextField textField) {
+        textField.setActions(null);
+      }
+      pdField.setValue(field);
+    } catch (IllegalArgumentException e) {
+      log.error(
+          "Error setting value '%s' for field %s".formatted(field,
+              pdField.getFullyQualifiedName()));
     }
+  }
 }
