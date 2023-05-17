@@ -106,7 +106,7 @@ jacocoTestReport {
 }
 
 group = "org.codeforamerica.platform"
-version = "0.0.4-SNAPSHOT"
+version = "0.0.5-SNAPSHOT"
 
 java {
     // we need to fix javadoc work before this will run successfully
