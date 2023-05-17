@@ -6,6 +6,7 @@ import formflow.library.data.Submission;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -76,34 +77,31 @@ public class ActionManager {
   }
 
   private void runAction(String name, Submission submission) {
-    try {
-      getAction(name).run(submission);
-    } catch (Exception e) {
-      log.error(String.format("Unable to find Action '%s' to run", name));
-    }
+    runAction(name, () -> getAction(name).run(submission));
   }
 
   private void runAction(String name, Submission submission, String uuid) {
-    try {
-      getAction(name).run(submission, uuid);
-    } catch (Exception e) {
-      log.error(String.format("Unable to find Action '%s' to run", name));
-    }
+    runAction(name, () -> getAction(name).run(submission, uuid));
   }
 
   private void runAction(String name, FormSubmission formSubmission) {
-    try {
-      getAction(name).run(formSubmission);
-    } catch (Exception e) {
-      log.error(String.format("Unable to find Action '%s' to run", name));
-    }
+    runAction(name, () -> getAction(name).run(formSubmission));
   }
 
   private void runAction(String name, FormSubmission formSubmission, String uuid) {
-    try {
-      getAction(name).run(formSubmission, uuid);
-    } catch (Exception e) {
+    runAction(name, () -> getAction(name).run(formSubmission, uuid));
+  }
+
+  private void runAction(String name, Runnable action) {
+    if (action == null) {
       log.error(String.format("Unable to find Action '%s' to run", name));
+      return;
+    }
+
+    try {
+      action.run();
+    } catch (Exception e) {
+      log.error(String.format("Unable to run Action '%s'", name));
     }
   }
 
