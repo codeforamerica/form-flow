@@ -1,6 +1,5 @@
 package formflow.library.pdf;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.boot.system.ApplicationTemp;
 
@@ -11,12 +10,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Slf4j
 public record PdfFile(String path, String name) {
 
-  // put all the file in the same tmp java location
   private static final File tmpFileDir = new ApplicationTemp().getDir();
 
+  /**
+   * This static function will take in a path to a template file and create a PdfFile object to return to the caller. It will
+   * create temp space on the filesystem that the PDF file is read into.
+   *
+   * @param pathToResource String path to PDF resource to read in
+   * @return PdfFile object representing the PDF indicated.
+   */
   public static PdfFile copyToTempFile(String pathToResource) {
     InputStream unfilledPdf = PdfFile.class.getResourceAsStream(pathToResource);
     String fileNameWithExtension = Path.of(pathToResource).getFileName().toString();
@@ -29,7 +33,13 @@ public record PdfFile(String path, String name) {
       tempFile = File.createTempFile(fileName, fileExtension, tmpFileDir);
       pathToTempFile = Files.write(tempFile.toPath(), unfilledPdf.readAllBytes());
     } catch (NullPointerException | IOException e) {
-      throw new RuntimeException("Could not copy pdf resource to temp file: " + e);
+      throw new RuntimeException(
+          String.format(
+              "Could not copy pdf resource file (%s) to the temp file location (%s): %s",
+              pathToResource,
+              tmpFileDir.toString(),
+              e)
+      );
     }
     return new PdfFile(pathToTempFile.toAbsolutePath().toString(), fileName);
   }
@@ -39,10 +49,21 @@ public record PdfFile(String path, String name) {
     return path;
   }
 
+  /**
+   * Returns a byte array containing all the contents of the PDF file.
+   *
+   * @return Byte array of file contents
+   * @throws IOException Thrown if the file cannot be read in.
+   */
   public byte[] fileBytes() throws IOException {
     return Files.readAllBytes(Paths.get(this.path));
   }
 
+  /**
+   * Does all the tasks necessary to finalize the PDF file. It will flatten the PDF file.
+   *
+   * @throws IOException Thrown if the file cannot be read in.
+   */
   public void finalizeForSending() throws IOException {
     PDDocument pdDocument = PDDocument.load(fileBytes());
     pdDocument.getDocumentCatalog().getAcroForm().flatten();
@@ -50,6 +71,11 @@ public record PdfFile(String path, String name) {
     pdDocument.close();
   }
 
+  /**
+   * Deletes the underlying temporary file from the file system.
+   *
+   * @throws IOException Thrown if the file cannot be worked with.
+   */
   public void deleteFile() throws IOException {
     Files.delete(Path.of(this.path));
   }
