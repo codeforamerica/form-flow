@@ -1,6 +1,5 @@
 package formflow.library.pdf;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.boot.system.ApplicationTemp;
 
@@ -11,40 +10,73 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Slf4j
 public record PdfFile(String path, String name) {
 
-    public static PdfFile copyToTempFile(String path) {
-        InputStream unfilledPdf = PdfFile.class.getResourceAsStream(path);
-        int fileExtension = path.length() - 4;
-        File tempFile;
-        Path pathToTempFile;
-        try {
-            tempFile = File.createTempFile(path, path.substring(fileExtension), new ApplicationTemp().getDir());
-            pathToTempFile = Files.write(tempFile.toPath(), unfilledPdf.readAllBytes());
-        } catch (NullPointerException | IOException e) {
-            throw new RuntimeException("Could not copy pdf resource to temp file: " + e);
-        }
-        return new PdfFile(pathToTempFile.toAbsolutePath().toString(), getNameFromPath(path));
-    }
+  private static final File tmpFileDir = new ApplicationTemp().getDir();
 
-    private static String getNameFromPath(String path) {
-        return path.substring(path.lastIndexOf('/') + 1, path.length() - 4);
-    }
+  /**
+   * This static function will take in a path to a template file and create a PdfFile object to return to the caller. It will
+   * create temp space on the filesystem that the PDF file is read into.
+   *
+   * @param pathToResource String path to PDF resource to read in
+   * @return PdfFile object representing the PDF indicated.
+   */
+  public static PdfFile copyToTempFile(String pathToResource) {
+    InputStream unfilledPdf = PdfFile.class.getResourceAsStream(pathToResource);
+    String fileNameWithExtension = Path.of(pathToResource).getFileName().toString();
+    String fileExtension = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf('.'));
+    String fileName = fileNameWithExtension.replaceAll(fileExtension + "$", "");
 
-    @Override
-    public String toString() {
-        return path;
+    File tempFile;
+    Path pathToTempFile;
+    try {
+      tempFile = File.createTempFile(fileName, fileExtension, tmpFileDir);
+      pathToTempFile = Files.write(tempFile.toPath(), unfilledPdf.readAllBytes());
+    } catch (NullPointerException | IOException e) {
+      throw new RuntimeException(
+          String.format(
+              "Could not copy pdf resource file (%s) to the temp file location (%s): %s",
+              pathToResource,
+              tmpFileDir.toString(),
+              e)
+      );
     }
+    return new PdfFile(pathToTempFile.toAbsolutePath().toString(), fileName);
+  }
 
-    public byte[] fileBytes() throws IOException {
-        return Files.readAllBytes(Paths.get(this.path));
-    }
+  @Override
+  public String toString() {
+    return path;
+  }
 
-    public void finalizeForSending() throws IOException {
-        PDDocument pdDocument = PDDocument.load(fileBytes());
-        pdDocument.getDocumentCatalog().getAcroForm().flatten();
-        pdDocument.save(path);
-        pdDocument.close();
-    }
+  /**
+   * Returns a byte array containing all the contents of the PDF file.
+   *
+   * @return Byte array of file contents
+   * @throws IOException Thrown if the file cannot be read in.
+   */
+  public byte[] fileBytes() throws IOException {
+    return Files.readAllBytes(Paths.get(this.path));
+  }
+
+  /**
+   * Does all the tasks necessary to finalize the PDF file. It will flatten the PDF file.
+   *
+   * @throws IOException Thrown if the file cannot be read in.
+   */
+  public void finalizeForSending() throws IOException {
+    PDDocument pdDocument = PDDocument.load(fileBytes());
+    pdDocument.getDocumentCatalog().getAcroForm().flatten();
+    pdDocument.save(path);
+    pdDocument.close();
+  }
+
+  /**
+   * Deletes the underlying temporary file from the file system.
+   *
+   * @throws IOException Thrown if the file cannot be worked with.
+   */
+  public void deleteFile() throws IOException {
+    Files.delete(Path.of(this.path));
+  }
 }
