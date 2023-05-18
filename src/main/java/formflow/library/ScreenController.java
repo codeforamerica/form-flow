@@ -15,13 +15,9 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -631,10 +627,16 @@ public class ScreenController extends FormFlowController {
     return currentFlowConfiguration.getScreenNavigation(screen);
   }
 
-  private FlowConfiguration getFlowConfigurationByName(String flow) {
-    return flowConfigurations.stream().filter(
-        flowConfiguration -> flowConfiguration.getName().equals(flow)
-    ).toList().get(0);
+  private FlowConfiguration getFlowConfigurationByName(String flow)  {
+    try {
+      return flowConfigurations.stream().filter(
+              flowConfiguration -> flowConfiguration.getName().equals(flow)
+      ).toList().get(0);
+
+    } catch (ArrayIndexOutOfBoundsException e){
+        throw new NoSuchElementException("Could not find flow=" + flow + " in templates");
+    }
+
   }
 
   private Boolean isConditionalNavigation(ScreenNavigationConfiguration currentScreen) {
