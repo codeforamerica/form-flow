@@ -1,6 +1,5 @@
 package formflow.library.pdf;
 
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.boot.system.ApplicationTemp;
@@ -20,8 +19,7 @@ public record PdfFile(String path, String name) {
 
   public static PdfFile copyToTempFile(String pathToResource) {
     InputStream unfilledPdf = PdfFile.class.getResourceAsStream(pathToResource);
-    Path resourcePath = Path.of(pathToResource);
-    String fileNameWithExtension = resourcePath.getFileName().toString();
+    String fileNameWithExtension = Path.of(pathToResource).getFileName().toString();
     String fileExtension = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf('.'));
     String fileName = fileNameWithExtension.replaceAll(fileExtension + "$", "");
 

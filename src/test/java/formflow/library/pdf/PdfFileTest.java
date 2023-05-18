@@ -96,10 +96,18 @@ class PdfFileTest {
     PdfFile twoPdfFile = PdfFile.copyToTempFile(testPdfPath);
     PdfFile threePdfFile = PdfFile.copyToTempFile(testPdfPath);
 
+    // delete one and make sure the other two are unaffected
     onePdfFile.deleteFile();
+    assertThat(Files.exists(Path.of(twoPdfFile.path()))).isTrue();
+    assertThat(Files.exists(Path.of(threePdfFile.path()))).isTrue();
+
+    // delete another and make sure the other one is unaffected
     twoPdfFile.deleteFile();
+    assertThat(Files.exists(Path.of(threePdfFile.path()))).isTrue();
+
     threePdfFile.deleteFile();
 
+    // test that they are all gone
     assertThat(Files.exists(Path.of(onePdfFile.path()))).isFalse();
     assertThat(Files.exists(Path.of(twoPdfFile.path()))).isFalse();
     assertThat(Files.exists(Path.of(threePdfFile.path()))).isFalse();
