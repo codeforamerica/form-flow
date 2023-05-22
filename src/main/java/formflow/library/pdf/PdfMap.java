@@ -1,14 +1,12 @@
 package formflow.library.pdf;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 
 @Data
 @AllArgsConstructor
@@ -26,6 +24,8 @@ public class PdfMap {
 
     AtomicInteger atomicInteger = new AtomicInteger(0);
 
+    // TODO -- check this logic, it's probably not complete
+
     subflowInfo.forEach((subflowName, subflow) -> {
       Map<String, Object> fields = subflow.getFields();
       String suffix = "_" + atomicInteger.get() + 1;
@@ -33,25 +33,24 @@ public class PdfMap {
       for (int index = 0; index < subflow.getTotalIterations(); index++) {
         subflowFields.putAll(
             fields.entrySet().stream()
-                .map(entrySet -> {
+                .map(fieldEntry -> {
                   // either return a List<Map<String, Object>> or
                   // return a Map<String, Object>
-                  String newKey = addSuffix(entrySet.getKey(), suffix);
+                  String newKey = addSuffix(fieldEntry.getKey(), suffix);
 
-                  TODO use instanceOf not [] because those are not there in PDF map.
-
-                  if (newKey.endsWith("[]")) {
-                    Map<String, Object> val =(Map<String, Object>)entrySet.getValue();
+                  if (fieldEntry.getValue() instanceof Map) {
+                    Map<String, Object> val = (Map<String, Object>) fieldEntry.getValue();
                     // run through all elements in the list it contains
                     Map<String, Object> values = val.entrySet().stream()
-                        .map((inputName, pdfName) -> {
-                          return(Map.entry(inputName, pdfName + suffix);
-                        });
+                        .map(listEntry -> {
+                          // don't change the key name here, it's not necessary
+                          return (Map.entry(listEntry.getKey(), listEntry.getValue() + suffix));
+                        }).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
-                    return(Map.entry(newKey, values));
+                    return (Map.entry(newKey, values));
                   } else {
                     //return (new AbstractMap.SimpleEntry(entrySet.getKey() + suffix, entrySet.getValue()));
-                    return (Map.entry(newKey, val + suffix);
+                    return (Map.entry(newKey, fieldEntry.getValue() + suffix));
                   }
                 })
         );
