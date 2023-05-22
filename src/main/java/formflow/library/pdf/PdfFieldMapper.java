@@ -54,6 +54,9 @@ public class PdfFieldMapper {
   }
 
   @NotNull
+  prive
+
+  @NotNull
   private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, String flow) {
     Map<String, Object> pdfInputsMap = getPdfMap(flow).getInputFields();
     Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(input.getName());

@@ -10,24 +10,21 @@ import java.util.UUID;
 @Component
 public class PdfGenerator {
 
-  private final SubmissionRepositoryService submissionRepositoryService;
   private final SubmissionFieldPreparers submissionFieldPreparers;
   private final PdfFieldMapper pdfFieldMapper;
   private final PdfMapConfiguration pdfMapConfiguration;
   private final PDFBoxFieldFiller pdfBoxFieldFiller;
 
-  public PdfGenerator(SubmissionRepositoryService submissionRepositoryService, SubmissionFieldPreparers submissionFieldPreparers,
+  public PdfGenerator(SubmissionFieldPreparers submissionFieldPreparers,
       PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration, PDFBoxFieldFiller pdfBoxFieldFiller) {
-    this.submissionRepositoryService = submissionRepositoryService;
     this.submissionFieldPreparers = submissionFieldPreparers;
     this.pdfFieldMapper = pdfFieldMapper;
     this.pdfMapConfiguration = pdfMapConfiguration;
     this.pdfBoxFieldFiller = pdfBoxFieldFiller;
   }
 
-  public PdfFile generate(String flow, UUID id) {
-    Submission submission = submissionRepositoryService.findById(id).orElseThrow();
-    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
+  public PdfFile generate(String flow, UUID submissionId) {
+    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submissionId);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     String pathToPdfResource = pdfMapConfiguration.getPdfFromFlow(flow);
     PdfFile tmpFile = pdfBoxFieldFiller.fill(pathToPdfResource, pdfFields);

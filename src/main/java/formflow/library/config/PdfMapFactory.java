@@ -38,7 +38,6 @@ public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
 
     Constructor constructor = new Constructor(PdfMap.class, loaderOptions);
     TypeDescription inputsDescription = new TypeDescription(HashMap.class);
-
     constructor.addTypeDescription(inputsDescription);
     Yaml yaml = new Yaml(constructor, new Representer(new DumperOptions()),
         new DumperOptions(), loaderOptions);
