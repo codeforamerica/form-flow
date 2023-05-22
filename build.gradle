@@ -81,7 +81,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.jsoup:jsoup:1.16.1'
-    testImplementation 'org.mockito:mockito-inline:3.11.2'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
     // bonigarcia seems to need this version of client5, as of version 5.3.2.
     // aws-java-sdk-s3 uses version httpclient:4.5.13, so if we see any differences in testing going forward
     // we should take a look at this dependency and see if it's really testing things correctly and
