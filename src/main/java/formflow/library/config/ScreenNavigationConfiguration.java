@@ -17,4 +17,5 @@ public class ScreenNavigationConfiguration {
   private String crossFieldValidationAction;
   private String beforeSaveAction;
   private String beforeDisplayAction;
+  private String afterSaveAction;
 }
