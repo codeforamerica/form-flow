@@ -8,7 +8,7 @@ flow:
     nextScreens:
       - name: subflowIterationStart
   subflowIterationStart:
-    afterSaveAction: SendEmailAfterSaveSubflow
+    afterSaveAction: SendEmailAfterSave
     subflow: income
     nextScreens:
       - name: next

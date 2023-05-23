@@ -21,4 +21,12 @@ public class SendEmailAfterSave implements Action {
         "This is a test email"
     );
   }
+
+  public void run(Submission submission, String id) {
+    mailgunEmailClient.sendEmail(
+        "Subject",
+        "test@example.com",
+        "This is a test email"
+    );
+  }
 }
