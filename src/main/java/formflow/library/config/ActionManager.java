@@ -54,8 +54,10 @@ public class ActionManager {
   }
 
   /**
-   * This handleAfterSaveAction calls invokes a method after a submission has been saved before a redirect occurs in the
-   * ScreenController.  The handleAfterSaveAction method is called on all screens except screens in a subflow.
+   * <p>
+   * <code>handleAfterSaveAction()</code> invokes a method after a submission has been saved in the ScreenController.  The
+   * handleAfterSaveAction method is called on all screens except for screens in a subflow.
+   * </p>
    *
    * @param currentScreen The screen that we are currently saving data from.
    * @param submission    The submission object after changes to the current screen have been saved to the repository
@@ -69,7 +71,7 @@ public class ActionManager {
 
   /**
    * <p>
-   * This handleAfterSaveAction calls invokes a method after a <b>subflow</b> submission has been saved.
+   * This <code>handleAfterSaveAction()</code> invokes a method after a <b>subflow</b> submission has been saved.
    * </p>
    *
    * @param currentScreen The screen that we are currently saving data from.
