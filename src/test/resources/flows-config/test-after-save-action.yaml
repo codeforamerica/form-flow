@@ -1,18 +1,18 @@
 name: testFlow
 flow:
   inputs:
-    beforeSaveAction: FormatDateBeforeSave
+    afterSaveAction: SendEmailAfterSave
     nextScreens:
       - name: subflowEntry
   subflowEntry:
     nextScreens:
       - name: subflowIterationStart
   subflowIterationStart:
+    afterSaveAction: SendEmailAfterSave
     subflow: income
     nextScreens:
       - name: next
   next:
-    beforeSaveAction: CalculateTotalBeforeSave
     subflow: income
     nextScreens:
       - name: subflowReview

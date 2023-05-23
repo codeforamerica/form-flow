@@ -15,6 +15,7 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.NoSuchElementException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -194,6 +196,7 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeSaveAction(currentScreen, submission);
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
+    actionManager.handleAfterSaveAction(currentScreen, submission);
 
     return new ModelAndView(String.format("redirect:/flow/%s/%s/navigation", flow, screen));
   }
@@ -331,6 +334,7 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
     saveToRepository(submission, subflowName);
     httpSession.setAttribute("id", submission.getId());
+    actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
 
     String nextScreen = getNextScreenName(httpSession, currentScreen, iterationUuid);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid) ?
@@ -476,14 +480,14 @@ public class ScreenController extends FormFlowController {
     return currentFlowConfiguration.getScreenNavigation(screen);
   }
 
-  private FlowConfiguration getFlowConfigurationByName(String flow)  {
+  private FlowConfiguration getFlowConfigurationByName(String flow) {
     try {
       return flowConfigurations.stream().filter(
-              flowConfiguration -> flowConfiguration.getName().equals(flow)
+          flowConfiguration -> flowConfiguration.getName().equals(flow)
       ).toList().get(0);
 
-    } catch (ArrayIndexOutOfBoundsException e){
-        throw new NoSuchElementException("Could not find flow=" + flow + " in templates");
+    } catch (ArrayIndexOutOfBoundsException e) {
+      throw new NoSuchElementException("Could not find flow=" + flow + " in templates");
     }
 
   }

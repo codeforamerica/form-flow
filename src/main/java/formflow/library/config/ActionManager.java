@@ -3,6 +3,7 @@ package formflow.library.config;
 import formflow.library.config.submission.Action;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,38 @@ public class ActionManager {
 
   public void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     String actionName = currentScreen.getBeforeSaveAction();
+    if (actionName != null) {
+      runAction(actionName, submission, uuid);
+    }
+  }
+
+  /**
+   * <p>
+   * <code>handleAfterSaveAction()</code> invokes a method after a submission has been saved in the ScreenController.  The
+   * handleAfterSaveAction method is called on all screens except for screens in a subflow.
+   * </p>
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   */
+  public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
+    String actionName = currentScreen.getAfterSaveAction();
+    if (actionName != null) {
+      runAction(actionName, submission);
+    }
+  }
+
+  /**
+   * <p>
+   * This <code>handleAfterSaveAction()</code> invokes a method after a <b>subflow</b> submission has been saved.
+   * </p>
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   */
+  public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
+    String actionName = currentScreen.getAfterSaveAction();
     if (actionName != null) {
       runAction(actionName, submission, uuid);
     }
@@ -101,7 +134,7 @@ public class ActionManager {
     try {
       action.run();
     } catch (Exception e) {
-      log.error(String.format("Unable to run Action '%s'", name));
+      log.error(String.format("Unable to run Action '%s', %s", name, e));
     }
   }
 

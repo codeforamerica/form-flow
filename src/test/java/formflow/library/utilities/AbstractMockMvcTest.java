@@ -152,6 +152,16 @@ public abstract class AbstractMockMvcTest {
         .andExpect(redirectedUrl(getUrlForPageName(pageName) + "/navigation"));
   }
 
+  protected void postSubflowExpectingSuccess(String pageName, String nextPage) throws Exception {
+    ResultActions test = postWithoutData(pageName);
+    String url = test.andExpect(status().is3xxRedirection())
+        .andReturn()
+        .getResponse()
+        .getRedirectedUrl();
+    assertThat(url).isNotNull();
+    assertThat(url.contains(nextPage));
+  }
+
   protected ResultActions postStartSubflowExpectingSuccess(String pageName) throws Exception {
     String postUrl = getUrlForPageName(pageName, "new");
     return postWithoutData(postUrl).andExpect(redirectedUrl(postUrl + "/navigation"));
@@ -419,7 +429,6 @@ public abstract class AbstractMockMvcTest {
 
   protected String getUrlForPageName(String pageName, String subflow) {
     return "/flow/testFlow/" + pageName + "/" + subflow;
-
   }
 
   protected String getUrlForPageName(String pageName) {
