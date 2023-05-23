@@ -71,7 +71,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     session = new MockHttpSession();
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-            .file("file", testImage.getBytes())
+            .file(testImage)
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
             .param("flow", "testFlow")

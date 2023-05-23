@@ -1,6 +1,5 @@
 package formflow.library;
 
-import com.google.common.io.Files;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -21,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -65,10 +65,11 @@ public class UploadController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-      String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+//      String otherFileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+      String fileExtension = StringUtils.getFilenameExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
       if (fileExtension.equals("pdf")) {
-        try (PDDocument pdfFile = PDDocument.load(file.getInputStream())) {
+        try (PDDocument ignored = PDDocument.load(file.getInputStream())) {
         } catch (InvalidPasswordException e) {
           // TODO update when we add internationalization to use locale for message source
           String message = messageSource.getMessage("upload-documents.error-password-protected", null, null);
