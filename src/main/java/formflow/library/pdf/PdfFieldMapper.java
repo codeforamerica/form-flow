@@ -54,9 +54,6 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  prive
-
-  @NotNull
   private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, String flow) {
     Map<String, Object> pdfInputsMap = getPdfMap(flow).getInputFields();
     Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(input.getName());
@@ -68,8 +65,8 @@ public class PdfFieldMapper {
 
   private PdfMap getPdfMap(String flow) {
     return pdfMapConfigurations.stream()
-            .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow));
+        .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow));
   }
 }

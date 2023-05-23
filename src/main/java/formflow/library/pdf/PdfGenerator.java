@@ -23,8 +23,8 @@ public class PdfGenerator {
     this.pdfBoxFieldFiller = pdfBoxFieldFiller;
   }
 
-  public PdfFile generate(String flow, UUID submissionId) {
-    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submissionId);
+  public PdfFile generate(String flow, Submission submission) {
+    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     String pathToPdfResource = pdfMapConfiguration.getPdfFromFlow(flow);
     PdfFile tmpFile = pdfBoxFieldFiller.fill(pathToPdfResource, pdfFields);

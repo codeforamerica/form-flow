@@ -22,30 +22,24 @@ public class SubmissionFieldPreparers {
   private final List<DefaultSubmissionFieldPreparer> defaultPreparers;
 
   private final List<SubmissionFieldPreparer> customPreparers;
-  private final List<SubflowSubmissionFieldPreparer> subflowSubmissionFieldPreparers;
 
   private final PdfMapConfiguration pdfMapConfiguration;
   private final ActionManager actionManager;
 
-  private final SubmissionRepositoryService submissionRepositoryService;
 
   public SubmissionFieldPreparers(List<DefaultSubmissionFieldPreparer> defaultPreparers,
-      List<SubmissionFieldPreparer> customPreparers, List<SubflowSubmissionFieldPreparer> subflowSubmissionFieldPreparers,
-      PdfMapConfiguration pdfMapConfiguration, SubmissionRepositoryService submissionRepositoryService,
-      ActionManager actionManager) {
+      List<SubmissionFieldPreparer> customPreparers,
+      PdfMapConfiguration pdfMapConfiguration, ActionManager actionManager) {
     this.defaultPreparers = defaultPreparers;
     this.customPreparers = customPreparers;
-    this.subflowSubmissionFieldPreparers = subflowSubmissionFieldPreparers;
     this.pdfMapConfiguration = pdfMapConfiguration;
     this.actionManager = actionManager;
-    this.submissionRepositoryService = submissionRepositoryService;
   }
 
-  public List<SubmissionField> prepareSubmissionFields(UUID submissionId) {
+  public List<SubmissionField> prepareSubmissionFields(Submission submission) {
     // do note that we are going to get the submission and then change it's inputData
     // drastically over the course of this method. That's why we want our own copy.  We will
     // not save it back at all.
-    Submission submission = submissionRepositoryService.findById(submissionId).orElseThrow();
     PdfMap pdfMap = pdfMapConfiguration.getPdfMap(submission.getFlow());
     HashMap<String, SubmissionField> submissionFieldsMap = new HashMap<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
@@ -124,8 +118,9 @@ public class SubmissionFieldPreparers {
               iteration.remove("iterationIsComplete");
               iteration.forEach((key, value) -> {
                 // tack on suffix for field. "_%d" where %d is the iteration number
-                inputData.put(key + "_" + (atomInteger.getAndIncrement() + 1), value);
+                inputData.put(key + "_" + (atomInteger.get() + 1), value);
               });
+              atomInteger.incrementAndGet();
             });
             // put it in the submissionFieldsMap
             //subflowDataList.forEach(submission.getInputData()::putAll);

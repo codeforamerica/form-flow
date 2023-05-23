@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
 import java.util.Date;
 import java.util.List;
@@ -14,10 +15,16 @@ import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class SingleFieldPreparersTest {
 
   private Submission testSubmission;
+
+  @Autowired
+  private ActionManager actionManager;
+
+  private PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration(List.of());
 
   @BeforeEach
   void setUp() {
@@ -32,7 +39,7 @@ class SingleFieldPreparersTest {
     DefaultSubmissionFieldPreparer successfulPreparer = mock(DefaultSubmissionFieldPreparer.class);
     DefaultSubmissionFieldPreparer failingPreparer = mock(DefaultSubmissionFieldPreparer.class);
     SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
-        List.of(failingPreparer, successfulPreparer), List.of());
+        List.of(failingPreparer, successfulPreparer), List.of(), new PdfMapConfiguration(), actionManager);
     Date date = DateTime.parse("2020-09-02").toDate();
 
     Map<String, SubmissionField> mockOutput = Map.of(
