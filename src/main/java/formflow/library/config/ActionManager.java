@@ -53,11 +53,12 @@ public class ActionManager {
     }
   }
 
-  // TODO: complete javadoc
-
   /**
-   * @param currentScreen The screen that
-   * @param submission    The submission object at time
+   * This handleAfterSaveAction calls invokes a method after a submission has been saved before a redirect occurs in the
+   * ScreenController.  The handleAfterSaveAction method is called on all screens except screens in a subflow.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
    */
   public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
     String actionName = currentScreen.getAfterSaveAction();
@@ -66,6 +67,15 @@ public class ActionManager {
     }
   }
 
+  /**
+   * <p>
+   * This handleAfterSaveAction calls invokes a method after a <b>subflow</b> submission has been saved.
+   * </p>
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   */
   public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     String actionName = currentScreen.getAfterSaveAction();
     if (actionName != null) {
