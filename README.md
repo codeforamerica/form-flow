@@ -546,7 +546,7 @@ the database. It is stored in a column named `inputData` on the `submissions` ta
 * The input fields on pages that are not part of a subflow will be stored in the main part of the
   JSON data. The keys will be the input fields name.
 * The input fields that are part of a subflow will be stored in an array under a key that is the
-  name of the subflow. To access the current item on a subflow page, use `currentSubflowItem`.
+  name of the subflow. To access the current item's data on a subflow page, use `fieldData`.
 * Field names are used as keys. We use them directly as they are and therefore they must be unique
   across a whole flow to avoid naming collisions. The example applies a prefix to the fields, but
   that's just for ease of being clear in the example. The system does not apply prefixes.
@@ -565,7 +565,7 @@ In the example below the following assumptions are applied:
 {
   "first_input1": "some value",
   "first_input2": "some value",
-  "second_input1": "a`Gbcd",
+  "second_input1": "abcd",
   "docsStart_input1": "some doc info",
   "doc": [
     {
@@ -1718,19 +1718,21 @@ subflow:
 We provide some data to the model for ease of use access in Thymeleaf templates. Below are the data
 types we pass and when they are available.
 
-| Name              | Type                    | Availability                                                                     | Description                                                                                                                                                         |
-|-------------------|-------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `flow`            | String                  | Always available                                                                 | The name of the flow the screen is contained within.                                                                                                                |
-| `screen`          | String                  | Always available                                                                 | the name of the screen.                                                                                                                                             |
-| `inputData`       | HashMap<String, Object> | Always available                                                                 | `inputData` is a HashMap of user submitted input data. If editing a subflow, `inputData` will only contain the data for that specific iteration within the subflow. |
-| `submission`      | Submission              | Always available                                                                 | `submission` is the entire Submission object that contains a single users submission data.                                                                          |
-| `formAction`      | String                  | Always available                                                                 | Is the correct endpoint for the forms `POST` action if `flows-config` is set up correctly.                                                                          |
-| `errorMessages`   | ArrayList<String>       | On screens that fail validation                                                  | A list of error messages for inputs that failed validation.                                                                                                         |
-| `subflow`         | String                  | On `deleteConfirmationScreen` screens                                            | This is the name of the subflow that the `deleteConfirmationScreen` screen belongs to.                                                                              |
-| `noEntryToDelete` | Boolean                 | On `deleteConfirmationScreen` screens if corresponding `uuid` is no longer there | Indicates that the subflow entry containing a `uuid` is no longer available.                                                                                        |
-| `reviewScreen`    | String                  | On `deleteConfirmationScreen` screens if corresponding `uuid` is no longer there | Name of the review screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                           |
-| `subflowIsEmpty`  | Boolean                 | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Indicates that the subflow being accessed no longer has entries.                                                                                                    |
-| `entryScreen`     | String                  | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Name of the entry screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                            |
+| Name                 | Type                    | Availability                                                                     | Description                                                                                                                                                                                                      |
+|----------------------|-------------------------|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `flow`               | String                  | Always available                                                                 | The name of the flow the screen is contained within.                                                                                                                                                             |
+| `screen`             | String                  | Always available                                                                 | the name of the screen.                                                                                                                                                                                          |
+| `inputData`          | HashMap<String, Object> | Always available                                                                 | `inputData` is a HashMap of user submitted input data. This field always contains the full set of data entered by the user.                                                                                      |
+| `fieldData`          | HashMap<String, Object> | Always available                                                                 | `fieldData` is a HashMap of user submitted input data. If the screen is part of a subflow, then this will only be that subflow's data. If the screen is not part of a subflow, then this will equal `inputData`. |
+| `currentSubflowItem` | HashMap<String, Object> | On subflow pages only                                                            | `currentSubflowItem` is a HashMap of user submitted input data for the current subflow iteration. Use `fieldData` instead of this option, as we will probably deprecate this field soon.                         |
+| `submission`         | Submission              | Always available                                                                 | `submission` is the entire Submission object that contains a single users submission data.                                                                                                                       |
+| `formAction`         | String                  | Always available                                                                 | Is the correct endpoint for the forms `POST` action if `flows-config` is set up correctly.                                                                                                                       |
+| `errorMessages`      | ArrayList<String>       | On screens that fail validation                                                  | A list of error messages for inputs that failed validation.                                                                                                                                                      |
+| `subflow`            | String                  | On `deleteConfirmationScreen` screens                                            | This is the name of the subflow that the `deleteConfirmationScreen` screen belongs to.                                                                                                                           |
+| `noEntryToDelete`    | Boolean                 | On `deleteConfirmationScreen` screens if corresponding `uuid` is no longer there | Indicates that the subflow entry containing a `uuid` is no longer available.                                                                                                                                     |
+| `reviewScreen`       | String                  | On `deleteConfirmationScreen` screens if corresponding `uuid` is no longer there | Name of the review screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                                                                        |
+| `subflowIsEmpty`     | Boolean                 | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Indicates that the subflow being accessed no longer has entries.                                                                                                                                                 |
+| `entryScreen`        | String                  | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Name of the entry screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                                                                         |
 
 There are spots in the templates where the `T` operator is used.
 [For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html)
