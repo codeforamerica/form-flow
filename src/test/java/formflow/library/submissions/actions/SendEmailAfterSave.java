@@ -3,7 +3,6 @@ package formflow.library.submissions.actions;
 import formflow.library.config.submission.Action;
 import formflow.library.data.Submission;
 import formflow.library.email.MailgunEmailClient;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

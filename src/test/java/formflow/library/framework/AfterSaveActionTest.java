@@ -1,6 +1,5 @@
 package formflow.library.framework;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -15,10 +14,7 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.email.MailgunEmailClient;
 import formflow.library.utilities.AbstractMockMvcTest;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.api.AssertionsForClassTypes;
@@ -28,15 +24,12 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-after-save-action.yaml"})
 public class AfterSaveActionTest extends AbstractMockMvcTest {
 
   Submission submission;
-
-  private MockMvc mockMvc;
 
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
