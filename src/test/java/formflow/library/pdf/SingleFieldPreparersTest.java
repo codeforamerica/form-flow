@@ -18,44 +18,50 @@ import static org.mockito.Mockito.*;
 
 class SingleFieldPreparersTest {
 
-    private Submission testSubmission;
+  private Submission testSubmission;
 
-    @Autowired
-    private ActionManager actionManager;
+  @Autowired
+  private ActionManager actionManager;
 
-    private PdfMapConfiguration pdfMapConfiguration = new PdfMapConfiguration(List.of());
 
-    @BeforeEach
-    void setUp() {
-        testSubmission = Submission.builder()
-                .id(UUID.randomUUID())
-                .submittedAt(DateTime.parse("2020-09-02").toDate())
-                .build();
-    }
+  @BeforeEach
+  void setUp() {
+    testSubmission = Submission.builder()
+        .id(UUID.randomUUID())
+        .flow("testFlow1")
+        .inputData(
+            Map.of("applicantName", "Mack",
+                "applicantDateOfBirth", "05/01/1980"
+            )
+        )
+        .submittedAt(DateTime.parse("2020-09-02").toDate())
+        .build();
+  }
 
-    @Test
-    void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
-        DefaultSubmissionFieldPreparer successfulPreparer = mock(DefaultSubmissionFieldPreparer.class);
-        DefaultSubmissionFieldPreparer failingPreparer = mock(DefaultSubmissionFieldPreparer.class);
-        SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
-                List.of(failingPreparer, successfulPreparer), List.of(), new PdfMapConfiguration(List.of(new PdfMap())), actionManager);
-        Date date = DateTime.parse("2020-09-02").toDate();
+  @Test
+  void shouldStillSuccessfullyMapEvenWithExceptionsInIndividualPreparers() {
+    DefaultSubmissionFieldPreparer successfulPreparer = mock(DefaultSubmissionFieldPreparer.class);
+    DefaultSubmissionFieldPreparer failingPreparer = mock(DefaultSubmissionFieldPreparer.class);
+    PdfMapConfiguration pdfMapConfiguration = mock(PdfMapConfiguration.class);
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
+        List.of(failingPreparer, successfulPreparer), List.of(), pdfMapConfiguration, actionManager);
+    Date date = DateTime.parse("2020-09-02").toDate();
+    PdfMap pdfMap = new PdfMap();
 
-        Map<String, SubmissionField> mockOutput = Map.of(
-                "submittedAt", new DatabaseField("submittedAt", String.valueOf(date))
-        );
-        when(successfulPreparer.prepareSubmissionFields(eq(testSubmission), anyMap(), any())).thenReturn(mockOutput);
-        when(failingPreparer.prepareSubmissionFields(eq(testSubmission), anyMap(), any()))
-                .thenThrow(IllegalArgumentException.class);
+    Map<String, SubmissionField> mockOutput = Map.of(
+        "submittedAt", new DatabaseField("submittedAt", String.valueOf(date))
+    );
+    when(successfulPreparer.prepareSubmissionFields(eq(testSubmission), anyMap(), any())).thenReturn(mockOutput);
+    when(failingPreparer.prepareSubmissionFields(eq(testSubmission), anyMap(), any())).thenThrow(IllegalArgumentException.class);
+    when(pdfMapConfiguration.getPdfMap("testFlow1")).thenReturn(pdfMap);
 
-        List<SubmissionField> actualOutput = submissionFieldPreparers
-                .prepareSubmissionFields(testSubmission);
-        assertThat(actualOutput).isNotEmpty();
-        // Default document fields
-        assertThat(actualOutput).containsExactly(
-                new DatabaseField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()))
-        );
-        verify(successfulPreparer).prepareSubmissionFields(eq(testSubmission), anyMap(), any());
-        verify(failingPreparer).prepareSubmissionFields(eq(testSubmission), anyMap(), any());
-    }
+    List<SubmissionField> actualOutput = submissionFieldPreparers.prepareSubmissionFields(testSubmission);
+    assertThat(actualOutput).isNotEmpty();
+    // Default document fields
+    assertThat(actualOutput).containsExactly(
+        new DatabaseField("submittedAt", String.valueOf(testSubmission.getSubmittedAt()))
+    );
+    verify(successfulPreparer).prepareSubmissionFields(eq(testSubmission), anyMap(), any());
+    verify(failingPreparer).prepareSubmissionFields(eq(testSubmission), anyMap(), any());
+  }
 }

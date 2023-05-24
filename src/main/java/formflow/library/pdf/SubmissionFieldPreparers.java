@@ -78,6 +78,10 @@ public class SubmissionFieldPreparers {
     List<Map<String, Object>> subflowDataList = new ArrayList<>();
     Map<String, Object> inputData = new HashMap<>();
 
+    if (subflowMap == null) {
+      return inputData;
+    }
+
     subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
           // run action on data
           if (pdfSubflow.dataAction != null) {
