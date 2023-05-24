@@ -2,6 +2,7 @@ package formflow.library.controllers;
 
 import formflow.library.PdfController;
 import formflow.library.data.Submission;
+import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.pdf.PdfFile;
 import formflow.library.pdf.PdfGenerator;
 import formflow.library.utilities.AbstractMockMvcTest;
@@ -25,6 +26,8 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     private Submission submission;
     private MockMvc mockMvc;
     private final PdfGenerator pdfGenerator = mock(PdfGenerator.class);
+
+    private SubmissionRepositoryService submissionRepositoryService;
     private PdfFile filledPdf;
     private String flow;
 
@@ -33,12 +36,12 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     @BeforeEach
     public void setUp() throws Exception {
         flow = "ubi";
-        PdfController pdfController = new PdfController(messageSource, pdfGenerator);
+        PdfController pdfController = new PdfController(messageSource, pdfGenerator, submissionRepositoryService);
         mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
         submission = Submission.builder().id(UUID.randomUUID()).build();
         filledPdf = mock(PdfFile.class);
         when(filledPdf.fileBytes()).thenReturn(new byte[5]);
-        when(pdfGenerator.generate(flow, submission.getId())).thenReturn(filledPdf);
+        when(pdfGenerator.generate(flow, submission)).thenReturn(filledPdf);
         super.setUp();
     }
 
@@ -52,7 +55,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
                 .andReturn();
         assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdf.fileBytes());
 
-        verify(pdfGenerator, times(1)).generate(flow, submission.getId());
+        verify(pdfGenerator, times(1)).generate(flow, submission);
         verify(filledPdf, times(1)).finalizeForSending();
     }
 

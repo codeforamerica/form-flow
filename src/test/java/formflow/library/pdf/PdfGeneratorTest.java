@@ -26,7 +26,7 @@ class PdfGeneratorTest {
     @BeforeEach
     void setUp() throws IOException {
         PdfMapConfiguration pdfMapConfiguration = spy(new PdfMapConfiguration(List.of()));
-        pdfGenerator = new PdfGenerator(submissionRepositoryService, submissionFieldPreparers, pdfFieldMapper, pdfMapConfiguration, pdfBoxFieldFiller);
+        pdfGenerator = new PdfGenerator(submissionFieldPreparers, pdfFieldMapper, pdfMapConfiguration, pdfBoxFieldFiller);
         submission = Submission.builder().id(UUID.randomUUID()).build();
         testPdfPath = "/pdfs/testPdf.pdf";
         String textFieldValue = "Greatest Text";
@@ -56,7 +56,7 @@ class PdfGeneratorTest {
 
     @Test
     void generateReturnsAFileFilledByPdfBox() {
-        PdfFile pdf = pdfGenerator.generate("ubi", submission.getId());
+        PdfFile pdf = pdfGenerator.generate("ubi", submission);
         assertThat(pdf).isEqualTo(new PdfFile(testPdfPath, "testPdf.pdf"));
     }
 }
