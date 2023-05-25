@@ -226,4 +226,59 @@ class SubmissionFieldPreparersTest {
             )
         )).isTrue();
   }
+
+  @Test
+  void shouldManipulateDataUsingAGivenDataAction() {
+    PdfMap pdfMap = new PdfMap();
+    pdfMap.setFlow("flow1");
+    PdfMapSubflow pdfMapSubflow = new PdfMapSubflow();
+    pdfMapSubflow.setSubflows(List.of("testSubflow"));
+    pdfMapSubflow.setDataAction("RemoveApplicantIterationAction");
+    pdfMapSubflow.setTotalIterations(5);
+    pdfMapSubflow.setFields(Map.of(
+        "firstName", "FIRST_NAME",
+        "lastName", "LAST_NAME"
+    ));
+    pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
+    pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
+
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+        List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of(new RemoveApplicantIterationAction())));
+
+    Map<String, Object> iteration1 = new HashMap<>();
+    iteration1.put("firstName", "Applicant");
+    iteration1.put("lastName", "TestLastName");
+    iteration1.put("uuid", "uuid1");
+    iteration1.put("iterationIsComplete", "true");
+    Map<String, Object> iteration2 = new HashMap<>();
+    iteration2.put("firstName", "Testy");
+    iteration2.put("lastName", "McTesterson");
+    iteration2.put("uuid", "uuid2");
+    iteration2.put("iterationIsComplete", "true");
+    Map<String, Object> iteration3 = new HashMap<>();
+    iteration3.put("firstName", "Testa");
+    iteration3.put("lastName", "Testerosa");
+    iteration3.put("uuid", "uuid3");
+    iteration3.put("iterationIsComplete", "true");
+
+    submission = Submission.builder().flow("flow1")
+        .inputData(
+            Map.of(
+                "testSubflow", List.of(
+                    iteration1,
+                    iteration2,
+                    iteration3
+                )
+            )).build();
+
+    assertThat(submissionFieldPreparers.prepareSubflowData(submission, pdfMapConfiguration.getPdfMap("flow1").getSubflowInfo())
+        .equals(
+            Map.of(
+                "firstName_1", "Testy",
+                "lastName_1", "McTesterson",
+                "firstName_2", "Testa",
+                "lastName_2", "Testerosa"
+            )
+        )).isTrue();
+  }
 }
