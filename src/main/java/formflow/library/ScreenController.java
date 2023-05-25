@@ -15,22 +15,20 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.NoSuchElementException;
-
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
@@ -66,7 +64,6 @@ public class ScreenController extends FormFlowController {
       AddressValidationService addressValidationService,
       ConditionManager conditionManager,
       ActionManager actionManager) {
-
     super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
     this.validationService = validationService;
@@ -108,7 +105,7 @@ public class ScreenController extends FormFlowController {
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
     if (currentScreen == null) {
-      return new ModelAndView("redirect:/error");
+      return errorScreen();
     }
 
     if (uuid != null) {
@@ -219,10 +216,10 @@ public class ScreenController extends FormFlowController {
   ) {
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById((UUID) httpSession.getAttribute("id"));
 
-    if (!maybeSubmission.isPresent()) {
+    if (maybeSubmission.isEmpty()) {
       // we have issues! We should not get here, really.
       log.error("There is no submission associated with request!");
-      return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+      return errorScreen();
     }
 
     Submission submission = maybeSubmission.get();
@@ -235,6 +232,11 @@ public class ScreenController extends FormFlowController {
     model.put("fieldData", currentObject);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
+  }
+
+  @NotNull
+  private static ModelAndView errorScreen() {
+    return new ModelAndView(new RedirectView("/error"));
   }
 
   /**
@@ -327,7 +329,7 @@ public class ScreenController extends FormFlowController {
                 iterationUuid
             )
         );
-        return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        return errorScreen();
       }
     }
 
@@ -353,7 +355,7 @@ public class ScreenController extends FormFlowController {
    * @return a redirect to delete confirmation screen for a particular uuid's data
    */
   @GetMapping("{flow}/{subflow}/{uuid}/deleteConfirmation")
-  RedirectView deleteConfirmation(
+  ModelAndView deleteConfirmation(
       @PathVariable String flow,
       @PathVariable String subflow,
       @PathVariable String uuid,
@@ -372,7 +374,7 @@ public class ScreenController extends FormFlowController {
       entryToDelete.ifPresent(entry -> httpSession.setAttribute("entryToDelete", entry));
     }
 
-    return new RedirectView(String.format("/flow/%s/" + deleteConfirmationScreen + "?uuid=" + uuid, flow));
+    return new ModelAndView(new RedirectView(String.format("/flow/%s/" + deleteConfirmationScreen + "?uuid=" + uuid, flow)));
   }
 
   /**
@@ -418,7 +420,7 @@ public class ScreenController extends FormFlowController {
         return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
       }
     } else {
-      return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+      return errorScreen();
     }
     String reviewScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getReviewScreen();
@@ -434,7 +436,7 @@ public class ScreenController extends FormFlowController {
    * @return the screen template with model data, returns error page on error
    */
   @GetMapping("{flow}/{screen}/navigation")
-  RedirectView navigation(
+  ModelAndView navigation(
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession
@@ -442,12 +444,12 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     log.info("navigation: flow: " + flow + ", screen: " + screen);
     if (currentScreen == null) {
-      return new RedirectView("/error");
+      return errorScreen();
     }
     String nextScreen = getNextScreenName(httpSession, currentScreen, null);
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
-    return new RedirectView("/flow/%s/%s".formatted(flow, nextScreen));
+    return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
   }
 
   private String getNextScreenName(HttpSession httpSession,
