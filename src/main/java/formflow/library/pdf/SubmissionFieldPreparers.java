@@ -112,15 +112,19 @@ public class SubmissionFieldPreparers {
 
             AtomicInteger atomInteger = new AtomicInteger(0);
             subflowDataList.forEach(iteration -> {
-              if (atomInteger.get() >= pdfSubflow.getTotalIterations()) {
-                return;
-              }
               // remove unnecessary fields
               iteration.remove("uuid");
               iteration.remove("iterationIsComplete");
               iteration.forEach((key, value) -> {
+
                 // tack on suffix for field. "_%d" where %d is the iteration number
-                inputData.put(key + "_" + (atomInteger.get() + 1), value);
+                if (key.endsWith("[]")) {
+                  // don't update the inner values.
+                  String newKey = key.replace("[]", "_" + (atomInteger.get() + 1) + "[]");
+                  inputData.put(newKey, value);
+                } else {
+                  inputData.put(key + "_" + (atomInteger.get() + 1), value);
+                }
               });
               atomInteger.incrementAndGet();
             });

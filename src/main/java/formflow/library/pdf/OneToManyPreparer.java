@@ -11,7 +11,7 @@ public class OneToManyPreparer implements DefaultSubmissionFieldPreparer {
 
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, Map<String, Object> data, PdfMap pdfMap) {
-    Map<String, Object> fieldMap = pdfMap.getInputFields();
+    Map<String, Object> fieldMap = pdfMap.getAllFields();
     Map<String, SubmissionField> preppedFields = new HashMap<>();
 
     fieldMap.keySet().stream()

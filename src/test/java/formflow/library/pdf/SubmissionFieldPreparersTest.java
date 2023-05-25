@@ -72,42 +72,42 @@ class SubmissionFieldPreparersTest {
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
 
     // Unfortunately can't use Map.of() here because it's immutable
-    Map<String, String> iteration1 = new HashMap<>();
+    Map<String, Object> iteration1 = new HashMap<>();
     iteration1.put("foo", "the foo 1");
     iteration1.put("bar", "the bar 1");
     iteration1.put("uuid", "uuid1");
     iteration1.put("iterationIsComplete", "true");
-    Map<String, String> iteration2 = new HashMap<>();
+    Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "the foo 2");
     iteration2.put("bar", "the bar 2");
     iteration2.put("uuid", "uuid2");
     iteration2.put("iterationIsComplete", "true");
-    Map<String, String> iteration3 = new HashMap<>();
+    Map<String, Object> iteration3 = new HashMap<>();
     iteration3.put("foo", "the foo 3");
     iteration3.put("bar", "the bar 3");
     iteration3.put("uuid", "uuid3");
     iteration3.put("iterationIsComplete", "true");
-    Map<String, String> iteration4 = new HashMap<>();
+    Map<String, Object> iteration4 = new HashMap<>();
     iteration4.put("foo", "the foo 4");
     iteration4.put("bar", "the bar 4");
     iteration4.put("uuid", "uuid4");
     iteration4.put("iterationIsComplete", "true");
-    Map<String, String> iteration5 = new HashMap<>();
+    Map<String, Object> iteration5 = new HashMap<>();
     iteration5.put("foo", "the foo 5");
     iteration5.put("bar", "the bar 5");
     iteration5.put("uuid", "uuid5");
     iteration5.put("iterationIsComplete", "true");
-    Map<String, String> iteration6 = new HashMap<>();
+    Map<String, Object> iteration6 = new HashMap<>();
     iteration6.put("foo", "the foo 6");
     iteration6.put("bar", "the bar 6");
     iteration6.put("uuid", "uuid6");
     iteration6.put("iterationIsComplete", "true");
-    Map<String, String> iteration7 = new HashMap<>();
+    Map<String, Object> iteration7 = new HashMap<>();
     iteration7.put("foo", "the foo 7");
     iteration7.put("bar", "the bar 7");
     iteration7.put("uuid", "uuid7");
     iteration7.put("iterationIsComplete", "true");
-    Map<String, String> iteration8 = new HashMap<>();
+    Map<String, Object> iteration8 = new HashMap<>();
     iteration8.put("foo", "the foo 8");
     iteration8.put("bar", "the bar 8");
     iteration8.put("uuid", "uuid8");
@@ -147,17 +147,17 @@ class SubmissionFieldPreparersTest {
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
 
     // Unfortunately can't use Map.of() here because it's immutable
-    Map<String, String> iteration1 = new HashMap<>();
+    Map<String, Object> iteration1 = new HashMap<>();
     iteration1.put("foo", "the foo 1");
     iteration1.put("bar", "the bar 1");
     iteration1.put("uuid", "uuid1");
     iteration1.put("iterationIsComplete", "true");
-    Map<String, String> iteration2 = new HashMap<>();
+    Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "the foo 2");
     iteration2.put("bar", "the bar 2");
     iteration2.put("uuid", "uuid2");
     iteration2.put("iterationIsComplete", "true");
-    Map<String, String> iteration3 = new HashMap<>();
+    Map<String, Object> iteration3 = new HashMap<>();
     iteration3.put("foo", "the foo 3");
     iteration3.put("bar", "the bar 3");
     iteration3.put("uuid", "uuid3");
@@ -181,6 +181,48 @@ class SubmissionFieldPreparersTest {
                 "foo_1", "the foo 1", "bar_1", "the bar 1",
                 "foo_2", "the foo 2", "bar_2", "the bar 2",
                 "foo_3", "the foo 3", "bar_3", "the bar 3"
+            )
+        )).isTrue();
+  }
+
+  @Test
+  void shouldAddCorrectSuffixForCheckboxFieldsInSubflows() {
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+        List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
+
+    Map<String, Object> iteration1 = new HashMap<>();
+    iteration1.put("foo", "the foo 1");
+    iteration1.put("bar", "the bar 1");
+    iteration1.put("checkboxInput[]", List.of("item1", "item2", "item3"));
+    iteration1.put("uuid", "uuid1");
+    iteration1.put("iterationIsComplete", "true");
+    Map<String, Object> iteration2 = new HashMap<>();
+    iteration2.put("foo", "the foo 2");
+    iteration2.put("bar", "the bar 2");
+    iteration2.put("checkboxInput[]", List.of("item1", "item2", "item3"));
+    iteration2.put("uuid", "uuid2");
+    iteration2.put("iterationIsComplete", "true");
+
+    submission = Submission.builder().flow("flow1")
+        .inputData(
+            Map.of(
+                "fieldThatGetsOverwritten", "willBeOverwritten",
+                "fieldThatDoesNotGetOverwritten", "willNotBeOverwritten",
+                "testSubflow", List.of(
+                    iteration1,
+                    iteration2
+                )
+            )).build();
+
+    assertThat(submissionFieldPreparers.prepareSubflowData(submission, pdfMapConfiguration.getPdfMap("flow1").getSubflowInfo())
+        .equals(
+            Map.of(
+                "foo_1", "the foo 1",
+                "bar_1", "the bar 1",
+                "checkboxInput_1[]", List.of("item1", "item2", "item3"),
+                "foo_2", "the foo 2",
+                "bar_2", "the bar 2",
+                "checkboxInput_2[]", List.of("item1", "item2", "item3")
             )
         )).isTrue();
   }
