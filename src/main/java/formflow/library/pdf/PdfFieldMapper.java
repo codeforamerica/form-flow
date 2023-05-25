@@ -18,20 +18,22 @@ public class PdfFieldMapper {
     this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
+
   public List<PdfField> map(List<SubmissionField> submissionFields, String flow) {
+    PdfMap pdfMap = getPdfMap(flow);
     return submissionFields.stream()
-        .map(submissionField -> makePdfFieldsForInput(submissionField, flow))
+        .map(submissionField -> makePdfFieldsForInput(submissionField, pdfMap))
         .flatMap(List::stream)
         .collect(Collectors.toList());
   }
 
   @NotNull
-  private List<PdfField> makePdfFieldsForInput(SubmissionField submissionField, String flow) {
+  private List<PdfField> makePdfFieldsForInput(SubmissionField submissionField, PdfMap pdfMap) {
     try {
       return switch (submissionField.getClass().getSimpleName()) {
-        case "SingleField" -> List.of(mapSingleFieldFromFlow((SingleField) submissionField, flow));
-        case "CheckboxField" -> mapMultiValueFieldFromFlow((CheckboxField) submissionField, flow);
-        default -> List.of(mapDatabaseFieldFromFlow((DatabaseField) submissionField, flow));
+        case "SingleField" -> List.of(mapSingleFieldFromFlow((SingleField) submissionField, pdfMap));
+        case "CheckboxField" -> mapMultiValueFieldFromFlow((CheckboxField) submissionField, pdfMap);
+        default -> List.of(mapDatabaseFieldFromFlow((DatabaseField) submissionField, pdfMap));
       };
     } catch (Exception e) {
       log.warn("No field matches %s in pdf-map.yaml config, value could not be mapped!".formatted(submissionField.getName()));
@@ -40,22 +42,22 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  private PdfField mapDatabaseFieldFromFlow(DatabaseField input, String flow) {
-    Map<String, Object> pdfDbMapForFlow = getPdfMap(flow).getDbFields();
+  private PdfField mapDatabaseFieldFromFlow(DatabaseField input, PdfMap pdfMap) {
+    Map<String, Object> pdfDbMapForFlow = pdfMap.getDbFields();
     String pdfFieldName = pdfDbMapForFlow.get(input.getName()).toString();
     return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
-  private PdfField mapSingleFieldFromFlow(SingleField input, String flow) {
-    Map<String, Object> pdfInputsMap = getPdfMap(flow).getInputFields();
+  private PdfField mapSingleFieldFromFlow(SingleField input, PdfMap pdfMap) {
+    Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
     String pdfFieldName = pdfInputsMap.get(input.getName()).toString();
     return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
-  private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, String flow) {
-    Map<String, Object> pdfInputsMap = getPdfMap(flow).getInputFields();
+  private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, PdfMap pdfMap) {
+    Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
     Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(input.getName());
 
     return input.getValue().stream()

@@ -2,17 +2,12 @@ package formflow.library.pdf;
 
 import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
-import formflow.library.data.SubmissionRepositoryService;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -117,6 +112,9 @@ public class SubmissionFieldPreparers {
 
             AtomicInteger atomInteger = new AtomicInteger(0);
             subflowDataList.forEach(iteration -> {
+              if (atomInteger.get() >= pdfSubflow.getTotalIterations()) {
+                return;
+              }
               // remove unnecessary fields
               iteration.remove("uuid");
               iteration.remove("iterationIsComplete");
