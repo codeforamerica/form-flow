@@ -29,6 +29,17 @@ public class PdfMap {
     return allFields;
   }
 
+  /**
+   * Fetches and returns all the fields for all the subflows, expanding out the fields based on the number of max iterations the
+   * PdfMap indicates are necessary
+   * <p>
+   * The return data will contain all the subflow fields to be accounted for flat-mapped to their values.  The fields for a
+   * specific iteration of a subflow will contain all the iteration's fields suffixed with a "_" and an iteration number. This *
+   * helps keep all the subflow together while we flatten the data.
+   * </p>
+   *
+   * @return
+   */
   public Map<String, Object> getAllSubflowFields() {
     Map<String, Object> subflowFields = new HashMap<>();
 

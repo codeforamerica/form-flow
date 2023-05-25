@@ -23,6 +23,13 @@ public class PdfGenerator {
     this.pdfBoxFieldFiller = pdfBoxFieldFiller;
   }
 
+  /**
+   * Generates a PdfFile based on Submission data and a certain Form Flow
+   *
+   * @param flow       the form flow we are working with
+   * @param submission the submission we are going to map the data of
+   * @return A PdfFile which contains the path to the newly created and filled in PDF file.
+   */
   public PdfFile generate(String flow, Submission submission) {
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);

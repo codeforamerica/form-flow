@@ -18,7 +18,14 @@ public class PdfFieldMapper {
     this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
-
+  /**
+   * Maps SubmissionFields to PdfFields, taking into account if they are a SingleField or a CheckboxField type of
+   * SubmissionField.
+   *
+   * @param submissionFields List of SubmissionFields containing user input data
+   * @param flow             The flow that we should get the PdfMap of to use in mapping
+   * @return List of PdfFields containing a PdfField and it's data value
+   */
   public List<PdfField> map(List<SubmissionField> submissionFields, String flow) {
     PdfMap pdfMap = getPdfMap(flow);
     return submissionFields.stream()
