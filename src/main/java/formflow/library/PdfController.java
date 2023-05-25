@@ -1,8 +1,7 @@
 package formflow.library;
 
-import formflow.library.pdf.PdfFile;
-import formflow.library.pdf.PdfGenerator;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -15,22 +14,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
-import java.util.UUID;
-
 @Controller
 @EnableAutoConfiguration
 @Slf4j
 @RequestMapping("/download")
+
 public class PdfController {
 
   private final MessageSource messageSource;
-  private final PdfGenerator pdfGenerator;
+
+  private final PdfService pdfService;
 
   public PdfController(MessageSource messageSource,
-      PdfGenerator pdfGenerator) {
+      PdfService pdfService) {
     this.messageSource = messageSource;
-    this.pdfGenerator = pdfGenerator;
+    this.pdfService = pdfService;
   }
 
   @GetMapping("{flow}/{submissionId}")
@@ -42,14 +40,11 @@ public class PdfController {
     if (httpSession.getAttribute("id").toString().equals(submissionId)) {
       log.info("Downloading PDF with submission_id: " + submissionId);
       HttpHeaders headers = new HttpHeaders();
-      PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
 
-      filledPdf.finalizeForSending();
-      byte[] data = filledPdf.fileBytes();
-      filledPdf.deleteFile();
-
+      byte[] data = pdfService.getFilledOutPDF(flow, submissionId);
+      String filename = pdfService.generatePdfName(flow, submissionId);
       headers.add(HttpHeaders.CONTENT_DISPOSITION,
-          "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submissionId));
+          "attachment; filename=%s".formatted(filename));
       return ResponseEntity
           .ok()
           .contentType(MediaType.APPLICATION_OCTET_STREAM)
