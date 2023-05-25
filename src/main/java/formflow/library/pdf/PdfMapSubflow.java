@@ -27,7 +27,7 @@ public class PdfMapSubflow {
       String suffix = "_" + (atomicInteger.get() + 1);
 
       fields.forEach((key, value) -> {
-        String newKey = addSuffix(key, suffix);
+        String newKey = key + suffix;
 
         if (value instanceof Map) {
           Map<String, Object> values = ((Map<String, Object>) value).entrySet().stream()
@@ -44,14 +44,5 @@ public class PdfMapSubflow {
       atomicInteger.getAndIncrement();
     }
     return iterationFields;
-  }
-
-  private String addSuffix(String origString, String suffix) {
-    int index = origString.lastIndexOf("[]");
-    if (index != -1) {
-      return origString.replaceFirst("\\[\\]$", suffix + "[]");
-    } else {
-      return origString + suffix;
-    }
   }
 }
