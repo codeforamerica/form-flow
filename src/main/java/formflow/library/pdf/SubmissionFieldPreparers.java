@@ -31,6 +31,19 @@ public class SubmissionFieldPreparers {
     this.actionManager = actionManager;
   }
 
+  /**
+   * This method creates a list of SubmissionField objects which will be used to create the PdfField objects that will eventually
+   * populate a given PDF. First it creates a single map of all input related data by flattening the subflow and input data
+   * objects into a single map. Then, it iterates over each preparer and calls the prepareSubmissionFields passing the submission,
+   * the flattened input data map and the PdfMap object from a given `pdf-map.yaml` file. First the default preparers are called
+   * which will run the OneToOnePreparer, OneToManyPreparer and the DatabaseFieldPreparer. Then, it will call any custom preparers
+   * that have been added to the application context by an implementer of the formflow library. The custom preparers are called
+   * last so that any SubmissionField objects created by the default preparers can and will be overridden by the custom
+   * preparers.
+   *
+   * @param submission
+   * @return a list of SubmissionField objects for all fields in a given PdfMap from a `pdf-map.yaml` file.
+   */
   public List<SubmissionField> prepareSubmissionFields(Submission submission) {
     // do note that we are going to get the submission and then change it's inputData
     // drastically over the course of this method. That's why we want our own copy.  We will
@@ -183,8 +196,6 @@ public class SubmissionFieldPreparers {
               });
               atomInteger.incrementAndGet();
             });
-            // put it in the submissionFieldsMap
-            //subflowDataList.forEach(submission.getInputData()::putAll);
           }
         }
     );
