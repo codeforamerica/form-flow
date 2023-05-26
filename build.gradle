@@ -68,7 +68,7 @@ dependencies {
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.13.15'
     implementation 'org.apache.pdfbox:pdfbox:2.0.28'
     implementation 'org.yaml:snakeyaml:2.0'
-    implementation 'com.mailgun:mailgun-java:1.0.7'
+    implementation 'com.mailgun:mailgun-java:1.0.8'
 
     compileOnly 'org.projectlombok:lombok'
 
