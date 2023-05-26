@@ -7,7 +7,7 @@ inputFields:
     phone: PHONE
     email: EMAIL
 dbFields:
-  
+subflowInfo:
 ---
 flow: test
 pdf: pdfs/fake

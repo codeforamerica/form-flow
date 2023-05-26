@@ -45,9 +45,6 @@ public class SubmissionFieldPreparers {
    * @return a list of SubmissionField objects for all fields in a given PdfMap from a `pdf-map.yaml` file.
    */
   public List<SubmissionField> prepareSubmissionFields(Submission submission) {
-    // do note that we are going to get the submission and then change it's inputData
-    // drastically over the course of this method. That's why we want our own copy.  We will
-    // not save it back at all.
     PdfMap pdfMap = pdfMapConfiguration.getPdfMap(submission.getFlow());
     HashMap<String, SubmissionField> submissionFieldsMap = new HashMap<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
@@ -56,8 +53,11 @@ public class SubmissionFieldPreparers {
     // set the inputData we want to hand to the preparers
     inputData.putAll(submission.getInputData());
 
+    // TODO run data action - flow level action to manipulate data
+    // manipulate data before preparing and mapping
+
     // now manage the subflow data
-    inputData.putAll(prepareSubflowData(submission, subflowMap));
+    //inputData.putAll(prepareSubflowData(submission, subflowMap));
 
     // now run preparers over all the fields.
     defaultPreparers.forEach(preparer -> {
@@ -109,9 +109,9 @@ public class SubmissionFieldPreparers {
    *         exampleCheckboxField: ["firstValue", "secondValue"]
    *       },
    *       {
-   *       exampleInput: "exampleInput value 2",
-   *       otherExampleInput: "otherExampleInput value 2"
-   *       exampleCheckboxField: ["firstValue", "secondValue"]
+   *         exampleInput: "exampleInput value 2",
+   *         otherExampleInput: "otherExampleInput value 2"
+   *         exampleCheckboxField: ["firstValue", "secondValue"]
    *       }
    *     ]
    *   }
