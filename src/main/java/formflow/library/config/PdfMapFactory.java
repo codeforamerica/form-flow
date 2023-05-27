@@ -39,7 +39,9 @@ public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
     Constructor constructor = new Constructor(PdfMap.class, loaderOptions);
     TypeDescription inputsDescription = new TypeDescription(HashMap.class);
     constructor.addTypeDescription(inputsDescription);
-    Yaml yaml = new Yaml(constructor, new Representer(new DumperOptions()),
+    Representer representer = new Representer(new DumperOptions());
+    representer.getPropertyUtils().setSkipMissingProperties(true);
+    Yaml yaml = new Yaml(constructor, representer,
         new DumperOptions(), loaderOptions);
     List<PdfMap> pdfMap = new ArrayList<>();
     try {

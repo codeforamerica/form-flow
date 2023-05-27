@@ -23,8 +23,13 @@ public class PdfMap {
     if (allFields == null) {
       allFields = new HashMap<>();
       allFields.putAll(inputFields);
-      allFields.putAll(dbFields);
-      allFields.putAll(getAllSubflowFields());
+      if (subflowInfo != null) {
+        allFields.putAll(getAllSubflowFields());
+      }
+      if (dbFields != null) {
+        allFields.putAll(dbFields);
+      }
+
     }
     return allFields;
   }

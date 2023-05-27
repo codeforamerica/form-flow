@@ -16,6 +16,12 @@ class SubmissionFieldPreparersTest {
   Submission submission;
 
   OneToOnePreparer defaultSingleFieldPreparer = new OneToOnePreparer();
+
+  OneToManyPreparer defaultCheckboxFieldPreparer = new OneToManyPreparer();
+
+  DataBaseFieldPreparer defaultDatabaseFieldPreparer = new DataBaseFieldPreparer();
+
+  SubflowFieldPreparer defaultSubflowFieldPreparer = new SubflowFieldPreparer();
   TestCustomPreparer testCustomPreparer = new TestCustomPreparer();
 
   @BeforeEach
@@ -41,7 +47,9 @@ class SubmissionFieldPreparersTest {
 
   @Test
   void submissionFieldPreparersShouldCreateSubmissionFieldsForAllFieldsInAPdfMapConfigurationWhileOverwritingDefaultFieldsWithCustomFieldsThatPrepareTheSameInput() {
-    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
+        List.of(defaultSingleFieldPreparer, defaultCheckboxFieldPreparer, defaultDatabaseFieldPreparer,
+            defaultSubflowFieldPreparer),
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
 
     submission = Submission.builder().flow("flow1")
@@ -68,7 +76,9 @@ class SubmissionFieldPreparersTest {
 
   @Test
   void shouldNotMapIterationsInASubflowGreaterThanMaxIterations() {
-    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
+        List.of(defaultSingleFieldPreparer, defaultCheckboxFieldPreparer, defaultDatabaseFieldPreparer,
+            defaultSubflowFieldPreparer),
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
 
     // Unfortunately can't use Map.of() here because it's immutable
@@ -143,7 +153,9 @@ class SubmissionFieldPreparersTest {
 
   @Test
   void submissionWithLessIterationsThanMaxIterationsShouldOnlyMapExistingIterations() {
-    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
+        List.of(defaultSingleFieldPreparer, defaultCheckboxFieldPreparer, defaultDatabaseFieldPreparer,
+            defaultSubflowFieldPreparer),
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
 
     // Unfortunately can't use Map.of() here because it's immutable
@@ -187,7 +199,9 @@ class SubmissionFieldPreparersTest {
 
   @Test
   void shouldAddCorrectSuffixForCheckboxFieldsInSubflows() {
-    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
+        List.of(defaultSingleFieldPreparer, defaultCheckboxFieldPreparer, defaultDatabaseFieldPreparer,
+            defaultSubflowFieldPreparer),
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
 
     Map<String, Object> iteration1 = new HashMap<>();
@@ -242,7 +256,9 @@ class SubmissionFieldPreparersTest {
     pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
     pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
 
-    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(List.of(defaultSingleFieldPreparer),
+    SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
+        List.of(defaultSingleFieldPreparer, defaultCheckboxFieldPreparer, defaultDatabaseFieldPreparer,
+            defaultSubflowFieldPreparer),
         List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of(new RemoveApplicantIterationAction())));
 
     Map<String, Object> iteration1 = new HashMap<>();

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class SubmissionSubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
+public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
 
   @Autowired
   ActionManager actionManager;
