@@ -52,10 +52,13 @@ public class PdfMapTest {
     assertThat(subflowFields.containsKey("householdMemberFirstName_6")).isFalse();
     assertThat(subflowFields.size()).isEqualTo(pdfMapSubflow.getTotalIterations() * pdfMapSubflow.getFields().size());
 
-    assertThat(subflowFields.containsKey("incomeTypes_1")).isFalse();
-    assertThat(subflowFields.containsKey("incomeJob_1")).isTrue();
-    assertThat(subflowFields.get("incomeJob_1")).isEqualTo("APPLICANT_HAS_JOB_INCOME_1");
+    assertThat(subflowFields.containsKey("incomeTypes_1")).isTrue();
+    Map<String, String> incomeTypeFields = (Map<String, String>) subflowFields.get("incomeTypes_1");
+    assertThat(incomeTypeFields.containsKey("incomeJob")).isTrue();
+    assertThat(incomeTypeFields.get("incomeJob")).isEqualTo("APPLICANT_HAS_JOB_INCOME_1");
 
+    // this should not be at the top level
+    assertThat(subflowFields.containsKey("incomeJob_1")).isFalse();
     assertThat(subflowFields.get("incomeJobAmount_1")).isEqualTo("PDF_MEMBER_INCOME_JOB_AMOUNT_1");
   }
 }

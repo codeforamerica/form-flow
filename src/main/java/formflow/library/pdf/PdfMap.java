@@ -19,6 +19,38 @@ public class PdfMap {
 
   Map<String, Object> allFields;
 
+  public void setInputFields(Map<String, Object> inputFields) {
+    this.inputFields = inputFields;
+    updateAllFields();
+  }
+
+  public void setDbFields(Map<String, Object> dbFields) {
+    this.dbFields = dbFields;
+    updateAllFields();
+  }
+
+  public void setSubflowInfo(Map<String, PdfMapSubflow> subflowInfo) {
+    this.subflowInfo = subflowInfo;
+    updateAllFields();
+  }
+
+  private void updateAllFields() {
+    if (allFields == null) {
+      allFields = new HashMap<>();
+    } else {
+      allFields.clear();
+    }
+    if (inputFields != null) {
+      allFields.putAll(inputFields);
+    }
+    if (dbFields != null) {
+      allFields.putAll(dbFields);
+    }
+    if (subflowInfo != null) {
+      allFields.putAll(getAllSubflowFields());
+    }
+  }
+ /*
   public Map<String, Object> getAllFields() {
     if (allFields == null) {
       allFields = new HashMap<>();
@@ -29,10 +61,9 @@ public class PdfMap {
       if (dbFields != null) {
         allFields.putAll(dbFields);
       }
-
     }
     return allFields;
-  }
+  }*/
 
   /**
    * Fetches and returns all the fields for all the subflows, expanding out the fields based on the number of max iterations the
