@@ -58,27 +58,17 @@ public class PdfFieldMapper {
   @NotNull
   private PdfField mapSingleFieldFromFlow(SingleField input, PdfMap pdfMap) {
     Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
-    Integer iterationNumber = input.getIteration();
-    String submissionFieldName;
-    if (iterationNumber == null) {
-      submissionFieldName = input.getName();
-    } else {
-      submissionFieldName = input.getName() + "_" + iterationNumber;
-    }
+    String submissionFieldName = input.getNameWithIteration();
     String pdfFieldName = pdfInputsMap.get(submissionFieldName).toString();
+
     return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
   private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, PdfMap pdfMap) {
     Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
-    Integer iterationNumber = input.getIteration();
-    String submissionFieldName;
-    if (iterationNumber == null) {
-      submissionFieldName = input.getName();
-    } else {
-      submissionFieldName = input.getName() + "_" + iterationNumber;
-    }
+    String submissionFieldName = input.getNameWithIteration();
+
     Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(submissionFieldName);
 
     return input.getValue().stream()

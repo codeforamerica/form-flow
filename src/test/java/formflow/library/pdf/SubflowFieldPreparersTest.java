@@ -2,6 +2,7 @@ package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,10 @@ class SubflowFieldPreparersTest {
     pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
     pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
 
+    ActionManager actionManager = new ActionManager(List.of(new RemoveApplicantIterationAction()));
+
     subflowFieldPreparer = new SubflowFieldPreparer();
+    subflowFieldPreparer.setActionManager(actionManager);
   }
 
   @Test
@@ -106,16 +110,16 @@ class SubflowFieldPreparersTest {
 
     assertThat(resultMap.equals(
         Map.of(
-            "foo_1", new SingleField("foo_1", "the foo 1", 1),
-            "bar_1", new SingleField("bar_1", "the bar 1", 1),
-            "foo_2", new SingleField("foo_2", "the foo 2", 2),
-            "bar_2", new SingleField("bar_2", "the bar 2", 2),
-            "foo_3", new SingleField("foo_3", "the foo 3", 3),
-            "bar_3", new SingleField("bar_3", "the bar 3", 3),
-            "foo_4", new SingleField("foo_4", "the foo 4", 4),
-            "bar_4", new SingleField("bar_4", "the bar 4", 4),
-            "foo_5", new SingleField("foo_5", "the foo 5", 5),
-            "bar_5", new SingleField("bar_5", "the bar 5", 5)
+            "foo_1", new SingleField("foo", "the foo 1", 1),
+            "bar_1", new SingleField("bar", "the bar 1", 1),
+            "foo_2", new SingleField("foo", "the foo 2", 2),
+            "bar_2", new SingleField("bar", "the bar 2", 2),
+            "foo_3", new SingleField("foo", "the foo 3", 3),
+            "bar_3", new SingleField("bar", "the bar 3", 3),
+            "foo_4", new SingleField("foo", "the foo 4", 4),
+            "bar_4", new SingleField("bar", "the bar 4", 4),
+            "foo_5", new SingleField("foo", "the foo 5", 5),
+            "bar_5", new SingleField("bar", "the bar 5", 5)
         )
     )).isTrue();
   }
@@ -157,12 +161,12 @@ class SubflowFieldPreparersTest {
 
     assertThat(resultMap.equals(
         Map.of(
-            "foo_1", new SingleField("foo_1", "the foo 1", 1),
-            "bar_1", new SingleField("bar_1", "the bar 1", 1),
-            "foo_2", new SingleField("foo_2", "the foo 2", 2),
-            "bar_2", new SingleField("bar_2", "the bar 2", 2),
-            "foo_3", new SingleField("foo_3", "the foo 3", 3),
-            "bar_3", new SingleField("bar_3", "the bar 3", 3)
+            "foo_1", new SingleField("foo", "the foo 1", 1),
+            "bar_1", new SingleField("bar", "the bar 1", 1),
+            "foo_2", new SingleField("foo", "the foo 2", 2),
+            "bar_2", new SingleField("bar", "the bar 2", 2),
+            "foo_3", new SingleField("foo", "the foo 3", 3),
+            "bar_3", new SingleField("bar", "the bar 3", 3)
         )
     )).isTrue();
   }
@@ -197,16 +201,22 @@ class SubflowFieldPreparersTest {
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
         submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
 
-    assertThat(resultMap.equals(
+    Map<String, SubmissionField> expectedMap =
         Map.of(
-            "foo_1", new SingleField("foo_1", "the foo 1", 1),
-            "bar_1", new SingleField("bar_1", "the bar 1", 1),
-            "checkboxInput_1", new CheckboxField("checkboxInput_1", List.of("item1", "item2", "item3"), 1),
-            "foo_2", new SingleField("foo_2", "the foo 2", 2),
-            "bar_2", new SingleField("bar_2", "the bar 2", 2),
-            "checkboxInput_2", new CheckboxField("checkboxInput_2", List.of("item1", "item2", "item3"), 2)
-        )
-    )).isTrue();
+            "foo_1", new SingleField("foo", "the foo 1", 1),
+            "bar_1", new SingleField("bar", "the bar 1", 1),
+            "checkboxInput_1[]", new CheckboxField("checkboxInput", List.of("item1", "item2", "item3"), 1),
+            "foo_2", new SingleField("foo", "the foo 2", 2),
+            "bar_2", new SingleField("bar", "the bar 2", 2),
+            "checkboxInput_2[]", new CheckboxField("checkboxInput", List.of("item1", "item2", "item3"), 2)
+        );
+
+    assertThat(resultMap.keySet().equals(expectedMap.keySet())).isTrue();
+
+    assertThat(resultMap.equals(expectedMap)).isTrue();
+    //for (var entry : resultMap.entrySet()) {
+    //  assertThat(expectedMap.get(entry.getKey())).isEqualTo(expectedMap.get(entry.getKey()));
+    // }
   }
 
   @Test
@@ -252,14 +262,12 @@ class SubflowFieldPreparersTest {
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
         submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
-
-    assertThat(resultMap.equals(
-        Map.of(
-            "firstName_1", new SingleField("firstName_1", "Testy", 1),
-            "lastName_1", new SingleField("lastName_1", "McTesterson", 1),
-            "firstName_2", new SingleField("firstName_2", "Testa", 2),
-            "lastName_2", new SingleField("lastName_2", "Testerosa", 2)
-        )
-    )).isTrue();
+    Map<String, SubmissionField> expectedMap = Map.of(
+        "firstName_1", new SingleField("firstName", "Testy", 1),
+        "lastName_1", new SingleField("lastName", "McTesterson", 1),
+        "firstName_2", new SingleField("firstName", "Testa", 2),
+        "lastName_2", new SingleField("lastName", "Testerosa", 2)
+    );
+    assertThat(resultMap.equals(expectedMap)).isTrue();
   }
 }

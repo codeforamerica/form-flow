@@ -1,20 +1,25 @@
 package formflow.library.pdf;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 
-@EqualsAndHashCode(callSuper = false)
-@Value
+@Getter
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class SingleField extends SubmissionField {
 
+  @ToString.Include
+  @EqualsAndHashCode.Include
   @NotNull String value;
-  Integer iteration;
 
   public SingleField(String name, @NotNull String value, Integer iteration) {
-    super(name);
+    super(name, iteration);
     this.value = value;
-    this.iteration = iteration;
   }
 }
 

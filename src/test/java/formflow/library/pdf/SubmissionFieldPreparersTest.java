@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,15 +59,16 @@ class SubmissionFieldPreparersTest {
             )).build();
 
     assertThat(defaultSingleFieldPreparer.prepareSubmissionFields(submission, submission.getInputData(),
-        pdfMapConfiguration.getPdfMap("flow1"))).containsExactly(
+        pdfMapConfiguration.getPdfMap("flow1"))).containsOnly(
         Map.entry("fieldThatGetsOverwritten", new SingleField("fieldThatGetsOverwritten", "willBeOverwritten", null)),
-        Map.entry("fieldThatDoesNotGetOverwritten", new SingleField("fieldThatGetsOverwritten", "willNotBeOverwritten", null))
+        Map.entry("fieldThatDoesNotGetOverwritten",
+            new SingleField("fieldThatDoesNotGetOverwritten", "willNotBeOverwritten", null))
     );
     assertThat(testCustomPreparer.prepareSubmissionFields(submission, submission.getInputData(),
-        pdfMapConfiguration.getPdfMap("flow1"))).containsExactly(
+        pdfMapConfiguration.getPdfMap("flow1"))).containsOnly(
         Map.entry("fieldThatGetsOverwritten", new SingleField("fieldThatGetsOverwritten", "OVERWRITTEN", null))
     );
-    assertThat(submissionFieldPreparers.prepareSubmissionFields(submission)).containsExactlyInAnyOrder(
+    assertThat(submissionFieldPreparers.prepareSubmissionFields(submission)).containsOnly(
         new SingleField("fieldThatDoesNotGetOverwritten", "willNotBeOverwritten", null),
         new SingleField("fieldThatGetsOverwritten", "OVERWRITTEN", null)
     );

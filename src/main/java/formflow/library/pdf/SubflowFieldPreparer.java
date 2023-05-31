@@ -139,4 +139,14 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
     });
     return preppedFields;
   }
+
+  /**
+   * Set the ActionManager explicitly. Generally the ActionManager is AutoWired in, but in the event that it can't be, or we want
+   * to override it, this provides the ability to do that.
+   *
+   * @param actionManager ActionManager to use
+   */
+  public void setActionManager(ActionManager actionManager) {
+    this.actionManager = actionManager;
+  }
 }
