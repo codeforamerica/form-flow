@@ -1,5 +1,6 @@
 package formflow.library.pdf;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.boot.system.ApplicationTemp;
 
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 public record PdfFile(String path, String name) {
 
   private static final File tmpFileDir = new ApplicationTemp().getDir();
@@ -77,6 +79,23 @@ public record PdfFile(String path, String name) {
    * @throws IOException Thrown if the file cannot be worked with.
    */
   public void deleteFile() throws IOException {
+    long size = folderSize(tmpFileDir);
+    log.info(String.format("👛 deleteFile %s: %s", tmpFileDir, size));
     Files.delete(Path.of(this.path));
+  }
+
+  // TODO: delete after confirmation
+  // https://stackoverflow.com/questions/2149785/get-size-of-folder-or-file
+  public static long folderSize(File directory) {
+    long length = 0;
+    for (File file : directory.listFiles()) {
+      log.info(String.format("🐧 File: %s / %s", file.getName(), file.length()));
+      if (file.isFile()) {
+        length += file.length();
+      } else {
+        length += folderSize(file);
+      }
+    }
+    return length;
   }
 }

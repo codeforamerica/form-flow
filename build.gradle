@@ -61,14 +61,14 @@ dependencies {
     implementation 'org.jetbrains:annotations:24.0.1'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.3.2'
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'org.flywaydb:flyway-core:9.19.0'
+    implementation 'org.flywaydb:flyway-core:9.19.1'
     implementation 'net.coobird:thumbnailator:0.4.19'
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.13.15'
     implementation 'org.apache.pdfbox:pdfbox:2.0.28'
     implementation 'org.yaml:snakeyaml:2.0'
-    implementation 'com.mailgun:mailgun-java:1.0.7'
+    implementation 'com.mailgun:mailgun-java:1.0.8'
 
     compileOnly 'org.projectlombok:lombok'
 
@@ -91,7 +91,7 @@ dependencies {
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
-    testImplementation 'org.projectlombok:lombok:1.18.26'
+    testImplementation 'org.projectlombok:lombok:1.18.28'
 }
 
 test {
