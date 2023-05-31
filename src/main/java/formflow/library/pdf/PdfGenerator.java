@@ -1,11 +1,9 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
-import formflow.library.data.SubmissionRepositoryService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class PdfGenerator {
@@ -33,7 +31,7 @@ public class PdfGenerator {
   public PdfFile generate(String flow, Submission submission) {
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
-    String pathToPdfResource = pdfMapConfiguration.getPdfFromFlow(flow);
+    String pathToPdfResource = pdfMapConfiguration.getPdfPathFromFlow(flow);
     PdfFile tmpFile = pdfBoxFieldFiller.fill(pathToPdfResource, pdfFields);
     return tmpFile;
   }

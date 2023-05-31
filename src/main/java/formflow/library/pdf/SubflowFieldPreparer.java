@@ -69,6 +69,8 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
   ActionManager actionManager;
 
   /**
+   * This will prepare the SubmissionFields for all the data across all the subflows specified in the PdfMap.
+   *
    * @param submission the submission
    * @param data       the data to act upon
    * @param pdfMap     the field mappings from the pdf-map.yaml file

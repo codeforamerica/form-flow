@@ -16,7 +16,7 @@ class PdfMapConfigurationTest {
         new PdfMap("flow1", testPdfFilename, Map.of(), Map.of(), Map.of(), Map.of()),
         new PdfMap("flow2", "/pdfs/Multipage-UBI-Form.pdf", Map.of(), Map.of(), Map.of(), Map.of())
     ));
-    assertThat(config.getPdfFromFlow("flow1")).isEqualTo(testPdfFilename);
+    assertThat(config.getPdfPathFromFlow("flow1")).isEqualTo(testPdfFilename);
   }
 
   @Test
@@ -24,6 +24,6 @@ class PdfMapConfigurationTest {
     PdfMapConfiguration config = new PdfMapConfiguration(List.of(
         new PdfMap("flow1", "pdf", Map.of(), Map.of(), Map.of(), Map.of())
     ));
-    assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> config.getPdfFromFlow("flow2"));
+    assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> config.getPdfPathFromFlow("flow2"));
   }
 }

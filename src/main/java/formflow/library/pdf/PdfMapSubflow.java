@@ -19,6 +19,43 @@ public class PdfMapSubflow {
   String dataAction;
   Map<String, Object> fields;
 
+  /**
+   * Returns all the fields associated with a subflow's iterations, expanded out, up to the totalIterations number defined in the
+   * PdfMap yaml file.  All the fields represented by iteration data are represented in the returned Map.
+   * <br>
+   * Example Subflow data in the PDF file:
+   * <pre>
+   *   subflowInfo:
+   *     householdAndIncome:
+   *       totalIterations: 2
+   *       dataAction: PdfSubflowHouseholdAndIncomeDataAction
+   *       subflows:
+   *         - income
+   *         - household
+   *       fields:
+   *         householdMemberFirstName: LEGAL_NAME_FIRST_MEMBER
+   *         householdMemberLastName: LEGAL_NAME_LAST_MEMBER
+   *         householdMemberRelationship: RELATIONSHIP_MEMBER
+   *         incomeTypes:
+   *           incomeJob: INCOME_HAS_JOB_MEMBER
+   *           incomeSelf: INCOME_HAS_SELF_EMPLOYMENT_MEMBER
+   *           incomeUnemployment: INCOME_HAS_UNEMPLOYMENT_MEMBER
+   * </pre>
+   * The above would generate the following map:
+   * <pre>
+   *   Map.of(
+   *      "householdMemberFirstName_1" : "LEGAL_NAME_FIRST_MEMBER_1",
+   *      "householdMemberLastName_1" : "LEGAL_NAME_LAST_MEMBER_1",
+   *      "householdMemberRelationship_1" : "RELATIONSHIP_MEMBER_1",
+   *      "incomeTypes_1" :
+   *          incomeJob: INCOME_HAS_JOB_MEMBER
+   *          incomeSelf: INCOME_HAS_SELF_EMPLOYMENT_MEMBER
+   *          incomeUnemployment: INCOME_HAS_UNEMPLOYMENT_MEMBER
+   * </pre>
+   * // TODO - start here
+   *
+   * @return
+   */
   public Map<String, Object> getFieldsForIterations() {
     Map<String, Object> iterationFields = new HashMap<>();
     AtomicInteger atomicInteger = new AtomicInteger(0);

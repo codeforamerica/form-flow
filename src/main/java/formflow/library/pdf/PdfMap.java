@@ -16,7 +16,6 @@ public class PdfMap {
   Map<String, Object> inputFields;
   Map<String, Object> dbFields;
   Map<String, PdfMapSubflow> subflowInfo;
-
   Map<String, Object> allFields;
 
   public void setInputFields(Map<String, Object> inputFields) {
