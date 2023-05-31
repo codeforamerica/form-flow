@@ -46,7 +46,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     session.setAttribute("id", submission.getId());
     MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
         .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=%s".formatted(pdfService.generatePdfName(flow, submission.getId().toString()))))
+            "attachment; filename=%s.pdf".formatted(pdfService.generatePdfName(flow, submission.getId().toString()))))
         .andExpect(status().is2xxSuccessful())
         .andReturn();
 

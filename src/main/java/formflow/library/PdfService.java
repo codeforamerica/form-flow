@@ -47,7 +47,7 @@ public class PdfService {
    * @return a generic filename string
    */
   public String generatePdfName(String flow, String submissionId) {
-    return String.format("%s_%s.pdf", submissionId, flow);
+    return String.format("%s_%s", submissionId, flow);
   }
 
 }
