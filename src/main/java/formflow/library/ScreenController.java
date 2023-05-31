@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
@@ -236,7 +237,7 @@ public class ScreenController extends FormFlowController {
 
   @NotNull
   private static ModelAndView errorScreen() {
-    return new ModelAndView(new RedirectView("/error"));
+    return new ModelAndView("redirect:/error", HttpStatus.BAD_REQUEST);
   }
 
   /**
