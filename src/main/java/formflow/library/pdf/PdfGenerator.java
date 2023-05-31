@@ -1,35 +1,37 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
-import formflow.library.data.SubmissionRepositoryService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class PdfGenerator {
 
-  private final SubmissionRepositoryService submissionRepositoryService;
   private final SubmissionFieldPreparers submissionFieldPreparers;
   private final PdfFieldMapper pdfFieldMapper;
   private final PdfMapConfiguration pdfMapConfiguration;
   private final PDFBoxFieldFiller pdfBoxFieldFiller;
 
-  public PdfGenerator(SubmissionRepositoryService submissionRepositoryService, SubmissionFieldPreparers submissionFieldPreparers,
+  public PdfGenerator(SubmissionFieldPreparers submissionFieldPreparers,
       PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration, PDFBoxFieldFiller pdfBoxFieldFiller) {
-    this.submissionRepositoryService = submissionRepositoryService;
     this.submissionFieldPreparers = submissionFieldPreparers;
     this.pdfFieldMapper = pdfFieldMapper;
     this.pdfMapConfiguration = pdfMapConfiguration;
     this.pdfBoxFieldFiller = pdfBoxFieldFiller;
   }
 
-  public PdfFile generate(String flow, UUID id) {
-    Submission submission = submissionRepositoryService.findById(id).orElseThrow();
+  /**
+   * Generates a PdfFile based on Submission data and a certain Form Flow
+   *
+   * @param flow       the form flow we are working with
+   * @param submission the submission we are going to map the data of
+   * @return A PdfFile which contains the path to the newly created and filled in PDF file.
+   */
+  public PdfFile generate(String flow, Submission submission) {
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
-    String pathToPdfResource = pdfMapConfiguration.getPdfFromFlow(flow);
+    String pathToPdfResource = pdfMapConfiguration.getPdfPathFromFlow(flow);
     PdfFile tmpFile = pdfBoxFieldFiller.fill(pathToPdfResource, pdfFields);
     return tmpFile;
   }

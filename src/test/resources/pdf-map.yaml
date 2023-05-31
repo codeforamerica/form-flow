@@ -7,11 +7,4 @@ inputFields:
     phone: PHONE
     email: EMAIL
 dbFields:
-  
----
-flow: test
-pdf: pdfs/fake
-inputFields:
-  whatever: FAKE_INPUT
-dbFields:
   submittedAt: SUBMITTED_AT_DATE

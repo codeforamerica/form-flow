@@ -18,20 +18,29 @@ public class PdfFieldMapper {
     this.pdfMapConfigurations = pdfMapConfigurations;
   }
 
+  /**
+   * Maps SubmissionFields to PdfFields, taking into account if they are a SingleField or a CheckboxField type of
+   * SubmissionField.
+   *
+   * @param submissionFields List of SubmissionFields containing user input data
+   * @param flow             The flow that we should get the PdfMap of to use in mapping
+   * @return List of PdfFields containing a PdfField and it's data value
+   */
   public List<PdfField> map(List<SubmissionField> submissionFields, String flow) {
+    PdfMap pdfMap = getPdfMap(flow);
     return submissionFields.stream()
-        .map(submissionField -> makePdfFieldsForInput(submissionField, flow))
+        .map(submissionField -> makePdfFieldsForInput(submissionField, pdfMap))
         .flatMap(List::stream)
         .collect(Collectors.toList());
   }
 
   @NotNull
-  private List<PdfField> makePdfFieldsForInput(SubmissionField submissionField, String flow) {
+  private List<PdfField> makePdfFieldsForInput(SubmissionField submissionField, PdfMap pdfMap) {
     try {
       return switch (submissionField.getClass().getSimpleName()) {
-        case "SingleField" -> List.of(mapSingleFieldFromFlow((SingleField) submissionField, flow));
-        case "CheckboxField" -> mapMultiValueFieldFromFlow((CheckboxField) submissionField, flow);
-        default -> List.of(mapDatabaseFieldFromFlow((DatabaseField) submissionField, flow));
+        case "SingleField" -> List.of(mapSingleFieldFromFlow((SingleField) submissionField, pdfMap));
+        case "CheckboxField" -> mapMultiValueFieldFromFlow((CheckboxField) submissionField, pdfMap);
+        default -> List.of(mapDatabaseFieldFromFlow((DatabaseField) submissionField, pdfMap));
       };
     } catch (Exception e) {
       log.warn("No field matches %s in pdf-map.yaml config, value could not be mapped!".formatted(submissionField.getName()));
@@ -40,23 +49,27 @@ public class PdfFieldMapper {
   }
 
   @NotNull
-  private PdfField mapDatabaseFieldFromFlow(DatabaseField input, String flow) {
-    Map<String, Object> pdfDbMapForFlow = getPdfMap(flow).getDbFields();
+  private PdfField mapDatabaseFieldFromFlow(DatabaseField input, PdfMap pdfMap) {
+    Map<String, Object> pdfDbMapForFlow = pdfMap.getDbFields();
     String pdfFieldName = pdfDbMapForFlow.get(input.getName()).toString();
     return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
-  private PdfField mapSingleFieldFromFlow(SingleField input, String flow) {
-    Map<String, Object> pdfInputsMap = getPdfMap(flow).getInputFields();
-    String pdfFieldName = pdfInputsMap.get(input.getName()).toString();
+  private PdfField mapSingleFieldFromFlow(SingleField input, PdfMap pdfMap) {
+    Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
+    String submissionFieldName = input.getName();
+    String pdfFieldName = pdfInputsMap.get(submissionFieldName).toString();
+
     return new PdfField(pdfFieldName, input.getValue());
   }
 
   @NotNull
-  private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, String flow) {
-    Map<String, Object> pdfInputsMap = getPdfMap(flow).getInputFields();
-    Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(input.getName());
+  private List<PdfField> mapMultiValueFieldFromFlow(CheckboxField input, PdfMap pdfMap) {
+    Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
+    String submissionFieldName = input.getName();
+
+    Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(submissionFieldName);
 
     return input.getValue().stream()
         .map(value -> new PdfField(pdfFieldMap.get(value), "Yes"))
@@ -65,8 +78,8 @@ public class PdfFieldMapper {
 
   private PdfMap getPdfMap(String flow) {
     return pdfMapConfigurations.stream()
-            .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow));
+        .filter(pdfMapConfig -> pdfMapConfig.getFlow().equals(flow))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No PDF configuration found for flow: " + flow));
   }
 }

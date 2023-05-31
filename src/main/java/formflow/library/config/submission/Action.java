@@ -2,6 +2,7 @@ package formflow.library.config.submission;
 
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
+import formflow.library.pdf.PdfMapSubflow;
 import java.util.List;
 import java.util.Map;
 
@@ -56,4 +57,7 @@ public interface Action {
     throw new UnsupportedOperationException("Not implemented");
   }
 
+  public default List<Map<String, Object>> runSubflowAction(Submission submission, PdfMapSubflow subflowMap) {
+    throw new UnsupportedOperationException("Not Implemented");
+  }
 }
