@@ -54,7 +54,7 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.guava:guava:32.0.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
