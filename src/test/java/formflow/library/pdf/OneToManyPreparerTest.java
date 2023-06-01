@@ -1,28 +1,29 @@
 package formflow.library.pdf;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import formflow.library.data.Submission;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class OneToManyPreparerTest {
 
-  PdfMap map;
+  PdfMap pdfMap;
   Submission submission;
 
   @BeforeEach
   void setUp() {
-    map = new PdfMap();
-    map.setFlow("flow1");
+    pdfMap = new PdfMap();
+    pdfMap.setFlow("flow1");
     submission = Submission.builder().flow("flow1").build();
   }
 
   @Test
   void preparesSubmissionFieldsForCheckboxInputs() {
-    map.setInputFields(Map.of(
+    pdfMap.setInputFields(Map.of(
         "checkbox", Map.of(
             "option1", "CHECKBOX_OPTION_1",
             "option2", "CHECKBOX_OPTION_2",
@@ -31,9 +32,9 @@ class OneToManyPreparerTest {
     submission.setInputData(Map.of(
         "checkbox[]", List.of("option1", "option3")
     ));
-    OneToManyPreparer oneToManyPreparer = new OneToManyPreparer(new PdfMapConfiguration(List.of(map)));
+    OneToManyPreparer oneToManyPreparer = new OneToManyPreparer();
 
-    assertThat(oneToManyPreparer.prepareSubmissionFields(submission)).containsExactly(
+    assertThat(oneToManyPreparer.prepareSubmissionFields(submission, submission.getInputData(), pdfMap)).containsExactly(
         Map.entry("checkbox", new CheckboxField("checkbox", List.of("option1", "option3"), null))
     );
   }
