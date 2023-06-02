@@ -48,7 +48,7 @@ public class PdfController extends FormFlowController {
       byte[] data = pdfService.getFilledOutPDF(flow, submissionId);
       String filename = pdfService.generatePdfName(flow, submissionId);
       headers.add(HttpHeaders.CONTENT_DISPOSITION,
-          "attachment; filename=%s".formatted(filename));
+          "attachment; filename=%s.pdf".formatted(filename));
       return ResponseEntity
           .ok()
           .contentType(MediaType.APPLICATION_OCTET_STREAM)

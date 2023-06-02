@@ -40,7 +40,11 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     flow = "ubi";
     PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
-    submission = Submission.builder().id(UUID.randomUUID()).build();
+    submission = Submission.builder()
+        .id(UUID.randomUUID())
+        .flow(flow)
+        .build();
+
     filledPdfByteArray = new byte[20];
     when(pdfService.getFilledOutPDF(flow, submission.getId().toString())).thenReturn(filledPdfByteArray);
     super.setUp();
