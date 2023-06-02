@@ -24,7 +24,7 @@ public class PdfService {
   //returns a filled out pdf file
 
   /**
-   * <p>Uses pdfGenerator to generate a pdf for a flow using a UUID.</p>
+   * Uses pdfGenerator to generate a pdf for a flow using a UUID.
    *
    * @param flow
    * @param submissionId
@@ -47,7 +47,7 @@ public class PdfService {
    * @return a generic filename string
    */
   public String generatePdfName(String flow, String submissionId) {
-    return String.format("%s_%s", submissionId, flow);
+    return String.format("%s_%s", flow, submissionId);
   }
 
 }
