@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;

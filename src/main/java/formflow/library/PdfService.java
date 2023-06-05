@@ -1,9 +1,9 @@
 package formflow.library;
 
+import formflow.library.data.Submission;
 import formflow.library.pdf.PdfFile;
 import formflow.library.pdf.PdfGenerator;
 import java.io.IOException;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +27,12 @@ public class PdfService {
    * Uses pdfGenerator to generate a pdf for a flow using a UUID.
    *
    * @param flow
-   * @param submissionId
+   * @param submission
    * @return a pdf byte array
    */
-  public byte[] getFilledOutPDF(String flow, String submissionId) throws IOException {
+  public byte[] getFilledOutPDF(String flow, Submission submission) throws IOException {
     // 1. generate the pdf
-    PdfFile filledPdf = pdfGenerator.generate(flow, UUID.fromString(submissionId));
+    PdfFile filledPdf = pdfGenerator.generate(flow, submission);
     filledPdf.finalizeForSending();
     byte[] pdfByteArray = filledPdf.fileBytes();
     filledPdf.deleteFile();

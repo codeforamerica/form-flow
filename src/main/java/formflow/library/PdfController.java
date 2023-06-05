@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -45,7 +46,7 @@ public class PdfController extends FormFlowController {
       log.info("Downloading PDF with submission_id: " + submissionId);
       HttpHeaders headers = new HttpHeaders();
 
-      byte[] data = pdfService.getFilledOutPDF(flow, submissionId);
+      byte[] data = pdfService.getFilledOutPDF(flow, maybeSubmission.get());
       String filename = pdfService.generatePdfName(flow, submissionId);
       headers.add(HttpHeaders.CONTENT_DISPOSITION,
           "attachment; filename=%s.pdf".formatted(filename));

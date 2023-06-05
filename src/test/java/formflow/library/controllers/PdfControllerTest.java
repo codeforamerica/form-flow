@@ -46,7 +46,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
         .build();
 
     filledPdfByteArray = new byte[20];
-    when(pdfService.getFilledOutPDF(flow, submission.getId().toString())).thenReturn(filledPdfByteArray);
+    when(pdfService.getFilledOutPDF(flow, submission)).thenReturn(filledPdfByteArray);
     super.setUp();
   }
 
@@ -61,7 +61,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
     assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdfByteArray);
 
-    verify(pdfService, times(1)).getFilledOutPDF(flow, submission.getId().toString());
+    verify(pdfService, times(1)).getFilledOutPDF(flow, submission);
   }
 
   @Test
