@@ -1,12 +1,22 @@
 package formflow.library.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import formflow.library.PdfController;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.pdf.PdfFile;
-import formflow.library.pdf.PdfGenerator;
+import formflow.library.pdf.PdfService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,23 +25,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 public class PdfControllerTest extends AbstractMockMvcTest {
 
   private Submission submission;
   private MockMvc mockMvc;
-  private final PdfGenerator pdfGenerator = mock(PdfGenerator.class);
+  private final PdfService pdfService = mock(PdfService.class);
 
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
-  private PdfFile filledPdf;
+  private byte[] filledPdfByteArray;
   private String flow;
 
 
@@ -39,12 +41,14 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setUp() throws Exception {
     flow = "ubi";
-    PdfController pdfController = new PdfController(messageSource, pdfGenerator, submissionRepositoryService);
+    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
-    submission = Submission.builder().id(UUID.randomUUID()).build();
-    filledPdf = mock(PdfFile.class);
-    when(filledPdf.fileBytes()).thenReturn(new byte[5]);
-    when(pdfGenerator.generate(flow, submission)).thenReturn(filledPdf);
+    submission = Submission.builder()
+        .id(UUID.randomUUID())
+        .flow(flow)
+        .build();
+    filledPdfByteArray = new byte[20];
+    when(pdfService.getFilledOutPDF(flow, submission)).thenReturn(filledPdfByteArray);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
   }
@@ -54,13 +58,12 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     session.setAttribute("id", submission.getId());
     MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
         .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submission.getId())))
+            "attachment; filename=%s.pdf".formatted(pdfService.generatePdfName(flow, submission))))
         .andExpect(status().is2xxSuccessful())
         .andReturn();
-    assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdf.fileBytes());
+    assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdfByteArray);
 
-    verify(pdfGenerator, times(1)).generate(flow, submission);
-    verify(filledPdf, times(1)).finalizeForSending();
+    verify(pdfService, times(1)).getFilledOutPDF(flow, submission);
   }
 
   @Test
