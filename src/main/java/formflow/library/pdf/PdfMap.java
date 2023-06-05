@@ -49,20 +49,6 @@ public class PdfMap {
       allFields.putAll(getAllSubflowFields());
     }
   }
- /*
-  public Map<String, Object> getAllFields() {
-    if (allFields == null) {
-      allFields = new HashMap<>();
-      allFields.putAll(inputFields);
-      if (subflowInfo != null) {
-        allFields.putAll(getAllSubflowFields());
-      }
-      if (dbFields != null) {
-        allFields.putAll(dbFields);
-      }
-    }
-    return allFields;
-  }*/
 
   /**
    * Fetches and returns all the fields for all the subflows, expanding out the fields based on the number of max iterations the

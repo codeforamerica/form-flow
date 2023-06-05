@@ -72,11 +72,10 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
    * This will prepare the SubmissionFields for all the data across all the subflows specified in the PdfMap.
    *
    * @param submission the submission
-   * @param data       the data to act upon
    * @param pdfMap     the field mappings from the pdf-map.yaml file
    * @return a map of field name to SubmissionField
    */
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, Map<String, Object> data, PdfMap pdfMap) {
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, SubmissionField> preppedFields = new HashMap<>();
     List<Map<String, Object>> subflowDataList = new ArrayList<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
@@ -122,6 +121,9 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
           iteration.remove("uuid");
           iteration.remove("iterationIsComplete");
           iteration.forEach((key, value) -> {
+            if (!pdfMap.getAllFields().containsKey(key)) {
+              return;
+            }
 
             // tack on suffix for field. "_%d" where %d is the iteration number
             if (key.endsWith("[]")) {

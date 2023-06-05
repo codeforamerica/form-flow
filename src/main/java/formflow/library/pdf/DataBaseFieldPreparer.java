@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class DataBaseFieldPreparer implements DefaultSubmissionFieldPreparer {
 
   @Override
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, Map<String, Object> data, PdfMap pdfMap) {
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, SubmissionField> databaseFields = new HashMap<>();
     Map<String, Object> dbFields = pdfMap.getDbFields();
 
