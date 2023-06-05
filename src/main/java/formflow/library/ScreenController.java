@@ -106,7 +106,7 @@ public class ScreenController extends FormFlowController {
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
     if (currentScreen == null) {
-      return errorScreen();
+      return errorScreen(HttpStatus.NOT_FOUND);
     }
 
     if (uuid != null) {
@@ -220,7 +220,7 @@ public class ScreenController extends FormFlowController {
     if (maybeSubmission.isEmpty()) {
       // we have issues! We should not get here, really.
       log.error("There is no submission associated with request!");
-      return errorScreen();
+      return errorScreen(HttpStatus.BAD_REQUEST);
     }
 
     Submission submission = maybeSubmission.get();
@@ -236,8 +236,9 @@ public class ScreenController extends FormFlowController {
   }
 
   @NotNull
-  private static ModelAndView errorScreen() {
-    return new ModelAndView("redirect:/error", HttpStatus.BAD_REQUEST);
+  private static ModelAndView errorScreen(HttpStatus httpStatus) {
+    // TODO: why does adding a status code make it go to a white page?
+    return new ModelAndView("redirect:/error");
   }
 
   /**
@@ -330,7 +331,7 @@ public class ScreenController extends FormFlowController {
                 iterationUuid
             )
         );
-        return errorScreen();
+        return errorScreen(HttpStatus.BAD_REQUEST);
       }
     }
 
@@ -421,7 +422,7 @@ public class ScreenController extends FormFlowController {
         return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
       }
     } else {
-      return errorScreen();
+      return errorScreen(HttpStatus.BAD_REQUEST);
     }
     String reviewScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getReviewScreen();
@@ -445,7 +446,7 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     log.info("navigation: flow: " + flow + ", screen: " + screen);
     if (currentScreen == null) {
-      return errorScreen();
+      return errorScreen(HttpStatus.NOT_FOUND);
     }
     String nextScreen = getNextScreenName(httpSession, currentScreen, null);
 

@@ -29,7 +29,7 @@ public class FormFlowErrorController implements ErrorController {
 
   public FormFlowErrorController(
       @Value("${form-flow.error.show-stack-trace:false}") boolean showStackTrace,
-      @Value("${server.error.path:${error.path:/blankError}}") String errorPath,
+      @Value("${server.error.path:${error.path:error}}") String errorPath,
       @Value("${form-flow.error.pretty-print-packages:formflow}") String prettyPrintPackages,
       ErrorAttributes errorAttributes) {
     this.showStackTrace = showStackTrace;
