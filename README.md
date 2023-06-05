@@ -23,6 +23,7 @@ Table of Contents
         * [Input Class](#input-class)
         * [Custom Validations](#custom-validations)
         * [Input Data JSON Structure](#input-data-json-structure)
+    * [PDF Generation](#pdf-generation)
 * [General Information](#general-information)
     * [Thymeleaf](#thymeleaf)
         * [Using Thymeleaf](#using-thymeleaf)
@@ -578,6 +579,135 @@ subflow name is the key value.
 Note that the subflows are an array of repeating entries - one for each iteration a user did of the
 subflow. Each iteration has a unique UUID associated with it so we can have a way of working with a
 specific iteration's data.
+
+## PDF Generation
+
+### PDF Generation Overview
+
+The Form Flow Library uses the [Apache PDFBox](https://pdfbox.apache.org/) library to generate PDFs
+from user input. In order to begin generating PDFs from your user responses, you will need to first
+create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
+inputs to PDF fields.
+
+### Creating a template PDF file
+
+The first step in generating PDFs is to create a template PDF file. This file will be used by the
+FFB
+to generate a PDF with user responses mapped to specific PDF fields. We recommend using Adobe
+Acrobat and
+the [Prepare Form Tool](https://www.adobe.com/acrobat/resources/how-to-create-fillable-pdf.html).
+
+When preparing your fields in Adobe Acrobat, in the field properties window, you will want to give
+each field a unique name.
+
+For text fields, this name should be different for each field. For example,
+given the PDF needs mappings for a first name field and last name field, names for each field could
+be `APPLICANT_FIRST_NAME` and `APPLICANT_LAST_NAME`.
+
+For radio fields, while the name should be unique, each radio will have the same name but different
+`Radio Button Choice` values within the `Options` tab of the field properties window. These
+`Radio Button Choice` values should match the actual values the radio inputs in your application.
+For example, a PDF with a radio field for `Gender` could have three radio buttons with the name
+Gender,
+and three separate values of `Male`, `Female`, and `Non-binary` matching the values of the
+corresponding
+input in the application.
+
+For checkbox fields, each checkbox should have a unique name, but the `Export Value` within the
+fields properties window under the `Options` tab should be `Yes`. This is because the FFB will map
+the
+actual value of the checkbox in the application to `Yes`, meaning that box will be checked if that
+value was selected by the user. For example, a PDF with a checkbox field for `programs` could have
+three checkboxes with the names `SNAP`, `TANF`, and `CCAP`, where the export value for each
+is `Yes`.
+
+### Creating a pdf-map.yaml file
+
+The next step in generating PDFs is to create a `pdf-map.yaml` file. This file will act as a map of
+input fields from your application to PDF fields in your template PDF file. This file should be
+added
+to your applications `resources` folder, in a folder named `pdfs`.
+
+Your `pdf-map.yaml` file will consist of the following key value pairs:
+
+#### flow
+
+The name of the flow that this `pdf-map.yaml` file corresponds to.
+
+For example:
+
+```yaml
+flow: ubi
+```
+
+#### pdf
+
+The path to the pdf template file the FFB library should use when generating your PDF.
+The path should begin with a forward flash. For example `/pdfs/Example-PDF-File.pdf`.
+
+For example:
+
+```yaml 
+pdf: /pdfs/Multipage-UBI-Form.pdf
+```
+
+#### inputFields
+
+Key value pairs for your applications inputs and their corresponding PDF fields. Note that the key
+should always be the actual name of an input in your application and the value can be one of two
+things.
+
+For single value fields like text fields and radios, the value should be the name of the PDF field.
+For example:
+
+```yaml
+inputFields:
+  firstName: APPLICANT_LEGAL_NAME_FIRST
+  lastName: APPLICANT_LEGAL_NAME_LAST
+  genderIdentity: GENDER
+  birthDate: APPLICANT_DATE_OF_BIRTH
+```
+
+For multi-value fields like checkboxes, the value should be a map of key value pairs where the top
+level key is the name of the checkbox field and each internal key value pair is a map of checkbox
+field value to PDF field name. For example:
+
+```yaml
+inputFields:
+  programs:
+    SNAP: APPLICANT_PROGRAMS_SNAP
+    TANF: APPLICANT_PROGRAMS_TANF
+    CCAP: APPLICANT_PROGRAMS_CCAP
+  incomeTypes:
+    incomeJob: APPLICANT_HAS_JOB_INCOME
+    incomeSelf: APPLICANT_HAS_SELF_EMPLOYMENT_INCOME
+    incomeUnemployment: APPLICANT_HAS_UNEMPLOYMENT_INCOME
+    incomeSocialSecurity: APPLICANT_HAS_SOCIAL_SECURITY_INCOME
+```
+
+Note that for the multi-value checkbox field mappings, `programs` and `incomeTypes` represent the
+names
+of checkbox inputs in the application, and `SNAP`, `TANF`, `CCAP`, `incomeJob`, `incomeSelf`, etc
+are
+the actual values of checkboxes within those inputs. `APPLICANT_PROGRAMS_SNAP`
+and `APPLICANT_HAS_JOB_INCOME`
+are the names of the corresponding PDF checkbox fields.
+
+#### dbFields
+
+### Subflow specific PDF field mappings
+
+### subflowInfo
+
+#### totalIterations
+
+#### dataAction
+
+#### subflows
+
+#### fields
+
+### Creating custom preparers
 
 # General Information
 
