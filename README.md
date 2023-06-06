@@ -356,6 +356,8 @@ There are four types of actions available in the Form Flow library:
 | beforeSaveAction                       | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
 | beforeDisplayAction                    | Submission      | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                          |
 | afterSaveAction                        | Submission      | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                       |
+
+
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
 actually rendered. The rest of the actions are called when the screen's data is submitted to the
 server, on an HTTP POST.
