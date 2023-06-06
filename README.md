@@ -1572,7 +1572,7 @@ form-flow:
 
 | Property                                | Value                    | Default    | Description                                                                                                        |
 |-----------------------------------------|--------------------------|------------|--------------------------------------------------------------------------------------------------------------------|
-| `form-flow.error.show-full-error`       | `boolean`                | `true`     | Show full the full stack trace and error codes on our '/error' template (on your local or staging env for example) |
+| `form-flow.error.show-stack-trace`      | `boolean`                | `true`     | Show full the full stack trace and error codes on our '/error' template (on your local or staging env for example) |
 | `form-flow.error.pretty-print-packages` | Comma seperated `String` | `formflow` | A comma seperated list of packages that will be highlighted on the stacktrace for easier identification.           |
 
 We've chosen to use a yaml version of the application file, but you could also store this as a
