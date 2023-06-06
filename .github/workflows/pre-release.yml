@@ -8,9 +8,24 @@ on:
         required: true
 jobs:
   run-tests:
+    name: Run tests
     uses: ./.github/workflows/run-tests.yml
-  whatever:
+  create-pre-release:
+    name: Create Pre-Release
+    needs: run-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Create Pre-Release
-        run: echo ${{inputs.version}}
+      - name: Tag Version
+        run: |
+          echo Creating pre-release version: ${{inputs.version}}
+          git tag ${{inputs.version}}
+          git push origin ${{inputs.version}}
+      - name: Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{inputs.version}
+          generate_release_notes: true
+          body: |
+            FILL IN DETAILS ABOUT THIS RELEASE!
+          draft: true
+          prerelease: true
