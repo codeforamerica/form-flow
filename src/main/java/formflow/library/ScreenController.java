@@ -237,8 +237,18 @@ public class ScreenController extends FormFlowController {
 
   @NotNull
   private static ModelAndView errorScreen(HttpStatus httpStatus) {
-    // TODO: why does adding a status code make it go to a white page?
-    return new ModelAndView("redirect:/error");
+    // TODO: not done
+    // So we can't use redirect: as it will not pass status code or anything else
+    ModelMap model = new ModelMap();
+    model.put("timestamp", java.time.LocalDateTime.now());
+    model.put("status", httpStatus.value());
+    model.put("error", httpStatus.name());
+    // TODO
+    model.put("message", "No message available");
+    model.put("path", "TBD");
+    model.put("prettyStackTrace", "");
+
+    return new ModelAndView("errors/devError", model);
   }
 
   /**
