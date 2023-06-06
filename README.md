@@ -8,7 +8,6 @@ Table of Contents
      a reasonable size 
 -->
 
-* [Current release](#current-release)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
@@ -107,23 +106,6 @@ Out-of-the-box, integrations can be set up with common third-party services:
 
 An example project built off of this Form Flow library can be found in
 our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
-
-# Current release
-
-The latest released version of Form Flow library is `0.0.4`
-
-The latest SNAPSHOT version that Form Flow library is using `0.0.5-SNAPSHOT`. This version
-contains all our up-to-date work, containing all work on `main`.
-
-Releases can be found in
-[maven central](https://oss.sonatype.org/#nexus-search;quick~org.codeforamerica.org).
-
-- `0.0.4-SNAPSHOT` was frozen midway through PDF generation code.
-- `0.0.3-SNAPSHOT` was frozen with the beginning of PDF generation code being in.
-- [`0.0.2-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.2-SNAPSHOT) was
-  frozen with address validation.
-- [`0.0.1-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.1-SNAPSHOT) was
-  frozen for the doc-la project to do user testing.
 
 # What is a form flow?
 
