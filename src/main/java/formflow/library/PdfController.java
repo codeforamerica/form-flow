@@ -2,10 +2,11 @@ package formflow.library;
 
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.pdf.PdfFile;
-import formflow.library.pdf.PdfGenerator;
+import formflow.library.pdf.PdfService;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -18,9 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
-import java.util.UUID;
-
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -28,13 +26,13 @@ import java.util.UUID;
 public class PdfController extends FormFlowController {
 
   private final MessageSource messageSource;
-  private final PdfGenerator pdfGenerator;
+  private final PdfService pdfService;
 
-  public PdfController(MessageSource messageSource, PdfGenerator pdfGenerator,
+  public PdfController(MessageSource messageSource, PdfService pdfService,
       SubmissionRepositoryService submissionRepositoryService) {
     super(submissionRepositoryService);
     this.messageSource = messageSource;
-    this.pdfGenerator = pdfGenerator;
+    this.pdfService = pdfService;
   }
 
   @GetMapping("{flow}/{submissionId}")
@@ -48,14 +46,10 @@ public class PdfController extends FormFlowController {
       log.info("Downloading PDF with submission_id: " + submissionId);
       Submission submission = maybeSubmission.get();
       HttpHeaders headers = new HttpHeaders();
-      PdfFile filledPdf = pdfGenerator.generate(flow, submission);
-
-      filledPdf.finalizeForSending();
-      byte[] data = filledPdf.fileBytes();
-      filledPdf.deleteFile();
+      byte[] data = pdfService.getFilledOutPDF(maybeSubmission.get());
 
       headers.add(HttpHeaders.CONTENT_DISPOSITION,
-          "attachment; filename=%s-%s.pdf".formatted(filledPdf.name(), submissionId));
+          "attachment; filename=%s.pdf".formatted(pdfService.generatePdfName(submission)));
       return ResponseEntity
           .ok()
           .contentType(MediaType.APPLICATION_OCTET_STREAM)
