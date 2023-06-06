@@ -1,3 +1,4 @@
+name: Create Pre-Release
 on:
   workflow_dispatch:
     inputs:
@@ -6,8 +7,10 @@ on:
         type: string
         required: true
 jobs:
-  test:
+  run-tests:
+    uses: ./.github/workflows/run-tests.yml
+  whatever:
     runs-on: ubuntu-latest
     steps:
-      - name: Noop
-        run: echo ${{ inputs.version }}
+      - name: Create Pre-Release
+        run: echo ${{inputs.version}}
