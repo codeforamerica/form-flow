@@ -1,4 +1,4 @@
-package formflow.library.controllers;
+package formflow.library;
 
 import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.BINDING_ERRORS;
 import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.EXCEPTION;
@@ -29,7 +29,7 @@ public class FormFlowErrorController implements ErrorController {
 
   public FormFlowErrorController(
       @Value("${form-flow.error.show-stack-trace:false}") boolean showStackTrace,
-      @Value("${server.error.path:${error.path:error}}") String errorPath,
+      @Value("${server.error.path:${error.path:errors/genericError}}") String errorPath,
       @Value("${form-flow.error.pretty-print-packages:formflow}") String prettyPrintPackages,
       ErrorAttributes errorAttributes) {
     this.showStackTrace = showStackTrace;
@@ -48,7 +48,7 @@ public class FormFlowErrorController implements ErrorController {
     );
     errorAttributesMap.put("prettyStackTrace", prettyException);
     if (showStackTrace) {
-      return new ModelAndView("devError", errorAttributesMap);
+      return new ModelAndView("errors/devError", errorAttributesMap);
     } else {
       return new ModelAndView(errorPath, errorAttributesMap);
     }
