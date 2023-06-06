@@ -48,7 +48,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
         .flow(flow)
         .build();
     filledPdfByteArray = new byte[20];
-    when(pdfService.getFilledOutPDF(flow, submission)).thenReturn(filledPdfByteArray);
+    when(pdfService.getFilledOutPDF(submission)).thenReturn(filledPdfByteArray);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
   }
@@ -58,12 +58,12 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     session.setAttribute("id", submission.getId());
     MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
         .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=%s.pdf".formatted(pdfService.generatePdfName(flow, submission))))
+            "attachment; filename=%s.pdf".formatted(pdfService.generatePdfName(submission))))
         .andExpect(status().is2xxSuccessful())
         .andReturn();
     assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdfByteArray);
 
-    verify(pdfService, times(1)).getFilledOutPDF(flow, submission);
+    verify(pdfService, times(1)).getFilledOutPDF(submission);
   }
 
   @Test

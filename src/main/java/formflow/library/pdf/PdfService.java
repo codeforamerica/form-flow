@@ -21,13 +21,12 @@ public class PdfService {
   /**
    * Uses pdfGenerator to generate a pdf for a flow using a UUID.
    *
-   * @param flow
    * @param submission
    * @return a pdf byte array
    */
-  public byte[] getFilledOutPDF(String flow, Submission submission) throws IOException {
+  public byte[] getFilledOutPDF(Submission submission) throws IOException {
     // 1. generate the pdf
-    PdfFile filledPdf = pdfGenerator.generate(flow, submission);
+    PdfFile filledPdf = pdfGenerator.generate(submission.getFlow(), submission);
     filledPdf.finalizeForSending();
     byte[] pdfByteArray = filledPdf.fileBytes();
     filledPdf.deleteFile();
@@ -37,11 +36,10 @@ public class PdfService {
   /**
    * Generates a generic pdf file name from a flow and submissionId
    *
-   * @param flow
    * @param submission
    * @return a generic filename string
    */
-  public String generatePdfName(String flow, Submission submission) {
-    return String.format("%s_%s", flow, submission.getId().toString());
+  public String generatePdfName(Submission submission) {
+    return String.format("%s_%s", submission.getFlow(), submission.getId().toString());
   }
 }
