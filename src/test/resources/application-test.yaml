@@ -12,6 +12,7 @@ form-flow:
       auth-id: "authId"
       auth-token: "authToken"
       license: "license"
+  encryption-key: '{"primaryKeyId":2135185311,"key":[{"keyData":{"typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey","value":"GiCRKaXiJ/zlDHAZfRQf1rCIbIY4fFmLqLWYIPLNXpOx4A==","keyMaterialType":"SYMMETRIC"},"status":"ENABLED","keyId":2135185311,"outputPrefixType":"TINK"}]}")'
   pdf:
     path: 'src/test/resources/pdfs/'
     map-file: 'pdf-map.yaml'

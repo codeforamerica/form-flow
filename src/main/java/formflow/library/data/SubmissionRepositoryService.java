@@ -2,11 +2,12 @@ package formflow.library.data;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
 /**
  * Service to retrieve and store Submission objects in the database.
@@ -17,8 +18,11 @@ public class SubmissionRepositoryService {
 
   SubmissionRepository repository;
 
-  public SubmissionRepositoryService(SubmissionRepository repository) {
+  SubmissionEncryptionService encryptionService;
+
+  public SubmissionRepositoryService(SubmissionRepository repository, SubmissionEncryptionService encryptionService) {
     this.repository = repository;
+    this.encryptionService = encryptionService;
   }
 
   /**
@@ -28,7 +32,7 @@ public class SubmissionRepositoryService {
    * @return UUID of the saved submission
    */
   public UUID save(Submission submission) {
-    return repository.save(submission).getId();
+    return repository.save(encryptionService.encrypt(submission)).getId();
   }
 
   /**
@@ -38,7 +42,8 @@ public class SubmissionRepositoryService {
    * @return Optional containing Submission if found, else empty
    */
   public Optional<Submission> findById(UUID id) {
-    return repository.findById(id);
+    Optional<Submission> submission = repository.findById(id);
+    return submission.map(value -> encryptionService.decrypt(value));
   }
 
   /**
