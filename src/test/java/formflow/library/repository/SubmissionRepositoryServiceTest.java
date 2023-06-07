@@ -55,34 +55,11 @@ class SubmissionRepositoryServiceTest {
     var timeNow = Instant.now();
     var submission = Submission.builder()
         .inputData(inputData)
+        .urlParams(new HashMap<>())
         .flow("testFlow")
         .submittedAt(Date.from(timeNow))
         .build();
 
-    when(encryptionService.encrypt(any())).thenReturn(submission);
-    when(encryptionService.decrypt(any())).thenReturn(submission);
-
-    UUID submissionId = submissionRepositoryService.save(submission);
-    verify(encryptionService, times(1)).encrypt(any());
-
-    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(submissionId);
-    verify(encryptionService, times(1)).decrypt(any());
-    Submission savedSubmission = savedSubmissionOptional.orElseThrow();
-    assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
-    assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
-    assertThat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(savedSubmission.getSubmittedAt()))
-        .isEqualTo(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp.from(timeNow)));
-  }
-
-  @Test
-  void shouldSaveSubmissionWithEncryptedValue() {
-    var inputData = Map.of("ssn", (Object)"123457890");
-    var timeNow = Instant.now();
-    var submission = Submission.builder()
-      .inputData(inputData)
-      .flow("testFlow")
-      .submittedAt(Date.from(timeNow))
-      .build();
 
     UUID submissionId = submissionRepositoryService.save(submission);
 

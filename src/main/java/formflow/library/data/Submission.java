@@ -81,6 +81,15 @@ public class Submission {
     urlParams = new HashMap<>();
   }
 
+  public Submission(Submission submission) {
+    inputData = new HashMap<>(submission.getInputData());
+    urlParams = new HashMap<>(submission.getUrlParams());
+
+    this.flow = submission.getFlow();
+    this.createdAt = submission.getCreatedAt();
+    this.submittedAt = submission.getSubmittedAt();
+    this.id = submission.id;
+  }
 
   /**
    * Provides access to a specific subflow's submission data for a particular UUID, if the subflow is present in the submission.
