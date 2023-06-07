@@ -19,16 +19,14 @@ public class SubmissionFieldPreparers {
   private final List<SubmissionFieldPreparer> customPreparers;
 
   private final PdfMapConfiguration pdfMapConfiguration;
-  private final ActionManager actionManager;
 
 
   public SubmissionFieldPreparers(List<DefaultSubmissionFieldPreparer> defaultPreparers,
       List<SubmissionFieldPreparer> customPreparers,
-      PdfMapConfiguration pdfMapConfiguration, ActionManager actionManager) {
+      PdfMapConfiguration pdfMapConfiguration) {
     this.defaultPreparers = defaultPreparers;
     this.customPreparers = customPreparers;
     this.pdfMapConfiguration = pdfMapConfiguration;
-    this.actionManager = actionManager;
   }
 
   /**

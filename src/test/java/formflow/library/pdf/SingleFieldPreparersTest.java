@@ -20,10 +20,6 @@ class SingleFieldPreparersTest {
 
   private Submission testSubmission;
 
-  @Autowired
-  private ActionManager actionManager;
-
-
   @BeforeEach
   void setUp() {
     testSubmission = Submission.builder()
@@ -44,7 +40,7 @@ class SingleFieldPreparersTest {
     DefaultSubmissionFieldPreparer failingPreparer = mock(DefaultSubmissionFieldPreparer.class);
     PdfMapConfiguration pdfMapConfiguration = mock(PdfMapConfiguration.class);
     SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
-        List.of(failingPreparer, successfulPreparer), List.of(), pdfMapConfiguration, actionManager);
+        List.of(failingPreparer, successfulPreparer), List.of(), pdfMapConfiguration);
     Date date = DateTime.parse("2020-09-02").toDate();
     PdfMap pdfMap = new PdfMap();
 
