@@ -70,7 +70,7 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     AssertionsForClassTypes.assertThat(builtMessage).isNotNull();
     AssertionsForClassTypes.assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
     AssertionsForClassTypes.assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
-    AssertionsForClassTypes.assertThat(builtMessage.getText()).isEqualTo(expectedBody);
+    AssertionsForClassTypes.assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
   }
 
   @Test
@@ -89,6 +89,6 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     AssertionsForClassTypes.assertThat(builtMessage).isNotNull();
     AssertionsForClassTypes.assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
     AssertionsForClassTypes.assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
-    AssertionsForClassTypes.assertThat(builtMessage.getText()).isEqualTo(expectedBody);
+    AssertionsForClassTypes.assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
   }
 }

@@ -49,7 +49,7 @@ class SubmissionFieldPreparersTest {
     SubmissionFieldPreparers submissionFieldPreparers = new SubmissionFieldPreparers(
         List.of(defaultSingleFieldPreparer, defaultCheckboxFieldPreparer, defaultDatabaseFieldPreparer,
             defaultSubflowFieldPreparer),
-        List.of(testCustomPreparer), pdfMapConfiguration, new ActionManager(List.of()));
+        List.of(testCustomPreparer), pdfMapConfiguration);
 
     submission = Submission.builder().flow("flow1")
         .inputData(

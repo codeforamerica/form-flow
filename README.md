@@ -8,7 +8,6 @@ Table of Contents
      a reasonable size 
 -->
 
-* [Current release](#current-release)
 * [What is a form flow?](#what-is-a-form-flow)
 * [Concepts](#concepts)
     * [Flow](#flow)
@@ -107,23 +106,6 @@ Out-of-the-box, integrations can be set up with common third-party services:
 
 An example project built off of this Form Flow library can be found in
 our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
-
-# Current release
-
-The latest released version of Form Flow library is `0.0.4`
-
-The latest SNAPSHOT version that Form Flow library is using `0.0.5-SNAPSHOT`. This version
-contains all our up-to-date work, containing all work on `main`.
-
-Releases can be found in
-[maven central](https://oss.sonatype.org/#nexus-search;quick~org.codeforamerica.org).
-
-- `0.0.4-SNAPSHOT` was frozen midway through PDF generation code.
-- `0.0.3-SNAPSHOT` was frozen with the beginning of PDF generation code being in.
-- [`0.0.2-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.2-SNAPSHOT) was
-  frozen with address validation.
-- [`0.0.1-SNAPSHOT`](https://github.com/codeforamerica/form-flow/releases/tag/0.0.1-SNAPSHOT) was
-  frozen for the doc-la project to do user testing.
 
 # What is a form flow?
 
@@ -353,10 +335,10 @@ There are four types of actions available in the Form Flow library:
 |----------------------------------------|-----------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | onPostAction                           | FormSubmission  | nothing                | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                         |
 | crossFieldValidationAction             | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                             |
-| beforeSaveAction                       | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will ** 
- not** be validated before being saved. |
+| beforeSaveAction                       | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
 | beforeDisplayAction                    | Submission      | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                          |
 | afterSaveAction                        | Submission      | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                       |
+
 
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
 actually rendered. The rest of the actions are called when the screen's data is submitted to the
