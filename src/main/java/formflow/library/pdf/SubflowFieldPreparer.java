@@ -121,20 +121,20 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
           iteration.remove("uuid");
           iteration.remove("iterationIsComplete");
           iteration.forEach((key, value) -> {
-            if (!pdfMap.getAllFields().containsKey(key)) {
+
+            String newKey = getNewKey(key, atomInteger.get());
+
+            if (!pdfMap.getAllFields().containsKey(newKey)) {
               return;
             }
 
             // tack on suffix for field. "_%d" where %d is the iteration number
             if (key.endsWith("[]")) {
               // don't update the inner values.
-              String newKey = key.replace("[]", "_" + atomInteger.get() + "[]");
               preppedFields.put(newKey, new CheckboxField(key.replace("[]", ""),
                   (List<String>) value, atomInteger.get()));
-              //expandedSubflowData.put(newKey, value);
             } else {
-              //expandedSubflowData.put(key + "_" + (atomInteger.get() + 1), value);
-              preppedFields.put(key + "_" + atomInteger.get(), new SingleField(key, value.toString(), atomInteger.get()));
+              preppedFields.put(newKey, new SingleField(key, value.toString(), atomInteger.get()));
             }
           });
           atomInteger.incrementAndGet();
@@ -152,5 +152,13 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
    */
   public void setActionManager(ActionManager actionManager) {
     this.actionManager = actionManager;
+  }
+
+  private String getNewKey(String existingKey, Integer iteration) {
+    if (existingKey.contains("[]")) {
+      return existingKey.replace("[]", "_" + iteration + "[]");
+    } else {
+      return existingKey + "_" + iteration;
+    }
   }
 }
