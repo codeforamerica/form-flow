@@ -582,8 +582,6 @@ specific iteration's data.
 
 ## PDF Generation
 
-### PDF Generation Overview
-
 The Form Flow Library uses the [Apache PDFBox](https://pdfbox.apache.org/) library to generate PDFs
 from user input. In order to begin generating PDFs from your user responses, you will need to first
 create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
@@ -695,19 +693,215 @@ are the names of the corresponding PDF checkbox fields.
 
 #### dbFields
 
+Key value pairs for database column fields from your application. The key is the name of a database
+column and the value is the name of a field in your PDF template. Currently supported fields are:
+
+- submittedAt
+- submissionId
+- createdAt
+- updatedAt
+- flow
+
+For example:
+
+```yaml
+dbFields:
+  submittedAt: SUBMISSION_TIME
+  submissionId: SUBMISSION_ID
+  flow: FLOW_NAME
+```
+
 ### Subflow specific PDF field mappings
 
 ### subflowInfo
 
+The top level key for all your subflows. `subflowInfo` holds all data related to mapping all of your
+subflows.
+
 #### totalIterations
 
+The total number of iterations possible given your PDF's template. For example, if your PDF has room
+for 5 household members, your `totalIterations` for the `household` subflow would be 5.
+
+For example:
+
+```yaml
+subflowInfo:
+  household:
+    totalIterations: 5
+```
+
 #### dataAction
+
+`dataAction` is similar to actions in your `flows-config.yaml` file. `dataAction` provides a place
+to
+create custom actions to manipulate the data before it is passed to the PDF generator.
+
+Examples of things you could do using `dataAction` include:
+
+- Remove the applicant from a subflow if you only want to include household members
+- Correlate data between 2 separate subflows (for example, if you have a section of your PDF that
+  asks
+  for household members and their income but those are two seperate subflows)
+
+Essentially, `dataAction` allows you to manipulate the data in whatever way you see fit, before the
+PDF generator runs.
 
 #### subflows
 
 #### fields
 
-### Creating custom preparers
+Similar to `inputFields`, `fields` is a map of input fields from your application to PDF fields in
+your
+PDF template file. Like `inputFields`, the key should always be the actual name of an input in your
+subflow, and the value can be one of two things.
+
+For single value fields like text fields and radios,
+the value will be the name of a field in your PDF template. For example:
+
+```yaml
+    fields:
+      householdMemberFirstName: LEGAL_NAME_FIRST_MEMBER
+      householdMemberLastName: LEGAL_NAME_LAST_MEMBER
+```
+
+For multi-value fields like checkboxes, the value will be a map of key value pairs where the top
+level
+key is the name of a checkbox input in your application and each internal key value pair is a map of
+checkbox field value to PDF field name. For example:
+
+```yaml
+fields:
+  incomeTypes:
+    incomeJob: INCOME_HAS_JOB_MEMBER
+    incomeSelf: INCOME_HAS_SELF_EMPLOYMENT_MEMBER
+    incomeUnemployment: INCOME_HAS_UNEMPLOYMENT_MEMBER
+```
+
+Where `incomeTypes` is the name of a checkbox input in your application,
+and `incomeJob`, `incomeSelf`,
+and `incomeUnemployment` are the actual values of checkboxes within that
+input. `INCOME_HAS_JOB_MEMBER`,
+`INCOME_HAS_SELF_EMPLOYMENT_MEMBER`, and `INCOME_HAS_UNEMPLOYMENT_MEMBER` are the names of the
+corresponding PDF checkbox fields.
+
+### Custom preparers
+
+Custom preparers are a way for you to manipulate the way fields get filled in during PDF generation.
+A custom preparer is a Java class that implements the `SubmissionFieldPreparer` interface, and it's
+`prepareSubmissionFields` method. This method takes in a `Submission` and `PdfMap` and returns
+a Map of String input name to `SubmissionField` class.
+
+It's important to note that the SubmissionField mappings created by a custom preparer will overwrite
+any of the default mappings that happen during PDF generation.
+
+#### SubmissionField
+
+SubmissionField is an interface that represents a mapping between your applications inputs and their
+values. SubmissionField's are used by the FFB library during PDF generation to map your application'
+s
+input values to the correct PDF Fields. There are 3 types of SubmissionFields:
+
+| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                                                                                                                                                                                                                                                                            |
+|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null) <br><br> Examples:<br> new SingleField("exampleInputName", "exampleInputValue", null) <br> new SingleField("exampleInputName", "exampleInputValue", 1)                                                                                           |
+| CheckboxField                  | For checkbox input fields. Represents a one to many mapping between a checkbox input and an array of it's many potential values. Can iclude an iteration if the input is within a subflow.                              | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration number `Int` iteration number (for subflows, can be null) <br><br> Examples:<br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), null) <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), 1) |
+| DatabaseField                  | For fields from database columns. Represents a mapping between database fields such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration.                                              | Params: `String` database column name, `String` database field value <br><br> Examples:<br> new DatabaseField("submittedAt", "exampleSubmittedAtValue")                                                                                                                                                                                                |
+
+#### Creating a Custom Preparer
+
+When creating a custom preparer, you will want to create a new Java class that implements the
+`SubmissionFieldPreparer` interface and it's `prepareSubmissionFields` method.
+
+Depending on what you would like to do with your custom preparer, it should return a map of String
+input name to either `SingleField`, `CheckboxField`, `DatabaseField` or even a combination.
+
+For example, if you wanted to create a custom preparer that takes three seperate date fields and
+maps
+them to a single PDF
+
+```java
+public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
+
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
+
+    String month = submission.getInputData().get("applicantBirthMonth").toString();
+    String day = submission.getInputData().get("applicantBirthDay").toString();
+    String year = submission.getInputData().get("applicantBirthYear").toString();
+
+    submissionFields.put("applicantDateOfBirth",
+        new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
+
+    return submissionFields;
+  }
+}
+```
+
+Note that in this example, we are using the `Submission` class to get the values of the inputs we
+want
+to map, and we are concatenating three separate fields into one and then creating a
+new `SingleField`
+object.
+
+#### Injecting custom input fields
+
+Note that in the above custom preparer example, we are creating a new `SingleField` for an input
+that
+does not actually exist in the application. Using custom preparers, we can create mappings for non
+existent
+input fields. This is useful for creating mappings for fields that are not actually inputs in your
+application
+but are still needed for PDF generation.
+
+Note that you would need to create a field for this input in your `pdf-map.yaml` file. For example:
+
+```yaml
+inputFields:
+  applicantDateOfBirth: APPLICANT_DATE_OF_BIRTH
+```
+
+### Custom Preparers for Subflows
+
+Working with subflows is a bit different for custom preparers. In subflows, you will need to append
+an
+`_n` to the end of the input name where `n` is the iteration number for the iteration within the
+subflow. For example, if you had a household subflow that asked for each household members date of
+birth
+we would update the above custom preparer example to this:
+
+```java
+public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
+
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
+
+    ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+        .get("household");
+
+    // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
+    int maxIterations = Math.min(houseHoldSubflow.size(),
+        pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
+
+    for (int i = 0; i < maxIterations; i++) {
+      String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
+      String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
+      String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
+      // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
+      int iterationNumber = i + 1;
+
+      submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
+          new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
+              iterationNumber));
+    }
+    return submissionFields;
+  }
+}
+```
 
 # General Information
 
