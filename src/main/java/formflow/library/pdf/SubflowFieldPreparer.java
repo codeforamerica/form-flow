@@ -124,7 +124,7 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
 
             String newKey = getNewKey(key, atomInteger.get());
 
-            if (!pdfMap.getAllFields().containsKey(newKey)) {
+            if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {
               return;
             }
 

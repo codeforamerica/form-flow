@@ -33,7 +33,8 @@ class SubflowFieldPreparersTest {
     pdfMapSubflow.setTotalIterations(5);
     pdfMapSubflow.setFields(Map.of(
         "foo", "FOO_FIELD",
-        "bar", "BAR_FIELD"
+        "bar", "BAR_FIELD",
+        "checkboxInput", Map.of("item1", "PDF_ITEM1", "item2", "PDF_ITEM2", "item3", "PDF_ITEM3")
     ));
     pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
     pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
@@ -214,9 +215,6 @@ class SubflowFieldPreparersTest {
     assertThat(resultMap.keySet().equals(expectedMap.keySet())).isTrue();
 
     assertThat(resultMap.equals(expectedMap)).isTrue();
-    //for (var entry : resultMap.entrySet()) {
-    //  assertThat(expectedMap.get(entry.getKey())).isEqualTo(expectedMap.get(entry.getKey()));
-    // }
   }
 
   @Test
