@@ -742,7 +742,7 @@ Examples of things you could do using `dataAction` include:
 - Remove the applicant from a subflow if you only want to include household members
 - Correlate data between 2 separate subflows (for example, if you have a section of your PDF that
   asks
-  for household members and their income but those are two seperate subflows)
+  for household members and their income but those are two separate subflows)
 
 Essentially, `dataAction` allows you to manipulate the data in whatever way you see fit, before the
 PDF generator runs.
@@ -866,8 +866,7 @@ inputFields:
 ### Custom Preparers for Subflows
 
 Working with subflows is a bit different for custom preparers. In subflows, you will need to append
-an
-`_n` to the end of the input name where `n` is the iteration number for the iteration within the
+an `_n` to the end of the input name where `n` is the iteration number for the iteration within the
 subflow. For example, if you had a household subflow that asked for each household members date of
 birth
 we would update the above custom preparer example to this:
@@ -902,6 +901,10 @@ public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
   }
 }
 ```
+
+For more examples of custom preparers in for both subflows and non subflows, you can look at the
+custom preparers in
+the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/pdf)
 
 # General Information
 
