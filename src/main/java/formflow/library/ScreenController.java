@@ -239,18 +239,6 @@ public class ScreenController extends FormFlowController {
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
 
-  private static void errorScreen(String method, String url, HttpStatus httpStatus) throws Exception {
-    HttpHeaders headers = new HttpHeaders();
-
-    if (httpStatus.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-      throw new NoHandlerFoundException(method, url, headers);
-    }
-
-    if (httpStatus.isSameCodeAs(HttpStatus.BAD_REQUEST)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-    }
-  }
-
   /**
    * Processes input data from a page of a subflow screen. If `new` is supplied for UUID, then it is assumed this is a new
    * iteration of the subflow and a new UUID is created and associated with the iteration's data.
@@ -462,6 +450,18 @@ public class ScreenController extends FormFlowController {
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
+  }
+
+  private static void errorScreen(String method, String url, HttpStatus httpStatus) throws Exception {
+    HttpHeaders headers = new HttpHeaders();
+
+    if (httpStatus.isSameCodeAs(HttpStatus.NOT_FOUND)) {
+      throw new NoHandlerFoundException(method, url, headers);
+    }
+
+    if (httpStatus.isSameCodeAs(HttpStatus.BAD_REQUEST)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
   }
 
   private String getNextScreenName(HttpSession httpSession,
