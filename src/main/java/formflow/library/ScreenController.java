@@ -95,7 +95,7 @@ public class ScreenController extends FormFlowController {
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String uuid,
       HttpSession httpSession
-  ) throws Exception {
+  ) throws NoHandlerFoundException {
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
 
     var currentScreen = getScreenConfig(flow, screen);
@@ -440,7 +440,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession
-  ) throws Exception {
+  ) throws NoHandlerFoundException {
     var currentScreen = getScreenConfig(flow, screen);
     log.info("navigation: flow: " + flow + ", screen: " + screen);
     if (currentScreen == null) {
