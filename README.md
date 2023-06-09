@@ -713,7 +713,7 @@ dbFields:
 
 ### Subflow specific PDF field mappings
 
-### subflowInfo
+#### subflowInfo
 
 The top level key for all your subflows. `subflowInfo` holds all data related to mapping all of your
 subflows.
@@ -730,24 +730,6 @@ subflowInfo:
   household:
     totalIterations: 5
 ```
-
-#### dataAction
-
-`dataAction` is similar to actions in your `flows-config.yaml` file. `dataAction` provides a place
-to
-create custom actions to manipulate the data before it is passed to the PDF generator.
-
-Examples of things you could do using `dataAction` include:
-
-- Remove the applicant from a subflow if you only want to include household members
-- Correlate data between 2 separate subflows (for example, if you have a section of your PDF that
-  asks
-  for household members and their income but those are two separate subflows)
-
-Essentially, `dataAction` allows you to manipulate the data in whatever way you see fit, before the
-PDF generator runs.
-
-#### subflows
 
 #### fields
 
@@ -850,8 +832,8 @@ object.
 
 Note that in the above custom preparer example, we are creating a new `SingleField` for an input
 that
-does not actually exist in the application. Using custom preparers, we can create mappings for non
-existent
+does not actually exist in the application. Using custom preparers, we can create mappings for
+non-existent
 input fields. This is useful for creating mappings for fields that are not actually inputs in your
 application
 but are still needed for PDF generation.
