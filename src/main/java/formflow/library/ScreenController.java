@@ -110,7 +110,7 @@ public class ScreenController extends FormFlowController {
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
     if (currentScreen == null) {
-      errorScreen(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen), HttpStatus.NOT_FOUND);
+      throwNotFoundError(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen));
     } else {
       if (uuid != null) {
         actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
@@ -218,13 +218,13 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws Exception {
+  ) throws ResponseStatusException {
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById((UUID) httpSession.getAttribute("id"));
 
     if (maybeSubmission.isEmpty()) {
       // we have issues! We should not get here, really.
       log.error("There is no submission associated with request!");
-      errorScreen(HttpMethod.GET.toString(), String.format("/flow/%s/%s/%s", flow, screen, uuid), HttpStatus.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     Submission submission = maybeSubmission.get();
@@ -264,7 +264,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws Exception {
+  ) throws ResponseStatusException {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
     String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
@@ -329,7 +329,7 @@ public class ScreenController extends FormFlowController {
                 iterationUuid
             )
         );
-        errorScreen(HttpMethod.POST.toString(), String.format("/flow/%s/%s/%s", flow, screen, uuid), HttpStatus.BAD_REQUEST);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
       }
     }
 
@@ -393,7 +393,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String subflow,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws Exception {
+  ) throws ResponseStatusException {
     UUID id = (UUID) httpSession.getAttribute("id");
     Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     String subflowEntryScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
@@ -420,7 +420,7 @@ public class ScreenController extends FormFlowController {
         return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
       }
     } else {
-      errorScreen(HttpMethod.POST.toString(), String.format("/flow/%s/%s/%s", flow, subflow, uuid), HttpStatus.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
     String reviewScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getReviewScreen();
@@ -444,7 +444,7 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     log.info("navigation: flow: " + flow + ", screen: " + screen);
     if (currentScreen == null) {
-      errorScreen(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen), HttpStatus.NOT_FOUND);
+      throwNotFoundError(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen));
     }
     String nextScreen = getNextScreenName(httpSession, currentScreen, null);
 
@@ -452,16 +452,9 @@ public class ScreenController extends FormFlowController {
     return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
   }
 
-  private static void errorScreen(String method, String url, HttpStatus httpStatus) throws Exception {
+  private static void throwNotFoundError(String method, String url) throws NoHandlerFoundException {
     HttpHeaders headers = new HttpHeaders();
-
-    if (httpStatus.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-      throw new NoHandlerFoundException(method, url, headers);
-    }
-
-    if (httpStatus.isSameCodeAs(HttpStatus.BAD_REQUEST)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-    }
+    throw new NoHandlerFoundException(method, url, headers);
   }
 
   private String getNextScreenName(HttpSession httpSession,
