@@ -9,6 +9,12 @@ import java.util.Map;
 
 public class SubmissionUtils {
 
+  /**
+   * Create a deep copy of the given submission.
+   *
+   * @param origSubmission given submission to copy
+   * @return deep copy of origSubmission
+   */
   public static Submission copySubmission(Submission origSubmission) {
     Submission newSubmission = new Submission();
     newSubmission.setUrlParams(new HashMap<>(origSubmission.getUrlParams()));

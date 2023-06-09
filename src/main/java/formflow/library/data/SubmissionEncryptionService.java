@@ -14,9 +14,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +40,14 @@ public class SubmissionEncryptionService {
   }
 
   /**
-   * Go through "@Encrypt" annotations and replace fields with encrypted value
+   * Go through "@Encrypt" annotations and replace fields with encrypted value.
+   *
+   * <p>Ex.
+   * <br>Given:
+   * <code>{secret: "this is a secret"}</code>
+   * <br>Result:
+   * <code>{secret_encrypted: "some-encrypted-chars"}</code
+   * </p>
    *
    * @param submission submission to be encrypted
    * @return encrypted copy of the given submission
@@ -51,20 +56,24 @@ public class SubmissionEncryptionService {
     if (submission.getFlow() == null) {
       return submission;
     }
-    Submission result = copySubmission(submission);
 
     try {
-      List<Field> fields = getAnnotatedFields(submission);
-      return replaceValues(result, fields, true);
+      return replaceValues(submission, true);
     } catch (ReflectiveOperationException e) {
       throw new IllegalStateException("Unable to find flow class", e);
     }
-
   }
 
 
   /**
-   * Goes through "@Encrypted" annotations and replaces the encrypted fields with the decrypted value
+   * Goes through "@Encrypted" annotations and replaces the encrypted fields with the decrypted value.
+   *
+   * <p>Ex.
+   * <br>Given:
+   * <code>{secret_encrypted: "some-encrypted-chars"}</code>
+   * <br>Result:
+   * <code>{secret: "this is a secret"}</code
+   * </p>
    *
    * @param submission submission to be decrypted
    * @return decrypted copy of the given submission
@@ -73,44 +82,37 @@ public class SubmissionEncryptionService {
     if (submission.getFlow() == null) {
       return submission;
     }
-    Submission result = new Submission(submission);
 
     try {
-      List<Field> fields = getAnnotatedFields(submission);
-      return replaceValues(result, fields, false);
+      return replaceValues(submission, false);
     } catch (ReflectiveOperationException e) {
       throw new IllegalStateException("Unable to find flow class", e);
     }
-
   }
 
   @NotNull
-  private Submission replaceValues(Submission result, List<Field> fields, boolean doEncryption) {
-    Map<String, Object> valuesToAdd = new HashMap<>();
-    List<String> valuesToRemove = new ArrayList<>();
-
+  private Submission replaceValues(Submission submission, boolean doEncryption) throws ClassNotFoundException {
+    Submission result = copySubmission(submission);
+    List<Field> fields = getAnnotatedFields(submission);
     Map<String, Object> inputData = result.getInputData();
-    for (Map.Entry<String, Object> entry : inputData.entrySet()) {
-      for (Field field : fields) {
+    submission.getInputData().entrySet().forEach(entry -> {
+      fields.forEach(field -> {
         if (entry.getValue() instanceof List) {
-          for (var element : (List) entry.getValue()) {
+          List possibleSubflows = (List) inputData.get(entry.getKey());
+          for (var element : possibleSubflows) {
             // check for subflows
             if (element instanceof Map) {
               Map<String, Object> subflow = (Map<String, Object>) element;
               if (containsEncryptionField(doEncryption, field, subflow)) {
-                String valueToRemove = addNewValueToMap(field, subflow, doEncryption, subflow);
-                subflow.remove(valueToRemove);
+                replaceValue(field, subflow, doEncryption);
               }
             }
           }
         } else if (containsEncryptionField(doEncryption, entry.getKey(), field)) {
-          valuesToRemove.add(addNewValueToMap(field, inputData, doEncryption, valuesToAdd));
+          replaceValue(field, inputData, doEncryption);
         }
-      }
-    }
-
-    valuesToRemove.forEach(inputData::remove);
-    inputData.putAll(valuesToAdd);
+      });
+    });
 
     return result;
   }
@@ -150,14 +152,14 @@ public class SubmissionEncryptionService {
     }
   }
 
-  private String addNewValueToMap(Field field, Map<String, Object> inputMap, boolean encrypt, Map<String, Object> valuesToAdd) {
+  private String replaceValue(Field field, Map<String, Object> inputMap, boolean encrypt) {
     if (encrypt) {
-      String value = (String) inputMap.get(field.getName());
-      valuesToAdd.put(field.getName() + ENCRYPT_SUFFIX, encryptString(value));
+      String value = (String) inputMap.remove(field.getName());
+      inputMap.put(field.getName() + ENCRYPT_SUFFIX, encryptString(value));
       return field.getName();
     } else {
-      String value = (String) inputMap.get(field.getName() + ENCRYPT_SUFFIX);
-      valuesToAdd.put(field.getName(), decryptString(value));
+      String value = (String) inputMap.remove(field.getName() + ENCRYPT_SUFFIX);
+      inputMap.put(field.getName(), decryptString(value));
       return field.getName() + ENCRYPT_SUFFIX;
     }
   }
