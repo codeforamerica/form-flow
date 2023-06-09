@@ -32,7 +32,9 @@ public class SubmissionRepositoryService {
    * @return UUID of the saved submission
    */
   public UUID save(Submission submission) {
-    return repository.save(encryptionService.encrypt(submission)).getId();
+    UUID id = repository.save(encryptionService.encrypt(submission)).getId();
+    submission.setId(id);
+    return id;
   }
 
   /**

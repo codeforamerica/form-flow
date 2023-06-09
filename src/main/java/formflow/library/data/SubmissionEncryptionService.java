@@ -14,7 +14,9 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,7 @@ public class SubmissionEncryptionService {
    * Go through "@Encrypt" annotations and replace fields with encrypted value
    *
    * @param submission submission to be encrypted
-   * @return
+   * @return encrypted copy of the given submission
    */
   public Submission encrypt(Submission submission) {
     if (submission.getFlow() == null) {
@@ -61,6 +63,12 @@ public class SubmissionEncryptionService {
   }
 
 
+  /**
+   * Goes through "@Encrypted" annotations and replaces the encrypted fields with the decrypted value
+   *
+   * @param submission submission to be decrypted
+   * @return decrypted copy of the given submission
+   */
   public Submission decrypt(Submission submission) {
     if (submission.getFlow() == null) {
       return submission;
@@ -78,28 +86,41 @@ public class SubmissionEncryptionService {
 
   @NotNull
   private Submission replaceValues(Submission result, List<Field> fields, boolean doEncryption) {
+    Map<String, Object> valuesToAdd = new HashMap<>();
+    List<String> valuesToRemove = new ArrayList<>();
+
     Map<String, Object> inputData = result.getInputData();
     for (Map.Entry<String, Object> entry : inputData.entrySet()) {
       for (Field field : fields) {
-        if (entry.getKey().equals(field.getName())) {
-          replaceValue(field, inputData, doEncryption);
-        } else if (entry.getValue() instanceof List) {
-          // check for subflows
+        if (entry.getValue() instanceof List) {
           for (var element : (List) entry.getValue()) {
+            // check for subflows
             if (element instanceof Map) {
               Map<String, Object> subflow = (Map<String, Object>) element;
-              if (subflow.containsKey(field.getName() + ENCRYPT_SUFFIX)) {
-                replaceValue(field, subflow, doEncryption);
+              if (containsEncryptionField(doEncryption, field, subflow)) {
+                String valueToRemove = addNewValueToMap(field, subflow, doEncryption, subflow);
+                subflow.remove(valueToRemove);
               }
-            } else {
-
             }
           }
+        } else if (containsEncryptionField(doEncryption, entry.getKey(), field)) {
+          valuesToRemove.add(addNewValueToMap(field, inputData, doEncryption, valuesToAdd));
         }
       }
     }
 
+    valuesToRemove.forEach(inputData::remove);
+    inputData.putAll(valuesToAdd);
+
     return result;
+  }
+
+  private boolean containsEncryptionField(boolean doEncryption, Field field, Map<String, Object> subflow) {
+    return doEncryption && subflow.containsKey(field.getName()) || !doEncryption && subflow.containsKey(field.getName() + ENCRYPT_SUFFIX);
+  }
+
+  private boolean containsEncryptionField(boolean doEncryption, String entryKey, Field field) {
+    return doEncryption && entryKey.equals(field.getName()) || !doEncryption && entryKey.equals(field.getName() + ENCRYPT_SUFFIX);
   }
 
   @NotNull
@@ -129,21 +150,15 @@ public class SubmissionEncryptionService {
     }
   }
 
-  private void replaceValueEncryptedValue(Field field, Map<String, Object> inputMap) {
-    String value = (String) inputMap.remove(field.getName());
-    inputMap.put(field.getName() + ENCRYPT_SUFFIX, encryptString(value));
-  }
-
-  private void replaceValueDecryptedValue(Field field, Map<String, Object> inputMap) {
-    String value = (String) inputMap.remove(field.getName());
-    inputMap.put(field.getName().replace(ENCRYPT_SUFFIX, ""), decryptString(value));
-  }
-
-  private void replaceValue(Field field, Map<String, Object> inputMap, boolean encrypt) {
+  private String addNewValueToMap(Field field, Map<String, Object> inputMap, boolean encrypt, Map<String, Object> valuesToAdd) {
     if (encrypt) {
-      replaceValueEncryptedValue(field, inputMap);
+      String value = (String) inputMap.get(field.getName());
+      valuesToAdd.put(field.getName() + ENCRYPT_SUFFIX, encryptString(value));
+      return field.getName();
     } else {
-      replaceValueDecryptedValue(field, inputMap);
+      String value = (String) inputMap.get(field.getName() + ENCRYPT_SUFFIX);
+      valuesToAdd.put(field.getName(), decryptString(value));
+      return field.getName() + ENCRYPT_SUFFIX;
     }
   }
 

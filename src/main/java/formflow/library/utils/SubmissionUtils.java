@@ -11,7 +11,6 @@ public class SubmissionUtils {
 
   public static Submission copySubmission(Submission origSubmission) {
     Submission newSubmission = new Submission();
-    newSubmission.setInputData(new HashMap<>(origSubmission.getInputData()));
     newSubmission.setUrlParams(new HashMap<>(origSubmission.getUrlParams()));
 
     newSubmission.setFlow(origSubmission.getFlow());

@@ -33,9 +33,6 @@ class SubmissionRepositoryServiceTest {
   @Autowired
   private SubmissionRepositoryService submissionRepositoryService;
 
-  @MockBean
-  SubmissionEncryptionService encryptionService;
-
   @Test
   void shouldSaveASubmissionWithUUID() {
     Submission firstSubmission = new Submission();
@@ -79,6 +76,7 @@ class SubmissionRepositoryServiceTest {
     var timeNow = Instant.now();
     var submission = Submission.builder()
         .inputData(inputData)
+        .urlParams(new HashMap<>())
         .flow("testFlow")
         .submittedAt(Date.from(timeNow))
         .build();
