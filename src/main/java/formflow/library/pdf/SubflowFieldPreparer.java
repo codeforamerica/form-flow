@@ -85,7 +85,7 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
 
     subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
       if (submission.getInputData().containsKey(pdfSubflowName)) {
-        subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflow.subflows.get(0)));
+        subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
       }
 
       if (subflowDataList.size() > 0) {
