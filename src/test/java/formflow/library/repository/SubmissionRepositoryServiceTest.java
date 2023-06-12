@@ -1,8 +1,11 @@
 package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import formflow.library.data.Submission;
+import formflow.library.data.SubmissionEncryptionService;
 import formflow.library.data.SubmissionRepositoryService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -14,9 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -45,9 +52,11 @@ class SubmissionRepositoryServiceTest {
     var timeNow = Instant.now();
     var submission = Submission.builder()
         .inputData(inputData)
+        .urlParams(new HashMap<>())
         .flow("testFlow")
         .submittedAt(Date.from(timeNow))
         .build();
+
 
     UUID submissionId = submissionRepositoryService.save(submission);
 
@@ -56,7 +65,7 @@ class SubmissionRepositoryServiceTest {
     assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
     assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
     assertThat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(savedSubmission.getSubmittedAt()))
-        .isEqualTo(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp.from(timeNow)));
+      .isEqualTo(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp.from(timeNow)));
   }
 
   @Test
@@ -67,6 +76,7 @@ class SubmissionRepositoryServiceTest {
     var timeNow = Instant.now();
     var submission = Submission.builder()
         .inputData(inputData)
+        .urlParams(new HashMap<>())
         .flow("testFlow")
         .submittedAt(Date.from(timeNow))
         .build();

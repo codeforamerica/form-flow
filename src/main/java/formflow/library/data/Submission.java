@@ -81,7 +81,6 @@ public class Submission {
     urlParams = new HashMap<>();
   }
 
-
   /**
    * Provides access to a specific subflow's submission data for a particular UUID, if the subflow is present in the submission.
    *
