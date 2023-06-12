@@ -56,8 +56,4 @@ public interface Action {
   public default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
     throw new UnsupportedOperationException("Not implemented");
   }
-
-  public default List<Map<String, Object>> runSubflowAction(Submission submission, PdfMapSubflow subflowMap) {
-    throw new UnsupportedOperationException("Not Implemented");
-  }
 }
