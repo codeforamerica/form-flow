@@ -30,7 +30,7 @@ class SubflowFieldPreparersTest {
     PdfMapSubflow pdfMapSubflow = new PdfMapSubflow();
     pdfMapSubflow.setSubflows(List.of("testSubflow"));
     pdfMapSubflow.setTotalIterations(5);
-    pdfMapSubflow.setFields(Map.of(
+    pdfMapSubflow.setInputFields(Map.of(
         "foo", "FOO_FIELD",
         "bar", "BAR_FIELD",
         "checkboxInput", Map.of("item1", "PDF_ITEM1", "item2", "PDF_ITEM2", "item3", "PDF_ITEM3")

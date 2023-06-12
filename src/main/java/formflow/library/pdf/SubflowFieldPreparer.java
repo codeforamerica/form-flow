@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  *   totalIterations: 3
  *   subflows:
  *     - income
- *   fields:
+ *   inputFields:
  *     exampleInput: EXAMPLE_PDF_FIELD
  *     otherExampleInput: ANOTHER_EXAMPLE_PDF_FIELD
  *     exampleCheckboxField:
