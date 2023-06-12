@@ -57,11 +57,7 @@ public class SubmissionEncryptionService {
       return submission;
     }
 
-    try {
-      return replaceValues(submission, true);
-    } catch (ReflectiveOperationException e) {
-      throw new IllegalStateException("Unable to find flow class", e);
-    }
+    return replaceValues(submission, true);
   }
 
 
@@ -83,15 +79,11 @@ public class SubmissionEncryptionService {
       return submission;
     }
 
-    try {
-      return replaceValues(submission, false);
-    } catch (ReflectiveOperationException e) {
-      throw new IllegalStateException("Unable to find flow class", e);
-    }
+    return replaceValues(submission, false);
   }
 
   @NotNull
-  private Submission replaceValues(Submission submission, boolean doEncryption) throws ClassNotFoundException {
+  private Submission replaceValues(Submission submission, boolean doEncryption) {
     Submission result = copySubmission(submission);
     List<Field> fields = getAnnotatedFields(submission);
     Map<String, Object> inputData = result.getInputData();
@@ -126,14 +118,18 @@ public class SubmissionEncryptionService {
   }
 
   @NotNull
-  private List<Field> getAnnotatedFields(Submission submission) throws ClassNotFoundException {
-    Class<?> flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(submission.getFlow()));
+  private List<Field> getAnnotatedFields(Submission submission) {
+    try {
+      Class<?> flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(submission.getFlow()));
 
-    List<Field> fields = Arrays.stream(flowClass.getDeclaredFields())
-      .filter(field -> Arrays.stream(field.getAnnotations())
-        .anyMatch(annotation -> annotation.annotationType().getName().endsWith(".Encrypted")))
-      .toList();
-    return fields;
+      List<Field> fields = Arrays.stream(flowClass.getDeclaredFields())
+        .filter(field -> Arrays.stream(field.getAnnotations())
+          .anyMatch(annotation -> annotation.annotationType().getName().endsWith(".Encrypted")))
+        .toList();
+      return fields;
+    } catch (ReflectiveOperationException e) {
+      throw new IllegalStateException("Unable to find flow class", e);
+    }
   }
 
   private String encryptString(String data) {
