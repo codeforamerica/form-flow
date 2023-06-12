@@ -74,11 +74,10 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
    * This will prepare the SubmissionFields for all the data across all the subflows specified in the PdfMap.
    *
    * @param submission the submission
-   * @param data       the data to act upon
    * @param pdfMap     the field mappings from the pdf-map.yaml file
    * @return a map of field name to SubmissionField
    */
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, Map<String, Object> data, PdfMap pdfMap) {
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, SubmissionField> preppedFields = new HashMap<>();
     List<Map<String, Object>> subflowDataList = new ArrayList<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
@@ -103,16 +102,19 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
           iteration.remove("iterationIsComplete");
           iteration.forEach((key, value) -> {
 
+            String newKey = getNewKey(key, atomInteger.get());
+
+            if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {
+              return;
+            }
+
             // tack on suffix for field. "_%d" where %d is the iteration number
             if (key.endsWith("[]")) {
               // don't update the inner values.
-              String newKey = key.replace("[]", "_" + atomInteger.get() + "[]");
               preppedFields.put(newKey, new CheckboxField(key.replace("[]", ""),
                   (List<String>) value, atomInteger.get()));
-              //expandedSubflowData.put(newKey, value);
             } else {
-              //expandedSubflowData.put(key + "_" + (atomInteger.get() + 1), value);
-              preppedFields.put(key + "_" + atomInteger.get(), new SingleField(key, value.toString(), atomInteger.get()));
+              preppedFields.put(newKey, new SingleField(key, value.toString(), atomInteger.get()));
             }
           });
           atomInteger.incrementAndGet();
@@ -130,5 +132,13 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
    */
   public void setActionManager(ActionManager actionManager) {
     this.actionManager = actionManager;
+  }
+
+  private String getNewKey(String existingKey, Integer iteration) {
+    if (existingKey.contains("[]")) {
+      return existingKey.replace("[]", "_" + iteration + "[]");
+    } else {
+      return existingKey + "_" + iteration;
+    }
   }
 }

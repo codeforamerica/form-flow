@@ -58,13 +58,13 @@ class SubmissionFieldPreparersTest {
                 "fieldThatDoesNotGetOverwritten", "willNotBeOverwritten"
             )).build();
 
-    assertThat(defaultSingleFieldPreparer.prepareSubmissionFields(submission, submission.getInputData(),
+    assertThat(defaultSingleFieldPreparer.prepareSubmissionFields(submission,
         pdfMapConfiguration.getPdfMap("flow1"))).containsOnly(
         Map.entry("fieldThatGetsOverwritten", new SingleField("fieldThatGetsOverwritten", "willBeOverwritten", null)),
         Map.entry("fieldThatDoesNotGetOverwritten",
             new SingleField("fieldThatDoesNotGetOverwritten", "willNotBeOverwritten", null))
     );
-    assertThat(testCustomPreparer.prepareSubmissionFields(submission, submission.getInputData(),
+    assertThat(testCustomPreparer.prepareSubmissionFields(submission,
         pdfMapConfiguration.getPdfMap("flow1"))).containsOnly(
         Map.entry("fieldThatGetsOverwritten", new SingleField("fieldThatGetsOverwritten", "OVERWRITTEN", null))
     );

@@ -32,7 +32,8 @@ class SubflowFieldPreparersTest {
     pdfMapSubflow.setTotalIterations(5);
     pdfMapSubflow.setFields(Map.of(
         "foo", "FOO_FIELD",
-        "bar", "BAR_FIELD"
+        "bar", "BAR_FIELD",
+        "checkboxInput", Map.of("item1", "PDF_ITEM1", "item2", "PDF_ITEM2", "item3", "PDF_ITEM3")
     ));
     pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
     pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
@@ -102,7 +103,7 @@ class SubflowFieldPreparersTest {
             )).build();
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
+        pdfMapConfiguration.getPdfMap("flow1"));
 
     assertThat(resultMap.equals(
         Map.of(
@@ -153,7 +154,7 @@ class SubflowFieldPreparersTest {
             )).build();
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
+        pdfMapConfiguration.getPdfMap("flow1"));
 
     assertThat(resultMap.equals(
         Map.of(
@@ -195,7 +196,7 @@ class SubflowFieldPreparersTest {
             )).build();
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
+        pdfMapConfiguration.getPdfMap("flow1"));
 
     Map<String, SubmissionField> expectedMap =
         Map.of(
