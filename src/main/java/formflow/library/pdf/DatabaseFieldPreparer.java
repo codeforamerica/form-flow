@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class DataBaseFieldPreparer implements DefaultSubmissionFieldPreparer {
+public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {
 
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {

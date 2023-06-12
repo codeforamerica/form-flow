@@ -332,14 +332,13 @@ displayed on the screen with any other validation error messages.
 
 There are four types of actions available in the Form Flow library:
 
-| Action Name                            | Data Available  | Returns                | Action Definition                                                                                                                                                                                                                                                                                                    |
-|----------------------------------------|-----------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onPostAction                           | FormSubmission  | nothing                | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                         |
-| crossFieldValidationAction             | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                             |
-| beforeSaveAction                       | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
-| beforeDisplayAction                    | Submission      | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                          |
-| afterSaveAction                        | Submission      | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                       |
-
+| Action Name                | Data Available  | Returns                | Action Definition                                                                                                                                                                                                                                                                                                                                          |
+|----------------------------|-----------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onPostAction               | FormSubmission  | nothing                | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                                                               |
+| crossFieldValidationAction | Form Submission | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                                                                   |
+| beforeSaveAction           | Submission      | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
+| beforeDisplayAction        | Submission      | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                                                                |
+| afterSaveAction            | Submission      | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                                                             |
 
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
 actually rendered. The rest of the actions are called when the screen's data is submitted to the
@@ -619,6 +618,13 @@ value was selected by the user. For example, a PDF with a checkbox field for `pr
 three checkboxes with the names `SNAP`, `TANF`, and `CCAP`, where the export value for each
 is `Yes`.
 
+For subflows, the name of your subflow fields must include an iteration number `n`. For example, if
+you have a subflow in your PDF template file that has 5 iterations, `n` should be a number between 1
+and 5. Given an input in your subflow `householdMemberFirstName` each iteration possible in your PDF
+template file should have a name of `HOUSEHOLD_MEMBER_FIRST_NAME_n` where `n` is the iteration
+number. If you have 5 possible iterations you would have `HOUSEHOLD_MEMBER_FIRST_NAME_1`
+through `HOUSEHOLD_MEMBER_FIRST_NAME_5`.
+
 ### Creating a pdf-map.yaml file
 
 The next step in generating PDFs is to create a `pdf-map.yaml` file. This file will act as a map of
@@ -626,7 +632,7 @@ input fields from your application to PDF fields in your template PDF file. This
 added
 to your applications `resources` folder, in a folder named `pdfs`.
 
-Your `pdf-map.yaml` file will consist of the following key value pairs:
+The following sections describe the expected keys in the `pdf-map.yaml` file.
 
 #### flow
 
@@ -711,14 +717,12 @@ dbFields:
   flow: FLOW_NAME
 ```
 
-### Subflow specific PDF field mappings
-
 #### subflowInfo
 
 The top level key for all your subflows. `subflowInfo` holds all data related to mapping all of your
 subflows.
 
-#### totalIterations
+##### totalIterations
 
 The total number of iterations possible given your PDF's template. For example, if your PDF has room
 for 5 household members, your `totalIterations` for the `household` subflow would be 5.
@@ -731,18 +735,17 @@ subflowInfo:
     totalIterations: 5
 ```
 
-#### fields
+##### inputFields
 
-Similar to `inputFields`, `fields` is a map of input fields from your application to PDF fields in
-your
-PDF template file. Like `inputFields`, the key should always be the actual name of an input in your
+`inputFields` is a map of input fields from your application to PDF fields in your
+PDF template file. The key should always be the actual name of an input in your
 subflow, and the value can be one of two things.
 
 For single value fields like text fields and radios,
 the value will be the name of a field in your PDF template. For example:
 
 ```yaml
-    fields:
+    inputFields:
       householdMemberFirstName: LEGAL_NAME_FIRST_MEMBER
       householdMemberLastName: LEGAL_NAME_LAST_MEMBER
 ```
@@ -753,7 +756,7 @@ key is the name of a checkbox input in your application and each internal key va
 checkbox field value to PDF field name. For example:
 
 ```yaml
-fields:
+inputFields:
   incomeTypes:
     incomeJob: INCOME_HAS_JOB_MEMBER
     incomeSelf: INCOME_HAS_SELF_EMPLOYMENT_MEMBER
@@ -767,6 +770,55 @@ input. `INCOME_HAS_JOB_MEMBER`,
 `INCOME_HAS_SELF_EMPLOYMENT_MEMBER`, and `INCOME_HAS_UNEMPLOYMENT_MEMBER` are the names of the
 corresponding PDF checkbox fields.
 
+If you would like to see an example of an entire `pdf-map.yaml` file, check out the starter-app's
+`pdf-map.yaml`
+file [here](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/pdf-map.yaml).
+
+### Default Field Preparers
+
+The FFB library comes with a few default preparers that it uses to map your application's inputs.
+Preparers create a map of `SubmissionField` objects which the FFB library uses to map your
+application's
+inputs and their user entered values to the correct PDF fields.
+These preparers are:
+
+- `OneToOnePreparer`
+    - Handles the mapping of single value fields like text, radio, or select inputs from your
+      application
+      to the correct fields in your PDF template file.
+- `OneToManyPreparer`
+    - Handles the mapping of multi-value fields like checkboxes from your application's inputs to
+      the
+      correct fields in your PDF template file.
+- `DatabaseFieldPreparer`
+    - Handles the mapping of database fields from your application to the correct fields in your PDF
+      template file. Currently supported fields are:
+        - submittedAt
+        - submissionId
+        - createdAt
+        - updatedAt
+        - flow
+- `SubflowFieldPreparer`
+    - Handles the mapping of subflow fields from your application's subflows and their inputs to the
+      correct fields in your PDF template file.
+
+All of these preparers will run by default against the `inputFields` you have indicated in your
+`pdf-map.yaml` file. Should you want to customize or inject fields you can do so
+using [custom preparers](#custom-preparers).
+
+#### SubmissionField
+
+SubmissionField is an interface that represents a mapping between your applications inputs and their
+values. SubmissionField's are used by the FFB library during PDF generation to map your application'
+s
+input values to the correct PDF Fields. There are 3 types of SubmissionFields:
+
+| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                                                             | Examples                                                                                                                                                                                                                                                 |
+|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null)                                   | **Outside of a subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of a subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", 1)                                                         |
+| CheckboxField                  | For checkbox input fields. Represents a one to many mapping between a checkbox input and an array of it's many potential values. Can iclude an iteration if the input is within a subflow.                              | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration number `Int` iteration number (for subflows, can be null) | **Outside of a subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), null) <br><br> **Inside of a subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), 1) |
+| DatabaseField                  | For fields from database columns. Represents a mapping between database fields such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration.                                              | Params: `String` database column name, `String` database field value                                                                    | new DatabaseField("submittedAt", "exampleSubmittedAtValue")                                                                                                                                                                                              |
+
 ### Custom preparers
 
 Custom preparers are a way for you to manipulate the way fields get filled in during PDF generation.
@@ -777,19 +829,6 @@ a Map of String input name to `SubmissionField` class.
 It's important to note that the SubmissionField mappings created by a custom preparer will overwrite
 any of the default mappings that happen during PDF generation.
 
-#### SubmissionField
-
-SubmissionField is an interface that represents a mapping between your applications inputs and their
-values. SubmissionField's are used by the FFB library during PDF generation to map your application'
-s
-input values to the correct PDF Fields. There are 3 types of SubmissionFields:
-
-| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                                                                                                                                                                                                                                                                            |
-|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null) <br><br> Examples:<br> new SingleField("exampleInputName", "exampleInputValue", null) <br> new SingleField("exampleInputName", "exampleInputValue", 1)                                                                                           |
-| CheckboxField                  | For checkbox input fields. Represents a one to many mapping between a checkbox input and an array of it's many potential values. Can iclude an iteration if the input is within a subflow.                              | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration number `Int` iteration number (for subflows, can be null) <br><br> Examples:<br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), null) <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), 1) |
-| DatabaseField                  | For fields from database columns. Represents a mapping between database fields such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration.                                              | Params: `String` database column name, `String` database field value <br><br> Examples:<br> new DatabaseField("submittedAt", "exampleSubmittedAtValue")                                                                                                                                                                                                |
-
 #### Creating a Custom Preparer
 
 When creating a custom preparer, you will want to create a new Java class that implements the
@@ -798,9 +837,8 @@ When creating a custom preparer, you will want to create a new Java class that i
 Depending on what you would like to do with your custom preparer, it should return a map of String
 input name to either `SingleField`, `CheckboxField`, `DatabaseField` or even a combination.
 
-For example, if you wanted to create a custom preparer that takes three seperate date fields and
-maps
-them to a single PDF
+For example, if you wanted to create a custom preparer that takes three separate date fields and
+maps them to a single PDF field.
 
 ```java
 public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
@@ -883,6 +921,10 @@ public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
   }
 }
 ```
+
+Note the comments in the above code detailing the max iterations we want and the fact that the
+iteration
+numbers are not 0 indexed.
 
 For more examples of custom preparers in for both subflows and non subflows, you can look at the
 custom preparers in
