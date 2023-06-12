@@ -29,11 +29,16 @@ public class SubmissionEncryptionService {
   @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
   private String inputConfigPath;
 
+  private enum EncryptionDirection {
+    ENCRYPT,
+    DECRYPT
+  }
+
   public SubmissionEncryptionService(@Value("${form-flow.encryption-key:}") String key) {
     try {
       AeadConfig.register();
       encDec = CleartextKeysetHandle.read(JsonKeysetReader.withString(key))
-        .getPrimitive(Aead.class);
+          .getPrimitive(Aead.class);
     } catch (GeneralSecurityException | IOException e) {
       throw new IllegalStateException(e);
     }
@@ -57,7 +62,7 @@ public class SubmissionEncryptionService {
       return submission;
     }
 
-    return replaceValues(submission, true);
+    return getNewSubmission(submission, EncryptionDirection.ENCRYPT);
   }
 
 
@@ -79,11 +84,12 @@ public class SubmissionEncryptionService {
       return submission;
     }
 
-    return replaceValues(submission, false);
+    return getNewSubmission(submission, EncryptionDirection.DECRYPT);
   }
 
+
   @NotNull
-  private Submission replaceValues(Submission submission, boolean doEncryption) {
+  private Submission getNewSubmission(Submission submission, EncryptionDirection direction) {
     Submission result = copySubmission(submission);
     List<Field> fields = getAnnotatedFields(submission);
     Map<String, Object> inputData = result.getInputData();
@@ -95,13 +101,13 @@ public class SubmissionEncryptionService {
             // check for subflows
             if (element instanceof Map) {
               Map<String, Object> subflow = (Map<String, Object>) element;
-              if (containsEncryptionField(doEncryption, field, subflow)) {
-                replaceValue(field, subflow, doEncryption);
+              if (containsEncryptionField(direction, field, subflow)) {
+                replaceValue(field, subflow, direction);
               }
             }
           }
-        } else if (containsEncryptionField(doEncryption, entry.getKey(), field)) {
-          replaceValue(field, inputData, doEncryption);
+        } else if (containsEncryptionField(direction, field, entry.getKey())) {
+          replaceValue(field, inputData, direction);
         }
       });
     });
@@ -109,12 +115,14 @@ public class SubmissionEncryptionService {
     return result;
   }
 
-  private boolean containsEncryptionField(boolean doEncryption, Field field, Map<String, Object> subflow) {
-    return doEncryption && subflow.containsKey(field.getName()) || !doEncryption && subflow.containsKey(field.getName() + ENCRYPT_SUFFIX);
+  private boolean containsEncryptionField(EncryptionDirection direction, Field field, Map<String, Object> subflow) {
+    return (direction == EncryptionDirection.ENCRYPT && subflow.containsKey(field.getName())) ||
+        (direction == EncryptionDirection.DECRYPT && subflow.containsKey(field.getName() + ENCRYPT_SUFFIX));
   }
 
-  private boolean containsEncryptionField(boolean doEncryption, String entryKey, Field field) {
-    return doEncryption && entryKey.equals(field.getName()) || !doEncryption && entryKey.equals(field.getName() + ENCRYPT_SUFFIX);
+  private boolean containsEncryptionField(EncryptionDirection direction, Field field, String entryKey) {
+    return (direction == EncryptionDirection.ENCRYPT && entryKey.equals(field.getName())) ||
+        (direction == EncryptionDirection.DECRYPT && entryKey.equals(field.getName() + ENCRYPT_SUFFIX));
   }
 
   @NotNull
@@ -123,9 +131,9 @@ public class SubmissionEncryptionService {
       Class<?> flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(submission.getFlow()));
 
       List<Field> fields = Arrays.stream(flowClass.getDeclaredFields())
-        .filter(field -> Arrays.stream(field.getAnnotations())
-          .anyMatch(annotation -> annotation.annotationType().getName().endsWith(".Encrypted")))
-        .toList();
+          .filter(field -> Arrays.stream(field.getAnnotations())
+              .anyMatch(annotation -> annotation.annotationType().getName().endsWith(".Encrypted")))
+          .toList();
       return fields;
     } catch (ReflectiveOperationException e) {
       throw new IllegalStateException("Unable to find flow class", e);
@@ -148,15 +156,23 @@ public class SubmissionEncryptionService {
     }
   }
 
-  private String replaceValue(Field field, Map<String, Object> inputMap, boolean encrypt) {
-    if (encrypt) {
+  private void replaceValue(Field field, Map<String, Object> inputMap, EncryptionDirection direction) {
+    String fieldName = getNewFieldName(field, direction);
+
+    if (direction == EncryptionDirection.ENCRYPT) {
       String value = (String) inputMap.remove(field.getName());
-      inputMap.put(field.getName() + ENCRYPT_SUFFIX, encryptString(value));
-      return field.getName();
+      inputMap.put(fieldName, encryptString(value));
     } else {
       String value = (String) inputMap.remove(field.getName() + ENCRYPT_SUFFIX);
-      inputMap.put(field.getName(), decryptString(value));
+      inputMap.put(fieldName, decryptString(value));
+    }
+  }
+
+  private String getNewFieldName(Field field, EncryptionDirection direction) {
+    if (direction == EncryptionDirection.ENCRYPT) {
       return field.getName() + ENCRYPT_SUFFIX;
+    } else {
+      return field.getName();
     }
   }
 
