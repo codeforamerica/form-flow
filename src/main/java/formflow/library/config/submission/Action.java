@@ -35,20 +35,47 @@ public interface Action {
    * Runs an action on form submission data to potentially manipulate the data.
    *
    * @param formSubmission form submission object the action is associated with, not null
+   * @deprecated use {@link #run(FormSubmission, Submission)} instead.
    */
+  @Deprecated
   public default void run(FormSubmission formSubmission) {
     throw new UnsupportedOperationException("Not implemented");
   }
+
+  /**
+   * Runs an action on form submission and submission data to potentially manipulate the data.
+   *
+   * @param formSubmission form submission object the action is associated with, not null
+   * @param submission     submission object the action is associated with, not null
+   */
+  public default void run(FormSubmission formSubmission, Submission submission) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
 
   /**
    * Runs an action on form submission data to potentially manipulate the data.
    *
    * @param formSubmission form submission object the action is associated with, not null
    * @param id             id for the iteration
+   * @deprecated use {@link #run(FormSubmission, Submission, String)} instead.
    */
+  @Deprecated
   public default void run(FormSubmission formSubmission, String id) {
     throw new UnsupportedOperationException("Not implemented run Validation");
   }
+
+  /**
+   * Runs an action on form submission and submission data to potentially manipulate the data.
+   *
+   * @param formSubmission form submission object the action is associated with, not null
+   * @param submission     submission object the action is associated with, not null
+   * @param id             id for the iteration
+   */
+  public default void run(FormSubmission formSubmission, Submission submission, String id) {
+    throw new UnsupportedOperationException("Not implemented run Validation");
+  }
+
 
   /*
    * Runs validation code with the expectation that error messages may be returned.
