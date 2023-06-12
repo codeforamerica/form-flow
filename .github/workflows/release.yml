@@ -4,9 +4,22 @@ on:
     types:
       - released
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        type: string
+        required: true
 jobs:
-  noop:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - name: Noop
-        run: echo "Noop"
+      - name: Checkout
+        uses: actions/checkout@v3
+        with: # TODO: take this out when you're done testing so it uses the release instead!
+          ref: ${{ inputs.version }}
+          fetch-depth: 0
+      - name: Update version in build.gradle
+        run: | # TODO: switch out inputs.version with github.event.release.tag_name when you're done testing!
+            echo "Updating version in build.gradle to ${{ inputs.version }}"
+            sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
+            cat build.gradle
