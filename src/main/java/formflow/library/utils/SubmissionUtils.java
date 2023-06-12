@@ -35,7 +35,9 @@ public class SubmissionUtils {
     for (Map.Entry<String, Object> entry : origMap.entrySet()) {
       if (entry.getValue() instanceof List) {
         List data = (List) entry.getValue();
-        if (data.get(0) instanceof String) {
+        if (data.size() == 0) {
+          result.put(entry.getKey(), new ArrayList<>());
+        } else if (data.get(0) instanceof String) {
           result.put(entry.getKey(), new ArrayList<>(data));
         } else if (data.get(0) instanceof Map) {
           List<Map> newList = new ArrayList<>();

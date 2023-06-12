@@ -27,6 +27,7 @@ public class SubmissionEncryptionServiceTest {
   void setup() {
     submission = Submission.builder()
         .inputData(Map.of(
+          "checkBoxSet", List.of(),
                 "ssnInput", "123-45-6789",
                 "subflowA", List.of(Map.of("ssnInputSubflow", "321-54-9876"))
             )
