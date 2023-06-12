@@ -54,14 +54,14 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
-    implementation 'com.google.guava:guava:32.0.0-jre'
+    implementation 'com.google.guava:guava:32.0.1-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.jetbrains:annotations:24.0.1'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.4.2'
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'org.flywaydb:flyway-core:9.19.2'
+    implementation 'org.flywaydb:flyway-core:9.19.4'
     implementation 'net.coobird:thumbnailator:0.4.19'
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'

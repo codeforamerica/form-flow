@@ -629,3 +629,16 @@ body,
 .address-validation .radio-button div {
   font-weight: normal;
 }
+
+.stack-trace {
+  color: white;
+  background-color: #232323;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-x: auto;
+  white-space: pre;
+}
