@@ -2,7 +2,6 @@ package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
 import java.util.HashMap;
 import java.util.List;
@@ -38,10 +37,7 @@ class SubflowFieldPreparersTest {
     pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
     pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
 
-    ActionManager actionManager = new ActionManager(List.of(new RemoveApplicantIterationAction()));
-
     subflowFieldPreparer = new SubflowFieldPreparer();
-    subflowFieldPreparer.setActionManager(actionManager);
   }
 
   @Test
