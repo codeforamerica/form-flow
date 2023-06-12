@@ -35,10 +35,15 @@ public class SubmissionEncryptionService {
   }
 
   public SubmissionEncryptionService(@Value("${form-flow.encryption-key:}") String key) {
+    if (key == null || key.isEmpty()) {
+      encDec = null;
+      return;
+    }
+
     try {
       AeadConfig.register();
       encDec = CleartextKeysetHandle.read(JsonKeysetReader.withString(key))
-          .getPrimitive(Aead.class);
+        .getPrimitive(Aead.class);
     } catch (GeneralSecurityException | IOException e) {
       throw new IllegalStateException(e);
     }
@@ -58,7 +63,7 @@ public class SubmissionEncryptionService {
    * @return encrypted copy of the given submission
    */
   public Submission encrypt(Submission submission) {
-    if (submission.getFlow() == null) {
+    if (submission.getFlow() == null || encDec == null) {
       return submission;
     }
 
@@ -80,7 +85,7 @@ public class SubmissionEncryptionService {
    * @return decrypted copy of the given submission
    */
   public Submission decrypt(Submission submission) {
-    if (submission.getFlow() == null) {
+    if (submission.getFlow() == null || encDec == null) {
       return submission;
     }
 
@@ -117,12 +122,12 @@ public class SubmissionEncryptionService {
 
   private boolean containsEncryptionField(EncryptionDirection direction, Field field, Map<String, Object> subflow) {
     return (direction == EncryptionDirection.ENCRYPT && subflow.containsKey(field.getName())) ||
-        (direction == EncryptionDirection.DECRYPT && subflow.containsKey(field.getName() + ENCRYPT_SUFFIX));
+      (direction == EncryptionDirection.DECRYPT && subflow.containsKey(field.getName() + ENCRYPT_SUFFIX));
   }
 
   private boolean containsEncryptionField(EncryptionDirection direction, Field field, String entryKey) {
     return (direction == EncryptionDirection.ENCRYPT && entryKey.equals(field.getName())) ||
-        (direction == EncryptionDirection.DECRYPT && entryKey.equals(field.getName() + ENCRYPT_SUFFIX));
+      (direction == EncryptionDirection.DECRYPT && entryKey.equals(field.getName() + ENCRYPT_SUFFIX));
   }
 
   @NotNull
@@ -131,9 +136,9 @@ public class SubmissionEncryptionService {
       Class<?> flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(submission.getFlow()));
 
       List<Field> fields = Arrays.stream(flowClass.getDeclaredFields())
-          .filter(field -> Arrays.stream(field.getAnnotations())
-              .anyMatch(annotation -> annotation.annotationType().getName().endsWith(".Encrypted")))
-          .toList();
+        .filter(field -> Arrays.stream(field.getAnnotations())
+          .anyMatch(annotation -> annotation.annotationType().getName().endsWith(".Encrypted")))
+        .toList();
       return fields;
     } catch (ReflectiveOperationException e) {
       throw new IllegalStateException("Unable to find flow class", e);
