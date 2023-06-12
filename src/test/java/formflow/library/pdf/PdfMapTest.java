@@ -23,7 +23,7 @@ public class PdfMapTest {
     PdfMapSubflow pdfMapSubflowA = new PdfMapSubflow();
     pdfMapSubflowA.setSubflows(List.of("income", "household"));
     pdfMapSubflowA.setTotalIterations(5);
-    pdfMapSubflowA.setFields(
+    pdfMapSubflowA.setInputFields(
         Map.of(
             "householdMemberFirstName", "PDF_HOUSEHOLD_MEMBER_FIRST_NAME",
             "householdMemberLastName", "PDF_HOUSEHOLD_MEMBER_LAST_NAME",
@@ -50,7 +50,7 @@ public class PdfMapTest {
     assertThat(subflowFields.containsKey("householdMemberFirstName_1")).isTrue();
     assertThat(subflowFields.containsKey("householdMemberFirstName_5")).isTrue();
     assertThat(subflowFields.containsKey("householdMemberFirstName_6")).isFalse();
-    assertThat(subflowFields.size()).isEqualTo(pdfMapSubflow.getTotalIterations() * pdfMapSubflow.getFields().size());
+    assertThat(subflowFields.size()).isEqualTo(pdfMapSubflow.getTotalIterations() * pdfMapSubflow.getInputFields().size());
 
     assertThat(subflowFields.containsKey("incomeTypes_1")).isTrue();
     Map<String, String> incomeTypeFields = (Map<String, String>) subflowFields.get("incomeTypes_1");

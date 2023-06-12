@@ -2,7 +2,6 @@ package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ class SubmissionFieldPreparersTest {
 
   OneToManyPreparer defaultCheckboxFieldPreparer = new OneToManyPreparer();
 
-  DataBaseFieldPreparer defaultDatabaseFieldPreparer = new DataBaseFieldPreparer();
+  DatabaseFieldPreparer defaultDatabaseFieldPreparer = new DatabaseFieldPreparer();
 
   SubflowFieldPreparer defaultSubflowFieldPreparer = new SubflowFieldPreparer();
   TestCustomPreparer testCustomPreparer = new TestCustomPreparer();
@@ -36,7 +35,7 @@ class SubmissionFieldPreparersTest {
     PdfMapSubflow pdfMapSubflow = new PdfMapSubflow();
     pdfMapSubflow.setSubflows(List.of("testSubflow"));
     pdfMapSubflow.setTotalIterations(5);
-    pdfMapSubflow.setFields(Map.of(
+    pdfMapSubflow.setInputFields(Map.of(
         "foo", "FOO_FIELD",
         "bar", "BAR_FIELD"
     ));

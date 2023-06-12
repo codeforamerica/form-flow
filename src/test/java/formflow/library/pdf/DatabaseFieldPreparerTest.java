@@ -36,7 +36,7 @@ class DatabaseFieldPreparerTest {
 
   @Test
   void prepareReturnsDatabaseFieldsSubmittedAtDate() {
-    DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer();
+    DatabaseFieldPreparer dataBaseFieldPreparer = new DatabaseFieldPreparer();
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission,
         pdfMapConfiguration.getPdfMap(submission.getFlow()))).containsEntry(
         "submittedAt", new DatabaseField("submittedAt", "09/15/2020")
@@ -45,7 +45,7 @@ class DatabaseFieldPreparerTest {
 
   @Test
   void shouldNotCreateDbFieldsForItemsNotPresentInPdfMap() {
-    DataBaseFieldPreparer dataBaseFieldPreparer = new DataBaseFieldPreparer();
+    DatabaseFieldPreparer dataBaseFieldPreparer = new DatabaseFieldPreparer();
     assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission,
         pdfMapConfiguration.getPdfMap(submission.getFlow()))).containsAllEntriesOf(
         Map.of("flow", new DatabaseField("flow", submission.getFlow()),
