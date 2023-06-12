@@ -16,7 +16,6 @@ public class PdfMapSubflow {
 
   List<String> subflows;
   int totalIterations;
-  String dataAction;
   Map<String, Object> fields;
 
   /**
@@ -28,7 +27,6 @@ public class PdfMapSubflow {
    *   subflowInfo:
    *     householdAndIncome:
    *       totalIterations: 2
-   *       dataAction: PdfSubflowHouseholdAndIncomeDataAction
    *       subflows:
    *         - income
    *         - household

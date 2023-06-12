@@ -83,30 +83,8 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
 
     subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
-      // run action on data
-      if (pdfSubflow.dataAction != null) {
-        subflowDataList.addAll(actionManager.getAction(pdfSubflow.dataAction).runSubflowAction(submission, pdfSubflow));
-      } else {
-        // if there are no subflows specified or if there is no action supplied, we can't possibly know how
-        // to combine more than one subflow's data and work with it successfully.  Send an error.
-        if (pdfSubflow.subflows == null) {
-          log.error("No subflows provided for PDF Subflow: " + pdfSubflowName);
-          throw new RuntimeException(
-              String.format("No subflow to work with specified for PDF subflow: %s. Unable to continue preparing data.",
-                  pdfSubflowName));
-        } else if (pdfSubflow.subflows.size() > 1) {
-          String error = String.format(
-              "Error in PDF subflow %s configuration. No action was provided, but multiple subflows were indicated. "
-                  + "There is no way to work with more than one subflow's data with out an Action to merge/collate the data.",
-              pdfSubflowName);
-          log.error(error);
-          throw new RuntimeException(error);
-        }
-
-        // there is only one subflow listed, so just bring its data forward
-        if (submission.getInputData().containsKey(pdfSubflow.subflows.get(0))) {
-          subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflow.subflows.get(0)));
-        }
+      if (submission.getInputData().containsKey(pdfSubflowName)) {
+        subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
       }
 
       if (subflowDataList.size() > 0) {
