@@ -55,6 +55,10 @@ public abstract class AbstractBasePageTest {
     testPage = new Page(driver);
   }
 
+  public void navigateTo(String path) {
+    driver.navigate().to(baseUrl + path);
+  }
+
   @SuppressWarnings("unused")
   public void takeSnapShot(String fileWithPath) {
     TakesScreenshot screenshot = driver;

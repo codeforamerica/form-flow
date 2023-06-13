@@ -1,13 +1,12 @@
 package formflow.library.pdf;
 
-import formflow.library.data.Submission;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.data.Submission;
 import java.util.List;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class OneToManyPreparerTest {
 
@@ -34,7 +33,7 @@ class OneToManyPreparerTest {
     ));
     OneToManyPreparer oneToManyPreparer = new OneToManyPreparer();
 
-    assertThat(oneToManyPreparer.prepareSubmissionFields(submission, submission.getInputData(), pdfMap)).containsExactly(
+    assertThat(oneToManyPreparer.prepareSubmissionFields(submission, pdfMap)).containsExactly(
         Map.entry("checkbox", new CheckboxField("checkbox", List.of("option1", "option3"), null))
     );
   }

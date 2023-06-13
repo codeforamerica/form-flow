@@ -16,23 +16,18 @@ public class PdfMapSubflow {
 
   List<String> subflows;
   int totalIterations;
-  String dataAction;
-  Map<String, Object> fields;
+  Map<String, Object> inputFields;
 
   /**
-   * Returns all the fields associated with a subflow's iterations, expanded out, up to the totalIterations number defined in the
-   * PdfMap yaml file.  All the fields represented by iteration data are represented in the returned Map.
+   * Returns all the inputFields associated with a subflow's iterations, expanded out, up to the totalIterations number defined in
+   * the PdfMap yaml file.  All the inputFields represented by iteration data are represented in the returned Map.
    * <br>
    * Example Subflow data in the PDF file:
    * <pre>
    *   subflowInfo:
    *     householdAndIncome:
    *       totalIterations: 2
-   *       dataAction: PdfSubflowHouseholdAndIncomeDataAction
-   *       subflows:
-   *         - income
-   *         - household
-   *       fields:
+   *       inputFields:
    *         householdMemberFirstName: LEGAL_NAME_FIRST_MEMBER
    *         householdMemberLastName: LEGAL_NAME_LAST_MEMBER
    *         householdMemberRelationship: RELATIONSHIP_MEMBER
@@ -63,7 +58,7 @@ public class PdfMapSubflow {
     for (int index = 0; index < totalIterations; index++) {
       String suffix = "_" + (atomicInteger.get() + 1);
 
-      fields.forEach((key, value) -> {
+      inputFields.forEach((key, value) -> {
         String newKey = key + suffix;
 
         if (value instanceof Map) {

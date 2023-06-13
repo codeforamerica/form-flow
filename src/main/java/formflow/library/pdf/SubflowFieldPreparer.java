@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  *   totalIterations: 3
  *   subflows:
  *     - income
- *   fields:
+ *   inputFields:
  *     exampleInput: EXAMPLE_PDF_FIELD
  *     otherExampleInput: ANOTHER_EXAMPLE_PDF_FIELD
  *     exampleCheckboxField:
@@ -74,40 +74,17 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
    * This will prepare the SubmissionFields for all the data across all the subflows specified in the PdfMap.
    *
    * @param submission the submission
-   * @param data       the data to act upon
    * @param pdfMap     the field mappings from the pdf-map.yaml file
    * @return a map of field name to SubmissionField
    */
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, Map<String, Object> data, PdfMap pdfMap) {
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, SubmissionField> preppedFields = new HashMap<>();
     List<Map<String, Object>> subflowDataList = new ArrayList<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
 
     subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
-      // run action on data
-      if (pdfSubflow.dataAction != null) {
-        subflowDataList.addAll(actionManager.getAction(pdfSubflow.dataAction).runSubflowAction(submission, pdfSubflow));
-      } else {
-        // if there are no subflows specified or if there is no action supplied, we can't possibly know how
-        // to combine more than one subflow's data and work with it successfully.  Send an error.
-        if (pdfSubflow.subflows == null) {
-          log.error("No subflows provided for PDF Subflow: " + pdfSubflowName);
-          throw new RuntimeException(
-              String.format("No subflow to work with specified for PDF subflow: %s. Unable to continue preparing data.",
-                  pdfSubflowName));
-        } else if (pdfSubflow.subflows.size() > 1) {
-          String error = String.format(
-              "Error in PDF subflow %s configuration. No action was provided, but multiple subflows were indicated. "
-                  + "There is no way to work with more than one subflow's data with out an Action to merge/collate the data.",
-              pdfSubflowName);
-          log.error(error);
-          throw new RuntimeException(error);
-        }
-
-        // there is only one subflow listed, so just bring its data forward
-        if (submission.getInputData().containsKey(pdfSubflow.subflows.get(0))) {
-          subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflow.subflows.get(0)));
-        }
+      if (submission.getInputData().containsKey(pdfSubflowName)) {
+        subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
       }
 
       if (subflowDataList.size() > 0) {
@@ -125,16 +102,19 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
           iteration.remove("iterationIsComplete");
           iteration.forEach((key, value) -> {
 
+            String newKey = getNewKey(key, atomInteger.get());
+
+            if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {
+              return;
+            }
+
             // tack on suffix for field. "_%d" where %d is the iteration number
             if (key.endsWith("[]")) {
               // don't update the inner values.
-              String newKey = key.replace("[]", "_" + atomInteger.get() + "[]");
               preppedFields.put(newKey, new CheckboxField(key.replace("[]", ""),
                   (List<String>) value, atomInteger.get()));
-              //expandedSubflowData.put(newKey, value);
             } else {
-              //expandedSubflowData.put(key + "_" + (atomInteger.get() + 1), value);
-              preppedFields.put(key + "_" + atomInteger.get(), new SingleField(key, value.toString(), atomInteger.get()));
+              preppedFields.put(newKey, new SingleField(key, value.toString(), atomInteger.get()));
             }
           });
           atomInteger.incrementAndGet();
@@ -152,5 +132,13 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
    */
   public void setActionManager(ActionManager actionManager) {
     this.actionManager = actionManager;
+  }
+
+  private String getNewKey(String existingKey, Integer iteration) {
+    if (existingKey.contains("[]")) {
+      return existingKey.replace("[]", "_" + iteration + "[]");
+    } else {
+      return existingKey + "_" + iteration;
+    }
   }
 }
