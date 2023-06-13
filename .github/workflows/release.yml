@@ -23,4 +23,5 @@ jobs:
         run: | # TODO: switch out inputs.version with github.event.release.tag_name when you're done testing!
             echo "Updating version in build.gradle to ${{ inputs.version }}"
             sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-            cat build.gradle
+            echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
+            echo "${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --import private_key.asc
