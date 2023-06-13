@@ -38,6 +38,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
    * @param subject        The subject line of the email
    * @param recipientEmail The email address that will get the email, aka the To field
    * @param emailBody      The HTML version of the email body
+   * @return A Mailgun MessageResponse object
    */
   @Override
   public MessageResponse sendEmail(
@@ -62,6 +63,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
    * @param recipientEmail The email address that will get the email, aka the To field
    * @param emailBody      The HTML version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
+   * @return A Mailgun MessageResponse object
    */
   @Override
   public MessageResponse sendEmail(
@@ -89,6 +91,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
    * @param emailBody      The HTML version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
    * @param requireTls     A way to make TLS required
+   * @return A Mailgun MessageResponse object
    */
   @Override
   public MessageResponse sendEmail(

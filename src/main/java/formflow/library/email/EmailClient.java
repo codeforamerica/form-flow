@@ -11,6 +11,7 @@ public interface EmailClient<T> {
    * @param subject        The subject line of the email
    * @param recipientEmail The email address that will get the email, aka the To field
    * @param emailBody      The plain text version of the email body
+   * @return A generic T
    */
   T sendEmail(
       String subject,
@@ -25,6 +26,7 @@ public interface EmailClient<T> {
    * @param recipientEmail The email address that will get the email, aka the To field
    * @param emailBody      The plain text version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
+   * @return A generic T
    */
   T sendEmail(
       String subject,
@@ -43,6 +45,7 @@ public interface EmailClient<T> {
    * @param emailBody      The plain text version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
    * @param requireTls     A way to make TLS required
+   * @return A generic T
    */
   T sendEmail(
       String subject,
