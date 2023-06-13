@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import com.mailgun.api.v3.MailgunMessagesApi;
 import com.mailgun.model.message.Message;
+import com.mailgun.model.message.MessageResponse;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.io.File;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
   private MailgunEmailClient mailgunEmailClient;
 
   private final MailgunMessagesApi mailgunMessagesApi = mock(MailgunMessagesApi.class);
+  private final MessageResponse messageResponse = mock(MessageResponse.class);
 
   @Override
   @BeforeEach
@@ -31,9 +33,9 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void mailgunWillSendWithMinimumInfo() throws Exception {
+  public void mailgunWillSendWithMinimumInfo() {
     final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-    doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+    doReturn(messageResponse).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
 
     String expectedSubject = "sendEmail with no CC's or attachments";
     String expectedRecipient = "test@example.com";
@@ -57,9 +59,9 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void mailgunWillSendWithDifferentSenderEmail() throws Exception {
+  public void mailgunWillSendWithDifferentSenderEmail() {
     final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-    doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+    doReturn(messageResponse).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
 
     String expectedSubject = "sendEmail with no CC's or attachments";
     String expectedRecipient = "test@example.com";
@@ -87,9 +89,9 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
 
 
   @Test
-  public void mailgunWillSendWithMinimumInfoAndAttachments() throws Exception {
+  public void mailgunWillSendWithMinimumInfoAndAttachments() {
     final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-    doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+    doReturn(messageResponse).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
 
     String expectedSubject = "sendEmail with no CC's";
     String expectedRecipient = "test@example.com";
@@ -116,9 +118,9 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void mailgunWillSendAllProvidedInfo() throws Exception {
+  public void mailgunWillSendAllProvidedInfo() {
     final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-    doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+    doReturn(messageResponse).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
 
     String expectedSubject = "sendEmail with all parameters";
     String expectedRecipient = "test@example.com";
@@ -126,7 +128,7 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     List<String> expectedEmailsToBCC = Arrays.asList("secret-one@test.com", "secret-two@test.com");
     String expectedBody = "Email body";
     List<File> expectedAttachments = Arrays.asList(new File("src/test/resources/pdfs/blankPdf.pdf"));
-    Boolean expectedRequireTls = true;
+    Boolean expectedRequireTls = Boolean.TRUE;
 
     mailgunEmailClient.sendEmail(
         expectedSubject,

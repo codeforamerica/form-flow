@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import com.mailgun.api.v3.MailgunMessagesApi;
 import com.mailgun.client.MailgunClient;
 import com.mailgun.model.message.Message;
+import com.mailgun.model.message.MessageResponse;
 import feign.FeignException;
 import java.io.File;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class MailgunEmailClient implements EmailClient {
+public class MailgunEmailClient implements EmailClient<MessageResponse> {
 
   private String senderEmail;
   private final String mailgunDomain;
@@ -37,13 +38,14 @@ public class MailgunEmailClient implements EmailClient {
    * @param subject        The subject line of the email
    * @param recipientEmail The email address that will get the email, aka the To field
    * @param emailBody      The HTML version of the email body
+   * @return A Mailgun MessageResponse object
    */
   @Override
-  public void sendEmail(
+  public MessageResponse sendEmail(
       String subject,
       String recipientEmail,
       String emailBody) {
-    sendEmail(
+    return sendEmail(
         subject,
         recipientEmail,
         emptyList(),
@@ -61,14 +63,15 @@ public class MailgunEmailClient implements EmailClient {
    * @param recipientEmail The email address that will get the email, aka the To field
    * @param emailBody      The HTML version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
+   * @return A Mailgun MessageResponse object
    */
   @Override
-  public void sendEmail(
+  public MessageResponse sendEmail(
       String subject,
       String recipientEmail,
       String emailBody,
       List<File> attachments) {
-    sendEmail(
+    return sendEmail(
         subject,
         recipientEmail,
         emptyList(),
@@ -88,9 +91,10 @@ public class MailgunEmailClient implements EmailClient {
    * @param emailBody      The HTML version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
    * @param requireTls     A way to make TLS required
+   * @return A Mailgun MessageResponse object
    */
   @Override
-  public void sendEmail(
+  public MessageResponse sendEmail(
       String subject,
       String recipientEmail,
       List<String> emailsToCC,
@@ -117,10 +121,11 @@ public class MailgunEmailClient implements EmailClient {
     Message builtMessage = message.build();
 
     try {
-      mailgunMessagesApi.sendMessage(mailgunDomain, builtMessage);
+      return mailgunMessagesApi.sendMessage(mailgunDomain, builtMessage);
     } catch (FeignException exception) {
       log.error(exception.getMessage());
     }
+    return null;
   }
 
   /**
