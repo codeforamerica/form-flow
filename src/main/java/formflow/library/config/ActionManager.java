@@ -25,17 +25,19 @@ public class ActionManager {
     return actions.get(name);
   }
 
-  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission) {
+  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission, Submission submission) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
       runAction(actionName, formSubmission);
+      runAction(actionName, formSubmission, submission);
     }
   }
 
-  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission, String uuid) {
+  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission, Submission submission, String uuid) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
       runAction(actionName, formSubmission, uuid);
+      runAction(actionName, formSubmission, submission, uuid);
     }
   }
 
@@ -121,8 +123,16 @@ public class ActionManager {
     runAction(name, () -> getAction(name).run(formSubmission));
   }
 
+  private void runAction(String name, FormSubmission formSubmission, Submission submission) {
+    runAction(name, () -> getAction(name).run(formSubmission, submission));
+  }
+
   private void runAction(String name, FormSubmission formSubmission, String uuid) {
     runAction(name, () -> getAction(name).run(formSubmission, uuid));
+  }
+
+  private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid) {
+    runAction(name, () -> getAction(name).run(formSubmission, submission, uuid));
   }
 
   private void runAction(String name, Runnable action) {
