@@ -1,24 +1,23 @@
 package formflow.library.data;
 
+import static formflow.library.utils.SubmissionUtils.copySubmission;
+
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.aead.AeadConfig;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static formflow.library.utils.SubmissionUtils.copySubmission;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class SubmissionEncryptionService {
@@ -34,7 +33,12 @@ public class SubmissionEncryptionService {
     DECRYPT
   }
 
-  public SubmissionEncryptionService(@Value("${form-flow.encryption-key:}") String key) {
+  public SubmissionEncryptionService(@Value("${form-flow.encryption-key:#{null}}") String key) {
+    if (key == null || key.isEmpty()) {
+      encDec = null;
+      return;
+    }
+
     try {
       AeadConfig.register();
       encDec = CleartextKeysetHandle.read(JsonKeysetReader.withString(key))
@@ -58,7 +62,7 @@ public class SubmissionEncryptionService {
    * @return encrypted copy of the given submission
    */
   public Submission encrypt(Submission submission) {
-    if (submission.getFlow() == null) {
+    if (submission.getFlow() == null || encDec == null) {
       return submission;
     }
 
@@ -80,7 +84,7 @@ public class SubmissionEncryptionService {
    * @return decrypted copy of the given submission
    */
   public Submission decrypt(Submission submission) {
-    if (submission.getFlow() == null) {
+    if (submission.getFlow() == null || encDec == null) {
       return submission;
     }
 
