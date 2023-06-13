@@ -163,7 +163,7 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     var currentScreen = getScreenConfig(flow, screen);
 
-    actionManager.handleOnPostAction(currentScreen, formSubmission);
+    actionManager.handleOnPostAction(currentScreen, formSubmission, submission);
 
     // Field validation
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
@@ -273,7 +273,7 @@ public class ScreenController extends FormFlowController {
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
 
-    actionManager.handleOnPostAction(currentScreen, formSubmission, iterationUuid);
+    actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
 
     if (isNewIteration) {
       // handle start iteration page, if new flow
