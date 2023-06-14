@@ -449,8 +449,8 @@ a validly formatted email address due to `@Email`.
 
 #### Marker Annotations
 
-Marker annotations that mark the field for a certain functionality. These annotations may or may
-not have any validation associated with them, they may simply mark the field for some usage.
+Marker annotations are used to mark a field for certain functionality. These annotations may or may
+not have any validation associated with them; they may simply mark the field for some usage.
 
 ##### @Encrypted
 
@@ -460,13 +460,15 @@ private String socialSecurityNumber;
 ```
 
 This is a marker annotation that tells the FFB to encrypt the field before saving it to the
-database. The system uses [Google's Tink](https://developers.google.com/tink) open-source
+database. The FFB library uses [Google's Tink](https://developers.google.com/tink) open-source
 cryptographic library to perform the cryptography.
 
 The field will be decrypted when retrieved from the database.
 
 Marking a field with `@Encrypted` guarantees that the field will be encrypted when present in the
 database.
+
+No validation is provided with this annotation.
 
 #### Validation Annotations
 
