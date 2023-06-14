@@ -114,6 +114,9 @@ java {
     withSourcesJar()
 }
 
+def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -182,7 +185,6 @@ publishing {
     }
 
     repositories {
-
         maven {
             name = "MavenCentral"
             // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW
@@ -198,8 +200,8 @@ publishing {
                 url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             }
             credentials {
-                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
-                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
+                username = sonatypeUsername
+                password = sonatypePassword
             }
         }
     }
@@ -207,8 +209,26 @@ publishing {
 
 signing {
     if (!version.endsWith("-SNAPSHOT")) {
-        useGpgCmd()
+//        useGpgCmd()
         sign publishing.publications.mavenJava
+    }
+}
+
+def sonatypePublishingUrl = "https://oss.sonatype.org/service/local/staging/profiles/>"
+
+task closeStagingRepository {
+    doLast {
+        exec {
+            commandLine 'curl', '-u', sonatypeUsername, ':', sonatypePassword, '-X', 'POST', sonatypePublishingUrl, '/finish'
+        }
+    }
+}
+
+task promoteStagingRepository {
+    doLast {
+        exec {
+            commandLine 'curl', '-u', sonatypeUsername, ':', sonatypePassword, '-X', 'POST', sonatypePublishingUrl, '/promote'
+        }
     }
 }
 

@@ -1,27 +1,80 @@
 name: Create Release
 on:
-#  release:
-#    types:
-#      - released
-#  TODO: take workflow_dispatch out when you're done testing!
   workflow_dispatch:
     inputs:
       version:
         description: 'Version to release'
         type: string
         required: true
+      sonatypeUsername:
+      
+        description: 'Sonatype username'
+        type: string
+        required: true
+      sonatypePassword:
+        description: 'Sonatype password'
+        type: string
+        required: true
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: form-flow-test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: form-flow-test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
     steps:
+      - name: Hide sensitive inputs
+        uses: levibostian/action-hide-sensitive-inputs@v1
+        with:
+          exclude_inputs: version
+      #      Get latest release
+      #      - name: Get latest release
       - name: Checkout
         uses: actions/checkout@v3
-        with: # TODO: take this out when you're done testing so it uses the release instead!
+        with: # take this out when you're done testing so it uses the release instead!
           ref: ${{ inputs.version }}
           fetch-depth: 0
-      - name: Update version in build.gradle
-        run: | # TODO: switch out inputs.version with github.event.release.tag_name when you're done testing!
-            echo "Updating version in build.gradle to ${{ inputs.version }}"
-            sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-            echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
-            echo "${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --import private_key.asc
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Build and test with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew clean jar
+      - name: Update version
+        run: | # switch out inputs.version with latest release when you're done testing!
+          echo "Updating version in build.gradle to ${{ inputs.version }}"
+          sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
+      - name: Use faketty to allow for GPG signing
+        uses: Yuri6037/Action-FakeTTY@v1.1
+      - name: Publish to Sonatype
+        run: |
+          echo "SONATYPE_USERNAME=${{ inputs.sonatypeUsername }}" >> $GITHUB_ENV
+          echo "SONATYPE_PASSWORD=${{ inputs.sonatypePassword }}" >> $GITHUB_ENV
+          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
+          echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
+          echo "${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --import private_key.asc
+          ./gradlew publish
+#          ./gradle closeStagingRepository
+#          ./gradle promoteStagingRepository
+
+        
