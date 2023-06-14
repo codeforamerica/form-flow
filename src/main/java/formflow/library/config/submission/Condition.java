@@ -18,17 +18,17 @@ public interface Condition {
    * @return true if the condition check passes, else false
    */
   default Boolean run(Submission submission) {
-    throw new UnsupportedOperationException("Not implemented");
+    throw new UnsupportedOperationException("Method not implemented in " + this.getClass().getName());
   }
 
   /**
    * Runs a condition check on a submission's subflow iteration.
    *
-   * @param submission submission object the condition is associated with, not null
-   * @param subflowUuid       uuid of the subflow iteration this should operate on
+   * @param submission  submission object the condition is associated with, not null
+   * @param subflowUuid uuid of the subflow iteration this should operate on
    * @return true if the condition check passes, else false
    */
   default Boolean run(Submission submission, String subflowUuid) {
-    throw new UnsupportedOperationException("Not implemented");
+    throw new UnsupportedOperationException("Method not implemented in " + this.getClass().getName());
   }
 }
