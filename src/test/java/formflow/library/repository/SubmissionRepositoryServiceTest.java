@@ -1,12 +1,11 @@
 package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 import formflow.library.data.Submission;
-import formflow.library.data.SubmissionEncryptionService;
 import formflow.library.data.SubmissionRepositoryService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -18,12 +17,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -32,6 +28,9 @@ class SubmissionRepositoryServiceTest {
 
   @Autowired
   private SubmissionRepositoryService submissionRepositoryService;
+
+  @PersistenceContext
+  EntityManager entityManager;
 
   @Test
   void shouldSaveASubmissionWithUUID() {
@@ -57,7 +56,6 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-
     UUID submissionId = submissionRepositoryService.save(submission);
 
     Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(submissionId);
@@ -65,7 +63,7 @@ class SubmissionRepositoryServiceTest {
     assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
     assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
     assertThat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(savedSubmission.getSubmittedAt()))
-      .isEqualTo(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp.from(timeNow)));
+        .isEqualTo(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp.from(timeNow)));
   }
 
   @Test
@@ -131,5 +129,71 @@ class SubmissionRepositoryServiceTest {
     var subflowEntry = (ArrayList<Map<String, Object>>) submission.getInputData().get("household");
     assertThat(subflowEntry.get(0).containsKey("_csrf")).isFalse();
     assertThat(subflowEntry.get(0).containsKey("foo")).isTrue();
+  }
+
+  @Test
+  void findByIdShouldReturnsDecryptedField() {
+    var inputData = Map.of(
+        "testKey", "this is a test value",
+        "otherTestKey", List.of("A", "B", "C"),
+        "ssnInput", "123-45-6789",
+        "household", List.of(Map.of("firstName", "John", "lastName", "Perez", "ssnInputSubflow", "321-54-9876")));
+    var timeNow = Instant.now();
+    var submission = Submission.builder()
+        .inputData(inputData)
+        .urlParams(new HashMap<>())
+        .flow("testFlow")
+        .submittedAt(Date.from(timeNow))
+        .build();
+
+    UUID subId = submissionRepositoryService.save(submission);
+
+    Submission dbSubmission = (submissionRepositoryService.findById(subId)).get();
+    assertThat(dbSubmission.getInputData().containsKey("ssnInput")).isTrue();
+    assertThat(dbSubmission.getInputData().containsKey("ssnInput_encrypted")).isFalse();
+    assertThat(dbSubmission.getInputData().get("ssnInput")).isEqualTo("123-45-6789");
+
+    Map<String, Object> subflowData = (Map) ((List) dbSubmission.getInputData().get("household")).get(0);
+    assertThat(subflowData.containsKey("ssnInputSubflow")).isTrue();
+    assertThat(subflowData.containsKey("ssnInputSubflow_encrypted")).isFalse();
+    assertThat(subflowData.get("ssnInputSubflow")).isEqualTo("321-54-9876");
+  }
+
+  @Test
+  void saveShouldEncryptFieldInDB() {
+    var inputData = Map.of(
+        "testKey", "this is a test value",
+        "otherTestKey", List.of("A", "B", "C"),
+        "ssnInput", "123-45-6789",
+        "household", List.of(Map.of("firstName", "John", "lastName", "Perez", "ssnInputSubflow", "321-54-9876")));
+    var timeNow = Instant.now();
+    var submission = Submission.builder()
+        .inputData(inputData)
+        .urlParams(new HashMap<>())
+        .flow("testFlow")
+        .submittedAt(Date.from(timeNow))
+        .build();
+
+    UUID subId = submissionRepositoryService.save(submission);
+
+    var query = entityManager.createQuery("SELECT s FROM Submission s WHERE s.id = :id");
+    query.setParameter("id", subId);
+    Submission resultSubmission = (Submission) query.getSingleResult();
+
+    // sanity check to ensure we got the correct submission
+    assertThat(resultSubmission.getId()).isEqualTo(subId);
+
+    // check first level ssn
+    assertThat(resultSubmission.getInputData().containsKey("ssnInput")).isFalse();
+    assertThat(resultSubmission.getInputData().containsKey("ssnInput_encrypted")).isTrue();
+    assertThat(resultSubmission.getInputData().get("ssnInput_encrypted")).isNotEqualTo(submission.getInputData().get("ssnInput"));
+
+    // check subflow ssn field
+    Map<String, Object> resultHouseholdSubflow =
+        (Map<String, Object>) ((List) resultSubmission.getInputData().get("household")).get(0);
+    Map<String, Object> origHouseholdSubflow = (Map<String, Object>) ((List) submission.getInputData().get("household")).get(0);
+    assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow_encrypted")).isTrue();
+    assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow")).isFalse();
+    assertThat(resultHouseholdSubflow.get("ssnInputSubflow_encrypted")).isNotEqualTo(origHouseholdSubflow.get("ssnInputSubflow"));
   }
 }
