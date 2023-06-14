@@ -21,11 +21,27 @@ public class ActionManager {
     actionsList.forEach(action -> this.actions.put(action.getClass().getSimpleName(), action));
   }
 
+  /**
+   * Get an action by name, usually to run the action.
+   *
+   * @param name The name of the action
+   * @return The action from the action manager
+   */
   public Action getAction(String name) {
     return actions.get(name);
   }
 
-  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission, Submission submission) {
+  /**
+   * <code>handleOnPostAction()</code> invokes a method in the ScreenController. Runs before validation. The
+   * handleAfterSaveAction method is called on all screens except for screens in a subflow. Runs an action if a screen has one
+   * defined.
+   *
+   * @param currentScreen  The screen that we are currently saving data from.
+   * @param formSubmission The current form submission
+   * @param submission     The submission object after changes to the current screen have been saved to the repository
+   */
+  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
+      Submission submission) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
       runAction(actionName, formSubmission);
@@ -33,7 +49,17 @@ public class ActionManager {
     }
   }
 
-  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission, Submission submission, String uuid) {
+  /**
+   * <code>handleOnPostAction()</code> invokes a method in the ScreenController. Runs before validation. The
+   * handleAfterSaveAction method is called on only screens in a subflow. Runs an action if a screen has one defined.
+   *
+   * @param currentScreen  The screen that we are currently saving data from.
+   * @param formSubmission The current form submission
+   * @param submission     The submission object after changes to the current screen have been saved to the repository
+   * @param uuid           The uuid of the current subflow.
+   */
+  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
+      Submission submission, String uuid) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
       runAction(actionName, formSubmission, uuid);
@@ -41,6 +67,14 @@ public class ActionManager {
     }
   }
 
+  /**
+   * <code>handleBeforeSaveAction()</code> invokes a method in the ScreenController. Runs after validation and before
+   * saving. The handleBeforeSaveAction method is called on all screens except for screens in a subflow. Runs an action if a
+   * screen has one defined.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   */
   public void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
     String actionName = currentScreen.getBeforeSaveAction();
     if (actionName != null) {
@@ -48,6 +82,15 @@ public class ActionManager {
     }
   }
 
+  /**
+   * <code>handleBeforeSaveAction()</code> invokes a method in the ScreenController. Runs after validation and before
+   * saving. The handleBeforeSaveAction method is called on only screens in a subflow. Runs an action if a screen has one
+   * defined.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   */
   public void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     String actionName = currentScreen.getBeforeSaveAction();
     if (actionName != null) {
@@ -87,6 +130,14 @@ public class ActionManager {
     }
   }
 
+  /**
+   * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the database
+   * and before the view template is displayed. The handleBeforeDisplayAction method is called on all screens except for screens
+   * in a subflow. Runs an action if a screen has one defined.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   */
   public void handleBeforeDisplayAction(ScreenNavigationConfiguration currentScreen, Submission submission) {
     String actionName = currentScreen.getBeforeDisplayAction();
     if (actionName != null) {
@@ -94,6 +145,15 @@ public class ActionManager {
     }
   }
 
+  /**
+   * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the database
+   * and before the view template is displayed. The handleBeforeDisplayAction method is called on only screens in a subflow. Runs
+   * an action if a screen has one defined.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   */
   public void handleBeforeDisplayAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid) {
     String actionName = currentScreen.getBeforeDisplayAction();
     if (actionName != null) {
@@ -101,6 +161,15 @@ public class ActionManager {
     }
   }
 
+  /**
+   * <code>handleCrossFieldValidationAction()</code> invokes a method in the ScreenController. Runs after field validation and
+   * before saving to the database. The handleCrossFieldValidationAction method is called on only screens in a subflow. Runs an
+   * action if a screen has one defined.
+   *
+   * @param currentScreen  The screen that we are currently saving data from.
+   * @param formSubmission The current form submission
+   * @return A map of validation results
+   */
   public Map<String, List<String>> handleCrossFieldValidationAction(ScreenNavigationConfiguration currentScreen,
       FormSubmission formSubmission) {
     Map<String, List<String>> messageMap = new HashMap<>();
