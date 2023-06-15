@@ -72,7 +72,7 @@ public interface Action {
    * @param id             id for the iteration
    */
   default void run(FormSubmission formSubmission, Submission submission, String id) {
-    throw new UnsupportedOperationException("Not implemented run Validation");
+    throw new UnsupportedOperationException("Not implemented " + this.getClass().getName());
   }
 
 
