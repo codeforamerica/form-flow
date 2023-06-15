@@ -198,7 +198,9 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeSaveAction(currentScreen, submission);
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
-    actionManager.handleAfterSaveAction(currentScreen, submission);
+    // get updated object, in case dates changed via, etc
+    Submission savedSubmission = submissionRepositoryService.findById(submission.getId()).get();
+    actionManager.handleAfterSaveAction(currentScreen, savedSubmission);
 
     return new ModelAndView(String.format("redirect:/flow/%s/%s/navigation", flow, screen));
   }
@@ -336,7 +338,9 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
     saveToRepository(submission, subflowName);
     httpSession.setAttribute("id", submission.getId());
-    actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
+    // get updated submission, in case dates changed, etc
+    Submission savedSubmission = submissionRepositoryService.findById(submission.getId()).get();
+    actionManager.handleAfterSaveAction(currentScreen, savedSubmission, iterationUuid);
 
     String nextScreen = getNextScreenName(httpSession, currentScreen, iterationUuid);
     String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid) ?
