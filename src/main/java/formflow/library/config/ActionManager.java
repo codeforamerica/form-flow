@@ -33,7 +33,7 @@ public class ActionManager {
 
   /**
    * <code>handleOnPostAction()</code> invokes a method in the ScreenController. Runs before validation. The
-   * handleAfterSaveAction method is called on all screens except for screens in a subflow. Runs an action if a screen has one
+   * handleOnPostAction method is called on all screens except for screens in a subflow. Runs an action if a screen has one
    * defined.
    *
    * @param currentScreen  The screen that we are currently saving data from.
@@ -51,7 +51,7 @@ public class ActionManager {
 
   /**
    * <code>handleOnPostAction()</code> invokes a method in the ScreenController. Runs before validation. The
-   * handleAfterSaveAction method is called on only screens in a subflow. Runs an action if a screen has one defined.
+   * handleOnPostAction method is called on only screens in a subflow. Runs an action if a screen has one defined.
    *
    * @param currentScreen  The screen that we are currently saving data from.
    * @param formSubmission The current form submission
@@ -163,8 +163,8 @@ public class ActionManager {
 
   /**
    * <code>handleCrossFieldValidationAction()</code> invokes a method in the ScreenController. Runs after field validation and
-   * before saving to the database. The handleCrossFieldValidationAction method is called on only screens in a subflow. Runs an
-   * action if a screen has one defined.
+   * before saving to the database. The handleCrossFieldValidationAction method is called on all screens. Runs an action if a
+   * screen has one defined.
    *
    * @param currentScreen  The screen that we are currently saving data from.
    * @param formSubmission The current form submission
