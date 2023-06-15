@@ -264,7 +264,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws ResponseStatusException {
+  ) throws ResponseStatusException, SmartyException, IOException, InterruptedException {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
     String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
@@ -295,7 +295,7 @@ public class ScreenController extends FormFlowController {
       }
     }
 
-    // TODO: validate addresses
+    handleAddressValidation(submission, formSubmission);
 
     if (httpSession.getAttribute("id") != null) {
       Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid);
