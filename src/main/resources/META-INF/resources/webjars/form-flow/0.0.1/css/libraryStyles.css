@@ -642,3 +642,71 @@ body,
   overflow-x: auto;
   white-space: pre;
 }
+
+/* Locale Select */
+
+.menu-button-links button {
+  min-width: 160px;
+  padding: 5px 10px;
+  margin-bottom: 0;
+  margin-right: 0;
+  display: flex;
+  position: relative;
+  background-color: white;
+  border: none;
+  font-size: 16px;
+  color: black;
+  border-radius: 5px;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.menu-button-links button > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.3;
+}
+
+.menu-button-links button strong {
+  font-size: 16px;
+}
+
+.menu-button-links .small-text {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.menu-button-links [role="menu"] {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: none;
+  position: absolute;
+  border: 2px solid #121111;
+  border-radius: 5px;
+  background-color: white;
+  z-index: 3;
+}
+
+.menu-button-links [role="menuitem"],
+.menu-button-links [role="separator"] {
+  margin: 0;
+  padding: 10px 15px;
+  display: block;
+  border: none;
+  color: teal;
+  font-size: 15px;
+}
+
+.menu-button-links button svg {
+  margin-right: 12px;
+  align-self: center;
+}
+
+/* focus styling */
+.menu-button-links button:focus,
+.menu-button-links [role="menuitem"]:focus,
+.menu-button-links button:hover {
+  color: #121111;
+}
