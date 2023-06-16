@@ -1847,7 +1847,7 @@ if Smarty had performed address validation.
 
 ## Sending Email
 
-Form-flow library will use Mailgun to send email to applicants.
+Form-flow library will use Mailgun to send emails to applicants.
 
 ### Mailgun
 
@@ -1859,8 +1859,8 @@ and verify your domain. Generate an API key for the Mailgun account. Note your M
 #### Configure Mailgun
 
 To configure Mailgun with the proper credentials an engineer must pass a mailgun domain,
-mailgun key, and a mailgun sender-email domain into their application. Those keys are passed into
-the application.yaml as you can see below:
+mailgun key, and a mailgun sender-email into their application. Those keys are passed into
+the application.yaml as displayed below:
 
 ```yaml
   email-client:
@@ -1879,6 +1879,104 @@ the application.yaml as you can see below:
 | `sender-email` | `Sender Email`   | passed into the application.yaml file in the sender-email field. | 
 
 ##### Required Fields for Emails
+
+To build an email message you must pass at least three String arguments into the sendEmail()
+method a MailgunEmailClient object:
+
+1. an email subject
+2. an email recipient
+3. an email body. The email body will take a string written in html and apply the text and styling
+   to the body of the email.
+
+* Note: We suggest passing the emails subject and the email body through message.properties to allow
+  for language translation.
+
+Each email message can also include these fields:
+
+1. emailsToCC → This is a list of emails passed into the cc: field of application.yaml.
+   To capture the list of cc's, developers can grab the list of emails from the application.yaml
+   using
+   @Value and passing in the field ”${form-flow.flow.ubi.email.confirmation.cc:}” based on the
+   application.yaml found above.
+2. email Bcc → is the list of emails passed into the bcc: field of application.yaml
+3. attachments → The list of files to attach, This field accepts a list of files that are added as
+   attachments to the email.
+4. requireTls → this is a boolean that determines whether a message can only be sent through tls
+   connection.  
+   True indicates that a message can only be using TLS encription.
+
+| Name            | Input Type   | Required Field                | Description                                                 | Defaults   | 
+|-----------------|--------------|-------------------------------|-------------------------------------------------------------|------------| 
+| subject         | String       | *                             | The subject of an email                                     |            |
+| recipient email | String       | *                             | The mailbox that the email is sent to                       |            | 
+| emailToCC       | List<String> | *                             | The list of mailboxes that are copied the email             | empty list |
+| emailToBcc      | List<String> |                               | List of mailboxes that are blind copied the email           | empty list | 
+| emailBody       | String       |                               | Body of an email.  The html version                         |            |  
+| attachments     | List<File>   | * Required to add attachments | List of files to be added as attachment to an email         | empty list | 
+| requireTls      | boolean      |                               | Requires that messages be only sent through **TLS** service | false      | 
+
+##### How to send an email
+
+To pass an email message to the email service, first you need to import the MailgunEmailClient from
+the form-flow library using:
+
+```java 
+import formflow.library.email.MailgunEmailClient;
+```
+
+We also advise that you import `MessageSource` to capture the email subject and email body, allowing
+for language translation.
+The recipient email be should be captured and passed into the sendEmail() method as a String.
+It’s recommended that developers pass a list of strings representing email addresses to **cc:**
+and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
+
+```java
+  @Value("${form-flow.flow.ubi.email.confirmation.cc:}")
+private List<String> emailToCc;
+
+@Value("${form-flow.flow.ubi.email.confirmation.bcc:}")
+private List<String> emailToBcc;
+```
+
+In order to add attachments, a list of type < File > must be generated to a `mailgunEmailClient`
+object.  
+To send an email MailgunEmailClient object must call the sendEmail() with the appropriate
+parameters. SendEmail is overloaded allowing it to be called in three ways:
+
+1. `sendEmail( String subject, String recipientEmail, String emailBody)`
+2. `sendEmail( String subject, String recipientEmail, String emailBody, List<File> attachments)`
+
+3. `sendEmail( String subject, String recipientEmail, String emailBody, List<String> emailsToCC,
+   List<String> emailsToBCC, List<File> attachments, boolean requireTls)`
+
+Below is and example of a sendEmail() call being made by an application using the form-flow library.
+Please note that pdfs is a list of files to be passed as attachments to the sent email.
+
+```java
+      ...
+    MessageResponse response;
+    response=mailgunEmailClient.sendEmail(
+    emailSubject,
+    recipientEmail,
+    emailToCc,
+    emailToBcc,
+    emailBody,
+    pdfs,
+    requireTls
+    );
+    ...
+```
+
+The sendEmail() method will send an email and return the MessageResponse object it receives from
+mailgun. The message response should mirror the code found below if a message has been successfully
+queued by Mailgun.
+
+```java
+{
+    "message":"Queued. Thank you.",
+    "id":"<20111114174239.25659.5817@samples.mailgun.org>"
+    }
+```
 
 # How to use
 
