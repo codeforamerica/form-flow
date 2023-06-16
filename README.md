@@ -1,4 +1,4 @@
-# Form Flow Library
+# Form Flow Library  (FFB)
 
 Table of Contents
 =================
@@ -21,7 +21,7 @@ Table of Contents
     * [Actions](#actions)
     * [Defining Inputs](#defining-inputs)
         * [Input Class](#input-class)
-        * [Custom Validations](#custom-validations)
+        * [Custom Annotations](#custom-annotations)
         * [Input Data JSON Structure](#input-data-json-structure)
     * [PDF Generation](#pdf-generation)
 * [General Information](#general-information)
@@ -338,7 +338,7 @@ There are four types of actions available in the Form Flow library:
 | crossFieldValidationAction | FormSubmission              | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                                                                   |
 | beforeSaveAction           | Submission                  | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
 | beforeDisplayAction        | Submission                  | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                                                                |
-| afterSaveAction            | Submission                  | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                                                             |
+| afterSaveAction            | Submission                  | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save. For example, you could add a method that sends an email or fires a task after a save is complete.                                                                                              |
 
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
 actually rendered. The rest of the actions are called when the screen's data is submitted to the
@@ -445,13 +445,37 @@ validating both that they need to enter a value due to `@NotBlank` and because t
 to be
 a validly formatted email address due to `@Email`.
 
-### Custom Validations
+### Custom Annotations
 
-We also
-implement [custom validations for convenience](/src/main/java/formflow/library/data/validators). Use
-them the same way you would any other JavaX validator, like so:
+#### Marker Annotations
 
-#### @Money
+Marker annotations are used to mark a field for certain functionality. These annotations may or may
+not have any validation associated with them; they may simply mark the field for some usage.
+
+##### @Encrypted
+
+```java
+@Encrypted
+private String socialSecurityNumber;
+```
+
+This is a marker annotation that tells the FFB to encrypt the field before saving it to the
+database. The FFB library uses [Google's Tink](https://developers.google.com/tink) open-source
+cryptographic library to perform the cryptography.
+
+The field will be decrypted when retrieved from the database.
+
+Marking a field with `@Encrypted` guarantees that the field will be encrypted when present in the
+database.
+
+No validation is provided with this annotation.
+
+#### Validation Annotations
+
+We implement [custom validations for convenience](/src/main/java/formflow/library/data/validators).
+Use them the same way you would any other JavaX validator.
+
+##### @Money
 
 ```java
 @Money(message = "Please make sure to enter a valid dollar amount.")
@@ -477,7 +501,7 @@ Does not accept values such as:
 .5
 ```
 
-#### @Phone
+##### @Phone
 
 Used to validate 10-digit phone numbers.
 
@@ -487,15 +511,11 @@ private String phoneNumber;
 ```
 
 Phone numbers must consist of a String with 10-digits passed to the validator in the pattern
-of `(333) 451-7777`.
-Phone numbers can not start with a zero or one.
+of `(333) 451-7777`. Phone numbers can not start with a zero or one.
 
 **Note that if you are using the [phone number input fragment](#phone) provided by the Form Flow
-Library
-the
-fragment uses input masking which will automatically format 10 digits entered into the
-correct `(333) 451-7777`
-format**
+Library the fragment uses input masking which will automatically format 10 digits entered into the
+correct `(333) 451-7777` format**
 
 ```
 "(333) 333-3333",
@@ -772,7 +792,8 @@ corresponding PDF checkbox fields.
 
 If you would like to see an example of an entire `pdf-map.yaml` file, check out the starter-app's
 `pdf-map.yaml`
-file [here](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/pdf-map.yaml).
+file [here](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/pdf-map.yaml)
+.
 
 ### Default Field Preparers
 
@@ -815,9 +836,29 @@ input values to the correct PDF Fields. There are 3 types of SubmissionFields:
 
 | SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                                                             | Examples                                                                                                                                                                                                                                                 |
 |--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null)                                   | **Outside of a subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of a subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", 1)                                                         |
-| CheckboxField                  | For checkbox input fields. Represents a one to many mapping between a checkbox input and an array of it's many potential values. Can iclude an iteration if the input is within a subflow.                              | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration number `Int` iteration number (for subflows, can be null) | **Outside of a subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), null) <br><br> **Inside of a subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), 1) |
-| DatabaseField                  | For fields from database columns. Represents a mapping between database fields such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration.                                              | Params: `String` database column name, `String` database field value                                                                    | new DatabaseField("submittedAt", "exampleSubmittedAtValue")                                                                                                                                                                                              |
+| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null)                                   | **
+
+Outside of a
+subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of
+a
+subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", 1)
+|
+| CheckboxField | For checkbox input fields. Represents a one to many mapping between a checkbox
+input and an array of it's many potential values. Can iclude an iteration if the input is within a
+subflow. | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration
+number `Int` iteration number (for subflows, can be null) | **
+Outside of a
+subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
+null) <br><br> **
+Inside of a
+subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
+
+1) |
+                                                         | DatabaseField | For fields from database columns. Represents a mapping between database fields
+   such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
+   Params: `String` database column name, `String` database field value | new DatabaseField("
+   submittedAt", "exampleSubmittedAtValue")
+   |
 
 ### Custom preparers
 
