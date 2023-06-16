@@ -62,12 +62,13 @@ public class S3CloudFileRepository implements CloudFileRepository {
       upload.waitForCompletion();
       log.info("Upload complete");
     } catch (AmazonServiceException e) {
+      // make some noise, something's wrong with our connection to S3
       System.err.println(e.getErrorMessage());
-      System.exit(1);
+      log.error("AWS S3 exception occurred: " + e.getErrorMessage());
+      throw new RuntimeException(e.getErrorMessage());
     } catch (InterruptedException | IOException e) {
-      log.info("Not a AmazonServiceException");
-      log.info(e.getMessage());
-      throw new RuntimeException(e);
+      log.error("Exception occurred in S3 code: " + e.getMessage());
+      throw new RuntimeException(e.getMessage());
     }
   }
 
