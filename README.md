@@ -332,14 +332,13 @@ displayed on the screen with any other validation error messages.
 
 There are four types of actions available in the Form Flow library:
 
-| Action Name                            | Data Available      | Returns                | Action Definition                                                                                                                                                                                                                                                                                                    |
-|----------------------------------------|---------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onPostAction                           | FormSubmission + Submission | nothing        | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                         |
-| crossFieldValidationAction             | FormSubmission      | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                             |
-| beforeSaveAction                       | Submission          | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
-| beforeDisplayAction                    | Submission          | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                          |
-| afterSaveAction                        | Submission          | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                       |
-
+| Action Name                | Data Available              | Returns                | Action Definition                                                                                                                                                                                                                                                                                                                                          |
+|----------------------------|-----------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onPostAction               | FormSubmission + Submission | nothing                | HTTP POST: An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs.                                                                                                                                               |
+| crossFieldValidationAction | FormSubmission              | List of error messages | HTTP POST: An action of this type is run just after field-level validation has occurred, but before the data has been saved to the database. It's a way to find out if any fields that relate to one another are missing necessary data.                                                                                                                   |
+| beforeSaveAction           | Submission                  | nothing                | HTTP POST: An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will **not** be validated before being saved. |
+| beforeDisplayAction        | Submission                  | nothing                | HTTP GET: An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering.                                                                                                                |
+| afterSaveAction            | Submission                  | nothing                | HTTP POST: An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save.  For example, you could add a method that sends an email or fires a task after a save is complete.                                                                                             |
 
 **Note**: `beforeDisplayActions` are run on an HTTP GET, _before_ the screen it's attached to is
 actually rendered. The rest of the actions are called when the screen's data is submitted to the
@@ -1859,14 +1858,27 @@ and verify your domain. Generate an API key for the Mailgun account. Note your M
 
 #### Configure Mailgun
 
-Configure the Mailgun credentials in your .env file. Add your Mailgun key to the application.yaml as
-seen below:
+To configure Mailgun with the proper credentials an engineer must pass a mailgun domain,
+mailgun key, and a mailgun sender-email domain into their application. Those keys are passed into
+the application.yaml as you can see below:
 
 ```yaml
   email-client:
     mailgun:
-      key: ${MAILGUN_KEY}
+      key: ${MAILGUN_KEY:'no-key-set'}
+      domain: 'mail.forms-starter.cfa-platforms.org'
+      sender-email: 'UBI Demo <demo@mail.forms-starter.cfa-platforms.org>'
 ```
+
+##### Required Mailgun keys:
+
+| Name           | Descriptor       | How you get it                                                   | 
+|----------------|------------------|------------------------------------------------------------------|
+| `key`          | `MAILGUN_KEY`    | passed in through .env files or secrets.                         |
+| `domain`       | `Mailgun Domain` | passed into application.yaml as a string into the domain field.  |
+| `sender-email` | `Sender Email`   | passed into the application.yaml file in the sender-email field. | 
+
+##### Required Fields for Emails
 
 # How to use
 
