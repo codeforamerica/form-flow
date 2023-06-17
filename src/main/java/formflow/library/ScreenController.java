@@ -305,14 +305,14 @@ public class ScreenController extends FormFlowController {
       if (isNewIteration) {
         ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
+        setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
         subflow.add(formSubmission.getFormData());
       } else {
         var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
         if (iterationToEdit != null) {
           submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
 
-          Boolean iterationIsComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
-          formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
+          setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
 
           submission.removeIncompleteIterations(subflowName, iterationUuid);
         }
@@ -344,6 +344,11 @@ public class ScreenController extends FormFlowController {
         String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, iterationUuid)
         : String.format("redirect:/flow/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
+  }
+
+  private void setIterationIsComplete(String flow, String iterationUuid, FormSubmission formSubmission, Submission submission, ScreenNavigationConfiguration currentScreen) {
+    Boolean iterationIsComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
+    formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
   }
 
   /**
