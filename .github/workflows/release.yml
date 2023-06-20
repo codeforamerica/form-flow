@@ -69,11 +69,11 @@ jobs:
       - name: Publish to Sonatype
         run: |
           ./gradlew publish --no-daemon --no-parallel
+#          ./gradle closeStagingRepository
+#          ./gradle promoteStagingRepository
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ github.event.inputs.versionName }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ inputs.sonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ inputs.sonatypePassword }}
-#          ./gradle closeStagingRepository
-#          ./gradle promoteStagingRepository
