@@ -69,6 +69,7 @@ jobs:
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
       - name: Publish to Sonatype
         run: |
+          gpg2 --export-secret-keys --armor ${{ inputs.gpgKeyName }} secring.gpg | grep -v '\-\-' | grep -v '^=.' | tr -d '\n'
           ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ github.event.inputs.versionName }}
