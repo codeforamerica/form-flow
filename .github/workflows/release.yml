@@ -79,9 +79,7 @@ jobs:
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
       - name: Publish to Sonatype
         run: |
-          echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
-          echo "${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --import private_key.asc
-          ./gradlew publish --no-configuration-cache
+          ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ github.event.inputs.versionName }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
