@@ -7,12 +7,15 @@ on:
         type: string
         required: true
       sonatypeUsername:
-
         description: 'Sonatype username'
         type: string
         required: true
       sonatypePassword:
         description: 'Sonatype password'
+        type: string
+        required: true
+      gpgKeyName:
+        description: 'GPG key name'
         type: string
         required: true
 
@@ -64,19 +67,11 @@ jobs:
         run: | # switch out inputs.version with latest release when you're done testing!
           echo "Updating version in build.gradle to ${{ inputs.version }}"
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-      - name: Use faketty to allow for GPG signing
-        uses: Yuri6037/Action-FakeTTY@v1.1
       - name: Publish to Sonatype
         run: |
-          echo "SONATYPE_USERNAME=${{ inputs.sonatypeUsername }}" >> $GITHUB_ENV
-          echo "SONATYPE_PASSWORD=${{ inputs.sonatypePassword }}" >> $GITHUB_ENV
-          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
           echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
           echo "${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --import private_key.asc
-          echo "signing.gnupg.keyName=${{ inputs.gpgKeyName }}\nsigning.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPRHASE }}" >> gradle/wrapper/gradle-wrapper.properties
-          ./gradlew publish --no-daemon --no-parallel
-        #          ./gradle closeStagingRepository
-        #          ./gradle promoteStagingRepository
+          ./gradlew publish --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ github.event.inputs.versionName }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}

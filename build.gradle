@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'org.springframework.boot' version '3.0.5'
@@ -7,7 +9,7 @@ plugins {
     id 'java'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'jacoco'
-    id 'signing'
+    id 'com.vanniktech.maven.publish' version '0.25.2'
 }
 
 jacoco {
@@ -118,120 +120,64 @@ java {
 def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
 def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = "form-flow"
-            from components.java
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
-            pom {
-                name = "Form Flow Builder"
-                description = "A Java library placed in a Spring Boot app to generate form flows."
-                url = "https://github.com/codeforamerica/form-flow/"
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://raw.githubusercontent.com/git/git-scm.com/main/MIT-LICENSE.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'bencalegari'
-                        name = 'Ben Calegari'
-                        email = 'bcalegari@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'cy-cfa'
-                        name = 'Cypress Borg'
-                        email = 'cborg@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'luigi'
-                        name = 'Luigi Ray-Montañez'
-                        email = 'luigi@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'birdprsn'
-                        name = 'Alex Gonzalez'
-                        email = 'agonzalez@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'cenyia'
-                        name = 'Chibuisi Enyia'
-                        email = 'cenyia@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'rcastillo'
-                        name = 'Rapi Castillo'
-                        email = 'rcastillo@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'bethany'
-                        name = 'Bethany Seeger'
-                        email = 'bseeger@codeforamerica.org'
-                    }
-                }
-                scm {
-                    url = 'scm:git:https://github.com/codeforamerica/form-flow.git'
-                }
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.DEFAULT, true)
+    coordinates("org.codeforamerica.platform", "form-flow", version)
+
+    pom {
+        name = "Form Flow Builder"
+        description = "A Java library placed in a Spring Boot app to generate form flows."
+        url = "https://github.com/codeforamerica/form-flow/"
+        licenses {
+            license {
+                name = 'MIT License'
+                url = 'https://raw.githubusercontent.com/git/git-scm.com/main/MIT-LICENSE.txt'
             }
         }
-    }
-
-    repositories {
-        maven {
-            name = "MavenCentral"
-            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW
-            // sonatype url, but we need the old one since we have an older account
-            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
-            //def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
-            //def snapshotsRepoUrl = layoutBuildDirectory.dir('repos/snapshots')
-            if (version.endsWith("-SNAPSHOT")) {
-                println("Creating a SNAPSHOT: ${version}")
-                url = "https://oss.sonatype.org/content/repositories/snapshots"
-            } else {
-                println("Creating a release version: ${version}")
-                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        developers {
+            developer {
+                id = 'bencalegari'
+                name = 'Ben Calegari'
+                email = 'bcalegari@codeforamerica.org'
             }
-            credentials {
-                username = sonatypeUsername
-                password = sonatypePassword
+            developer {
+                id = 'cy-cfa'
+                name = 'Cypress Borg'
+                email = 'cborg@codeforamerica.org'
+            }
+            developer {
+                id = 'luigi'
+                name = 'Luigi Ray-Montañez'
+                email = 'luigi@codeforamerica.org'
+            }
+            developer {
+                id = 'birdprsn'
+                name = 'Alex Gonzalez'
+                email = 'agonzalez@codeforamerica.org'
+            }
+            developer {
+                id = 'cenyia'
+                name = 'Chibuisi Enyia'
+                email = 'cenyia@codeforamerica.org'
+            }
+            developer {
+                id = 'rcastillo'
+                name = 'Rapi Castillo'
+                email = 'rcastillo@codeforamerica.org'
+            }
+            developer {
+                id = 'bethany'
+                name = 'Bethany Seeger'
+                email = 'bseeger@codeforamerica.org'
             }
         }
-    }
-}
-
-signing {
-    if (!version.endsWith("-SNAPSHOT")) {
-//        useGpgCmd()
-        sign publishing.publications.mavenJava
+        scm {
+            url = 'scm:git:https://github.com/codeforamerica/form-flow.git'
+        }
     }
 }
 
 def sonatypePublishingUrl = "https://oss.sonatype.org/service/local/staging/profiles/>"
-
-task closeStagingRepository {
-    doLast {
-        exec {
-            commandLine 'curl', '-u', sonatypeUsername, ':', sonatypePassword, '-X', 'POST', sonatypePublishingUrl, '/finish'
-        }
-    }
-}
-
-task promoteStagingRepository {
-    doLast {
-        exec {
-            commandLine 'curl', '-u', sonatypeUsername, ':', sonatypePassword, '-X', 'POST', sonatypePublishingUrl, '/promote'
-        }
-    }
-}
 
 // javadoc {
 //    if (JavaVersion.current().isJava9Compatible()) {
