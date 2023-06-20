@@ -81,7 +81,8 @@ jobs:
         run: |
           echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.gpg
           gpg --batch --passphrase-fd 0 --pinentry loopback --export-secret-keys --armor private_key.gpg | grep -v '\-\-' | grep -v '^=.' | tr -d '\n'
-          gpg --list-keys
+          git config --global user.signingkey ${{ inputs.gpgKeyName }}
+          echo $(gpg --list-keys)
           ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
