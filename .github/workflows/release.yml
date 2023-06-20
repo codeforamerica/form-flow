@@ -70,7 +70,7 @@ jobs:
       - name: Publish to Sonatype
         run: |
           echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.gpg
-          gpg --batch --passphrase-fd 0 --pinentry loopback --export-secret-keys --armor private_key.gpg | grep -v '\-\-' | grep -v '^=.' | tr -d '\n'
+          gpg -ao private.asc --export-secret-keys | grep -v '\-\-' | grep -v '^=.' | tr -d '\n'
           git config --global user.signingkey ${{ inputs.gpgKeyName }}
           echo $(gpg --list-keys)
           ./gradlew publish --no-daemon --no-parallel
