@@ -36,6 +36,8 @@ jobs:
         ports:
           - 5432:5432
     steps:
+      - name: Use faketty to allow for GPG signing
+        uses: Yuri6037/Action-FakeTTY@v1.1
       - name: Hide sensitive inputs
         uses: levibostian/action-hide-sensitive-inputs@v1
         with:
@@ -88,3 +90,5 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ inputs.sonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ inputs.sonatypePassword }}
+          GPG_TTY: $(tty)
+
