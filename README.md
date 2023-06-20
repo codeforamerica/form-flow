@@ -1899,7 +1899,8 @@ and verify your domain. Generate an API key for the Mailgun account. Note your M
 
 #### Configure Mailgun
 
-To configure Mailgun with the proper credentials an engineer must pass a mailgun domain,
+To [configure Mailgun](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials-)
+with the proper credentials an engineer must pass a mailgun domain,
 mailgun key, and a mailgun sender-email into their application. Those keys are passed into
 the application.yaml as displayed below:
 
@@ -1922,7 +1923,7 @@ the application.yaml as displayed below:
 ##### Required Fields for Emails
 
 To build an email message you must pass at least three String arguments into the sendEmail()
-method a MailgunEmailClient object:
+method on a MailgunEmailClient object:
 
 1. an email subject
 2. an email recipient
@@ -1944,17 +1945,17 @@ Each email message can also include these fields:
    attachments to the email.
 4. requireTls → this is a boolean that determines whether a message can only be sent through tls
    connection.  
-   True indicates that a message can only be using TLS encription.
+   True indicates that a message can only be using TLS encryption.
 
-| Name            | Input Type   | Required Field                | Description                                                 | Defaults   | 
-|-----------------|--------------|-------------------------------|-------------------------------------------------------------|------------| 
-| subject         | String       | *                             | The subject of an email                                     |            |
-| recipient email | String       | *                             | The mailbox that the email is sent to                       |            | 
-| emailToCC       | List<String> | *                             | The list of mailboxes that are copied the email             | empty list |
-| emailToBcc      | List<String> |                               | List of mailboxes that are blind copied the email           | empty list | 
-| emailBody       | String       |                               | Body of an email.  The html version                         |            |  
-| attachments     | List<File>   | * Required to add attachments | List of files to be added as attachment to an email         | empty list | 
-| requireTls      | boolean      |                               | Requires that messages be only sent through **TLS** service | false      | 
+| Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
+|-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
+| subject         | String       | *              | The subject of an email                                     |            |
+| recipient email | String       | *              | The mailbox that the email is sent to                       |            | 
+| emailToCC       | List<String> | *              | The list of mailboxes that are copied the email             | empty list |
+| emailToBcc      | List<String> |                | List of mailboxes that are blind copied the email           | empty list | 
+| emailBody       | String       |                | Body of an email.  The html version                         |            |  
+| attachments     | List<File>   |                | List of files to be added as attachment to an email         | empty list | 
+| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | false      | 
 
 ##### How to send an email
 
@@ -1991,7 +1992,7 @@ parameters. SendEmail is overloaded allowing it to be called in three ways:
    List<String> emailsToBCC, List<File> attachments, boolean requireTls)`
 
 Below is and example of a sendEmail() call being made by an application using the form-flow library.
-Please note that pdfs is a list of files to be passed as attachments to the sent email.
+Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
       ...
