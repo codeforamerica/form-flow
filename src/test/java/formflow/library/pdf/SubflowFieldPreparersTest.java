@@ -2,7 +2,6 @@ package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
 import java.util.HashMap;
 import java.util.List;
@@ -31,17 +30,15 @@ class SubflowFieldPreparersTest {
     PdfMapSubflow pdfMapSubflow = new PdfMapSubflow();
     pdfMapSubflow.setSubflows(List.of("testSubflow"));
     pdfMapSubflow.setTotalIterations(5);
-    pdfMapSubflow.setFields(Map.of(
+    pdfMapSubflow.setInputFields(Map.of(
         "foo", "FOO_FIELD",
-        "bar", "BAR_FIELD"
+        "bar", "BAR_FIELD",
+        "checkboxInput", Map.of("item1", "PDF_ITEM1", "item2", "PDF_ITEM2", "item3", "PDF_ITEM3")
     ));
     pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
     pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
 
-    ActionManager actionManager = new ActionManager(List.of(new RemoveApplicantIterationAction()));
-
     subflowFieldPreparer = new SubflowFieldPreparer();
-    subflowFieldPreparer.setActionManager(actionManager);
   }
 
   @Test
@@ -106,7 +103,7 @@ class SubflowFieldPreparersTest {
             )).build();
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
+        pdfMapConfiguration.getPdfMap("flow1"));
 
     assertThat(resultMap.equals(
         Map.of(
@@ -157,7 +154,7 @@ class SubflowFieldPreparersTest {
             )).build();
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
+        pdfMapConfiguration.getPdfMap("flow1"));
 
     assertThat(resultMap.equals(
         Map.of(
@@ -199,7 +196,7 @@ class SubflowFieldPreparersTest {
             )).build();
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
+        pdfMapConfiguration.getPdfMap("flow1"));
 
     Map<String, SubmissionField> expectedMap =
         Map.of(
@@ -213,61 +210,6 @@ class SubflowFieldPreparersTest {
 
     assertThat(resultMap.keySet().equals(expectedMap.keySet())).isTrue();
 
-    assertThat(resultMap.equals(expectedMap)).isTrue();
-    //for (var entry : resultMap.entrySet()) {
-    //  assertThat(expectedMap.get(entry.getKey())).isEqualTo(expectedMap.get(entry.getKey()));
-    // }
-  }
-
-  @Test
-  void shouldManipulateDataUsingAGivenDataAction() {
-    PdfMap pdfMap = new PdfMap();
-    pdfMap.setFlow("flow1");
-    PdfMapSubflow pdfMapSubflow = new PdfMapSubflow();
-    pdfMapSubflow.setSubflows(List.of("testSubflow"));
-    pdfMapSubflow.setDataAction("RemoveApplicantIterationAction");
-    pdfMapSubflow.setTotalIterations(5);
-    pdfMapSubflow.setFields(Map.of(
-        "firstName", "FIRST_NAME",
-        "lastName", "LAST_NAME"
-    ));
-    pdfMap.setSubflowInfo(Map.of("testSubflow", pdfMapSubflow));
-    pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
-
-    Map<String, Object> iteration1 = new HashMap<>();
-    iteration1.put("firstName", "Applicant");
-    iteration1.put("lastName", "TestLastName");
-    iteration1.put("uuid", "uuid1");
-    iteration1.put("iterationIsComplete", "true");
-    Map<String, Object> iteration2 = new HashMap<>();
-    iteration2.put("firstName", "Testy");
-    iteration2.put("lastName", "McTesterson");
-    iteration2.put("uuid", "uuid2");
-    iteration2.put("iterationIsComplete", "true");
-    Map<String, Object> iteration3 = new HashMap<>();
-    iteration3.put("firstName", "Testa");
-    iteration3.put("lastName", "Testerosa");
-    iteration3.put("uuid", "uuid3");
-    iteration3.put("iterationIsComplete", "true");
-
-    submission = Submission.builder().flow("flow1")
-        .inputData(
-            Map.of(
-                "testSubflow", List.of(
-                    iteration1,
-                    iteration2,
-                    iteration3
-                )
-            )).build();
-
-    Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
-        submission.getInputData(), pdfMapConfiguration.getPdfMap("flow1"));
-    Map<String, SubmissionField> expectedMap = Map.of(
-        "firstName_1", new SingleField("firstName", "Testy", 1),
-        "lastName_1", new SingleField("lastName", "McTesterson", 1),
-        "firstName_2", new SingleField("firstName", "Testa", 2),
-        "lastName_2", new SingleField("lastName", "Testerosa", 2)
-    );
     assertThat(resultMap.equals(expectedMap)).isTrue();
   }
 }

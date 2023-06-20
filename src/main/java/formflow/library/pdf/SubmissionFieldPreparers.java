@@ -2,11 +2,8 @@ package formflow.library.pdf;
 
 import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,16 +16,14 @@ public class SubmissionFieldPreparers {
   private final List<SubmissionFieldPreparer> customPreparers;
 
   private final PdfMapConfiguration pdfMapConfiguration;
-  private final ActionManager actionManager;
 
 
   public SubmissionFieldPreparers(List<DefaultSubmissionFieldPreparer> defaultPreparers,
       List<SubmissionFieldPreparer> customPreparers,
-      PdfMapConfiguration pdfMapConfiguration, ActionManager actionManager) {
+      PdfMapConfiguration pdfMapConfiguration) {
     this.defaultPreparers = defaultPreparers;
     this.customPreparers = customPreparers;
     this.pdfMapConfiguration = pdfMapConfiguration;
-    this.actionManager = actionManager;
   }
 
   /**
@@ -47,18 +42,11 @@ public class SubmissionFieldPreparers {
   public List<SubmissionField> prepareSubmissionFields(Submission submission) {
     PdfMap pdfMap = pdfMapConfiguration.getPdfMap(submission.getFlow());
     HashMap<String, SubmissionField> submissionFieldsMap = new HashMap<>();
-    Map<String, Object> inputData = new HashMap<>();
-
-    // set the inputData we want to hand to the preparers
-    inputData.putAll(submission.getInputData());
-
-    // TODO run data action - flow level action to manipulate data
-    // manipulate data before preparing and mapping
 
     // now run preparers over all the fields.
     defaultPreparers.forEach(preparer -> {
       try {
-        submissionFieldsMap.putAll(preparer.prepareSubmissionFields(submission, inputData, pdfMap));
+        submissionFieldsMap.putAll(preparer.prepareSubmissionFields(submission, pdfMap));
       } catch (Exception e) {
         String preparerClassName = preparer.getClass().getSimpleName();
         log.error("There was an issue preparing submission data for " + preparerClassName, e);
@@ -67,7 +55,7 @@ public class SubmissionFieldPreparers {
 
     customPreparers.forEach(preparer -> {
       try {
-        submissionFieldsMap.putAll(preparer.prepareSubmissionFields(submission, inputData, pdfMap));
+        submissionFieldsMap.putAll(preparer.prepareSubmissionFields(submission, pdfMap));
       } catch (Exception e) {
         String preparerClassName = preparer.getClass().getSimpleName();
         log.error("There was an issue preparing submission data for " + preparerClassName, e);

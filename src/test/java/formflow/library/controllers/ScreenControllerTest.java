@@ -72,7 +72,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     @Test
     public void addressValidationShouldRunAfterFieldValidation() throws Exception {
       var params = new HashMap<String, List<String>>();
-      params.put("_validatevalidationOn", List.of("true"));
+      params.put("validate_validationOn", List.of("true"));
       params.put("validationOnStreetAddress1", List.of("880 N 8th St"));
       params.put("validationOnStreetAddress2", List.of("Apt 2"));
       // City is required
@@ -96,13 +96,13 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       ));
 
       var params = new HashMap<String, List<String>>();
-      params.put("_validatevalidationOff", List.of("false"));
+      params.put("validate_validationOff", List.of("false"));
       params.put("validationOffStreetAddress1", List.of("110 N 6th St"));
       params.put("validationOffStreetAddress2", List.of("Apt 1"));
       params.put("validationOffCity", List.of("Roswell"));
       params.put("validationOffState", List.of("NM"));
       params.put("validationOffZipCode", List.of("88201"));
-      params.put("_validatevalidationOn", List.of("true"));
+      params.put("validate_validationOn", List.of("true"));
       params.put("validationOnStreetAddress1", List.of("880 N 8th St"));
       params.put("validationOnStreetAddress2", List.of("Apt 2"));
       params.put("validationOnCity", List.of("Roswell"));

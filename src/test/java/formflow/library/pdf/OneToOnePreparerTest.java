@@ -1,12 +1,11 @@
 package formflow.library.pdf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import formflow.library.data.Submission;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class OneToOnePreparerTest {
 
@@ -32,7 +31,7 @@ class OneToOnePreparerTest {
     ));
     OneToOnePreparer oneToOnePreparer = new OneToOnePreparer();
 
-    assertThat(oneToOnePreparer.prepareSubmissionFields(submission, submission.getInputData(), pdfMap)).containsExactly(
+    assertThat(oneToOnePreparer.prepareSubmissionFields(submission, pdfMap)).containsExactly(
         Map.entry("inputName1", new SingleField("inputName1", "foo", null)),
         Map.entry("inputName2", new SingleField("inputName2", "bar", null))
     );
@@ -51,7 +50,7 @@ class OneToOnePreparerTest {
     ));
     OneToOnePreparer oneToOnePreparer = new OneToOnePreparer();
 
-    assertThat(oneToOnePreparer.prepareSubmissionFields(submission, submission.getInputData(), pdfMap)).containsExactly(
+    assertThat(oneToOnePreparer.prepareSubmissionFields(submission, pdfMap)).containsExactly(
         Map.entry("inputName1", new SingleField("inputName1", "foo", null))
     );
   }

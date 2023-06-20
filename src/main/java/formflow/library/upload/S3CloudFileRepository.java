@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Profile({"dev", "demo"})
+@Profile("!test")
 @Slf4j
 public class S3CloudFileRepository implements CloudFileRepository {
 

@@ -82,5 +82,3 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ inputs.sonatypePassword }}
 #          ./gradle closeStagingRepository
 #          ./gradle promoteStagingRepository
-
-        

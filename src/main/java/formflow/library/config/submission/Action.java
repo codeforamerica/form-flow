@@ -2,7 +2,6 @@ package formflow.library.config.submission;
 
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
-import formflow.library.pdf.PdfMapSubflow;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +15,8 @@ public interface Action {
    *
    * @param submission submission object the action is associated with, not null
    */
-  public default void run(Submission submission) {
-    throw new UnsupportedOperationException("Not implemented");
+  default void run(Submission submission) {
+    throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
 
 
@@ -27,37 +26,60 @@ public interface Action {
    * @param submission submission object the action is associated with, not null
    * @param id         id for the iteration
    */
-  public default void run(Submission submission, String id) {
-    throw new UnsupportedOperationException("Not implemented");
+  default void run(Submission submission, String id) {
+    throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
 
   /**
    * Runs an action on form submission data to potentially manipulate the data.
    *
    * @param formSubmission form submission object the action is associated with, not null
+   * @deprecated use {@link #run(FormSubmission, Submission)} instead.
    */
-  public default void run(FormSubmission formSubmission) {
-    throw new UnsupportedOperationException("Not implemented");
+  @Deprecated
+  default void run(FormSubmission formSubmission) {
+    throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
+
+  /**
+   * Runs an action on form submission and submission data to potentially manipulate the data.
+   *
+   * @param formSubmission form submission object the action is associated with, not null
+   * @param submission     submission object the action is associated with, not null
+   */
+  default void run(FormSubmission formSubmission, Submission submission) {
+    throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
+  }
+
 
   /**
    * Runs an action on form submission data to potentially manipulate the data.
    *
    * @param formSubmission form submission object the action is associated with, not null
    * @param id             id for the iteration
+   * @deprecated use {@link #run(FormSubmission, Submission, String)} instead.
    */
-  public default void run(FormSubmission formSubmission, String id) {
+  @Deprecated
+  default void run(FormSubmission formSubmission, String id) {
     throw new UnsupportedOperationException("Not implemented run Validation");
   }
+
+  /**
+   * Runs an action on form submission and submission data to potentially manipulate the data.
+   *
+   * @param formSubmission form submission object the action is associated with, not null
+   * @param submission     submission object the action is associated with, not null
+   * @param id             id for the iteration
+   */
+  default void run(FormSubmission formSubmission, Submission submission, String id) {
+    throw new UnsupportedOperationException("Not implemented " + this.getClass().getName());
+  }
+
 
   /*
    * Runs validation code with the expectation that error messages may be returned.
    */
-  public default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  public default List<Map<String, Object>> runSubflowAction(Submission submission, PdfMapSubflow subflowMap) {
-    throw new UnsupportedOperationException("Not Implemented");
+  default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
+    throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
 }

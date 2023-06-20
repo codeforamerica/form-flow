@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
+import org.openqa.selenium.By.ByTagName;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -295,6 +296,10 @@ public class Page {
 
   public String getHtml() {
     return driver.getPageSource();
+  }
+
+  public String getBody() {
+    return driver.findElement(ByTagName.tagName("body")).getText();
   }
 
 //  public void chooseSentiment(Sentiment sentiment) {

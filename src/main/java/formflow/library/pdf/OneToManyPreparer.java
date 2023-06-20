@@ -10,16 +10,16 @@ import org.springframework.stereotype.Component;
 public class OneToManyPreparer implements DefaultSubmissionFieldPreparer {
 
   @Override
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, Map<String, Object> data, PdfMap pdfMap) {
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, Object> fieldMap = pdfMap.getAllFields();
     Map<String, SubmissionField> preppedFields = new HashMap<>();
 
     fieldMap.keySet().stream()
-        .filter(field -> fieldMap.get(field) instanceof Map && data.get(field + "[]") != null)
+        .filter(field -> fieldMap.get(field) instanceof Map && submission.getInputData().get(field + "[]") != null)
         .forEach(field ->
             preppedFields.put(field, new CheckboxField(
                     field,
-                    (List<String>) data.get(field + "[]"),
+                    (List<String>) submission.getInputData().get(field + "[]"),
                     null
                 )
             )

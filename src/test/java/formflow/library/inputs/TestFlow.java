@@ -31,7 +31,10 @@ public class TestFlow extends FlowInputs {
   String selectInput;
   String moneyInput;
   String phoneInput;
+  @Encrypted
   String ssnInput;
+  @Encrypted
+  String ssnInputSubflow;
   String stateInput;
   @NotEmpty(message = "Please select at least one")
   List<String> favoriteFruitCheckbox;
