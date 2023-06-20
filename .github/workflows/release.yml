@@ -71,7 +71,7 @@ jobs:
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
       - name: Publish to Sonatype
         run: |
-          echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.gpg
+          echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY | grep -v '\-\-' |grep -v '=.' |tr -d '\n' }}" > private_key.gpg
           cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import
           ./gradlew publish --no-daemon --no-parallel
         env:
