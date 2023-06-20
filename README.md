@@ -834,9 +834,9 @@ values. SubmissionField's are used by the FFB library during PDF generation to m
 s
 input values to the correct PDF Fields. There are 3 types of SubmissionFields:
 
-| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                                                             | Examples                                                                                                                                                                                                                                                 |
-|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null)                                   | **
+| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                           | Examples |
+|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|----------|
+| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null) | **       
 
 Outside of a
 subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of
@@ -854,7 +854,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                         | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                    | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
@@ -1956,6 +1956,28 @@ Each email message can also include these fields:
 | emailBody       | String       |                | Body of an email.  The html version                         |            |  
 | attachments     | List<File>   |                | List of files to be added as attachment to an email         | empty list | 
 | requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | false      | 
+
+##### Where to use Mailgun Email Client
+
+We recommend that [actions](##Actions) be utilized to trigger the sending of emails. In the example
+found [here](src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java):
+
+1. A beforeSave action is called on a page in the `flows-config.yaml file` to trigger an email being
+   sent like
+   [this](https://github.com/codeforamerica/form-flow-starter-app/blob/12bc95233ef82bfd82813b17ce2eb96b1805e315/src/main/resources/flows-config.yaml#L114):
+
+```yaml
+  signName:
+    beforeSaveAction: SendEmailConfirmation
+    nextScreens:
+      - name: nextSteps
+```
+
+2. A MailgunEmailClient is pulled into a beforeSaveAction,
+3. An instance of the mailgunEmailClient is used to call the sendEmail() method with the necessary
+   arguments.
+
+You can either analyze the response or exit the action after emails have been sent.
 
 ##### How to send an email
 
