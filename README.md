@@ -854,7 +854,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                                                          | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                                | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
@@ -1935,17 +1935,17 @@ method on a MailgunEmailClient object:
 
 Each email message can also include these fields:
 
-1. emailsToCC → This is a list of emails passed into the cc: field of application.yaml.
-   To capture the list of cc's, developers can grab the list of emails from the application.yaml
-   using
-   @Value and passing in the field ”${form-flow.flow.ubi.email.confirmation.cc:}” based on the
-   application.yaml found above.
-2. email Bcc → is the list of emails passed into the bcc: field of application.yaml
-3. attachments → The list of files to attach, This field accepts a list of files that are added as
-   attachments to the email.
-4. requireTls → this is a boolean that determines whether a message can only be sent through tls
-   connection.  
-   True indicates that a message can only be using TLS encryption.
+- **emailsToCC** → This is a list of emails passed into the cc: field of application.yaml.
+  To capture the list of cc's, developers can grab the list of emails from the application.yaml
+  using @Value and passing in the field ”${form-flow.flow.ubi.email.confirmation.cc:}” based on the
+  application.yaml found above.
+- **emailToBCC** → is the list of emails passed into the bcc: field of application.yaml
+- **attachments** → The list of files to attach, This field accepts a list of files that are added
+  as
+  attachments to the email.
+- **requireTls** → this is a boolean that determines whether a message can only be sent through tls
+  connection.  
+  True indicates that a message can only be using TLS encryption.
 
 | Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
 |-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
