@@ -264,7 +264,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession
-  ) throws ResponseStatusException {
+  ) throws ResponseStatusException, SmartyException, IOException, InterruptedException {
     log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
     String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
@@ -295,11 +295,9 @@ public class ScreenController extends FormFlowController {
       }
     }
 
-    // TODO: validate addresses
+    handleAddressValidation(submission, formSubmission);
 
     if (httpSession.getAttribute("id") != null) {
-      Boolean iterationIsComplete = !isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid);
-      formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
       // have we submitted any data to the subflow yet?
       if (!submission.getInputData().containsKey(subflowName)) {
         submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
@@ -307,11 +305,15 @@ public class ScreenController extends FormFlowController {
       if (isNewIteration) {
         ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
+        setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
         subflow.add(formSubmission.getFormData());
       } else {
         var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
         if (iterationToEdit != null) {
           submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
+
+          setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
+
           submission.removeIncompleteIterations(subflowName, iterationUuid);
         }
       }
@@ -332,17 +334,21 @@ public class ScreenController extends FormFlowController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
       }
     }
-
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
+
     saveToRepository(submission, subflowName);
     httpSession.setAttribute("id", submission.getId());
     actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
-
-    String nextScreen = getNextScreenName(httpSession, currentScreen, iterationUuid);
-    String viewString = isNextScreenInSubflow(flow, httpSession, currentScreen, iterationUuid) ?
+    String nextScreen = getNextScreenName(submission, currentScreen, iterationUuid);
+    String viewString = isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid) ?
         String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, iterationUuid)
         : String.format("redirect:/flow/%s/%s", flow, nextScreen);
     return new ModelAndView(viewString);
+  }
+
+  private void setIterationIsComplete(String flow, String iterationUuid, FormSubmission formSubmission, Submission submission, ScreenNavigationConfiguration currentScreen) {
+    Boolean iterationIsComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
+    formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
   }
 
   /**
@@ -446,7 +452,7 @@ public class ScreenController extends FormFlowController {
     if (currentScreen == null) {
       throwNotFoundError(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen));
     }
-    String nextScreen = getNextScreenName(httpSession, currentScreen, null);
+    String nextScreen = getNextScreenName(submissionRepositoryService.findOrCreate(httpSession), currentScreen, null);
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
@@ -457,11 +463,11 @@ public class ScreenController extends FormFlowController {
     throw new NoHandlerFoundException(method, url, headers);
   }
 
-  private String getNextScreenName(HttpSession httpSession,
+  private String getNextScreenName(Submission submission,
       ScreenNavigationConfiguration currentScreen, String subflowUuid) {
     NextScreen nextScreen;
 
-    List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, httpSession, subflowUuid);
+    List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, submission, subflowUuid);
 
     if (isConditionalNavigation(currentScreen) && nextScreens.size() > 0) {
       nextScreen = nextScreens.get(0);
@@ -508,21 +514,19 @@ public class ScreenController extends FormFlowController {
    * Returns a list of possible next screens, the ones whose conditions pass
    *
    * @param currentScreen screen you're on
-   * @param httpSession   session
+   * @param submission    submission
    * @param subflowUuid   current subflow uuid
    * @return List<NextScreen> list of next screens
    */
   private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
-      HttpSession httpSession, String subflowUuid) {
+      Submission submission, String subflowUuid) {
     return currentScreen.getNextScreens().stream()
         .filter(nextScreen -> conditionManager.conditionExists(nextScreen.getCondition()))
         .filter(nextScreen -> {
           if (currentScreen.getSubflow() != null) {
-            return conditionManager.runCondition(nextScreen.getCondition(), submissionRepositoryService.findOrCreate(httpSession),
-                subflowUuid);
+            return conditionManager.runCondition(nextScreen.getCondition(), submission, subflowUuid);
           } else {
-            return conditionManager.runCondition(nextScreen.getCondition(),
-                submissionRepositoryService.findOrCreate(httpSession));
+            return conditionManager.runCondition(nextScreen.getCondition(), submission);
           }
         })
         .toList();
@@ -542,9 +546,9 @@ public class ScreenController extends FormFlowController {
         subflowConfig.getValue().getIterationStartScreen().equals(screen));
   }
 
-  private Boolean isNextScreenInSubflow(String flow, HttpSession session, ScreenNavigationConfiguration currentScreen,
+  private Boolean isNextScreenInSubflow(String flow, Submission submission, ScreenNavigationConfiguration currentScreen,
       String subflowUuid) {
-    String nextScreenName = getNextScreenName(session, currentScreen, subflowUuid);
+    String nextScreenName = getNextScreenName(submission, currentScreen, subflowUuid);
     return getScreenConfig(flow, nextScreenName).getSubflow() != null;
   }
 
