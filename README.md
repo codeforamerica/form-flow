@@ -834,9 +834,9 @@ values. SubmissionField's are used by the FFB library during PDF generation to m
 s
 input values to the correct PDF Fields. There are 3 types of SubmissionFields:
 
-| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                                                             | Examples                                                                                                                                                                                                                                                 |
-|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null)                                   | **
+| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                           | Examples |
+|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|----------|
+| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null) | **       
 
 Outside of a
 subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of
@@ -854,7 +854,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                         | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                                | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
@@ -1888,7 +1888,7 @@ if Smarty had performed address validation.
 
 ## Sending Email
 
-Form-flow library will use Mailgun to send email to applicants.
+Form-flow library will use Mailgun to send emails to applicants.
 
 ### Mailgun
 
@@ -1899,13 +1899,147 @@ and verify your domain. Generate an API key for the Mailgun account. Note your M
 
 #### Configure Mailgun
 
-Configure the Mailgun credentials in your .env file. Add your Mailgun key to the application.yaml as
-seen below:
+To [configure Mailgun](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials-)
+with the proper credentials an engineer must pass a mailgun domain,
+mailgun key, and a mailgun sender-email into their application. Those keys are passed into
+the application.yaml as displayed below:
 
 ```yaml
   email-client:
     mailgun:
-      key: ${MAILGUN_KEY}
+      key: ${MAILGUN_KEY:'no-key-set'}
+      domain: 'mail.forms-starter.cfa-platforms.org'
+      sender-email: 'UBI Demo <demo@mail.forms-starter.cfa-platforms.org>'
+```
+
+##### Required Mailgun keys:
+
+| Name           | Descriptor       | How you get it                                                   | 
+|----------------|------------------|------------------------------------------------------------------|
+| `key`          | `MAILGUN_KEY`    | passed in through .env files or secrets.                         |
+| `domain`       | `Mailgun Domain` | passed into application.yaml as a string into the domain field.  |
+| `sender-email` | `Sender Email`   | passed into the application.yaml file in the sender-email field. | 
+
+##### Required Fields for Emails
+
+To build an email message you must pass at least three String arguments into the sendEmail()
+method on a MailgunEmailClient object:
+
+1. an email subject
+2. an email recipient
+3. an email body. The email body will take a string written in html and apply the text and styling
+   to the body of the email.
+
+* Note: We suggest passing the emails subject and the email body through message.properties to allow
+  for language translation.
+
+Each email message can also include these fields:
+
+- **emailsToCC** → This is a list of emails passed into the cc: field of application.yaml.
+  To capture the list of cc's, developers can grab the list of emails from the application.yaml
+  using @Value and passing in the field ”${form-flow.flow.ubi.email.confirmation.cc:}” based on the
+  application.yaml found above.
+- **emailToBCC** → is the list of emails passed into the bcc: field of application.yaml
+- **attachments** → The list of files to attach, This field accepts a list of files that are added
+  as
+  attachments to the email.
+- **requireTls** → this is a boolean that determines whether a message can only be sent through tls
+  connection.  
+  True indicates that a message can only be using TLS encryption.
+
+| Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
+|-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
+| subject         | String       | *              | The subject of an email                                     |            |
+| recipient email | String       | *              | The mailbox that the email is sent to                       |            | 
+| emailToCC       | List<String> | *              | The list of mailboxes that are copied the email             | empty list |
+| emailToBcc      | List<String> |                | List of mailboxes that are blind copied the email           | empty list | 
+| emailBody       | String       |                | Body of an email.  The html version                         |            |  
+| attachments     | List<File>   |                | List of files to be added as attachment to an email         | empty list | 
+| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | false      | 
+
+##### Where to use Mailgun Email Client
+
+We recommend that [actions](#actions) be utilized to trigger the sending of emails. In the example
+found [here](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java):
+
+1. A beforeSave action is called on a page in the `flows-config.yaml file` to trigger an email being
+   sent like
+   [this](https://github.com/codeforamerica/form-flow-starter-app/blob/12bc95233ef82bfd82813b17ce2eb96b1805e315/src/main/resources/flows-config.yaml#L114):
+
+```yaml
+  signName:
+    beforeSaveAction: SendEmailConfirmation
+    nextScreens:
+      - name: nextSteps
+```
+
+2. A MailgunEmailClient is pulled into a beforeSaveAction,
+3. An instance of the mailgunEmailClient is used to call the sendEmail() method with the necessary
+   arguments.
+
+You can either analyze the response or exit the action after emails have been sent.
+
+##### How to send an email
+
+To pass an email message to the email service, first you need to import the MailgunEmailClient from
+the form-flow library using:
+
+```java 
+import formflow.library.email.MailgunEmailClient;
+```
+
+We also advise that you import `MessageSource` to capture the email subject and email body, allowing
+for language translation.
+The recipient email be should be captured and passed into the sendEmail() method as a String.
+It’s recommended that developers pass a list of strings representing email addresses to **cc:**
+and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
+
+```java
+  @Value("${form-flow.flow.ubi.email.confirmation.cc:}")
+private List<String> emailToCc;
+
+@Value("${form-flow.flow.ubi.email.confirmation.bcc:}")
+private List<String> emailToBcc;
+```
+
+In order to add attachments, a list of type < File > must be generated to a `mailgunEmailClient`
+object.  
+To send an email MailgunEmailClient object must call the sendEmail() with the appropriate
+parameters. SendEmail is overloaded allowing it to be called in three ways:
+
+1. `sendEmail( String subject, String recipientEmail, String emailBody)`
+2. `sendEmail( String subject, String recipientEmail, String emailBody, List<File> attachments)`
+
+3. `sendEmail( String subject, String recipientEmail, String emailBody, List<String> emailsToCC,
+   List<String> emailsToBCC, List<File> attachments, boolean requireTls)`
+
+Below is and example of a sendEmail() call being made by an application using the form-flow library.
+Please note that pdfs is a list of files to be passed as attachments with the email.
+
+```java
+      ...
+    MessageResponse response;
+    response=mailgunEmailClient.sendEmail(
+    emailSubject,
+    recipientEmail,
+    emailToCc,
+    emailToBcc,
+    emailBody,
+    pdfs,
+    requireTls
+    );
+    ...
+```
+
+The sendEmail() method will send an email and return the MessageResponse object it receives from
+mailgun. The message response should mirror the code found below if a message has been successfully
+queued by Mailgun.
+
+```java
+{
+    "message":"Queued. Thank you.",
+    "id":"<20111114174239.25659.5817@samples.mailgun.org>"
+    }
 ```
 
 # How to use
