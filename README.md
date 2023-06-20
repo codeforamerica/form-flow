@@ -854,7 +854,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                                                    | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                          | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
@@ -1959,8 +1959,8 @@ Each email message can also include these fields:
 
 ##### Where to use Mailgun Email Client
 
-We recommend that [actions](##Actions) be utilized to trigger the sending of emails. In the example
-found [here](src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java):
+We recommend that [actions](#actions) be utilized to trigger the sending of emails. In the example
+found [here](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java):
 
 1. A beforeSave action is called on a page in the `flows-config.yaml file` to trigger an email being
    sent like
