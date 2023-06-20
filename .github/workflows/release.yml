@@ -80,7 +80,7 @@ jobs:
           echo "Updating version in build.gradle to ${{ inputs.version }}"
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
       - name: Set env
-        run: echo "GRADLE_PUBLISH_KEY=$(echo ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }} | grep -v '\-\-' | grep -v '=.' |tr -d '\n')"
+        run: echo "GRADLE_PUBLISH_KEY=$(echo ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }} |grep -v '\-\-' |grep -v '=.' |tr -d '\n')"
       - name: Prepare Gradle Publish properties
         run: |
           - name: Prepare Gradle Publish properties
