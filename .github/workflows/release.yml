@@ -81,9 +81,10 @@ jobs:
         run: |
           echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
           gpg --export-secret-keys --armor ${{ inputs.gpgKeyName }} private_key.asc | grep -v '\-\-' | grep -v '^=.' | tr -d '\n'
+          gpg --list-keys
           ./gradlew publish --no-daemon --no-parallel
         env:
-          ORG_GRADLE_PROJECT_VERSION_NAME: ${{ github.event.inputs.versionName }}
+          ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ inputs.sonatypeUsername }}
