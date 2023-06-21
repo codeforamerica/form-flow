@@ -39,8 +39,6 @@ jobs:
         uses: levibostian/action-hide-sensitive-inputs@v1
         with:
           exclude_inputs: version
-      #      Get latest release
-      #      - name: Get latest release
       - name: Checkout
         uses: actions/checkout@v3
         with: # take this out when you're done testing so it uses the release instead!
@@ -78,7 +76,7 @@ jobs:
       - name: Publish to Sonatype
         run: |
           cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import
-          gpg --export-secret-keys --armor ${{ inputs.gpgKeyName }}
+#          gpg --export-secret-keys --armor ${{ inputs.gpgKeyName }}
           ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
