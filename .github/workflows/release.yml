@@ -76,13 +76,12 @@ jobs:
       - name: Publish to Sonatype
         run: |
           cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import
-#          gpg --export-secret-keys --armor ${{ inputs.gpgKeyName }}
           ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ inputs.sonatypeUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ inputs.sonatyp#          gpg --export-secret-keys --armor ${{ inputs.gpgKeyName }}eUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ inputs.sonatypePassword }}
           GPG_TTY: $(tty)
 
