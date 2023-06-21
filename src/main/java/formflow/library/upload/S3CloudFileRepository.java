@@ -43,9 +43,8 @@ public class S3CloudFileRepository implements CloudFileRepository {
   }
 
   /**
-   * Takes a filepath and Multipart file to to upload the multipart file to AWS S3 where the filepath acts as the path to the file
-   * in S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a
-   * folder.
+   * Takes a filepath and Multipart file to upload the multipart file to AWS S3 where the filepath acts as the path to the file in
+   * S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a folder.
    *
    * @param filePath File path representing a folder structure and path to the file in S3.
    * @param file     The multipart file to be uploaded to S3.
