@@ -67,20 +67,15 @@ jobs:
         run: | # switch out inputs.version with latest release when you're done testing!
           echo "Updating version in build.gradle to ${{ inputs.version }}"
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-      - name: Set env
-        run: echo "GRADLE_PUBLISH_KEY=$(echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | awk 'NR == 1 { print "GPG_SIGNING_KEY=" } 1' ORS='\\n')"
-      - name: Prepare Gradle Publish properties
-        run: |
-          echo "gradle.publish.key=${{ secrets.GRADLE_PUBLISH_KEY }}" >> ~/.gradle/gradle.properties
-          echo "gradle.publish.secret=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
-      - name: Publish to Sonatype
-        run: |
-          ./gradlew publishAllPublicationsToMavenCentralRepository
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Publish package
+        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        with:
+          arguments: publish
         env:
-          ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingPassphrase: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ inputs.sonatypeUsername }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ inputs.sonatypePassword }}
-          GPG_TTY: $(tty)
+          SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
+          SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
+          GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
 
