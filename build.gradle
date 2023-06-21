@@ -9,7 +9,8 @@ plugins {
     id 'java'
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'jacoco'
-    id 'com.vanniktech.maven.publish' version '0.25.2'
+    id 'signing'
+    id 'maven-publish'
 }
 
 jacoco {
@@ -42,6 +43,11 @@ task webjar(type: Jar, dependsOn: "jar") {
     from(fileTree("dist")) {
         into "META-INF/resources"
     }
+}
+
+signing {
+    useInMemoryPgpKeys(getKeyFile(), getKeyPassword())
+    sign publishing.publications.mavenJava
 }
 
 repositories {
