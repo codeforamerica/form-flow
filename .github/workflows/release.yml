@@ -79,6 +79,9 @@ jobs:
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Configure GPG Key
+        run: |
+          echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
       - name: Publish package
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
