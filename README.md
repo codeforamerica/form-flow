@@ -833,10 +833,17 @@ SubmissionField is an interface that represents a mapping between your applicati
 values. SubmissionField's are used by the FFB library during PDF generation to map your application'
 s
 input values to the correct PDF Fields. There are 3 types of SubmissionFields:
+<table>
+<tr>
+<td>SubmissionField Implementation</td> <td>Description</td> <td>Constructor</td> <td>Examples</td>
+</tr>
+</table>
 
-| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                           | Examples |
 |--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|----------|
-| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null) | **       
+| SingleField | For single value input fields. Represents a one to one mapping between an input in
+your application such as a text, radio or drop down field and it's value. Can include an iteration
+if the input is within a subflow. | Params: `String` input name, `String` input value, `Int`
+iteration number (for subflows, can be null) | **
 
 Outside of a
 subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of
@@ -854,7 +861,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                                                                | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                                            | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
