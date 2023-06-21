@@ -847,15 +847,40 @@ if the input is within a subflow.</td>
 <td>Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null)</td>
 <td>
 <div>
-<b>Outside of a subflow</b>
-<br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br>
+<b>Outside of a subflow:</b>
+<br>new SingleField("exampleInputName", "exampleInputValue", null)<br><br>
+</div>
+<div>
 <b>Inside of a subflow</b>
-<br> new SingleField("exampleInputName", "exampleInputValue", 1)
+<br>new SingleField("exampleInputName", "exampleInputValue", 1)<br>
 </div>
 </td>
 <tr>
+<td>CheckboxField</td>
+<td>For checkbox input fields. Represents a one to many mapping between a checkbox
+input and an array of it's many potential values. Can iclude an iteration if the input is within a
+subflow.</td>
+<td>Params: String input name, ArrayList\<String\> input value, Int iteration number Int iteration number (for subflows, can be null)</td>
+<td>
+<div>
+<b>Outside of a subflow:</b>
+<br>new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), null)<br><br>
+</div>
+<div>
+<b>Inside of a subflow</b>
+<br>new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), 1)<br>
+</div>
+</td>
 </tr>
 <tr>
+<td>DatabaseField</td>
+<td>For fields from database columns. Represents a mapping between database fields such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration.</td>
+<td>Params: `String` database column name, `String` database field value</td>
+<td>
+<div>
+new DatabaseField("submittedAt", "exampleSubmittedAtValue")
+</div>
+</td>
 </tr>
 <tr>
 </tr>
@@ -863,10 +888,7 @@ if the input is within a subflow.</td>
 
 |--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|----------|
 
-| CheckboxField | For checkbox input fields. Represents a one to many mapping between a checkbox
-input and an array of it's many potential values. Can iclude an iteration if the input is within a
-subflow. | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration
-number `Int` iteration number (for subflows, can be null) | **
+| | | | **
 Outside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 null) <br><br> **
@@ -874,7 +896,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                                                                                  | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                                                                                      | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
