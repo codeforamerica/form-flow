@@ -116,6 +116,8 @@ java {
     withSourcesJar()
 }
 
+ext.admin = System.getenv("SONATYPE_USERNAME")
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -208,8 +210,6 @@ publishing {
         }
     }
 }
-
-ext.admin = System.getenv("SONATYPE_USERNAME")
 
 signing {
     required { admin }
