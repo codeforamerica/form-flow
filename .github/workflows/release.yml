@@ -73,9 +73,10 @@ jobs:
         run: |
           echo "gradle.publish.key=$GRADLE_PUBLISH_KEY" >> ~/.gradle/gradle.properties
           echo "gradle.publish.secret=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
       - name: Publish to Sonatype
         run: |
-          cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import --pinentry-mode -loopback
+          cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import --pinentry-mode loopback
           ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
