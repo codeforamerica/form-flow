@@ -67,11 +67,11 @@ jobs:
         run: | # switch out inputs.version with latest release when you're done testing!
           echo "Updating version in build.gradle to ${{ inputs.version }}"
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-      - name: Set env
-        run: echo "GRADLE_PUBLISH_KEY=$(echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | grep -v '\-\-' | grep -v '=.' | tr -d '\n')"
+#      - name: Set env
+#        run: echo "GRADLE_PUBLISH_KEY=$(echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | grep -v '\-\-' | grep -v '=.' | tr -d '\n')"
       - name: Prepare Gradle Publish properties
         run: |
-          echo "gradle.publish.key=$GRADLE_PUBLISH_KEY" >> ~/.gradle/gradle.properties
+          echo "gradle.publish.key=${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" >> ~/.gradle/gradle.properties
           echo "gradle.publish.secret=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
       - name: Publish to Sonatype
         run: |
