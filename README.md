@@ -860,7 +860,7 @@ if the input is within a subflow.</td>
 <td>For checkbox input fields. Represents a one to many mapping between a checkbox
 input and an array of it's many potential values. Can include an iteration if the input is within a
 subflow.</td>
-<td>Params: <code>String</code> input name, ArrayList\<String> input value, <code>Int</code> iteration number (for subflows, can be null)</td>
+<td>Params: <code>String</code> input name, ArrayList&lt;String&gt; input value, <code>Int</code> iteration number (for subflows, can be null)</td>
 <td>
 <div>
 <b>Outside of a subflow:</b>
