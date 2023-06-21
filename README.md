@@ -860,7 +860,7 @@ if the input is within a subflow.</td>
 <td>For checkbox input fields. Represents a one to many mapping between a checkbox
 input and an array of it's many potential values. Can iclude an iteration if the input is within a
 subflow.</td>
-<td>Params: String input name, ArrayList\<String\> input value, Int iteration number Int iteration number (for subflows, can be null)</td>
+<td>Params: String input name, ArrayList<String> input value, Int iteration number Int iteration number (for subflows, can be null)</td>
 <td>
 <div>
 <b>Outside of a subflow:</b>
@@ -882,8 +882,6 @@ new DatabaseField("submittedAt", "exampleSubmittedAtValue")
 </div>
 </td>
 </tr>
-<tr>
-</tr>
 </table>
 
 |--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|----------|
@@ -896,7 +894,7 @@ Inside of a
 subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
 
 1) |
-                                                                                                                                                      | DatabaseField | For fields from database columns. Represents a mapping between database fields
+                                                                                                                                                            | DatabaseField | For fields from database columns. Represents a mapping between database fields
    such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
    Params: `String` database column name, `String` database field value | new DatabaseField("
    submittedAt", "exampleSubmittedAtValue")
