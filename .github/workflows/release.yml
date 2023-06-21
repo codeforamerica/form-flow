@@ -88,8 +88,11 @@ jobs:
         run: |
           echo "signing.keyId=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
           echo "signing.password=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >>  ~/.gradle/gradle.properties
-          echo "signing.secretKeyRingFile=~/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
-          echo "no-tty" >> ~/.gnupg/gpg.conf
+          echo "signing.gnupg.homeDir=~/.gnupg" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.optionsFile=gnupg-home/gpg.conf" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.keyName=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
+          echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
       - name: Publish package
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
