@@ -199,9 +199,11 @@ publishing {
                 println("Creating a release version: ${version}")
                 url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             }
-            credentials {
-                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
-                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
+            if (admin) {
+                credentials {
+                    username = System.getenv("SONATYPE_USERNAME")
+                    password = System.getenv("SONATYPE_PASSWORD")
+                }
             }
         }
     }
@@ -210,13 +212,11 @@ publishing {
 ext.admin = System.getenv("SONATYPE_USERNAME")
 
 signing {
-    if (!version.endsWith("-SNAPSHOT")) {
-        required { admin }
-        def signingKey = System.getenv("GPG_SIGNING_KEY")
-        def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign publishing.publications
-    }
+    required { admin }
+    def signingKey = System.getenv("GPG_SIGNING_KEY")
+    def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications
 }
 
 // javadoc {
