@@ -81,7 +81,7 @@ jobs:
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
       - name: Configure GPG Key
         run: |
-          echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
+          echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg -c --batch --passphrase ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
         env:
           GPG_TTY: $(tty)
       - name: Publish package
