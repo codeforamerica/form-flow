@@ -43,9 +43,8 @@ public class S3CloudFileRepository implements CloudFileRepository {
   }
 
   /**
-   * Takes a filepath and Multipart file to to upload the multipart file to AWS S3 where the filepath acts as the path to the file
-   * in S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a
-   * folder.
+   * Takes a filepath and Multipart file to upload the multipart file to AWS S3 where the filepath acts as the path to the file in
+   * S3. File paths that include "/" will create a folder structure where each string prior to the "/" will represent a folder.
    *
    * @param filePath File path representing a folder structure and path to the file in S3.
    * @param file     The multipart file to be uploaded to S3.
@@ -62,12 +61,13 @@ public class S3CloudFileRepository implements CloudFileRepository {
       upload.waitForCompletion();
       log.info("Upload complete");
     } catch (AmazonServiceException e) {
+      // make some noise, something's wrong with our connection to S3
       System.err.println(e.getErrorMessage());
-      System.exit(1);
+      log.error("AWS S3 exception occurred: " + e.getErrorMessage());
+      throw new RuntimeException(e.getErrorMessage());
     } catch (InterruptedException | IOException e) {
-      log.info("Not a AmazonServiceException");
-      log.info(e.getMessage());
-      throw new RuntimeException(e);
+      log.error("Exception occurred in S3 code: " + e.getMessage());
+      throw new RuntimeException(e.getMessage());
     }
   }
 
