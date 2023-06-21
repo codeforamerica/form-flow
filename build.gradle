@@ -178,6 +178,7 @@ mavenPublishing {
 }
 
 def sonatypePublishingUrl = "https://oss.sonatype.org/service/local/staging/profiles/>"
+apply plugin: "com.vanniktech.maven.publish"
 
 // javadoc {
 //    if (JavaVersion.current().isJava9Compatible()) {
