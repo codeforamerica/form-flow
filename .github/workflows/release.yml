@@ -85,6 +85,8 @@ jobs:
           echo "gradle.publish.secret=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
       - name: Publish to Sonatype
         run: |
+          echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
+          gpg --import private_key.asc
           ./gradlew publishAllPublicationsToMavenCentralRepository
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
