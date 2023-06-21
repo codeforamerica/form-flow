@@ -85,7 +85,7 @@ jobs:
           echo "gradle.publish.secret=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
       - name: Publish to Sonatype
         run: |
-          cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import --pinentry-mode loopback
+          cat <(echo -e "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}") | gpg --batch --import --pinentry-mode loopback -sa -u bcalegari+platforms-robot@codeforamerica.org
           ./gradlew publish --no-daemon --no-parallel
         env:
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ inputs.version }}
