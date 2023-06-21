@@ -82,6 +82,8 @@ jobs:
       - name: Configure GPG Key
         run: |
           echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
+        env:
+          GPG_TTY: $(tty)
       - name: Publish package
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
@@ -91,5 +93,4 @@ jobs:
           SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
           GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
-          GPG_TTY: $(tty)
 
