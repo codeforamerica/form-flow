@@ -203,7 +203,6 @@ class SubmissionRepositoryServiceTest {
         "testKey", "this is a test value",
         "otherTestKey", List.of("A", "B", "C")
     );
-    var timeNow = Instant.now();
     var submission = Submission.builder()
         .inputData(inputData)
         .urlParams(new HashMap<>())
@@ -214,10 +213,11 @@ class SubmissionRepositoryServiceTest {
     Submission savedSubmission = submissionRepositoryService.findById(id).get();
 
     assertThat(savedSubmission.getCreatedAt()).isInThePast();
-    assertThat(savedSubmission.getUpdatedAt()).is(updatedAt -> updatedAt != null);
     assertThat(savedSubmission.getUpdatedAt() == null).isTrue();
 
-    inputData.put("newKey", "newValue");
-
+    savedSubmission.getInputData().put("newKey", "newValue");
+    submissionRepositoryService.save(savedSubmission);
+    assertThat(savedSubmission.getUpdatedAt() != null).isTrue();
+    assertThat(savedSubmission.getUpdatedAt()).isInThePast();
   }
 }
