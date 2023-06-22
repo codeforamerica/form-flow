@@ -85,7 +85,7 @@ jobs:
       - name: Publish package
         uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: publish publishMavenJavaPublicationToMavenRepository
+          arguments: publish publishAllPublicationsToMavenCentralRepository
         env:
           SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
           SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
