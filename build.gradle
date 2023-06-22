@@ -121,6 +121,7 @@ ext.admin = System.getenv("SONATYPE_USERNAME")
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            evaluationDependsOn(signing)
             artifactId = "form-flow"
             from components.java
             versionMapping {
