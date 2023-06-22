@@ -132,13 +132,6 @@ publishing {
                 }
             }
             pom {
-                signing {
-                    required { admin }
-                    def signingKey = System.getenv("GPG_SIGNING_KEY")
-                    def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
-                    useInMemoryPgpKeys(signingKey, signingPassword)
-                    sign publishing.publications
-                }
                 name = "Form Flow Builder"
                 description = "A Java library placed in a Spring Boot app to generate form flows."
                 url = "https://github.com/codeforamerica/form-flow/"
