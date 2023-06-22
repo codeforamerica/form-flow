@@ -833,32 +833,58 @@ SubmissionField is an interface that represents a mapping between your applicati
 values. SubmissionField's are used by the FFB library during PDF generation to map your application'
 s
 input values to the correct PDF Fields. There are 3 types of SubmissionFields:
-
-| SubmissionField Implementation | Description                                                                                                                                                                                                             | Constructor                                                                                           | Examples |
-|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|----------|
-| SingleField                    | For single value input fields. Represents a one to one mapping between an input in your application such as a text, radio or drop down field and it's value. Can include an iteration if the input is within a subflow. | Params: `String` input name, `String` input value, `Int` iteration number (for subflows, can be null) | **       
-
-Outside of a
-subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", null) <br><br> **Inside of
-a
-subflow**: <br> new SingleField("exampleInputName", "exampleInputValue", 1)
-|
-| CheckboxField | For checkbox input fields. Represents a one to many mapping between a checkbox
-input and an array of it's many potential values. Can iclude an iteration if the input is within a
-subflow. | Params: `String` input name, `ArrayList<String>` input value, `Int` iteration
-number `Int` iteration number (for subflows, can be null) | **
-Outside of a
-subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
-null) <br><br> **
-Inside of a
-subflow**: <br> new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"),
-
-1) |
-                                                                                                | DatabaseField | For fields from database columns. Represents a mapping between database fields
-   such as `submittedAt`, `submissionId`, etc and their values. Does not include an iteration. |
-   Params: `String` database column name, `String` database field value | new DatabaseField("
-   submittedAt", "exampleSubmittedAtValue")
-   |
+<table>
+    <tr>
+        <td><b>SubmissionField Implementation</b></td> 
+        <td><b>Description</b></td> 
+        <td><b>Constructor</b></td> 
+        <td><b>Examples</b></td>
+    </tr>
+    <tr>
+        <td>SingleField</td>
+        <td>For single value input fields. Represents a one to one mapping between an input in
+        your application such as a text, radio or drop down field and it's value. Can include an iteration
+        if the input is within a subflow.</td>
+        <td>Params: <code>String</code> input name, <code>String</code> input value, <code>Int</code> iteration number (for subflows, can be null)</td>
+        <td>
+        <div>
+        <b>Outside of a subflow:</b>
+        <br>new SingleField("exampleInputName", "exampleInputValue", null)<br><br>
+        </div>
+        <div>
+        <b>Inside of a subflow:</b>
+        <br>new SingleField("exampleInputName", "exampleInputValue", 1)<br>
+        </div>
+        </td>
+    </tr>
+    <tr>
+        <td>CheckboxField</td>
+        <td>For checkbox input fields. Represents a one to many mapping between a checkbox
+        input and an array of it's many potential values. Can include an iteration if the input is within a
+        subflow.</td>
+        <td>Params: <code>String</code> input name, ArrayList&lt;String&gt; input value, <code>Int</code> iteration number (for subflows, can be null)</td>
+        <td>
+        <div>
+        <b>Outside of a subflow:</b>
+        <br>new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), null)<br><br>
+        </div>
+        <div>
+        <b>Inside of a subflow:</b>
+        <br>new CheckboxField("exampleInputName", List.of("exampleValueOne", "exampleValueTwo"), 1)<br>
+        </div>
+        </td>
+    </tr>
+    <tr>
+        <td>DatabaseField</td>
+        <td>For fields from database columns. Represents a mapping between database fields such as <code>submittedAt</code>, <code>submissionId</code>, etc. and their values. Does not include an iteration.</td>
+        <td>Params: <code>String</code> database column name, <code>String</code> database field value</td>
+        <td>
+        <div>
+        new DatabaseField("submittedAt", "exampleSubmittedAtValue")
+        </div>
+        </td>
+    </tr>
+</table>
 
 ### Custom preparers
 
