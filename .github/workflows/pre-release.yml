@@ -20,7 +20,7 @@ jobs:
       - name: Tag Version
         run: |
           echo Creating pre-release version: ${{inputs.version}}
-          git config --local user.email "bcalegari+platforms-robot@codeforamerica.org"
+          git config --local user.email "platforms-robot@codeforamerica.org"
           git config --local user.name "CfA Platforms Robot"
           git tag -a ${{inputs.version}} -m "Pre-release version ${{inputs.version}}"
           git push origin ${{inputs.version}}
