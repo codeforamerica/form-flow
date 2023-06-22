@@ -77,6 +77,8 @@ jobs:
       - name: Configure gradle properties for key id
         run: |
           echo "signing.gnupg.homeDir=/home/runner/.gnupg" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.keyName=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
       - name: Publish package
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
@@ -89,5 +91,4 @@ jobs:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
-          GPG_TTY: $(tty)
 
