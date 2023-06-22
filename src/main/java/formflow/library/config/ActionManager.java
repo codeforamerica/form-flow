@@ -44,7 +44,6 @@ public class ActionManager {
       Submission submission) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
-      runAction(actionName, formSubmission);
       runAction(actionName, formSubmission, submission);
     }
   }
@@ -62,7 +61,6 @@ public class ActionManager {
       Submission submission, String uuid) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
-      runAction(actionName, formSubmission, uuid);
       runAction(actionName, formSubmission, submission, uuid);
     }
   }
@@ -188,16 +186,8 @@ public class ActionManager {
     runAction(name, () -> getAction(name).run(submission, uuid));
   }
 
-  private void runAction(String name, FormSubmission formSubmission) {
-    runAction(name, () -> getAction(name).run(formSubmission));
-  }
-
   private void runAction(String name, FormSubmission formSubmission, Submission submission) {
     runAction(name, () -> getAction(name).run(formSubmission, submission));
-  }
-
-  private void runAction(String name, FormSubmission formSubmission, String uuid) {
-    runAction(name, () -> getAction(name).run(formSubmission, uuid));
   }
 
   private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid) {
