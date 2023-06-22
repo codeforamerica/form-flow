@@ -76,6 +76,8 @@ jobs:
           GPG_TTY: $(tty)
       - name: Configure gradle properties for key id
         run: |
+          echo "signing.keyId=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
+          echo "signing.password=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.homeDir=/home/runner/.gnupg" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.keyName=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
