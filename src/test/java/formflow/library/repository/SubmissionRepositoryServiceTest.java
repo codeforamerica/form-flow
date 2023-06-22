@@ -196,4 +196,28 @@ class SubmissionRepositoryServiceTest {
     assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow")).isFalse();
     assertThat(resultHouseholdSubflow.get("ssnInputSubflow_encrypted")).isNotEqualTo(origHouseholdSubflow.get("ssnInputSubflow"));
   }
+
+  @Test
+  void shouldSetCreatedAtAndUpdatedAtFields() {
+    var inputData = Map.of(
+        "testKey", "this is a test value",
+        "otherTestKey", List.of("A", "B", "C")
+    );
+    var timeNow = Instant.now();
+    var submission = Submission.builder()
+        .inputData(inputData)
+        .urlParams(new HashMap<>())
+        .flow("testFlow")
+        .build();
+
+    UUID id = submissionRepositoryService.save(submission);
+    Submission savedSubmission = submissionRepositoryService.findById(id).get();
+
+    assertThat(savedSubmission.getCreatedAt()).isInThePast();
+    assertThat(savedSubmission.getUpdatedAt()).is(updatedAt -> updatedAt != null);
+    assertThat(savedSubmission.getUpdatedAt() == null).isTrue();
+
+    inputData.put("newKey", "newValue");
+
+  }
 }
