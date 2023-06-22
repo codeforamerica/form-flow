@@ -39,14 +39,10 @@ jobs:
           distribution: 'adopt'
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
-        with:
-          arguments: build
-      - name: Publish to Maven Central
+      - name: Build with Gradle and publish to maven central
         uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: publish
+          arguments: build publish
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
