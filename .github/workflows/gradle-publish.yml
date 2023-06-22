@@ -43,6 +43,13 @@ jobs:
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:
           arguments: build
+      - name: Publish to Maven Central
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: publish
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       - name: Trigger starter-app tests on newly published version
         uses: peter-evans/repository-dispatch@v2.1.1
         with:
