@@ -81,13 +81,11 @@ jobs:
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
       - name: Configure GPG Key
         run: |
-          echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg2 --import --pinentry-mode loopback --passphrase ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
+          echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import --pinentry-mode loopback --passphrase ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
         env:
           GPG_TTY: $(tty)
       - name: Configure gradle properties for key id
         run: |
-          echo "signing.keyId=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
-          echo "signing.password=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >>  ~/.gradle/gradle.properties
           echo "signing.gnupg.homeDir=/home/runner/.gnupg" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.keyName=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
