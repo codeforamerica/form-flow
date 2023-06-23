@@ -102,9 +102,6 @@ public class UploadController extends FormFlowController {
 
       if (dzFilesMap == null) {
         fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
-        HashMap<String, HashMap<UUID, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
-        dropzoneInstanceMap.put(inputName, userFileMap);
-        httpSession.setAttribute("userFiles", dropzoneInstanceMap);
       } else {
         if (dzFilesMap.containsKey(inputName)) {
           // User files exists, and it already has a key for this dropzone instance
@@ -112,12 +109,15 @@ public class UploadController extends FormFlowController {
           fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
         } else {
           // User files exists, but it doesn't have the dropzone instance yet
-          userFileMap = new HashMap<>();
           fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
           dzFilesMap.put(inputName, userFileMap);
         }
       }
       userFileMap.put(newFileId, fileInfo);
+
+      HashMap<String, HashMap<UUID, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
+      dropzoneInstanceMap.put(inputName, userFileMap);
+      httpSession.setAttribute("userFiles", dropzoneInstanceMap);
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
@@ -170,6 +170,10 @@ public class UploadController extends FormFlowController {
       if (userFileMap.isEmpty()) {
         dzFilesMap.remove(dropZoneInstanceName);
       }
+
+      HashMap<String, HashMap<UUID, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
+      dropzoneInstanceMap.put(dropZoneInstanceName, userFileMap);
+      httpSession.setAttribute("userFiles", dropzoneInstanceMap);
 
       return new RedirectView(returnPath);
     } catch (Exception e) {
