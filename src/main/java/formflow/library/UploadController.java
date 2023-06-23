@@ -37,6 +37,8 @@ public class UploadController extends FormFlowController {
 
   private final MessageSource messageSource;
 
+  private final String SESSION_USERFILES_KEY = "userFiles";
+
   public UploadController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
@@ -95,29 +97,29 @@ public class UploadController extends FormFlowController {
       log.info("Created new file with id: " + newFileId);
 
       //TODO: change userFiles special string to constant to be referenced in thymeleaf
-      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
-          (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
-      HashMap<UUID, HashMap<String, String>> userFileMap = new HashMap<>();
-      HashMap<String, String> fileInfo;
+      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap;
+      HashMap<UUID, HashMap<String, String>> userFileMap;
+      HashMap<String, String> fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
 
-      if (dzFilesMap == null) {
-        fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
+      if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
+        // no dropzone data exists at all yet, let's create space for the session map as well
+        // as for the current file being uploaded
+        dzFilesMap = new HashMap<>();
+        userFileMap = new HashMap<>();
       } else {
+        dzFilesMap = (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
         if (dzFilesMap.containsKey(inputName)) {
-          // User files exists, and it already has a key for this dropzone instance
+          // a map for this dropzone widget already exists, let's add more files to it
           userFileMap = dzFilesMap.get(inputName);
-          fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
         } else {
-          // User files exists, but it doesn't have the dropzone instance yet
-          fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
-          dzFilesMap.put(inputName, userFileMap);
+          // a map for this inputName dropzone instance does not exist yet, let's create it so we can add files to it
+          userFileMap = new HashMap<>();
         }
       }
-      userFileMap.put(newFileId, fileInfo);
 
-      HashMap<String, HashMap<UUID, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
-      dropzoneInstanceMap.put(inputName, userFileMap);
-      httpSession.setAttribute("userFiles", dropzoneInstanceMap);
+      userFileMap.put(newFileId, fileInfo);
+      dzFilesMap.put(inputName, userFileMap);
+      httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
@@ -163,7 +165,7 @@ public class UploadController extends FormFlowController {
       cloudFileRepository.delete(file.getRepositoryPath());
       uploadedFileRepositoryService.deleteById(file.getFile_id());
       HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
-          (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute("userFiles");
+          (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
       HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
 
       userFileMap.remove(fileId);
@@ -171,9 +173,7 @@ public class UploadController extends FormFlowController {
         dzFilesMap.remove(dropZoneInstanceName);
       }
 
-      HashMap<String, HashMap<UUID, HashMap<String, String>>> dropzoneInstanceMap = new HashMap<>();
-      dropzoneInstanceMap.put(dropZoneInstanceName, userFileMap);
-      httpSession.setAttribute("userFiles", dropzoneInstanceMap);
+      httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
 
       return new RedirectView(returnPath);
     } catch (Exception e) {
