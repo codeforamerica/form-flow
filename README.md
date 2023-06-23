@@ -23,7 +23,6 @@ Table of Contents
         * [Input Class](#input-class)
         * [Custom Annotations](#custom-annotations)
         * [Input Data JSON Structure](#input-data-json-structure)
-
 * [General Information](#general-information)
     * [Thymeleaf](#thymeleaf)
         * [Using Thymeleaf](#using-thymeleaf)
@@ -1454,7 +1453,7 @@ The JSON will be in the form of:
   "homeAddressCity": "Berkeley",
   "homeAddressState": "CA",
   "homeAddressZipCode": "94710",
-  "_validatehomeAddress": "true",
+  "validate_homeAddress": "true",
   "homeAddressStreetAddress1_validated": "1719 5th St Apt D",
   "homeAddressStreetAddress2_validated": "D",
   "homeAddressCity_validated": "Berkeley",
@@ -1466,7 +1465,7 @@ The JSON will be in the form of:
 Note that both the original address and the validated address are stored, with the validated fields
 having the suffix `_validated`.
 
-Also note the input prefixed with `_validate` which appears here as `_validatehomeAddress` with a
+Also note the input prefixed with `validate_` which appears here as `validate_homeAddress` with a
 value of true.
 This is a hidden field which is applied within the address fragment. This field is used to determine
 whether Smarty validation for that address should be performed. The before mentioned `validate`
@@ -1510,7 +1509,7 @@ of how this works using conditions can be found in the starter app.
 - [Condition for showing the `cfa:verifyAddressScreen` based screen](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/conditions/SmartySuggestionNotFound.java)
 
 Note how the conditions first check that Smarty validation is on by looking for the value of the
-hidden field `_validateresidentialAddress` and they check if a validated address line is present in
+hidden field `validate_residentialAddress` and they check if a validated address line is present in
 Submission's input data. This is because `residentialAddressStreetAddress1_validated` would only be
 present if Smarty had performed address validation.
 
