@@ -89,7 +89,7 @@ jobs:
       - name: Publish package
         uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: publish
+          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
           SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
