@@ -71,6 +71,7 @@ dependencies {
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'com.mailgun:mailgun-java:1.0.8'
     implementation 'com.google.crypto.tink:tink:1.9.0'
+    implementation 'org.springframework.session:spring-session-jdbc'
 
     compileOnly 'org.projectlombok:lombok'
 
@@ -108,7 +109,7 @@ jacocoTestReport {
 }
 
 group = "org.codeforamerica.platform"
-version = "0.0.5-SNAPSHOT"
+version = "0.0.6-SNAPSHOT"
 
 java {
     // we need to fix javadoc work before this will run successfully
@@ -117,6 +118,9 @@ java {
 }
 
 ext.admin = System.getenv("SONATYPE_USERNAME")
+def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
+
 
 publishing {
     publications {
@@ -186,7 +190,6 @@ publishing {
     }
 
     repositories {
-
         maven {
             name = "MavenCentral"
             // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW
@@ -203,8 +206,8 @@ publishing {
             }
             if (admin) {
                 credentials {
-                    username = System.getenv("SONATYPE_USERNAME")
-                    password = System.getenv("SONATYPE_PASSWORD")
+                    username = sonatypeUsername
+                    password = sonatypePassword
                 }
             }
         }
@@ -224,8 +227,8 @@ nexusPublishing {
         sonatype {
             nexusUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
             snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
-            username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME") // defaults to project.properties["myNexusUsername"]
-            password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD") // defaults to project.properties["myNexusPassword"]
+            username = sonatypeUsername
+            password = sonatypePassword
         }
     }
 }
