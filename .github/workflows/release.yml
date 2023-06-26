@@ -14,10 +14,6 @@ on:
         description: 'Sonatype password'
         type: string
         required: true
-      gpgKeyName:
-        description: 'GPG key name'
-        type: string
-        required: true
 
 jobs:
   release:
@@ -76,38 +72,35 @@ jobs:
           GPG_TTY: $(tty)
       - name: Configure gradle properties for key id
         run: |
-          echo "signing.keyId=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
-          echo "signing.password=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.homeDir=/home/runner/.gnupg" >> ~/.gradle/gradle.properties
-          echo "signing.gnupg.keyName=${{ inputs.gpgKeyName }}" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.keyName=${{ secrets.PLATFORM_ROBOT_GPG_ID }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
       - name: Publish package
-        uses: gradle/gradle-build-action@v2.4.2
+        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
-          arguments: publish publishAllPublicationsToMavenCentralRepository
+          arguments: publish
         env:
           SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
           SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
-      - name: Update version after publish
-        run: | 
-          git config --local user.email "platforms-robot@codeforamerica.org"
-          git config --local user.name "CfA Platforms Robot"
-          git checkout main
-          git checkout -b "bump-snapshot-${{ inputs.version }}-SNAPSHOT"
-          sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}-SNAPSHOT"/' build.gradle
-          git add build.gradle
-          git commit -m "Updating version in build.gradle to ${{ inputs.version }}-SNAPSHOT"
-          git push origin/bump-snapshot-${{ inputs.version }}-SNAPSHOT
-          git checkout main 
-          git merge origin/bump-snapshot-${{ inputs.version }}-SNAPSHOT
-
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{inputs.version}}
-          draft: false
-          prerelease: false
+#      - name: Update version after publish
+#        run: |
+#          git config --local user.email "platforms-robot@codeforamerica.org"
+#          git config --local user.name "CfA Platforms Robot"
+#          git checkout main
+#          git checkout -b "bump-snapshot-${{ inputs.version }}-SNAPSHOT"
+#          sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}-SNAPSHOT"/' build.gradle
+#          git add build.gradle
+#          git commit -m "Updating version in build.gradle to ${{ inputs.version }}-SNAPSHOT"
+#          git push origin/bump-snapshot-${{ inputs.version }}-SNAPSHOT
+#          git checkout main
+#          git merge origin/bump-snapshot-${{ inputs.version }}-SNAPSHOT
+#      - name: Publish GitHub Release
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          tag_name: ${{inputs.version}}
+#          draft: false
+#          prerelease: false
 
