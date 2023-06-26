@@ -86,13 +86,10 @@ jobs:
           echo "signing.gnupg.keyName=${{ secrets.PLATFORM_ROBOT_GPG_ID }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
-      - name: List gradle packages
-        run: |
-          ./gradlew tasks
       - name: Publish package
         uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: tasks publishToSonatype closeAndReleaseSonatypeStagingRepository
+          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
           SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
