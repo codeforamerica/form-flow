@@ -40,3 +40,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  session:
+    store-type: jdbc
+    timeout: 72h
+    jdbc:
+      initialize-schema: always
