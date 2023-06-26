@@ -8,6 +8,7 @@ plugins {
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'jacoco'
     id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
 }
 
 jacoco {
@@ -70,7 +71,6 @@ dependencies {
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'com.mailgun:mailgun-java:1.0.8'
     implementation 'com.google.crypto.tink:tink:1.9.0'
-    implementation 'org.springframework.session:spring-session-jdbc'
 
     compileOnly 'org.projectlombok:lombok'
 
@@ -108,13 +108,15 @@ jacocoTestReport {
 }
 
 group = "org.codeforamerica.platform"
-version = "0.0.6-SNAPSHOT"
+version = "0.0.5-SNAPSHOT"
 
 java {
     // we need to fix javadoc work before this will run successfully
     //withJavadocJar()
     withSourcesJar()
 }
+
+ext.admin = System.getenv("SONATYPE_USERNAME")
 
 publishing {
     publications {
@@ -199,18 +201,32 @@ publishing {
                 println("Creating a release version: ${version}")
                 url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             }
-            credentials {
-                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
-                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
+            if (admin) {
+                credentials {
+                    username = System.getenv("SONATYPE_USERNAME")
+                    password = System.getenv("SONATYPE_PASSWORD")
+                }
             }
         }
     }
 }
 
 signing {
-    if (!version.endsWith("-SNAPSHOT")) {
-        useGpgCmd()
-        sign publishing.publications.mavenJava
+    required { admin }
+    def signingKey = System.getenv("GPG_SIGNING_KEY")
+    def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME") // defaults to project.properties["myNexusUsername"]
+            password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD") // defaults to project.properties["myNexusPassword"]
+        }
     }
 }
 
