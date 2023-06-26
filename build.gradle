@@ -192,11 +192,6 @@ publishing {
     repositories {
         maven {
             name = "MavenCentral"
-            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW
-            // sonatype url, but we need the old one since we have an older account
-            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
-            //def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
-            //def snapshotsRepoUrl = layoutBuildDirectory.dir('repos/snapshots')
             if (version.endsWith("-SNAPSHOT")) {
                 println("Creating a SNAPSHOT: ${version}")
                 url = "https://oss.sonatype.org/content/repositories/snapshots"
@@ -215,6 +210,10 @@ publishing {
 }
 
 signing {
+    if (!version.endsWith("-SNAPSHOT")) {
+        useGpgCmd()
+        sign publishing.publications.mavenJava
+    }
     required { admin }
     def signingKey = System.getenv("GPG_SIGNING_KEY")
     def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
