@@ -6,7 +6,7 @@ on:
         description: 'Version to release'
         type: string
         required: true
-    ref_to_release:
+    refToRelease:
       description: 'Ref to release (branch, sha, tag, etc)'
       type: string
       required: true
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.ref_to_release }}
+          ref: ${{ inputs.refToRelease }}
       - name: Tag Version
         run: |
           echo Creating pre-release version: ${{inputs.version}}
