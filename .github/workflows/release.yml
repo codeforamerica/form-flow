@@ -43,13 +43,6 @@ jobs:
         with: # take this out when you're done testing so it uses the release instead!
           ref: ${{ inputs.version }}
           fetch-depth: 0
-      - name: Update version in build.gradle
-        run: | # TODO: switch out inputs.version with github.event.release.tag_name when you're done testing!
-            echo "Updating version in build.gradle to ${{ inputs.version }}"
-            sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-            cat build.gradle
-            echo "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" > private_key.asc
-            echo "${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --import private_key.asc
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -73,8 +66,6 @@ jobs:
         run: | # switch out inputs.version with latest release when you're done testing!
           echo "Updating version in build.gradle to ${{ inputs.version }}"
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
       - name: Configure GPG Key
         run: |
           echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import --pinentry-mode loopback --passphrase ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
@@ -115,4 +106,3 @@ jobs:
 #          tag_name: ${{inputs.version}}
 #          draft: false
 #          prerelease: false
-
