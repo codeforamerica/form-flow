@@ -8,6 +8,7 @@ plugins {
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'jacoco'
     id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3'
 }
 
 jacoco {
@@ -217,6 +218,17 @@ signing {
     def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications
+}
+
+nexusPublishing {
+    repositories {
+        myNexus {
+            nexusUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME") // defaults to project.properties["myNexusUsername"]
+            password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD") // defaults to project.properties["myNexusPassword"]
+        }
+    }
 }
 
 // javadoc {
