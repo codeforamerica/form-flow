@@ -6,11 +6,11 @@ on:
         description: 'Version to release'
         type: string
         required: true
-    refToRelease:
-      description: 'Ref to release (branch, sha, tag, etc)'
-      type: string
-      required: true
-      default: 'main'
+      refToRelease:
+        description: 'Ref to release (branch, sha, tag, etc)'
+        type: string
+        required: true
+        default: 'main'
 
 jobs:
   #  run-tests:
