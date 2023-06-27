@@ -1,6 +1,6 @@
 package formflow.library.data;
 
-import static formflow.library.utils.SubmissionUtils.copySubmission;
+import static formflow.library.data.Submission.copySubmission;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -195,5 +194,29 @@ class SubmissionRepositoryServiceTest {
     assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow_encrypted")).isTrue();
     assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow")).isFalse();
     assertThat(resultHouseholdSubflow.get("ssnInputSubflow_encrypted")).isNotEqualTo(origHouseholdSubflow.get("ssnInputSubflow"));
+  }
+
+  @Test
+  void shouldSetCreatedAtAndUpdatedAtFields() {
+    var inputData = Map.of(
+        "testKey", "this is a test value",
+        "otherTestKey", List.of("A", "B", "C")
+    );
+    var submission = Submission.builder()
+        .inputData(inputData)
+        .urlParams(new HashMap<>())
+        .flow("testFlow")
+        .build();
+
+    UUID id = submissionRepositoryService.save(submission);
+    Submission savedSubmission = submissionRepositoryService.findById(id).get();
+
+    assertThat(savedSubmission.getCreatedAt()).isInThePast();
+    savedSubmission.getInputData().put("newKey", "newValue");
+    submissionRepositoryService.save(savedSubmission);
+    Submission updatedSubmission = submissionRepositoryService.findById(id).get();
+    assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
+    assertThat(updatedSubmission.getUpdatedAt()).isInThePast();
+    assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
   }
 }
