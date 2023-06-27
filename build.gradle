@@ -8,6 +8,7 @@ plugins {
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'jacoco'
     id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
 }
 
 jacoco {
@@ -17,10 +18,15 @@ jacoco {
 targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
+group = "org.codeforamerica.platform"
+version = "0.0.7-SNAPSHOT"
+ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
     file(".env").withInputStream { localEnv.load(it) }
 }
+def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
 jar {
     manifest {
@@ -59,7 +65,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.jetbrains:annotations:24.0.1'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.5.0'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.5.1'
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.flywaydb:flyway-core:9.19.4'
     implementation 'net.coobird:thumbnailator:0.4.19'
@@ -107,9 +113,6 @@ jacocoTestReport {
     }
 }
 
-group = "org.codeforamerica.platform"
-version = "0.0.5-SNAPSHOT"
-
 java {
     // we need to fix javadoc work before this will run successfully
     //withJavadocJar()
@@ -118,7 +121,7 @@ java {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        pluginMaven(MavenPublication) {
             artifactId = "form-flow"
             from components.java
             versionMapping {
@@ -182,35 +185,29 @@ publishing {
             }
         }
     }
-
-    repositories {
-
-        maven {
-            name = "MavenCentral"
-            // this url "https://s01.oss.sonatype.org/content/repositories/snapshots" is the NEW
-            // sonatype url, but we need the old one since we have an older account
-            // (created 2013) we are on the old servers (see https://issues.sonatype.org/browse/OSSRH-85469)
-            //def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
-            //def snapshotsRepoUrl = layoutBuildDirectory.dir('repos/snapshots')
-            if (version.endsWith("-SNAPSHOT")) {
-                println("Creating a SNAPSHOT: ${version}")
-                url = "https://oss.sonatype.org/content/repositories/snapshots"
-            } else {
-                println("Creating a release version: ${version}")
-                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-            }
-            credentials {
-                username = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
-                password = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
-            }
-        }
-    }
 }
 
 signing {
-    if (!version.endsWith("-SNAPSHOT")) {
-        useGpgCmd()
-        sign publishing.publications.mavenJava
+    required { admin }
+    def signingKey = System.getenv("GPG_SIGNING_KEY")
+    def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            if (version.endsWith("-SNAPSHOT")) {
+                println("Creating a SNAPSHOT: ${version}")
+            } else {
+                println("Creating a release version: ${version}")
+            }
+            nexusUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            username = sonatypeUsername
+            password = sonatypePassword
+        }
     }
 }
 

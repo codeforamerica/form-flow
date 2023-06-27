@@ -1,20 +1,13 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
-
-name: Publish Package to Github & Maven Central
-
+name: Publish Snapshot to Sonatype
 on:
   workflow_run:
-    workflows: ["Run tests"]
-    types: [completed]
-    branches: [main]
+    workflows: [ "Run tests" ]
+    types: [ completed ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  publish-snapshot:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,7 +22,6 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -37,19 +29,17 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-          settings-path: ${{ github.workspace }} # location for the settings.xml file
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
+          server-id: github
+          settings-path: ${{ github.workspace }}
+      - name: Create jar and publish to Sonatype
+        uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: build
-      - name: Publish to Maven Central
-        uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
-        with:
-          arguments: publish
+          arguments: jar publish
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
       - name: Trigger starter-app tests on newly published version
         uses: peter-evans/repository-dispatch@v2.1.1
         with:
