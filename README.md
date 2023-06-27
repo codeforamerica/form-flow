@@ -1913,8 +1913,7 @@ the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 ## Sending Email
 
 Form-flow library(FFL) is using [Mailgun](#mailgun) as its default email service provider. If you
-would like
-to use an alternative Mailgun then you have two choices:
+would like to use an alternative email service, then you have two choices:
 
 1. Build a custom email client service that does not implement the EmailClient interface.
 2. Create an email service that implements the EmailClient interface.
@@ -1927,7 +1926,7 @@ to use an alternative Mailgun then you have two choices:
    example: [SendEmailClient](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java))
    or from an endpoint
 
-#### Creating a custom email service with EmailClient.
+### Creating a custom email service with EmailClient.
 
 The
 FFLs’ [EmailClient](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/email/EmailClient.java)
