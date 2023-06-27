@@ -20,6 +20,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
   private String senderEmail;
   private final String mailgunDomain;
   private MailgunMessagesApi mailgunMessagesApi;
+  private Boolean requireTls = true;
 
   public MailgunEmailClient(@Value("${form-flow.email-client.mailgun.sender-email:}") String senderEmail,
       @Value("${form-flow.email-client.mailgun.domain:}") String mailgunDomain,
@@ -51,8 +52,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
         emptyList(),
         emptyList(),
         emailBody,
-        emptyList(),
-        false);
+        emptyList());
   }
 
   /**
@@ -77,8 +77,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
         emptyList(),
         emptyList(),
         emailBody,
-        attachments,
-        false);
+        attachments);
   }
 
   /**
@@ -90,7 +89,6 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
    * @param emailsToBCC    A list of emails to be added into the BCC field
    * @param emailBody      The HTML version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
-   * @param requireTls     A way to make TLS required
    * @return A Mailgun MessageResponse object
    */
   @Override
@@ -100,8 +98,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
       List<String> emailsToCC,
       List<String> emailsToBCC,
       String emailBody,
-      List<File> attachments,
-      boolean requireTls) {
+      List<File> attachments) {
     Message.MessageBuilder message = Message.builder()
         .from(senderEmail)
         .to(recipientEmail)
@@ -121,6 +118,7 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
     Message builtMessage = message.build();
 
     try {
+      log.info("requireTls is set to: " + requireTls);
       return mailgunMessagesApi.sendMessage(mailgunDomain, builtMessage);
     } catch (FeignException exception) {
       log.error(exception.getMessage());
@@ -144,5 +142,14 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
    */
   public void setSenderEmail(String senderEmail) {
     this.senderEmail = senderEmail;
+  }
+
+  /**
+   * This setter allows to change requireTls from its default setting of true
+   *
+   * @param requireTls Is a Boolean that sets requireTls for the message sent to mailgun.
+   */
+  public void setRequireTls(Boolean requireTls) {
+    this.requireTls = requireTls;
   }
 }

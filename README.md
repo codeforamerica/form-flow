@@ -158,21 +158,21 @@ example using our [live templates for a form screen](#applying-live-templates-to
 ```html
 
 <th:block th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
-    <th:block th:ref="formContent">
-        <div class="form-card__content">
-            <th:block th:replace="'icons :: 'clipboard'"></th:block>
-            <th:block th:replace="'content :: cardHeader(header='Tell us about yourself')"/>
-            <th:block
-                    th:replace="'inputs :: textInput(name='firstName', label='What's your first name?')"/>
-            <th:block
-                    th:replace="'inputs :: textInput(name='lastName', label='What's your last name?')"/>
-            <th:block
-                    th:replace="'inputs :: textInput(name='emailAddress', label='What's your email address?')"/>
-        </div>
-        <div class="form-card__footer">
-            <th:block th:replace="~{fragments/continueButton :: continue}"/>
-        </div>
-    </th:block>
+  <th:block th:ref="formContent">
+    <div class="form-card__content">
+      <th:block th:replace="'icons :: 'clipboard'"></th:block>
+      <th:block th:replace="'content :: cardHeader(header='Tell us about yourself')"/>
+      <th:block
+          th:replace="'inputs :: textInput(name='firstName', label='What's your first name?')"/>
+      <th:block
+          th:replace="'inputs :: textInput(name='lastName', label='What's your last name?')"/>
+      <th:block
+          th:replace="'inputs :: textInput(name='emailAddress', label='What's your email address?')"/>
+    </div>
+    <div class="form-card__footer">
+      <th:block th:replace="~{fragments/continueButton :: continue}"/>
+    </div>
+  </th:block>
 </th:block>
 ```
 
@@ -242,25 +242,25 @@ Submission data is stored in the `Submission` object, persisted to PostgreSQL vi
 ```java
 class Submission {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    private String flow;
+  private String flow;
 
-    @CreationTimestamp
-    @Temporal(TIMESTAMP)
-    private Timestamp createdAt;
+  @CreationTimestamp
+  @Temporal(TIMESTAMP)
+  private Timestamp createdAt;
 
-    @UpdateTimestamp
-    @Temporal(TIMESTAMP)
-    private Timestamp updatedAt;
+  @UpdateTimestamp
+  @Temporal(TIMESTAMP)
+  private Timestamp updatedAt;
 
-    @Temporal(TIMESTAMP)
-    private Timestamp submittedAt;
+  @Temporal(TIMESTAMP)
+  private Timestamp submittedAt;
 
-    @Type(JsonType.class)
-    private Map<String, String> inputData = new HashMap<>();
+  @Type(JsonType.class)
+  private Map<String, String> inputData = new HashMap<>();
 
 }
 ```
@@ -287,9 +287,9 @@ Google address.
 @Component
 public class CheckGmailUser implements Condition {
 
-    public boolean run(Submission submission) {
-        return submission.getInputData().get('emailAddress').contains("gmail.com");
-    }
+  public boolean run(Submission submission) {
+    return submission.getInputData().get('emailAddress').contains("gmail.com");
+  }
 } 
 ```
 
@@ -309,8 +309,8 @@ Thymeleaf templates. Template code can run conditions via this object, like so:
 ```html
 
 <div
-        th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
-    <h1 th:if="showCondition">Conditionally show this element</h1>
+    th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
+  <h1 th:if="showCondition">Conditionally show this element</h1>
 </div>
 ```
 
@@ -349,11 +349,11 @@ Here is an example of a `beforeSaveAction` Action class:
 ```java
 public class CalculateBeforeSave implements Action {
 
-    public void run(Submission submission) {
-        float rate = 0.59;
-        int mileage = submission.getInputData().get('mileage');
-        submission.getInputData().put('reimbursement', mileage * rate);
-    }
+  public void run(Submission submission) {
+    float rate = 0.59;
+    int mileage = submission.getInputData().get('mileage');
+    submission.getInputData().put('reimbursement', mileage * rate);
+  }
 } 
 ```
 
@@ -414,18 +414,18 @@ can also be used as a field name in your inputs class**. Java will require that 
 ```java
 class ApplicationInformation extends FlowInputs {
 
-    @NotBlank(message = "{personal-info.provide-first-name}")
-    String firstName;
+  @NotBlank(message = "{personal-info.provide-first-name}")
+  String firstName;
 
-    @NotBlank(message = "{personal-info.provide-last-name}")
-    String lastName;
+  @NotBlank(message = "{personal-info.provide-last-name}")
+  String lastName;
 
-    String emailAddress;
+  String emailAddress;
 
-    String phoneNumber;
+  String phoneNumber;
 
-    @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
-    ArrayList<String> gender;
+  @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
+  ArrayList<String> gender;
 }
 ```
 
@@ -599,7 +599,6 @@ Note that the subflows are an array of repeating entries - one for each iteratio
 subflow. Each iteration has a unique UUID associated with it so we can have a way of working with a
 specific iteration's data.
 
-
 # General Information
 
 ## Thymeleaf
@@ -637,7 +636,7 @@ app.
 <main id="content" role="main" class="form-card spacing-above-35"
       th:with="selectedSelf=${T(org.codeforamerica.formflowstarter.app.config.ConditionDefinitions).incomeSelectedSelf(submission, uuid)},
                      houseHoldMemberName=${T(org.codeforamerica.formflowstarter.app.data.Submission).getSubflowEntryByUuid('income', uuid, submission).householdMember}">
-    ...
+  ...
 </main>
 ```
 
@@ -695,18 +694,18 @@ The template HTML can look like:
 <head th:replace="~{fragments/head :: head(title='')}"></head>
 <body>
 <div class="page-wrapper">
-    <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
-    <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
-    <section class="slab">
-        <div class="grid">
-            <div class="grid__item">
-                <h1 class="spacing-below-35"></h1>
-            </div>
-        </div>
-    </section>
-    <main id="content" role="main" class="slab slab--white">
+  <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
+  <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
+  <section class="slab">
+    <div class="grid">
+      <div class="grid__item">
+        <h1 class="spacing-below-35"></h1>
+      </div>
+    </div>
+  </section>
+  <main id="content" role="main" class="slab slab--white">
 
-    </main>
+  </main>
 </div>
 <th:block th:replace="~{fragments/footer :: footer}"/>
 </body>
@@ -749,15 +748,15 @@ Example form fragment:
 ```html
 
 <th:block
-        th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
-    <th:block th:ref="exampleForm">
-        <div class="form-card__content">
-            INPUTS GO HERE
-        </div>
-        <div class="form-card__footer">
-            SUBMIT BUTTON GOES HERE
-        </div>
-    </th:block>
+    th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
+  <th:block th:ref="exampleForm">
+    <div class="form-card__content">
+      INPUTS GO HERE
+    </div>
+    <div class="form-card__footer">
+      SUBMIT BUTTON GOES HERE
+    </div>
+  </th:block>
 </th:block>
 ```
 
@@ -997,12 +996,12 @@ Below are examples of both types of checkboxes:
                           label='This label is actually a legend for the checkbox fieldset',
                           fieldsetHelpText='This help text will appear below the legend',
                           content=~{::vehiclesOwnedContent})}">
-    <th:block th:ref="vehiclesOwnedContent">
-        <th:block
-                th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
-    </th:block>
+  <th:block th:ref="vehiclesOwnedContent">
+    <th:block
+        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
+  </th:block>
 </th:block>
 ```
 
@@ -1017,7 +1016,7 @@ to `checkboxInSet()`:
 ```html
 
 <th:block
-        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
+    th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
 ```
 
 Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is
@@ -1063,14 +1062,14 @@ An example of a radio input:
                           label='What\'s your favorite color?',
                           fieldsetHelpText='The only true answer is blue',
                           content=~{::favoriteColorContent})}">
-    <th:block th:ref="favoriteColorContent">
-        <th:block
-                th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='BLUE', label='Blue')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')}"/>
-    </th:block>
+  <th:block th:ref="favoriteColorContent">
+    <th:block
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='BLUE', label='Blue')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')}"/>
+  </th:block>
 </th:block>
 ```
 
@@ -1102,17 +1101,17 @@ An example select input:
 ```html
 
 <th:block
-        th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
-    <th:block th:ref="favoriteFruitContent">
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
-    </th:block>
+    th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
+  <th:block th:ref="favoriteFruitContent">
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
+  </th:block>
 </th:block>
 ```
 
@@ -1824,20 +1823,20 @@ maps them to a single PDF field.
 ```java
 public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
 
-    @Override
-    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-                                                                PdfMap pdfMap) {
-        Map<String, SubmissionField> submissionFields = new HashMap<>();
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-        String month = submission.getInputData().get("applicantBirthMonth").toString();
-        String day = submission.getInputData().get("applicantBirthDay").toString();
-        String year = submission.getInputData().get("applicantBirthYear").toString();
+    String month = submission.getInputData().get("applicantBirthMonth").toString();
+    String day = submission.getInputData().get("applicantBirthDay").toString();
+    String year = submission.getInputData().get("applicantBirthYear").toString();
 
-        submissionFields.put("applicantDateOfBirth",
-                new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
+    submissionFields.put("applicantDateOfBirth",
+        new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
 
-        return submissionFields;
-    }
+    return submissionFields;
+  }
 }
 ```
 
@@ -1875,31 +1874,31 @@ we would update the above custom preparer example to this:
 ```java
 public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
-    @Override
-    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-                                                                PdfMap pdfMap) {
-        Map<String, SubmissionField> submissionFields = new HashMap<>();
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-        ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
-                .get("household");
+    ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+        .get("household");
 
-        // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
-        int maxIterations = Math.min(houseHoldSubflow.size(),
-                pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
+    // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
+    int maxIterations = Math.min(houseHoldSubflow.size(),
+        pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
 
-        for (int i = 0; i < maxIterations; i++) {
-            String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
-            String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
-            String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
-            // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
-            int iterationNumber = i + 1;
+    for (int i = 0; i < maxIterations; i++) {
+      String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
+      String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
+      String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
+      // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
+      int iterationNumber = i + 1;
 
-            submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
-                    new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
-                            iterationNumber));
-        }
-        return submissionFields;
+      submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
+          new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
+              iterationNumber));
     }
+    return submissionFields;
+  }
 }
 ```
 
@@ -1969,9 +1968,10 @@ Each email message can also include these fields:
   as
   attachments to the email.
 - **requireTls** → this is a boolean that determines whether a message can only be sent through tls
-  connection.  
-  True indicates that a message can only be using TLS encryption.
-
+  connection.  `requireTls` is set to `true` by default. SNE's can call `setRequireTls()`, of
+  the `MailgunEmailClient` class. Passing `false` as an argument to the `setRequireTls()` will turn
+  off `requireTls` for emails.
+  
 | Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
 |-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
 | subject         | String       | *              | The subject of an email                                     |            |
@@ -1980,7 +1980,7 @@ Each email message can also include these fields:
 | emailToBcc      | List<String> |                | List of mailboxes that are blind copied the email           | empty list | 
 | emailBody       | String       |                | Body of an email.  The html version                         |            |  
 | attachments     | List<File>   |                | List of files to be added as attachment to an email         | empty list | 
-| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | false      | 
+| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | true       | 
 
 ##### Where to use Mailgun Email Client
 
@@ -2043,17 +2043,17 @@ Please note that pdfs is a list of files to be passed as attachments with the em
 
 ```java
       ...
-        MessageResponse response;
-        response=mailgunEmailClient.sendEmail(
-        emailSubject,
-        recipientEmail,
-        emailToCc,
-        emailToBcc,
-        emailBody,
-        pdfs,
-        requireTls
-        );
-        ...
+    MessageResponse response;
+    response=mailgunEmailClient.sendEmail(
+    emailSubject,
+    recipientEmail,
+    emailToCc,
+    emailToBcc,
+    emailBody,
+    pdfs,
+    requireTls
+    );
+    ...
 ```
 
 The sendEmail() method will send an email and return the MessageResponse object it receives from
@@ -2062,9 +2062,9 @@ queued by Mailgun.
 
 ```java
 {
-        "message":"Queued. Thank you.",
-        "id":"<20111114174239.25659.5817@samples.mailgun.org>"
-        }
+    "message":"Queued. Thank you.",
+    "id":"<20111114174239.25659.5817@samples.mailgun.org>"
+    }
 ```
 
 # How to use
