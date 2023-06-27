@@ -1990,9 +1990,10 @@ Each email message can also include these fields:
   as
   attachments to the email.
 - **requireTls** → this is a boolean that determines whether a message can only be sent through tls
-  connection.  
-  True indicates that a message can only be using TLS encryption.
-
+  connection.  `requireTls` is set to `true` by default. SNE's can call `setRequireTls()`, of
+  the `MailgunEmailClient` class. Passing `false` as an argument to the `setRequireTls()` will turn
+  off `requireTls` for emails.
+  
 | Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
 |-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
 | subject         | String       | *              | The subject of an email                                     |            |
@@ -2001,7 +2002,7 @@ Each email message can also include these fields:
 | emailToBcc      | List<String> |                | List of mailboxes that are blind copied the email           | empty list | 
 | emailBody       | String       |                | Body of an email.  The html version                         |            |  
 | attachments     | List<File>   |                | List of files to be added as attachment to an email         | empty list | 
-| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | false      | 
+| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | true       | 
 
 ##### Where to use Mailgun Email Client
 

@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface EmailClient<T> {
 
+  Boolean requireTls = true;
+
   /**
    * This sends an email with the least amount of information needed to be provided.
    *
@@ -44,7 +46,6 @@ public interface EmailClient<T> {
    * @param emailsToBCC    A list of emails to be added into the BCC field
    * @param emailBody      The plain text version of the email body
    * @param attachments    A list of files that will be added as attachments to the email
-   * @param requireTls     A way to make TLS required
    * @return A generic T
    */
   T sendEmail(
@@ -53,7 +54,8 @@ public interface EmailClient<T> {
       List<String> emailsToCC,
       List<String> emailsToBCC,
       String emailBody,
-      List<File> attachments,
-      boolean requireTls
+      List<File> attachments
   );
+
+  void setRequireTls(Boolean requireTls);
 }

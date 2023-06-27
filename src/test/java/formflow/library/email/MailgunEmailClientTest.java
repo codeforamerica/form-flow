@@ -55,7 +55,7 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     assertThat(builtMessage.getCc()).isNull();
     assertThat(builtMessage.getBcc()).isNull();
     assertThat(builtMessage.getAttachment()).isNull();
-    assertThat(builtMessage.getRequireTls()).isEqualTo("no");
+    assertThat(builtMessage.getRequireTls()).isEqualTo("yes");
   }
 
   @Test
@@ -84,7 +84,7 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     assertThat(builtMessage.getCc()).isNull();
     assertThat(builtMessage.getBcc()).isNull();
     assertThat(builtMessage.getAttachment()).isNull();
-    assertThat(builtMessage.getRequireTls()).isEqualTo("no");
+    assertThat(builtMessage.getRequireTls()).isEqualTo("yes");
   }
 
 
@@ -114,7 +114,7 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     assertThat(builtMessage.getCc()).isNull();
     assertThat(builtMessage.getBcc()).isNull();
     assertThat(builtMessage.getAttachment().size()).isEqualTo(2);
-    assertThat(builtMessage.getRequireTls()).isEqualTo("no");
+    assertThat(builtMessage.getRequireTls()).isEqualTo("yes");
   }
 
   @Test
@@ -128,7 +128,6 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     List<String> expectedEmailsToBCC = Arrays.asList("secret-one@test.com", "secret-two@test.com");
     String expectedBody = "Email body";
     List<File> expectedAttachments = Arrays.asList(new File("src/test/resources/pdfs/blankPdf.pdf"));
-    Boolean expectedRequireTls = Boolean.TRUE;
 
     mailgunEmailClient.sendEmail(
         expectedSubject,
@@ -136,8 +135,7 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
         expectedEmailsToCC,
         expectedEmailsToBCC,
         expectedBody,
-        expectedAttachments,
-        expectedRequireTls
+        expectedAttachments
     );
 
     final Message builtMessage = captor.getValue();
@@ -151,5 +149,56 @@ public class MailgunEmailClientTest extends AbstractMockMvcTest {
     assertThat(builtMessage.getBcc().size()).isEqualTo(2);
     assertThat(builtMessage.getAttachment().size()).isEqualTo(1);
     assertThat(builtMessage.getRequireTls()).isEqualTo("yes");
+  }
+
+  @Test
+  public void mailgunWillSendWithMinimumInfoAndTlsTurnedOff() {
+    //Default requireTls field is set to true and tested below
+    final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+    doReturn(messageResponse).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+
+    String expectedSubject = "sendEmail with no CC's or attachments";
+    String expectedRecipient = "test@example.com";
+    String expectedBody = "Email body";
+
+    mailgunEmailClient.sendEmail(
+        expectedSubject,
+        expectedRecipient,
+        expectedBody
+    );
+
+    final Message builtMessage = captor.getValue();
+    assertThat(builtMessage).isNotNull();
+    assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
+    assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
+    assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
+    assertThat(builtMessage.getCc()).isNull();
+    assertThat(builtMessage.getBcc()).isNull();
+    assertThat(builtMessage.getAttachment()).isNull();
+    assertThat(builtMessage.getRequireTls()).isEqualTo("yes");
+
+    //requireTls is set to false and set to false on the mailgunEmailClient.
+    //The code below checks that the sendEmail method sends an email without requiring Tls.
+    Boolean requireTls = false;
+    mailgunEmailClient.setRequireTls(requireTls);
+    mailgunEmailClient.sendEmail(
+        expectedSubject,
+        expectedRecipient,
+        expectedBody
+    );
+
+    final Message builtNoTlsMessage = captor.getValue();
+    assertThat(builtNoTlsMessage).isNotNull();
+    assertThat(builtNoTlsMessage.getSubject()).isEqualTo(expectedSubject);
+    assertThat(builtNoTlsMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
+    assertThat(builtNoTlsMessage.getHtml()).isEqualTo(expectedBody);
+    assertThat(builtNoTlsMessage.getCc()).isNull();
+    assertThat(builtNoTlsMessage.getBcc()).isNull();
+    assertThat(builtNoTlsMessage.getAttachment()).isNull();
+    assertThat(builtNoTlsMessage.getRequireTls()).isEqualTo("no");
+
+    //returns mailgunEmailClient to its default state.   Otherwise, the mailgunEmailClient maintains the state that requireTls
+    //was set to last.
+    mailgunEmailClient.setRequireTls(true);
   }
 }
