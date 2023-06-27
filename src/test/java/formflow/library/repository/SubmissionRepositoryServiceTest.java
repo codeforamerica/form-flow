@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -213,11 +212,11 @@ class SubmissionRepositoryServiceTest {
     Submission savedSubmission = submissionRepositoryService.findById(id).get();
 
     assertThat(savedSubmission.getCreatedAt()).isInThePast();
-    assertThat(savedSubmission.getUpdatedAt() == null).isTrue();
-
     savedSubmission.getInputData().put("newKey", "newValue");
     submissionRepositoryService.save(savedSubmission);
-    assertThat(savedSubmission.getUpdatedAt() != null).isTrue();
-    assertThat(savedSubmission.getUpdatedAt()).isInThePast();
+    Submission updatedSubmission = submissionRepositoryService.findById(id).get();
+    assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
+    assertThat(updatedSubmission.getUpdatedAt()).isInThePast();
+    assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
   }
 }
