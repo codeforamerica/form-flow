@@ -158,21 +158,21 @@ example using our [live templates for a form screen](#applying-live-templates-to
 ```html
 
 <th:block th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
-    <th:block th:ref="formContent">
-        <div class="form-card__content">
-            <th:block th:replace="'icons :: 'clipboard'"></th:block>
-            <th:block th:replace="'content :: cardHeader(header='Tell us about yourself')"/>
-            <th:block
-                    th:replace="'inputs :: textInput(name='firstName', label='What's your first name?')"/>
-            <th:block
-                    th:replace="'inputs :: textInput(name='lastName', label='What's your last name?')"/>
-            <th:block
-                    th:replace="'inputs :: textInput(name='emailAddress', label='What's your email address?')"/>
-        </div>
-        <div class="form-card__footer">
-            <th:block th:replace="~{fragments/continueButton :: continue}"/>
-        </div>
-    </th:block>
+  <th:block th:ref="formContent">
+    <div class="form-card__content">
+      <th:block th:replace="'icons :: 'clipboard'"></th:block>
+      <th:block th:replace="'content :: cardHeader(header='Tell us about yourself')"/>
+      <th:block
+          th:replace="'inputs :: textInput(name='firstName', label='What's your first name?')"/>
+      <th:block
+          th:replace="'inputs :: textInput(name='lastName', label='What's your last name?')"/>
+      <th:block
+          th:replace="'inputs :: textInput(name='emailAddress', label='What's your email address?')"/>
+    </div>
+    <div class="form-card__footer">
+      <th:block th:replace="~{fragments/continueButton :: continue}"/>
+    </div>
+  </th:block>
 </th:block>
 ```
 
@@ -242,25 +242,25 @@ Submission data is stored in the `Submission` object, persisted to PostgreSQL vi
 ```java
 class Submission {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    private String flow;
+  private String flow;
 
-    @CreationTimestamp
-    @Temporal(TIMESTAMP)
-    private Timestamp createdAt;
+  @CreationTimestamp
+  @Temporal(TIMESTAMP)
+  private Timestamp createdAt;
 
-    @UpdateTimestamp
-    @Temporal(TIMESTAMP)
-    private Timestamp updatedAt;
+  @UpdateTimestamp
+  @Temporal(TIMESTAMP)
+  private Timestamp updatedAt;
 
-    @Temporal(TIMESTAMP)
-    private Timestamp submittedAt;
+  @Temporal(TIMESTAMP)
+  private Timestamp submittedAt;
 
-    @Type(JsonType.class)
-    private Map<String, String> inputData = new HashMap<>();
+  @Type(JsonType.class)
+  private Map<String, String> inputData = new HashMap<>();
 
 }
 ```
@@ -287,9 +287,9 @@ Google address.
 @Component
 public class CheckGmailUser implements Condition {
 
-    public boolean run(Submission submission) {
-        return submission.getInputData().get('emailAddress').contains("gmail.com");
-    }
+  public boolean run(Submission submission) {
+    return submission.getInputData().get('emailAddress').contains("gmail.com");
+  }
 } 
 ```
 
@@ -309,8 +309,8 @@ Thymeleaf templates. Template code can run conditions via this object, like so:
 ```html
 
 <div
-        th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
-    <h1 th:if="showCondition">Conditionally show this element</h1>
+    th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
+  <h1 th:if="showCondition">Conditionally show this element</h1>
 </div>
 ```
 
@@ -349,11 +349,11 @@ Here is an example of a `beforeSaveAction` Action class:
 ```java
 public class CalculateBeforeSave implements Action {
 
-    public void run(Submission submission) {
-        float rate = 0.59;
-        int mileage = submission.getInputData().get('mileage');
-        submission.getInputData().put('reimbursement', mileage * rate);
-    }
+  public void run(Submission submission) {
+    float rate = 0.59;
+    int mileage = submission.getInputData().get('mileage');
+    submission.getInputData().put('reimbursement', mileage * rate);
+  }
 } 
 ```
 
@@ -414,18 +414,18 @@ can also be used as a field name in your inputs class**. Java will require that 
 ```java
 class ApplicationInformation extends FlowInputs {
 
-    @NotBlank(message = "{personal-info.provide-first-name}")
-    String firstName;
+  @NotBlank(message = "{personal-info.provide-first-name}")
+  String firstName;
 
-    @NotBlank(message = "{personal-info.provide-last-name}")
-    String lastName;
+  @NotBlank(message = "{personal-info.provide-last-name}")
+  String lastName;
 
-    String emailAddress;
+  String emailAddress;
 
-    String phoneNumber;
+  String phoneNumber;
 
-    @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
-    ArrayList<String> gender;
+  @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
+  ArrayList<String> gender;
 }
 ```
 
@@ -599,7 +599,6 @@ Note that the subflows are an array of repeating entries - one for each iteratio
 subflow. Each iteration has a unique UUID associated with it so we can have a way of working with a
 specific iteration's data.
 
-
 # General Information
 
 ## Thymeleaf
@@ -637,7 +636,7 @@ app.
 <main id="content" role="main" class="form-card spacing-above-35"
       th:with="selectedSelf=${T(org.codeforamerica.formflowstarter.app.config.ConditionDefinitions).incomeSelectedSelf(submission, uuid)},
                      houseHoldMemberName=${T(org.codeforamerica.formflowstarter.app.data.Submission).getSubflowEntryByUuid('income', uuid, submission).householdMember}">
-    ...
+  ...
 </main>
 ```
 
@@ -695,18 +694,18 @@ The template HTML can look like:
 <head th:replace="~{fragments/head :: head(title='')}"></head>
 <body>
 <div class="page-wrapper">
-    <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
-    <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
-    <section class="slab">
-        <div class="grid">
-            <div class="grid__item">
-                <h1 class="spacing-below-35"></h1>
-            </div>
-        </div>
-    </section>
-    <main id="content" role="main" class="slab slab--white">
+  <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
+  <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
+  <section class="slab">
+    <div class="grid">
+      <div class="grid__item">
+        <h1 class="spacing-below-35"></h1>
+      </div>
+    </div>
+  </section>
+  <main id="content" role="main" class="slab slab--white">
 
-    </main>
+  </main>
 </div>
 <th:block th:replace="~{fragments/footer :: footer}"/>
 </body>
@@ -749,15 +748,15 @@ Example form fragment:
 ```html
 
 <th:block
-        th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
-    <th:block th:ref="exampleForm">
-        <div class="form-card__content">
-            INPUTS GO HERE
-        </div>
-        <div class="form-card__footer">
-            SUBMIT BUTTON GOES HERE
-        </div>
-    </th:block>
+    th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
+  <th:block th:ref="exampleForm">
+    <div class="form-card__content">
+      INPUTS GO HERE
+    </div>
+    <div class="form-card__footer">
+      SUBMIT BUTTON GOES HERE
+    </div>
+  </th:block>
 </th:block>
 ```
 
@@ -997,12 +996,12 @@ Below are examples of both types of checkboxes:
                           label='This label is actually a legend for the checkbox fieldset',
                           fieldsetHelpText='This help text will appear below the legend',
                           content=~{::vehiclesOwnedContent})}">
-    <th:block th:ref="vehiclesOwnedContent">
-        <th:block
-                th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
-    </th:block>
+  <th:block th:ref="vehiclesOwnedContent">
+    <th:block
+        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
+  </th:block>
 </th:block>
 ```
 
@@ -1017,7 +1016,7 @@ to `checkboxInSet()`:
 ```html
 
 <th:block
-        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
+    th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
 ```
 
 Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is
@@ -1063,14 +1062,14 @@ An example of a radio input:
                           label='What\'s your favorite color?',
                           fieldsetHelpText='The only true answer is blue',
                           content=~{::favoriteColorContent})}">
-    <th:block th:ref="favoriteColorContent">
-        <th:block
-                th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='BLUE', label='Blue')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')}"/>
-    </th:block>
+  <th:block th:ref="favoriteColorContent">
+    <th:block
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='BLUE', label='Blue')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')}"/>
+  </th:block>
 </th:block>
 ```
 
@@ -1102,17 +1101,17 @@ An example select input:
 ```html
 
 <th:block
-        th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
-    <th:block th:ref="favoriteFruitContent">
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
-        <th:block
-                th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
-    </th:block>
+    th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
+  <th:block th:ref="favoriteFruitContent">
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
+    <th:block
+        th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
+  </th:block>
 </th:block>
 ```
 
@@ -1824,20 +1823,20 @@ maps them to a single PDF field.
 ```java
 public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
 
-    @Override
-    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-                                                                PdfMap pdfMap) {
-        Map<String, SubmissionField> submissionFields = new HashMap<>();
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-        String month = submission.getInputData().get("applicantBirthMonth").toString();
-        String day = submission.getInputData().get("applicantBirthDay").toString();
-        String year = submission.getInputData().get("applicantBirthYear").toString();
+    String month = submission.getInputData().get("applicantBirthMonth").toString();
+    String day = submission.getInputData().get("applicantBirthDay").toString();
+    String year = submission.getInputData().get("applicantBirthYear").toString();
 
-        submissionFields.put("applicantDateOfBirth",
-                new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
+    submissionFields.put("applicantDateOfBirth",
+        new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
 
-        return submissionFields;
-    }
+    return submissionFields;
+  }
 }
 ```
 
@@ -1875,31 +1874,31 @@ we would update the above custom preparer example to this:
 ```java
 public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
-    @Override
-    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-                                                                PdfMap pdfMap) {
-        Map<String, SubmissionField> submissionFields = new HashMap<>();
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-        ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
-                .get("household");
+    ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+        .get("household");
 
-        // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
-        int maxIterations = Math.min(houseHoldSubflow.size(),
-                pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
+    // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
+    int maxIterations = Math.min(houseHoldSubflow.size(),
+        pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
 
-        for (int i = 0; i < maxIterations; i++) {
-            String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
-            String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
-            String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
-            // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
-            int iterationNumber = i + 1;
+    for (int i = 0; i < maxIterations; i++) {
+      String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
+      String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
+      String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
+      // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
+      int iterationNumber = i + 1;
 
-            submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
-                    new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
-                            iterationNumber));
-        }
-        return submissionFields;
+      submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
+          new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
+              iterationNumber));
     }
+    return submissionFields;
+  }
 }
 ```
 
@@ -1913,7 +1912,29 @@ the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 ## Sending Email
 
-Form-flow library will use Mailgun to send emails to applicants.
+Form-flow library(FFL) is using [Mailgun](#mailgun) as its default email service provider. If you
+would like
+to use an alternative Mailgun then you have two choices:
+
+1. Build a custom email client service that does not implement the EmailClient interface.
+2. Create an email service that implements the EmailClient interface.
+
+### Building a custom email service
+
+1. Add the alternative email client to the dependencies in your application
+2. Generate a service using your alternative email client
+3. Call the service from an action(
+   example: [SendEmailClient](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java))
+   or from an endpoint
+
+#### Creating a custom email service with EmailClient.
+
+The
+FFLs’ [EmailClient](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/email/EmailClient.java)
+interface contains an overloaded send method with three method signatures. For developers creating
+custom email services with the EmailClient interface, note that sendEmail
+methods expect a return. The response object that is returned by Mailgun can be
+seen [here](https://github.com/codeforamerica/form-flow/blob/ccafd4d6024525a66a28b4b9c31fac81b55eab50/src/main/java/formflow/library/email/MailgunEmailClient.java#L69).
 
 ### Mailgun
 
@@ -2015,7 +2036,7 @@ import formflow.library.email.MailgunEmailClient;
 
 We also advise that you import `MessageSource` to capture the email subject and email body, allowing
 for language translation.
-The recipient email be should be captured and passed into the sendEmail() method as a String.
+The recipient email be should be captured and passed into the `sendEmail()` method as a String.
 It’s recommended that developers pass a list of strings representing email addresses to **cc:**
 and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
 
@@ -2027,10 +2048,10 @@ private List<String> emailToCc;
 private List<String> emailToBcc;
 ```
 
-In order to add attachments, a list of type < File > must be generated to a `mailgunEmailClient`
-object.  
-To send an email MailgunEmailClient object must call the sendEmail() with the appropriate
-parameters. SendEmail is overloaded allowing it to be called in three ways:
+In order to add attachments, a list of type `<File>` must be generated to a `mailgunEmailClient`
+object. To send an email MailgunEmailClient object must call the `sendEmail()` method with the
+appropriate
+arguments. SendEmail is overloaded allowing it to be called in three ways:
 
 1. `sendEmail( String subject, String recipientEmail, String emailBody)`
 2. `sendEmail( String subject, String recipientEmail, String emailBody, List<File> attachments)`
@@ -2043,29 +2064,43 @@ Please note that pdfs is a list of files to be passed as attachments with the em
 
 ```java
       ...
-        MessageResponse response;
-        response=mailgunEmailClient.sendEmail(
-        emailSubject,
-        recipientEmail,
-        emailToCc,
-        emailToBcc,
-        emailBody,
-        pdfs,
-        requireTls
-        );
-        ...
+    MessageResponse response;
+    response=mailgunEmailClient.sendEmail(
+    emailSubject,
+    recipientEmail,
+    emailToCc,
+    emailToBcc,
+    emailBody,
+    pdfs,
+    requireTls
+    );
+    ...
 ```
 
-The sendEmail() method will send an email and return the MessageResponse object it receives from
+The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
 mailgun. The message response should mirror the code found below if a message has been successfully
 queued by Mailgun.
 
 ```java
 {
-        "message":"Queued. Thank you.",
-        "id":"<20111114174239.25659.5817@samples.mailgun.org>"
-        }
+    "message":"Queued. Thank you.",
+    "id":"<20111114174239.25659.5817@samples.mailgun.org>"
+    }
 ```
+
+When a malformed(bad) email is sent to the Mailgun api, mailgun throws an error. The error includes
+an
+error code and a corresponding error message as seen below.
+
+```logcatfilter
+... INFO  com.mailgun.util.ConsoleLogger - [MailgunMessagesApi#sendMessage] <--- HTTP/1.1 400 Bad Request (812ms)
+... ERROR f.library.email.MailgunEmailClient - [400 Bad Request] during [POST] to [https://api.mailgun.net/v3/.../messages] 
+[MailgunMessagesApi#sendMessage(String,Message)]: [{"message":"bcc parameter is not a valid address. please check documentation"}]
+```
+
+The error message thrown by mailgun is passed to the response object when an email fails. Common
+Mailgun error codes can be found
+[here](https://documentation.mailgun.com/en/latest/api-sending.html#error-codes).
 
 # How to use
 
