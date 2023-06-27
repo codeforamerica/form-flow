@@ -1912,7 +1912,29 @@ the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 ## Sending Email
 
-Form-flow library will use Mailgun to send emails to applicants.
+Form-flow library(FFL) is using [Mailgun](#mailgun) as its default email service provider. If you
+would like
+to use an alternative Mailgun then you have two choices:
+
+1. Build a custom email client service that does not implement the EmailClient interface.
+2. Create an email service that implements the EmailClient interface.
+
+### Building a custom email service
+
+1. Add the alternative email client to the dependencies in your application
+2. Generate a service using your alternative email client
+3. Call the service from an action(
+   example: [SendEmailClient](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java))
+   or from an endpoint
+
+#### Creating a custom email service with EmailClient.
+
+The
+FFLs’ [EmailClient](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/email/EmailClient.java)
+interface contains an overloaded send method with three method signatures. For developers creating
+custom email services with the EmailClient interface, note that sendEmail
+methods expect a return. The response object that is returned by Mailgun can be
+seen [here](https://github.com/codeforamerica/form-flow/blob/ccafd4d6024525a66a28b4b9c31fac81b55eab50/src/main/java/formflow/library/email/MailgunEmailClient.java#L69).
 
 ### Mailgun
 
@@ -2015,7 +2037,7 @@ import formflow.library.email.MailgunEmailClient;
 
 We also advise that you import `MessageSource` to capture the email subject and email body, allowing
 for language translation.
-The recipient email be should be captured and passed into the sendEmail() method as a String.
+The recipient email be should be captured and passed into the `sendEmail()` method as a String.
 It’s recommended that developers pass a list of strings representing email addresses to **cc:**
 and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
 
@@ -2027,10 +2049,10 @@ private List<String> emailToCc;
 private List<String> emailToBcc;
 ```
 
-In order to add attachments, a list of type < File > must be generated to a `mailgunEmailClient`
-object.  
-To send an email MailgunEmailClient object must call the sendEmail() with the appropriate
-parameters. SendEmail is overloaded allowing it to be called in three ways:
+In order to add attachments, a list of type `<File>` must be generated to a `mailgunEmailClient`
+object. To send an email MailgunEmailClient object must call the `sendEmail()` method with the
+appropriate
+arguments. SendEmail is overloaded allowing it to be called in three ways:
 
 1. `sendEmail( String subject, String recipientEmail, String emailBody)`
 2. `sendEmail( String subject, String recipientEmail, String emailBody, List<File> attachments)`
@@ -2056,7 +2078,7 @@ Please note that pdfs is a list of files to be passed as attachments with the em
     ...
 ```
 
-The sendEmail() method will send an email and return the MessageResponse object it receives from
+The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
 mailgun. The message response should mirror the code found below if a message has been successfully
 queued by Mailgun.
 
@@ -2066,6 +2088,20 @@ queued by Mailgun.
     "id":"<20111114174239.25659.5817@samples.mailgun.org>"
     }
 ```
+
+When a malformed(bad) email is sent to the Mailgun api, mailgun throws an error. The error includes
+an
+error code and a corresponding error message as seen below.
+
+```logcatfilter
+... INFO  com.mailgun.util.ConsoleLogger - [MailgunMessagesApi#sendMessage] <--- HTTP/1.1 400 Bad Request (812ms)
+... ERROR f.library.email.MailgunEmailClient - [400 Bad Request] during [POST] to [https://api.mailgun.net/v3/.../messages] 
+[MailgunMessagesApi#sendMessage(String,Message)]: [{"message":"bcc parameter is not a valid address. please check documentation"}]
+```
+
+The error message thrown by mailgun is passed to the response object when an email fails. Common
+Mailgun error codes can be found
+[here](https://documentation.mailgun.com/en/latest/api-sending.html#error-codes).
 
 # How to use
 

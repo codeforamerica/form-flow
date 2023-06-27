@@ -18,10 +18,15 @@ jacoco {
 targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
+group = "org.codeforamerica.platform"
+version = "0.0.7-SNAPSHOT"
+ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
     file(".env").withInputStream { localEnv.load(it) }
 }
+def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
+def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
 jar {
     manifest {
@@ -108,23 +113,15 @@ jacocoTestReport {
     }
 }
 
-group = "org.codeforamerica.platform"
-version = "0.0.7-SNAPSHOT"
-
 java {
     // we need to fix javadoc work before this will run successfully
     //withJavadocJar()
     withSourcesJar()
 }
 
-ext.admin = System.getenv("SONATYPE_USERNAME")
-def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
-def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
-
-
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        pluginMaven(MavenPublication) {
             artifactId = "form-flow"
             from components.java
             versionMapping {
@@ -188,32 +185,9 @@ publishing {
             }
         }
     }
-
-    repositories {
-        maven {
-            name = "MavenCentral"
-            if (version.endsWith("-SNAPSHOT")) {
-                println("Creating a SNAPSHOT: ${version}")
-                url = "https://oss.sonatype.org/content/repositories/snapshots"
-            } else {
-                println("Creating a release version: ${version}")
-                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-            }
-            if (admin) {
-                credentials {
-                    username = sonatypeUsername
-                    password = sonatypePassword
-                }
-            }
-        }
-    }
 }
 
 signing {
-    if (!version.endsWith("-SNAPSHOT")) {
-        useGpgCmd()
-        sign publishing.publications.mavenJava
-    }
     required { admin }
     def signingKey = System.getenv("GPG_SIGNING_KEY")
     def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
@@ -224,6 +198,11 @@ signing {
 nexusPublishing {
     repositories {
         sonatype {
+            if (version.endsWith("-SNAPSHOT")) {
+                println("Creating a SNAPSHOT: ${version}")
+            } else {
+                println("Creating a release version: ${version}")
+            }
             nexusUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
             snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
             username = sonatypeUsername
