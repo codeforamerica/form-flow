@@ -11,14 +11,29 @@ flow:
         condition: DidNotFindAddressSuggestion
   testAddressValidationFound:
     nextScreens:
-      - name: test
+      - name: subflowAddItem
   testAddressValidationNotFound:
     nextScreens:
-      - name: test
+      - name: subflowAddItem
   testAddressVerification:
     nextScreens:
-      - name: test
+      - name: subflowAddItem
   subflowAddItem:
+    subflow: testSubflow
+    nextScreens:
+      - name: testSubflowAddressValidation
+  testSubflowAddressValidation:
+    subflow: testSubflow
+    nextScreens:
+      - name: testSubflowAddressValidationFound
+        condition: FoundSubflowAddressSuggestion
+      - name: testSubflowAddressValidationNotFound
+        condition: DidNotFindSubflowAddressSuggestion
+  testSubflowAddressValidationFound:
+    subflow: testSubflow
+    nextScreens:
+      - name: test
+  testSubflowAddressValidationNotFound:
     subflow: testSubflow
     nextScreens:
       - name: test

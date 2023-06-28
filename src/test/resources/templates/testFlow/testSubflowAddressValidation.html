@@ -1,10 +1,12 @@
-<head th:replace="~{fragments/head :: head(title='Enter Address')}"></head>
+<html>
+<head th:replace="~{fragments/head :: head(title='Enter Address (subflow)')}"></head>
 <th:block th:replace="~{fragments/form :: form(action=${formAction}, content=~{::testAddress})}">
   <th:block th:ref="testAddress">
     <div class="form-card__content">
       <th:block
           th:replace="~{fragments/inputs/address :: address(validate=true, inputName='validationOn')}"/>
     </div>
-    <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(text='Continue')}"/>
   </th:block>
+  <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(text='Continue')}"/>
 </th:block>
+</html>
