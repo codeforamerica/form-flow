@@ -130,7 +130,7 @@ jobs:
       - name: Update version after publish
         run: |
           sed -i 's/version = "\(.*\)"/version = "${{ inputs.snapshotVersion }}-SNAPSHOT"/' build.gradle
-          echo -e "\n"
+          sed -i -e '$a\' build.gradle
       - name: Create PR to bump version
         id: version_bump
         uses: peter-evans/create-pull-request@v5.0.2
