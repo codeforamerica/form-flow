@@ -5,22 +5,31 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -87,7 +96,7 @@ public class UploadController extends FormFlowController {
       cloudFileRepository.upload(uploadLocation, file);
 
       UserFile uploadedFile = UserFile.builder()
-          .submission_id(submission)
+          .submissionId(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
@@ -155,15 +164,15 @@ public class UploadController extends FormFlowController {
       }
 
       UserFile file = maybeFile.get();
-      if (!submissionId.equals(file.getSubmission_id().getId())) {
+      if (!submissionId.equals(file.getSubmissionId().getId())) {
         log.error(String.format("Submission %d does not match file %s's submission id %d", submissionId, fileId,
-            file.getSubmission_id().getId()));
+            file.getSubmissionId().getId()));
         return new RedirectView("/error");
       }
 
       log.info("Delete file {} from cloud storage", fileId);
       cloudFileRepository.delete(file.getRepositoryPath());
-      uploadedFileRepositoryService.deleteById(file.getFile_id());
+      uploadedFileRepositoryService.deleteById(file.getFileId());
       HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
           (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
       HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
@@ -180,5 +189,40 @@ public class UploadController extends FormFlowController {
       log.error("Error occurred while deleting file " + e.getLocalizedMessage());
       return new RedirectView("/error");
     }
+  }
+
+  @GetMapping("/file-download")
+  ResponseEntity<FileSystemResource> downloadFile(
+      HttpSession httpSession
+  ) throws IOException {
+    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+    List<UserFile> userFiles = uploadedFileRepositoryService.findAllBySubmissionId(submission);
+    if (userFiles.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    try {
+      FileOutputStream fos = new FileOutputStream("UserFiles-" + submission.getId() + ".zip");
+      ZipOutputStream zos = new ZipOutputStream(fos);
+      for (UserFile userFile : userFiles) {
+        ZipEntry fileEntry = new ZipEntry(userFile.getOriginalName());
+        fileEntry.setSize(userFile.getFilesize().longValue());
+        zos.putNextEntry(fileEntry);
+
+        CloudFile cloudFile = cloudFileRepository.get(userFile.getRepositoryPath());
+        byte[] bytes = new byte[Math.toIntExact(cloudFile.getFileSize())];
+        try (FileInputStream fis = new FileInputStream(cloudFile.getFile())) {
+          fis.read(bytes);
+          zos.write(bytes);
+        }
+        zos.closeEntry();
+      }
+    } catch (IOException e) {
+      log.error("Error occurred while downloading file " + e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
+        .body(new FileSystemResource("UserFiles-" + submission.getId() + ".zip"));
   }
 }

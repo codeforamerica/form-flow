@@ -9,9 +9,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
+import java.io.File;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +69,21 @@ public class S3CloudFileRepository implements CloudFileRepository {
       throw new RuntimeException(e.getErrorMessage());
     } catch (InterruptedException | IOException e) {
       log.error("Exception occurred in S3 code: " + e.getMessage());
+      throw new RuntimeException(e.getMessage());
+    }
+  }
+
+  public CloudFile get(String filepath) {
+    File file = new File(filepath);
+    try {
+      log.info("Getting file at filepath {} from S3", filepath);
+      Download download = transferManager.download(bucketName, filepath, file);
+      ObjectMetadata metadata = download.getObjectMetadata();
+      download.waitForCompletion();
+      log.info("File {} successfully downloaded", filepath);
+      return new CloudFile(metadata.getContentLength(), file);
+    } catch (InterruptedException e) {
+      log.error("Exception occurred while attempting to get file in S3 code: " + e.getMessage());
       throw new RuntimeException(e.getMessage());
     }
   }

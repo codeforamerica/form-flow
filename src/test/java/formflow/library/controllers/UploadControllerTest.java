@@ -111,7 +111,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
       UUID submissionUUID_1 = UUID.randomUUID();
       UUID submissionUUID_2 = UUID.randomUUID();
       submission = Submission.builder().id(submissionUUID_1).build();
-      UserFile testUserFile = UserFile.builder().submission_id(submission).build();
+      UserFile testUserFile = UserFile.builder().submissionId(submission).build();
       when(submissionRepositoryService.findById(submissionUUID_1)).thenReturn(Optional.ofNullable(submission));
       when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));

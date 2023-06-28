@@ -8,5 +8,7 @@ public interface CloudFileRepository {
 
   void upload(String filePath, MultipartFile file) throws IOException, InterruptedException;
 
+  CloudFile get(String filepath);
+
   void delete(String filepath);
 }
