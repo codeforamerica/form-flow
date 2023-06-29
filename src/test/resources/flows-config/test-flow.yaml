@@ -32,12 +32,15 @@ flow:
   testSubflowAddressValidationFound:
     subflow: testSubflow
     nextScreens:
-      - name: test
+      - name: testReviewScreen
   testSubflowAddressValidationNotFound:
     subflow: testSubflow
     nextScreens:
-      - name: test
-  test:
+      - name: testReviewScreen
+  testReviewScreen:
+    nextScreens:
+      - name: success
+  testDeleteConfirmationScreen:
     nextScreens:
       - name: success
   pageWithOptionalValidation:
@@ -56,7 +59,7 @@ flow:
     nextScreens:
 subflows:
   testSubflow:
-    entryScreen: testEntryScreen
-    iterationStartScreen: testIterationStartScreen
+    entryScreen: subflowAddItem
+    iterationStartScreen: testSubflowAddressValidation
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
