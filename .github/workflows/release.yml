@@ -153,6 +153,7 @@ jobs:
         uses: "WyriHaximus/github-action-wait-for-status@v1.8"
         with:
           checkInterval: 30
+          ignoreActions: "Automerge PRs"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       - name: automerge
