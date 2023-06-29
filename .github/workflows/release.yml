@@ -148,25 +148,25 @@ jobs:
           delete-branch: true
           labels: automerge
           token: ${{ steps.generate-token.outputs.token }}
-      - name: 'Wait for status checks'
-        id: waitforstatuschecks
-        uses: "WyriHaximus/github-action-wait-for-status@v1.8"
-        with:
-          checkInterval: 30
-          ignoreActions: "automerge"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      - name: automerge
-        uses: "pascalgn/automerge-action@v0.15.6"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      - name: "Announce successful release of ${{inputs.version}} to #platform-help"
-        uses: ravsamhq/notify-slack-action@v2
-        with:
-          status: ${{ job.status }}
-          notification_title: "form-flow version ${{inputs.version}} released! :tada::platypus_roll::tada:"
-          footer: "Github: <{repo_url}|{repo}> | <{workflow_url}|Workflow> | <{repo_url}/releases/tag/${{inputs.version}}|Release Notes> "
-          mention_groups: "S03PFJ5DFLZ,S04PD39SC64"
-          token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#      - name: 'Wait for status checks'
+#        id: waitforstatuschecks
+#        uses: "WyriHaximus/github-action-wait-for-status@v1.8"
+#        with:
+#          checkInterval: 30
+#          ignoreActions: "automerge"
+#        env:
+#          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+#      - name: automerge
+#        uses: "pascalgn/automerge-action@v0.15.6"
+#        env:
+#          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+#      - name: "Announce successful release of ${{inputs.version}} to #platform-help"
+#        uses: ravsamhq/notify-slack-action@v2
+#        with:
+#          status: ${{ job.status }}
+#          notification_title: "form-flow version ${{inputs.version}} released! :tada::platypus_roll::tada:"
+#          footer: "Github: <{repo_url}|{repo}> | <{workflow_url}|Workflow> | <{repo_url}/releases/tag/${{inputs.version}}|Release Notes> "
+#          mention_groups: "S03PFJ5DFLZ,S04PD39SC64"
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#        env:
+#          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
