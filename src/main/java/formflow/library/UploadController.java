@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -191,38 +192,52 @@ public class UploadController extends FormFlowController {
     }
   }
 
-  @GetMapping("/file-download")
-  ResponseEntity<FileSystemResource> downloadFile(
-      HttpSession httpSession
-  ) throws IOException {
-    Submission submission = submissionRepositoryService.findOrCreate(httpSession);
-    List<UserFile> userFiles = uploadedFileRepositoryService.findAllBySubmissionId(submission);
-    if (userFiles.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-
-    try {
-      FileOutputStream fos = new FileOutputStream("UserFiles-" + submission.getId() + ".zip");
-      ZipOutputStream zos = new ZipOutputStream(fos);
-      for (UserFile userFile : userFiles) {
-        ZipEntry fileEntry = new ZipEntry(userFile.getOriginalName());
-        fileEntry.setSize(userFile.getFilesize().longValue());
-        zos.putNextEntry(fileEntry);
-
-        CloudFile cloudFile = cloudFileRepository.get(userFile.getRepositoryPath());
-        byte[] bytes = new byte[Math.toIntExact(cloudFile.getFileSize())];
-        try (FileInputStream fis = new FileInputStream(cloudFile.getFile())) {
-          fis.read(bytes);
-          zos.write(bytes);
-        }
-        zos.closeEntry();
+  @GetMapping("/file-download/{submissionId}")
+  ResponseEntity<FileSystemResource> downloadAllFiles(
+      HttpSession httpSession,
+      @PathVariable String submissionId
+  ) {
+    Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
+    if (httpSession.getAttribute("id").toString().equals(submissionId) && maybeSubmission.isPresent()) {
+      if (maybeSubmission.isEmpty()) {
+        log.error(String.format("Session %d does not exist", submissionId));
+        return ResponseEntity.notFound().build();
       }
-    } catch (IOException e) {
-      log.error("Error occurred while downloading file " + e.getMessage());
-      return ResponseEntity.notFound().build();
+
+      Submission submission = maybeSubmission.get();
+      List<UserFile> userFiles = uploadedFileRepositoryService.findAllBySubmissionId(submission);
+      if (userFiles.isEmpty()) {
+        return ResponseEntity.notFound().build();
+      }
+
+      try (FileOutputStream fos = new FileOutputStream("UserFiles-" + submission.getId() + ".zip");
+          ZipOutputStream zos = new ZipOutputStream(fos)) {
+
+        for (UserFile userFile : userFiles) {
+          ZipEntry fileEntry = new ZipEntry(userFile.getOriginalName());
+          fileEntry.setSize(userFile.getFilesize().longValue());
+          zos.putNextEntry(fileEntry);
+
+          CloudFile cloudFile = cloudFileRepository.get(userFile.getRepositoryPath());
+          byte[] bytes = new byte[Math.toIntExact(cloudFile.getFileSize())];
+          try (FileInputStream fis = new FileInputStream(cloudFile.getFile())) {
+            fis.read(bytes);
+            zos.write(bytes);
+          }
+          zos.closeEntry();
+        }
+      } catch (IOException e) {
+        log.error("Error occurred while downloading file " + e.getMessage());
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
+          .body(new FileSystemResource("UserFiles-" + submission.getId() + ".zip"));
+    } else {
+      log.error(
+          "Attempted to download files belonging to submission " + submissionId + " but session id " + httpSession.getAttribute(
+              "id") + " does not match.");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-    return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
-        .body(new FileSystemResource("UserFiles-" + submission.getId() + ".zip"));
   }
 }
