@@ -22,6 +22,8 @@ form-flow:
       domain: 'mail.forms-starter.cfa-platforms.org'
       sender-email: 'Testing <test@mail.forms-starter.cfa-platforms.org>'
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:postgresql://localhost:5432/form-flow-test
     username: form-flow-test
