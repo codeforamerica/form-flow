@@ -157,6 +157,10 @@ jobs:
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: automerge
+        uses: "pascalgn/automerge-action@v0.15.6"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       - name: "Announce successful release of ${{inputs.version}} to #platform-help"
         uses: ravsamhq/notify-slack-action@v2
         with:
