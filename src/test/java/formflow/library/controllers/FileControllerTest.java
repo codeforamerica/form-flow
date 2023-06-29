@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import formflow.library.UploadController;
+import formflow.library.FileController;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-conditional-navigation.yaml"})
-public class UploadControllerTest extends AbstractMockMvcTest {
+public class FileControllerTest extends AbstractMockMvcTest {
 
   Submission submission;
   private MockMvc mockMvc;
@@ -48,7 +48,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
   @MockBean
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
-  private UploadController uploadController;
+  private FileController fileController;
 
   private UUID fileId = UUID.randomUUID();
 
@@ -56,7 +56,7 @@ public class UploadControllerTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
-    mockMvc = MockMvcBuilders.standaloneSetup(uploadController).build();
+    mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     submission = Submission.builder().id(submissionUUID).build();
     super.setUp();
   }

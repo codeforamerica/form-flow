@@ -8,8 +8,8 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,12 +34,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @EnableAutoConfiguration
 @Slf4j
-public class UploadController extends FormFlowController {
+public class FileController extends FormFlowController {
 
   private final UserFileRepositoryService uploadedFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
@@ -49,7 +49,7 @@ public class UploadController extends FormFlowController {
 
   private final String SESSION_USERFILES_KEY = "userFiles";
 
-  public UploadController(
+  public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
@@ -193,7 +193,7 @@ public class UploadController extends FormFlowController {
   }
 
   @GetMapping("/file-download/{submissionId}")
-  ResponseEntity<FileSystemResource> downloadAllFiles(
+  ResponseEntity<StreamingResponseBody> downloadAllFiles(
       HttpSession httpSession,
       @PathVariable String submissionId
   ) {
@@ -210,9 +210,8 @@ public class UploadController extends FormFlowController {
         return ResponseEntity.notFound().build();
       }
 
-      try (FileOutputStream fos = new FileOutputStream("UserFiles-" + submission.getId() + ".zip");
-          ZipOutputStream zos = new ZipOutputStream(fos)) {
-
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try (ZipOutputStream zos = new ZipOutputStream(baos)) {
         for (UserFile userFile : userFiles) {
           ZipEntry fileEntry = new ZipEntry(userFile.getOriginalName());
           fileEntry.setSize(userFile.getFilesize().longValue());
@@ -228,11 +227,17 @@ public class UploadController extends FormFlowController {
         }
       } catch (IOException e) {
         log.error("Error occurred while downloading file " + e.getMessage());
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.internalServerError().build();
       }
+
+      StreamingResponseBody responseBody = outputStream -> {
+        baos.writeTo(outputStream);
+        baos.close();
+      };
+
       return ResponseEntity.ok()
           .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
-          .body(new FileSystemResource("UserFiles-" + submission.getId() + ".zip"));
+          .body(responseBody);
     } else {
       log.error(
           "Attempted to download files belonging to submission " + submissionId + " but session id " + httpSession.getAttribute(
