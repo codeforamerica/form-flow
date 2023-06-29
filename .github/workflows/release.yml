@@ -148,15 +148,13 @@ jobs:
           delete-branch: true
           labels: automerge
           token: ${{ steps.generate-token.outputs.token }}
-      - name: Wait until checks have completed
-        run: |
-          until gh pr checks ${{ steps.version_bump.outputs.pull-request-number }} | grep -v -e "pass"
-          do
-            echo "Waiting for tests to pass..."
-            sleep 60
-          done
+      - name: 'Wait for status checks'
+        id: waitforstatuschecks
+        uses: "WyriHaximus/github-action-wait-for-status@v2"
+        with:
+          checkInterval: 30
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       - name: automerge
         uses: "pascalgn/automerge-action@v0.15.6"
         env:
