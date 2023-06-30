@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -219,11 +218,11 @@ public class FileController extends FormFlowController {
           zos.putNextEntry(fileEntry);
 
           CloudFile cloudFile = cloudFileRepository.get(userFile.getRepositoryPath());
-          try (InputStream fileInputStream = new FileInputStream(cloudFile.getFile())) {
-            byte[] buffer = new byte[1024];
+          byte[] bytes = new byte[Math.toIntExact(cloudFile.getFileSize())];
+          try (FileInputStream fis = new FileInputStream(cloudFile.getFile())) {
             int bytesRead;
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-              zos.write(buffer, 0, bytesRead);
+            while ((bytesRead = fis.read(bytes)) != -1) {
+              zos.write(bytes, 0, bytesRead);
             }
           }
           zos.closeEntry();
