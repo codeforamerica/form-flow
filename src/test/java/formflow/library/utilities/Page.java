@@ -1,6 +1,7 @@
 package formflow.library.utilities;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,6 +62,9 @@ public class Page {
 
   public void clickContinue() {
     clickButton("Continue");
+    await().until(
+        () -> !driver.findElements(By.className("main-footer")).get(0).getAttribute("innerHTML")
+            .isBlank());
   }
 
   public void enter(String inputName, String value) {
