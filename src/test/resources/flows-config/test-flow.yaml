@@ -11,36 +11,18 @@ flow:
         condition: DidNotFindAddressSuggestion
   testAddressValidationFound:
     nextScreens:
-      - name: subflowAddItem
+      - name: test
   testAddressValidationNotFound:
     nextScreens:
-      - name: subflowAddItem
+      - name: test
   testAddressVerification:
     nextScreens:
-      - name: subflowAddItem
+      - name: test
   subflowAddItem:
     subflow: testSubflow
     nextScreens:
-      - name: testSubflowAddressValidation
-  testSubflowAddressValidation:
-    subflow: testSubflow
-    nextScreens:
-      - name: testSubflowAddressValidationFound
-        condition: FoundSubflowAddressSuggestion
-      - name: testSubflowAddressValidationNotFound
-        condition: DidNotFindSubflowAddressSuggestion
-  testSubflowAddressValidationFound:
-    subflow: testSubflow
-    nextScreens:
-      - name: testReviewScreen
-  testSubflowAddressValidationNotFound:
-    subflow: testSubflow
-    nextScreens:
-      - name: testReviewScreen
-  testReviewScreen:
-    nextScreens:
-      - name: success
-  testDeleteConfirmationScreen:
+      - name: test
+  test:
     nextScreens:
       - name: success
   pageWithOptionalValidation:
@@ -59,7 +41,7 @@ flow:
     nextScreens:
 subflows:
   testSubflow:
-    entryScreen: subflowAddItem
-    iterationStartScreen: testSubflowAddressValidation
+    entryScreen: testEntryScreen
+    iterationStartScreen: testIterationStartScreen
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
