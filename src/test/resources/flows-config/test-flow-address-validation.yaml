@@ -1,0 +1,47 @@
+name: testFlowAddressValidation
+flow:
+  testAddressValidation:
+    nextScreens:
+      - name: testAddressValidationFound
+        condition: FoundAddressSuggestion
+      - name: testAddressValidationNotFound
+        condition: DidNotFindAddressSuggestion
+  testAddressValidationFound:
+    nextScreens:
+      - name: subflowAddItem
+  testAddressValidationNotFound:
+    nextScreens:
+      - name: subflowAddItem
+  subflowAddItem:
+    subflow: testSubflow
+    nextScreens:
+      - name: testSubflowAddressValidation
+  testSubflowAddressValidation:
+    subflow: testSubflow
+    nextScreens:
+      - name: testSubflowAddressValidationFound
+        condition: FoundSubflowAddressSuggestion
+      - name: testSubflowAddressValidationNotFound
+        condition: DidNotFindSubflowAddressSuggestion
+  testSubflowAddressValidationFound:
+    subflow: testSubflow
+    nextScreens:
+      - name: testReviewScreen
+  testSubflowAddressValidationNotFound:
+    subflow: testSubflow
+    nextScreens:
+      - name: testReviewScreen
+  testReviewScreen:
+    nextScreens:
+      - name: success
+  testDeleteConfirmationScreen:
+    nextScreens:
+      - name: success
+  success:
+    nextScreens:
+subflows:
+  testSubflow:
+    entryScreen: subflowAddItem
+    iterationStartScreen: testSubflowAddressValidation
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen

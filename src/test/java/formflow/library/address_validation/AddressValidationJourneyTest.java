@@ -16,15 +16,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow-address-validation.yaml"}, webEnvironment = RANDOM_PORT)
 public class AddressValidationJourneyTest extends AbstractBasePageTest {
 
   @Autowired
   private AddressValidationService addressValidationService;
 
+  private final String startPagePrefix = "flow/testFlowAddressValidation/";
+
   @Test
-  public void testAddressValidationInFlowValidationSuccess() throws SmartyException, IOException, InterruptedException {
-    Map<String, ValidatedAddress> validatedAddress = Map.of(
+  public void testAddressValidationInFlowValidationSuccess() throws IOException, SmartyException, InterruptedException {
+    startingPage = startPagePrefix + "testAddressValidation";
+    super.setUp();
+    Map<String, ValidatedAddress> goodValidatedAddress = Map.of(
         "validationOn",
         new ValidatedAddress("validatedStreetAddress",
             "validatedAptNumber",
@@ -33,10 +37,7 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
             "validatedZipCode-1234"
         ));
 
-    when(addressValidationService.validate(any())).thenReturn(validatedAddress);
-
-    startingPage = "flow/testFlow/testAddressValidation";
-    super.setUp();
+    when(addressValidationService.validate(any())).thenReturn(goodValidatedAddress);
 
     assertThat(testPage.getTitle()).isEqualTo("Enter Address");
     testPage.enter("validationOnStreetAddress1", "1111 N State St");
@@ -49,14 +50,15 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
   }
 
   @Test
-  public void testAddressValidationInFlowValidationNotFound() throws SmartyException, IOException, InterruptedException {
+  public void testAddressValidationInFlowValidationNotFound() throws IOException, SmartyException, InterruptedException {
+    startingPage = startPagePrefix + "testAddressValidation";
+    super.setUp();
+
     Map<String, ValidatedAddress> badValidationAddress = new HashMap<>();
     badValidationAddress.put("validationOn", null);
 
-    startingPage = "flow/testFlow/testAddressValidation";
-    super.setUp();
-
     when(addressValidationService.validate(any())).thenReturn(badValidationAddress);
+
     testPage.enter("validationOnStreetAddress1", "1234 junk");
     testPage.enter("validationOnStreetAddress2", "Apt 2");
     testPage.enter("validationOnCity", "Made Up City");
@@ -68,8 +70,10 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
   }
 
   @Test
-  public void testAddressValidationInSubflowAddressFound() throws SmartyException, IOException, InterruptedException {
-    Map<String, ValidatedAddress> validatedAddress = Map.of(
+  public void testAddressValidationInSubflowAddressFound() throws IOException, SmartyException, InterruptedException {
+    startingPage = startPagePrefix + "testSubflowAddressValidation";
+    super.setUp();
+    Map<String, ValidatedAddress> goodValidatedAddress = Map.of(
         "validationOn",
         new ValidatedAddress("validatedStreetAddress",
             "validatedAptNumber",
@@ -78,10 +82,7 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
             "validatedZipCode-1234"
         ));
 
-    when(addressValidationService.validate(any())).thenReturn(validatedAddress);
-
-    startingPage = "flow/testFlow/testSubflowAddressValidation";
-    super.setUp();
+    when(addressValidationService.validate(any())).thenReturn(goodValidatedAddress);
 
     assertThat(testPage.getTitle()).isEqualTo("Enter Address (subflow)");
     testPage.enter("validationOnStreetAddress1", "1111 N State St");
@@ -94,13 +95,12 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
   }
 
   @Test
-  public void testAddressValidationInSubflowAddressNotFound() throws SmartyException, IOException, InterruptedException {
+  public void testAddressValidationInSubflowAddressNotFound() throws IOException, SmartyException, InterruptedException {
+    startingPage = startPagePrefix + "testSubflowAddressValidation";
+    super.setUp();
+
     Map<String, ValidatedAddress> badValidationAddress = new HashMap<>();
     badValidationAddress.put("validationOn", null);
-
-    //startingPage = "flow/testFlow/subflowAddItem";
-    startingPage = "flow/testFlow/testSubflowAddressValidation";
-    super.setUp();
 
     when(addressValidationService.validate(any())).thenReturn(badValidationAddress);
 

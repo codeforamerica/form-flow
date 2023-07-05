@@ -46,6 +46,8 @@ public abstract class AbstractBasePageTest {
 
   @BeforeEach
   protected void setUp() throws IOException {
+    driver.manage().deleteAllCookies();
+    driver.resetInputState();
     initTestPage();
     baseUrl = "http://localhost:%s/%s".formatted(localServerPort, startingPage);
     driver.navigate().to(baseUrl);
