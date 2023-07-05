@@ -306,6 +306,9 @@ public class ScreenController extends FormFlowController {
         ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
         subflow.add(formSubmission.getFormData());
+
+        // setIterationIsComplete() ends up calling conditions, so we should update the subflow information _before_ we call this
+        // to make sure anything conditions check have the complete data.
         setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
       } else {
         var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
