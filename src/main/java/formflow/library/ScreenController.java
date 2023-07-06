@@ -3,29 +3,13 @@ package formflow.library;
 import com.smartystreets.api.exceptions.SmartyException;
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
-import formflow.library.config.ActionManager;
-import formflow.library.config.ConditionManager;
-import formflow.library.config.FlowConfiguration;
-import formflow.library.config.NextScreen;
-import formflow.library.config.ScreenNavigationConfiguration;
-import formflow.library.config.SubflowConfiguration;
+import formflow.library.config.*;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -36,15 +20,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * A controller to render any screen in flows, including subflows.
@@ -119,7 +103,7 @@ public class ScreenController extends FormFlowController {
       }
     }
 
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission);
+    Map<String, Object> model = createModel(flow, screen, httpSession, submission, null);
 
     String formAction = createFormActionString(flow, screen);
     model.put("formAction", formAction);
@@ -558,10 +542,6 @@ public class ScreenController extends FormFlowController {
   private String createFormActionString(String flow, String screen) {
     return isIterationStartScreen(flow, screen) ?
         "/flow/%s/%s/new".formatted(flow, screen) : "/flow/%s/%s".formatted(flow, screen);
-  }
-
-  private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission) {
-    return createModel(flow, screen, httpSession, submission, null);
   }
 
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
