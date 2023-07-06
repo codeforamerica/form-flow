@@ -650,7 +650,6 @@ body,
 /* Locale Select */
 
 .menu-button-links button {
-  min-width: 160px;
   padding: 5px 10px;
   margin-bottom: 0;
   margin-right: 0;
@@ -702,7 +701,7 @@ body,
   position: absolute;
   border: 2px solid #121111;
   border-radius: 5px;
-  background-color: white;
+  background-color: #ffffff;
   z-index: 3;
 }
 
@@ -716,7 +715,24 @@ body,
   font-size: 15px;
 }
 
-.menu-button-links button svg {
-  margin-right: 12px;
-  align-self: center;
+.translate-links {
+  display: none;
+}
+
+.translate-links a {
+  color: #ffffff;
+}
+
+.translate-links * + * {
+  margin-left: 1.5rem;
+}
+
+@media screen and (min-width: 601px) {
+  .translate-button.use-links-for-desktop {
+    display: none;
+  }
+
+  .translate-links.use-links-for-desktop {
+    display: block;
+  }
 }

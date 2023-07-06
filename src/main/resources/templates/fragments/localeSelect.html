@@ -4,11 +4,13 @@
         lang=${#locale.toString()},
         currentURL=${screen},
         appPropsLocales=${#strings.replace(@environment.getProperty('form-flow.locales'), ' ', '')},
-        supportedLocales=(${appPropsLocales != null ? appPropsLocales.split(',') : 'en'})
+        supportedLocales=(${appPropsLocales != null ? appPropsLocales.split(',') : 'en'}),
+        useLinksForDesktopView=${#arrays.length(supportedLocales) <= 3}
 ">
   <button type="button"
           id="language_menu"
-          class="button"
+          class="button translate-button"
+          th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}"
           aria-haspopup="true"
           aria-controls="menu2">
     <i class="icon icon-translate"></i>
@@ -29,24 +31,24 @@
          class="text--small language-option-track-click" role="menuitem"></a>
     </li>
   </ul>
+  <div class="translate-links"
+       th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}">
+    <a th:each="locale : ${supportedLocales}"
+       th:text="${#messages.msg('language-preferences.link-text.' + locale)}" th:href="'#'"></a>
+  </div>
 </div>
 <noscript th:fragment="translate_noscript"
           th:with="lang=${#locale.toString()}, currentURL=${screen}">
   <!-- When JavaScript is disabled, hide translate button and show translate links -->
   <style>
-    .menu-button-links {
+    .translate-button {
       display: none !important;
     }
+
+    .translate-links {
+      display: block !important;
+    }
   </style>
-  <div class="translate-links">
-    <a th:if="${!lang.equals('en')}" th:text="English" th:href="|${currentURL}?lang=en|"
-       class="toolbar__item toolbar__right-item text--small link--subtle"></a>
-    <a th:if="${!lang.equals('es')}" th:text="Español" th:href="|${currentURL}?lang=es|"
-       class="toolbar__item toolbar__right-item text--small link--subtle"></a>
-    <a th:if="${!lang.equals('vi')}" th:text="#{language-preferences.vietnamese}"
-       th:href="|${currentURL}?lang=vi|"
-       class="toolbar__item toolbar__right-item text--small link--subtle"></a>
-  </div>
 </noscript>
 
 <script th:fragment="translate_button_js">
