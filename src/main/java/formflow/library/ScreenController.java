@@ -230,11 +230,10 @@ public class ScreenController extends FormFlowController {
     Submission submission = maybeSubmission.get();
     var currentScreen = getScreenConfig(flow, screen);
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission);
-    var currentObject = submission.getSubflowEntryByUuid(currentScreen.getSubflow(), uuid);
-    model.put("currentSubflowItem", currentObject);
-    // createModel sets fieldData to submission.inputData; override fieldData with the subflow's data
-    model.put("fieldData", currentObject);
+    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
+    // subflow data will be already set in the "fieldData" field.  We keep "currentSubflowItem" for
+    // backwards compatability at this point
+    model.put("currentSubflowItem", model.get("fieldData"));
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
@@ -562,14 +561,21 @@ public class ScreenController extends FormFlowController {
   }
 
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission) {
+    return createModel(flow, screen, httpSession, submission, null);
+  }
+
+  private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
+      String uuid) {
     Map<String, Object> model = new HashMap<>();
     FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
+    String subflowName = (uuid != null && !uuid.isBlank()) ? flowConfig.getFlow().get(screen).getSubflow() : null;
+
     model.put("flow", flow);
     model.put("screen", screen);
     model.put("conditionManager", conditionManager);
 
-    if (flowConfig.getFlow().get(screen).getSubflow() != null) {
-      model.put("subflow", flowConfig.getFlow().get(screen).getSubflow());
+    if (subflowName != null) {
+      model.put("subflow", subflowName);
     }
 
     // Put subflow on model if on subflow delete confirmation screen
@@ -595,16 +601,26 @@ public class ScreenController extends FormFlowController {
       });
     }
 
-    // If there are errors, merge form data that was submitted, with already existing inputData
+    // Merge form data that was submitted, with already existing inputData
+    // This helps in the case of errors, so all the current data is on the page
     if (httpSession.getAttribute("formDataSubmission") != null) {
-      submission.mergeFormDataWithSubmissionData(
-          new FormSubmission((Map<String, Object>) httpSession.getAttribute("formDataSubmission")));
+      FormSubmission formSubmission = new FormSubmission((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+      if (subflowName != null) {
+        submission.mergeFormDataWithSubflowIterationData(subflowName, submission.getSubflowEntryByUuid(subflowName, uuid),
+            formSubmission.getFormData());
+      } else {
+        submission.mergeFormDataWithSubmissionData(formSubmission);
+      }
     }
 
     model.put("submission", submission);
     model.put("inputData", submission.getInputData());
     // default fieldData to "inputData", but it might be replaced with subflow data later on
-    model.put("fieldData", submission.getInputData());
+    if (subflowName != null) {
+      model.put("fieldData", submission.getSubflowEntryByUuid(subflowName, uuid));
+    } else {
+      model.put("fieldData", submission.getInputData());
+    }
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
 
     return model;
