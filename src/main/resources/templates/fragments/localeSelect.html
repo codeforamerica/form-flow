@@ -14,12 +14,10 @@
     <i class="icon icon-translate"></i>
     <span>
       <strong th:text="#{language-preferences.button}"></strong>
-        <span th:if="${lang.equals('en')}" class="small-text" aria-hidden="true"
-              th:text="|#{language-preferences.spanish}, #{language-preferences.vietnamese}|"></span>
-        <span th:if="${lang.equals('es')}" class="small-text" aria-hidden="true"
-              th:text="|#{language-preferences.english}, #{language-preferences.vietnamese}|"></span>
-        <span th:if="${lang.equals('vi')}" class="small-text" aria-hidden="true"
-              th:text="|#{language-preferences.english}, #{language-preferences.spanish}|"></span>
+      <span class="small-text" aria-hidden="true"
+            th:text="${#messages.msgOrNull('language-preferences.preview.second') == ''}
+            ? #{language-preferences.preview.first}
+            : #{language-preferences.preview.first} + ', ' + #{language-preferences.preview.second}"></span>
     </span>
   </button>
   <ul id="menu2"
