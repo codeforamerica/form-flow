@@ -71,7 +71,7 @@ dependencies {
     implementation 'net.coobird:thumbnailator:0.4.20'
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
-    implementation 'com.smartystreets.api:smartystreets-java-sdk:3.13.19'
+    implementation 'com.smartystreets.api:smartystreets-java-sdk:3.14.0'
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'com.mailgun:mailgun-java:1.0.8'
