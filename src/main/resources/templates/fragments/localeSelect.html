@@ -8,26 +8,28 @@
         useLinksForDesktopView=${#arrays.length(supportedLocales) <= 3}
 ">
   <button type="button"
-          id="language_menu"
+          id="language-menu"
           class="button translate-button"
           th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}"
           aria-haspopup="true"
-          aria-controls="menu2">
-    <i class="icon icon-translate"></i>
+          aria-controls="language-menu-dropdown">
+    <i class="icon icon-translate" aria-hidden="true"></i>
     <span>
       <strong th:text="#{language-preferences.button}"></strong>
-      <span class="small-text" aria-hidden="true"
+      <span class="small-text"
             th:text="${#messages.msgOrNull('language-preferences.preview.second') == ''}
             ? #{language-preferences.preview.first}
             : #{language-preferences.preview.first} + ', ' + #{language-preferences.preview.second}"></span>
     </span>
   </button>
-  <ul id="menu2"
+  <ul id="language-menu-dropdown"
       role="menu"
-      aria-labelledby="language_menu">
+      aria-labelledby="language-menu">
     <li th:each="locale : ${supportedLocales}" role="none">
       <!--  TODO: set correct href in later ticket  -->
-      <a th:text="${#messages.msg('language-preferences.link-text.' + locale)}" th:href="'#'"
+      <a th:text="${#messages.msg('language-preferences.link-text.' + locale)}"
+         th:lang="${locale}"
+         th:href="'#'"
          class="text--small language-option-track-click" role="menuitem"></a>
     </li>
   </ul>
