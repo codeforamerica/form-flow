@@ -1,3 +1,4 @@
+name: Create Pre-Release
 on:
   workflow_dispatch:
     inputs:
@@ -5,9 +6,38 @@ on:
         description: 'Version to release'
         type: string
         required: true
+      refToRelease:
+        description: 'Ref to release (branch, sha, tag, etc)'
+        type: string
+        required: true
+        default: 'main'
+
 jobs:
-  test:
+  run-tests:
+    name: Run tests
+    uses: ./.github/workflows/run-tests.yml
+  create-pre-release:
+    name: Create Pre-Release
+    needs: run-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Noop
-        run: echo ${{ inputs.version }}
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.refToRelease }}
+      - name: Tag Version
+        run: |
+          echo Creating pre-release version: ${{inputs.version}}
+          git config --local user.email "platforms-robot@codeforamerica.org"
+          git config --local user.name "CfA Platforms Robot"
+          git tag -a ${{inputs.version}} -m "Pre-release version ${{inputs.version}}"
+          git push origin ${{inputs.version}}
+      - name: Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{inputs.version}}
+          generate_release_notes: true
+          body: |
+            FILL IN DETAILS ABOUT THIS RELEASE!
+          draft: true
+          prerelease: true

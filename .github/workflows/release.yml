@@ -4,9 +4,143 @@ on:
     types:
       - released
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        type: string
+        required: true
+      sonatypeUsername:
+        description: 'Sonatype username'
+        type: string
+        required: true
+      sonatypePassword:
+        description: 'Sonatype password'
+        type: string
+        required: true
+
 jobs:
-  noop:
+  release:
+    name: Release to Sonatype
     runs-on: ubuntu-latest
     steps:
-      - name: Noop
-        run: echo "Noop"
+      - name: Use faketty to allow for GPG signing
+        uses: Yuri6037/Action-FakeTTY@v1.1
+      - name: Hide sensitive inputs
+        uses: levibostian/action-hide-sensitive-inputs@v1
+        with:
+          exclude_inputs: version
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.version }}
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Update version
+        run: |
+          echo "Updating version in build.gradle to ${{ inputs.version }}"
+          sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
+      - name: Build Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew clean jar
+      - name: Configure GPG Key
+        run: |
+          echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import --pinentry-mode loopback --passphrase ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
+        env:
+          GPG_TTY: $(tty)
+      - name: Configure gradle properties for key id
+        run: |
+          echo "signing.gnupg.homeDir=/home/runner/.gnupg" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.keyName=${{ secrets.PLATFORM_ROBOT_GPG_ID }}" >> ~/.gradle/gradle.properties
+          echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
+          echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
+      - name: Publish package
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
+        env:
+          SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
+          SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
+          GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
+#          the below keys are duplicates believe shouldn't be needed. if the next release fails, uncomment them
+#          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
+#          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
+      - name: Confirm version ${{ inputs.version }} published to Sonatype
+        timeout-minutes: 5
+        run: |
+          until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/${{inputs.version}}"
+          do
+            echo "Waiting for version ${{ inputs.version }} to be published to Sonatype..."
+            sleep 5
+          done
+      - name: "Announce failure to release of ${{inputs.version}} to #platform-help"
+        uses: ravsamhq/notify-slack-action@v2
+        if: failure()
+        with:
+          status: ${{ job.status }}
+          notification_title: "form-flow version ${{inputs.version}} release failed!"
+          footer: "Github: <{repo_url}|{repo}> | <{workflow_url}|Workflow> | <{repo_url}/releases/tag/${{inputs.version}}|Release Notes> "
+          mention_groups: "S03PFJ5DFLZ,S04PD39SC64"
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  post_release_success:
+    name: Clean up after release
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PLATFORM_ROBOT_PAT }}
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{inputs.version}}
+          draft: false
+          prerelease: false
+      - name: Create new snapshot version string
+        run: echo NEW_SNAPSHOT_VERSION=$(echo ${{ inputs.version }}  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
+      - name: Update snapshot version
+        run: sed -i 's/version = "\(.*\)"/version = "${{ env.NEW_SNAPSHOT_VERSION }}"/' build.gradle
+      - name: Push snapshot update changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_user_name: cfa-platforms-robot
+          commit_message: "Bump version to ${{env.NEW_SNAPSHOT_VERSION}}"
+          commit_user_email: platforms-robot@codeforamerica.org
+          commit_author: CfA Platforms Robot <platforms-robot@codeforamerica.org>
+          push_options: --force
+      - name: Trigger starter-app snapshot upgrade on newly published version
+        uses: peter-evans/repository-dispatch@v2.1.1
+        with:
+          repository: codeforamerica/form-flow-starter-app
+          event-type: form-flow-snapshot-version-bumped
+          client-payload: '{"version": "${{env.NEW_SNAPSHOT_VERSION}}"}'
+          token: ${{ secrets.PLATFORM_ROBOT_PAT }}
+      - name: "Announce successful release of ${{inputs.version}} to #platform-help"
+        uses: ravsamhq/notify-slack-action@v2
+        with:
+          status: ${{ job.status }}
+          notification_title: "form-flow version ${{inputs.version}} released! :tada::platypus_roll::tada:"
+          footer: "Github: <{repo_url}|{repo}> | <{workflow_url}|Workflow> | <{repo_url}/releases/tag/${{inputs.version}}|Release Notes> "
+          mention_groups: "S03PFJ5DFLZ,S04PD39SC64"
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
