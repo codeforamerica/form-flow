@@ -2,14 +2,12 @@
 *   This content is licensed according to the W3C Software License at
 *   https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
 *
-*   File:   menu-button-links.js
-*
 *   Desc:   Creates a menu button that opens a menu of links
 */
 
 'use strict';
 
-class MenuButtonLinks {
+class LanguageSelector {
   constructor(domNode) {
     this.domNode = domNode;
     this.buttonNode = domNode.querySelector('button');
@@ -250,7 +248,9 @@ class MenuButtonLinks {
     } else {
       switch (key) {
         case ' ':
-          mixpanel.track('language_picker_click',)
+          if (mixpanel) {
+            mixpanel.track('language-selector-click',);
+          }
           window.location.href = tgt.href;
           break;
 
@@ -319,12 +319,12 @@ class MenuButtonLinks {
   }
 }
 
-// Initialize menu buttons
+// Initialize language selectors
 window.addEventListener('load', function () {
-  var menuButtons = document.querySelectorAll('.menu-button-links');
-  if (menuButtons !== null && menuButtons.length !== 0) {
-    for (let i = 0; i < menuButtons.length; i++) {
-      new MenuButtonLinks(menuButtons[i]);
+  var languageSelectors = document.querySelectorAll('.language-selector');
+  if (languageSelectors !== null && languageSelectors.length !== 0) {
+    for (let i = 0; i < languageSelectors.length; i++) {
+      new LanguageSelector(languageSelectors[i]);
     }
   }
 });

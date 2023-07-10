@@ -1,11 +1,13 @@
 <!-- Based on https://www.w3.org/TR/wai-aria-practices/examples/menu-button/menu-button-links.html -->
-<div th:fragment="localeSelect" id="translate-button" class="menu-button-links"
+<div th:fragment="languageSelector"
+     id="language-selector"
+     class="language-selector"
      th:with="
         lang=${#locale.toString()},
         currentURL=${screen},
-        appPropsLocales=${#strings.replace(@environment.getProperty('form-flow.locales'), ' ', '')},
-        supportedLocales=(${appPropsLocales != null ? appPropsLocales.split(',') : 'en'}),
-        useLinksForDesktopView=${#arrays.length(supportedLocales) <= 3}
+        appPropsLanguages=${#strings.replace(@environment.getProperty('form-flow.languages'), ' ', '')},
+        supportedLanguages=${appPropsLanguages != null ? appPropsLanguages.split(',') : 'default'},
+        useLinksForDesktopView=${#arrays.length(supportedLanguages) <= 3}
 ">
   <button type="button"
           id="language-menu"
@@ -25,18 +27,18 @@
   <ul id="language-menu-dropdown"
       role="menu"
       aria-labelledby="language-menu">
-    <li th:each="locale : ${supportedLocales}" role="none">
+    <li th:each="language : ${supportedLanguages}" role="none">
       <!--  TODO: set correct href in later ticket  -->
-      <a th:text="${#messages.msg('language-preferences.link-text.' + locale)}"
-         th:lang="${locale}"
+      <a th:text="${#messages.msg('language-preferences.link-text.' + language)}"
+         th:lang="${language}"
          th:href="'#'"
          class="text--small language-option-track-click" role="menuitem"></a>
     </li>
   </ul>
   <div class="translate-links"
        th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}">
-    <a th:each="locale : ${supportedLocales}"
-       th:text="${#messages.msg('language-preferences.link-text.' + locale)}" th:href="'#'"></a>
+    <a th:each="language : ${supportedLanguages}"
+       th:text="${#messages.msg('language-preferences.link-text.' + language)}" th:href="'#'"></a>
   </div>
   <noscript>
     <!-- When JavaScript is disabled, hide translate button and show translate links -->
