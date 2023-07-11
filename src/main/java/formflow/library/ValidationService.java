@@ -34,8 +34,7 @@ public class ValidationService {
 
   private final Validator validator;
   private final ActionManager actionManager;
-  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
-  private String inputConfigPath;
+  private final String inputConfigPath;
   private final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
       NotEmpty.class.getName(),
@@ -47,9 +46,11 @@ public class ValidationService {
    *
    * @param validator Validator from Jakarta package.
    */
-  public ValidationService(Validator validator, ActionManager actionManager) {
+  public ValidationService(Validator validator, ActionManager actionManager,
+      @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
     this.validator = validator;
     this.actionManager = actionManager;
+    this.inputConfigPath = inputConfigPath;
   }
 
   /**
