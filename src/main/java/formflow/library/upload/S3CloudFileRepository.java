@@ -16,7 +16,6 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.util.IOUtils;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,7 +76,6 @@ public class S3CloudFileRepository implements CloudFileRepository {
   }
 
   public CloudFile get(String filepath) {
-    File file = new File(filepath);
     try {
       log.info("Getting file at filepath {} from S3", filepath);
       S3Object s3Object = s3Client.getObject(bucketName, filepath);
