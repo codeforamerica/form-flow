@@ -4,7 +4,6 @@
      class="language-selector"
      th:with="
         lang=${#locale.toString()},
-        currentURL=${screen},
         appPropsLanguages=${#strings.replace(@environment.getProperty('form-flow.languages'), ' ', '')},
         supportedLanguages=${appPropsLanguages != null ? appPropsLanguages.split(',') : 'default'},
         useLinksForDesktopView=${#arrays.length(supportedLanguages) <= 3},
@@ -37,7 +36,7 @@
     <li th:each="language : ${supportedLanguages}" role="none">
       <a th:text="${#messages.msg('language-preferences.link-text.' + language)}"
          th:lang="${language}"
-         th:href="|${currentURL}?lang=${language}|"
+         th:href="|?lang=${language}|"
          class="text--small language-option-track-click" role="menuitem"></a>
     </li>
   </ul>
@@ -45,7 +44,7 @@
        th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}">
     <a th:each="language : ${supportedLanguages}"
        th:text="${#messages.msg('language-preferences.link-text.' + language)}"
-       th:href="|${currentURL}?lang=${language}|"></a>
+       th:href="|?lang=${language}|"></a>
   </nav>
   <noscript>
     <!-- When JavaScript is disabled, hide translate button and show translate links -->
