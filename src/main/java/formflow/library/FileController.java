@@ -9,7 +9,6 @@ import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -192,6 +191,53 @@ public class FileController extends FormFlowController {
     }
   }
 
+  @GetMapping("/file-download/{submissionId}/{fileId}")
+  public ResponseEntity<StreamingResponseBody> downloadSingleFile(
+      HttpSession httpSession,
+      @PathVariable String submissionId,
+      @PathVariable String fileId
+  ) {
+
+    Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(UUID.fromString(fileId));
+    if (maybeFile.isEmpty()) {
+      log.error(String.format("File with id %s may have already been deleted", fileId));
+      return ResponseEntity.notFound().build();
+    }
+
+    UserFile file = maybeFile.get();
+    if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    if (!httpSession.getAttribute("id").toString().equals(file.getSubmissionId().getId().toString())) {
+      log.error(String.format("Attempt to download file with submission ID %s but session ID %s does not match",
+          file.getSubmissionId().getId(), httpSession.getAttribute("id")));
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    String repositoryPath = file.getRepositoryPath();
+    String filename = file.getOriginalName();
+    String contentType = file.getMimeType();
+
+    CloudFile cloudFile = cloudFileRepository.get(repositoryPath);
+    byte[] fileData = cloudFile.getFileBytes();
+    long fileSize = cloudFile.getFileSize();
+
+    StreamingResponseBody responseBody = outputStream -> {
+      try {
+        outputStream.write(fileData);
+      } catch (IOException e) {
+        log.error("Error occurred while downloading file " + e.getMessage());
+      }
+    };
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+        .contentType(MediaType.parseMediaType(contentType))
+        .contentLength(fileSize)
+        .body(responseBody);
+  }
+
   @GetMapping("/file-download/{submissionId}")
   ResponseEntity<StreamingResponseBody> downloadAllFiles(
       HttpSession httpSession,
@@ -218,13 +264,8 @@ public class FileController extends FormFlowController {
           zos.putNextEntry(fileEntry);
 
           CloudFile cloudFile = cloudFileRepository.get(userFile.getRepositoryPath());
-          byte[] bytes = new byte[Math.toIntExact(cloudFile.getFileSize())];
-          try (FileInputStream fis = new FileInputStream(cloudFile.getFile())) {
-            int bytesRead;
-            while ((bytesRead = fis.read(bytes)) != -1) {
-              zos.write(bytes, 0, bytesRead);
-            }
-          }
+          byte[] fileBytes = cloudFile.getFileBytes();
+          zos.write(fileBytes);
           zos.closeEntry();
         }
       } catch (IOException e) {
