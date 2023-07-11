@@ -35,17 +35,17 @@
       role="menu"
       aria-labelledby="language-menu">
     <li th:each="language : ${supportedLanguages}" role="none">
-      <!--  TODO: set correct href in later ticket  -->
       <a th:text="${#messages.msg('language-preferences.link-text.' + language)}"
          th:lang="${language}"
-         th:href="'#'"
+         th:href="|${currentURL}?lang=${language}|"
          class="text--small language-option-track-click" role="menuitem"></a>
     </li>
   </ul>
   <nav th:aria-label="#{language-preferences.button}" class="translate-links"
        th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}">
     <a th:each="language : ${supportedLanguages}"
-       th:text="${#messages.msg('language-preferences.link-text.' + language)}" th:href="'#'"></a>
+       th:text="${#messages.msg('language-preferences.link-text.' + language)}"
+       th:href="|${currentURL}?lang=${language}|"></a>
   </nav>
   <noscript>
     <!-- When JavaScript is disabled, hide translate button and show translate links -->
