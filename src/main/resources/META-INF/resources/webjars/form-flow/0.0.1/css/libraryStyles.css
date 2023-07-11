@@ -678,7 +678,7 @@ body,
   }
 }
 
-.language-selector button strong {
+.language-selector .large-text {
   font-size: 1.4rem;
 }
 
