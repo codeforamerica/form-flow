@@ -180,6 +180,36 @@ public class FileControllerTest extends AbstractMockMvcTest {
       assertThat(session.getAttribute("userFiles")).isEqualTo(new HashMap<>());
     }
   }
-  
+
+  @Nested
+  public class Download {
+
+    //verify that when you hit the file download endpoint that only you can
+    // download the zip file of your documents
+    @Test
+    void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForSingleFile() {
+
+    }
+
+    @Test
+    void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionId() throws Exception {
+      //Submission
+      //httpSession
+//      UUID submissionUUID = UUID.randomUUID();
+//      UserFile userFile1 = UserFile.builder()
+//          .fileId(UUID.randomUUID()).build();
+//
+//      submission =  Submission.builder().id(submissionUUID).build();
+      session.setAttribute("id", UUID.randomUUID());
+      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
+              .session(session))
+          .andExpect(status().is(403));
+
+
+    }
+    //test that when you hit the endpoint only you can download a document from your submission
+    //test that if generate a zip with your documents if you pass in a submission.
+    //test that you generate a document when you pass in a submision and the userfile id.
+  }
 
 }
