@@ -1,6 +1,8 @@
 package formflow.library.inputs;
 
 import formflow.library.data.FlowInputs;
+import formflow.library.data.validators.Money;
+import formflow.library.data.validators.Phone;
 import jakarta.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,4 +85,38 @@ public class TestFlow extends FlowInputs {
   @NotBlank
   String validationOnZipCode;
   Boolean useValidatedValidationOn;
+
+  // now lets test some fields in a subflow
+  String firstNameSubflow;
+  @NotBlank
+  String textInputSubflow;
+  @NotBlank
+  String areaInputSubflow;
+  @NotBlank
+  String dateSubflowDay;
+  @NotBlank
+  String dateSubflowMonth;
+  @NotBlank
+  String dateSubflowYear;
+  @NotBlank(message = "Date may not be empty")
+  @Pattern(regexp = "\\d/\\d/\\d\\d\\d\\d", message = "Date must be in the format of mm/dd/yyyy")
+  String dateSubflowFull;
+
+  @NotBlank
+  @Max(value = 100)
+  String numberInputSubflow;
+  @NotEmpty
+  ArrayList<String> checkboxSetSubflow;
+  @NotEmpty
+  ArrayList<String> checkboxInputSubflow;
+  @NotBlank
+  String radioInputSubflow;
+  @NotBlank
+  String selectInputSubflow;
+  @NotBlank
+  @Money
+  String moneyInputSubflow;
+  @NotBlank
+  @Phone
+  String phoneInputSubflow;
 }

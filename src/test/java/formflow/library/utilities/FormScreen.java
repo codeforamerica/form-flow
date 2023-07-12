@@ -29,8 +29,7 @@ public class FormScreen {
   }
 
   public boolean hasInputError(String inputName) {
-    Element element = html.select("input[name='%s'] ~ p.text--error".formatted(inputName))
-        .first();
+    Element element = html.select("[id^=\"%s-error-message\"]".formatted(inputName)).first();
     return element != null;
   }
 
@@ -142,7 +141,7 @@ public class FormScreen {
     return html.select(selector).first();
   }
 
-  public String getTextAreaAreaValue(String inputName) {
+  public String getTextAreaValue(String inputName) {
     return html.select("textarea[name='%s']".formatted(inputName)).text();
   }
 
