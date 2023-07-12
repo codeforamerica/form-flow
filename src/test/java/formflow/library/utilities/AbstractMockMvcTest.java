@@ -43,6 +43,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
@@ -211,6 +212,17 @@ public abstract class AbstractMockMvcTest {
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrl(redirectUrl));
+  }
+
+  protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
+      Map<String, List<String>> params)
+      throws Exception {
+    return mockMvc.perform(
+        post(postUrl)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .params(new LinkedMultiValueMap<>(params))
+    ).andExpect(redirectedUrlPattern(redirectUrlPattern));
   }
 
   protected void postExpectingNextPageElementText(String pageName,

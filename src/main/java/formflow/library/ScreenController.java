@@ -319,8 +319,15 @@ public class ScreenController extends FormFlowController {
       }
     } else {
       if (isNewIteration) {
+        Map<String, Object> inputData = new HashMap<>();
+        ArrayList<Map<String, Object>> subflow = new ArrayList<>();
+
+        formSubmission.getFormData().put("uuid", iterationUuid);
+        subflow.add(formSubmission.getFormData());
+        inputData.put(subflowName, subflow);
+
         submission.setFlow(flow);
-        submission.setInputData(formSubmission.getFormData());
+        submission.setInputData(inputData);
       } else {
         // We are not in a current session, so this implies we are on the first page
         // of a flow. If it's not a new iteration, then where _are_ we?
