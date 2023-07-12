@@ -15,10 +15,12 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.sql.Date;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
@@ -192,6 +194,37 @@ public class FileControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
               .session(session))
           .andExpect(status().is(403));
+    }
+
+    //Does sessionId match submissionId on the file
+    @Test
+    void shouldReturnForbiddenIfSessionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
+      Submission differentSubmissionIdFromUserFile = Submission.builder().id(UUID.randomUUID()).build();
+      session.setAttribute("id", submission.getId());
+      UserFile userFile = UserFile.builder().submissionId(differentSubmissionIdFromUserFile)
+          .fileId(fileId).build();
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
+      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+              .session(session))
+          .andExpect(status().is(403));
+    }
+
+    @Test
+    void downloadingASingleFileShouldReturnTheCorrectFile() throws Exception {
+      session.setAttribute("id", submission.getId());
+      byte[] testFileBytes = new byte[1024];
+      long fileSize = testFileBytes.length;
+      CloudFile testFile = new CloudFile(fileSize, testFileBytes);
+      UserFile testUserFile = UserFile.builder().mimeType("image/jpeg").repositoryPath("testPath").submissionId(submission)
+          .build();
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
+      when(cloudFileRepository.get("testPath")).thenReturn(testFile);
+      byte[] response = mockMvc.perform(
+              MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+                  .session(session))
+          .andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsByteArray();
+      assertThat(Arrays.equals(testFileBytes, response)).isTrue();
     }
 
     @Test
