@@ -7,14 +7,21 @@
         currentURL=${screen},
         appPropsLanguages=${#strings.replace(@environment.getProperty('form-flow.languages'), ' ', '')},
         supportedLanguages=${appPropsLanguages != null ? appPropsLanguages.split(',') : 'default'},
-        useLinksForDesktopView=${#arrays.length(supportedLanguages) <= 3}
+        useLinksForDesktopView=${#arrays.length(supportedLanguages) <= 3},
+        buttonLabel=${
+          #messages.msgOrNull('language-preferences.preview.first') != '' &&
+          #messages.msgOrNull('language-preferences.preview.second') != ''
+          ? #messages.msgOrNull('language-preferences.button') + ', ' + #messages.msgOrNull('language-preferences.preview.first') + ', ' + #messages.msgOrNull('language-preferences.preview.second')
+          : #messages.msgOrNull('language-preferences.button') + ', ' + #messages.msgOrNull('language-preferences.preview.first')
+        }
 ">
   <button type="button"
           id="language-menu"
           class="button button--small translate-button"
           th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}"
           aria-haspopup="true"
-          aria-controls="language-menu-dropdown">
+          aria-controls="language-menu-dropdown"
+          th:aria-label="${buttonLabel}">
     <i class="icon icon-translate" aria-hidden="true"></i>
     <span>
       <span class="large-text" th:text="#{language-preferences.button}"></span>
@@ -35,11 +42,11 @@
          class="text--small language-option-track-click" role="menuitem"></a>
     </li>
   </ul>
-  <div class="translate-links"
+  <nav th:aria-label="#{language-preferences.button}" class="translate-links"
        th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}">
     <a th:each="language : ${supportedLanguages}"
        th:text="${#messages.msg('language-preferences.link-text.' + language)}" th:href="'#'"></a>
-  </div>
+  </nav>
   <noscript>
     <!-- When JavaScript is disabled, hide translate button and show translate links -->
     <style>
