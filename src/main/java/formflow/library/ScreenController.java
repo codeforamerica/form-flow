@@ -15,6 +15,15 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -34,16 +43,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.view.RedirectView;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * A controller to render any screen in flows, including subflows.
@@ -97,7 +96,7 @@ public class ScreenController extends FormFlowController {
   ) throws NoHandlerFoundException {
     log.info("getScreen: flow: " + flow + ", screen: " + screen);
 
-    var currentScreen = getScreenConfig(flow, screen);
+    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
       submission.mergeUrlParamsWithData(query_params);
@@ -563,7 +562,7 @@ public class ScreenController extends FormFlowController {
       String uuid) {
     Map<String, Object> model = new HashMap<>();
     FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
-    String subflowName = (uuid != null && !uuid.isBlank()) ? flowConfig.getFlow().get(screen).getSubflow() : null;
+    String subflowName = flowConfig.getFlow().get(screen).getSubflow();
 
     model.put("flow", flow);
     model.put("screen", screen);
@@ -600,7 +599,8 @@ public class ScreenController extends FormFlowController {
     // This helps in the case of errors, so all the current data is on the page
     if (httpSession.getAttribute("formDataSubmission") != null) {
       FormSubmission formSubmission = new FormSubmission((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
-      if (subflowName != null) {
+      if (subflowName != null && uuid != null && !uuid.isBlank()) {
+        // there is existing data to merge with
         submission.mergeFormDataWithSubflowIterationData(subflowName, submission.getSubflowEntryByUuid(subflowName, uuid),
             formSubmission.getFormData());
       } else {
@@ -610,13 +610,16 @@ public class ScreenController extends FormFlowController {
 
     model.put("submission", submission);
     model.put("inputData", submission.getInputData());
-    // default fieldData to "inputData", but it might be replaced with subflow data later on
-    if (subflowName != null) {
-      model.put("fieldData", submission.getSubflowEntryByUuid(subflowName, uuid));
-    } else {
-      model.put("fieldData", submission.getInputData());
-    }
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
+    model.put("fieldData", submission.getInputData());
+    if (subflowName != null) {
+      if (uuid != null && !uuid.isBlank()) {
+        model.put("fieldData", submission.getSubflowEntryByUuid(subflowName, uuid));
+      } else if (httpSession.getAttribute("formSubmissionData") != null) {
+        // this is a new subflow iteration, we have submission data, so share that
+        model.put("fieldData", httpSession.getAttribute("formDataSubmission"));
+      }
+    }
 
     return model;
   }

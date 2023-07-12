@@ -1,5 +1,8 @@
 package formflow.library.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,6 +13,7 @@ import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
+import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +63,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     public void modelIncludesCurrentSubflowItem() throws Exception {
       HashMap<String, String> subflowItem = new HashMap<>();
       subflowItem.put("uuid", "aaa-bbb-ccc");
-      subflowItem.put("firstName", "foo bar baz");
+      subflowItem.put("firstNameSubflow", "foo bar baz");
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
       getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
@@ -114,4 +118,44 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       verify(addressValidationService, times(1)).validate(any());
     }
   }
+
+  @Test
+  public void fieldsStillHaveValuesWhenFieldValidationFailsInSubflow() throws Exception {
+    var params = new HashMap<String, List<String>>();
+    UUID uuid = UUID.randomUUID();
+    params.put("firstNameSubflow", List.of("tester"));
+    params.put("textInputSubflow", List.of("text input value"));
+    params.put("areaInputSubflow", List.of("area input value"));
+    // bad value for numberInput
+    params.put("numberInputSubflow", List.of(""));
+    params.put("checkboxSetSubflow[]", List.of("", "Checkbox-A"));
+    params.put("checkboxInputSubflow[]", List.of("", "checkbox-value"));
+    params.put("radioInputSubflow", List.of("Radio B"));
+    params.put("selectInputSubflow", List.of("Select C"));
+    // bad value for moneyInput
+    params.put("moneyInputSubflow", List.of("-11"));
+    // bad value for phoneInput
+    params.put("phoneInputSubflow", List.of("12323"));
+    // skipping date, which should cause an error
+
+    String pageName = "subflowAddItem/new";
+    postExpectingFailure(pageName, params, "subflowAddItem");
+    var page = new FormScreen(getPage("subflowAddItem"));
+
+    assertTrue(page.hasDateInputError());
+    assertTrue(page.hasInputError("numberInputSubflow"));
+    assertTrue(page.hasInputError("moneyInputSubflow"));
+    assertTrue(page.hasInputError("phoneInputSubflow"));
+    assertFalse(page.hasInputError("textInputSubflow"));
+
+    // make sure the values are still filled in, in general
+    assertEquals("text input value", page.getInputValue("textInputSubflow"));
+    assertEquals("area input value", page.getTextAreaValue("areaInputSubflow"));
+    assertEquals(List.of("Checkbox-A"), page.getCheckboxSetValues("checkboxSetSubflow"));
+    assertEquals(List.of("checkbox-value"), page.getCheckboxSetValues("checkboxInputSubflow"));
+    assertEquals("Radio B", page.getRadioValue("radioInputSubflow"));
+    assertEquals("Select C", page.getSelectValue("selectInputSubflow"));
+  }
+
+
 }
