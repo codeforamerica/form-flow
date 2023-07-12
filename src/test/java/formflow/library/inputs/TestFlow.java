@@ -119,4 +119,37 @@ public class TestFlow extends FlowInputs {
   @NotBlank
   @Phone
   String phoneInputSubflow;
+
+  // now lets test some fields in the second page of a subflow
+  String firstNameSubflowPage2;
+  @NotBlank
+  String textInputSubflowPage2;
+  @NotBlank
+  String areaInputSubflowPage2;
+  @NotBlank
+  String dateSubflowPage2Day;
+  @NotBlank
+  String dateSubflowPage2Month;
+  @NotBlank
+  String dateSubflowPage2Year;
+  @NotBlank(message = "Date may not be empty")
+  @Pattern(regexp = "\\d/\\d/\\d\\d\\d\\d", message = "Date must be in the format of mm/dd/yyyy")
+  String dateSubflowPage2Full;
+  @NotBlank
+  @Max(value = 100)
+  String numberInputSubflowPage2;
+  @NotEmpty
+  ArrayList<String> checkboxSetSubflowPage2;
+  @NotEmpty
+  ArrayList<String> checkboxInputSubflowPage2;
+  @NotBlank
+  String radioInputSubflowPage2;
+  @NotBlank
+  String selectInputSubflowPage2;
+  @NotBlank
+  @Money
+  String moneyInputSubflowPage2;
+  @NotBlank
+  @Phone
+  String phoneInputSubflowPage2;
 }
