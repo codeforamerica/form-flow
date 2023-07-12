@@ -184,32 +184,23 @@ public class FileControllerTest extends AbstractMockMvcTest {
   @Nested
   public class Download {
 
-    //verify that when you hit the file download endpoint that only you can
-    // download the zip file of your documents
     @Test
-    void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForSingleFile() {
-
+    void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForSingleFileEndpoint() throws Exception {
+      session.setAttribute("id", UUID.randomUUID());
+      UserFile userFile = UserFile.builder().submissionId(submission).build();
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
+      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+              .session(session))
+          .andExpect(status().is(403));
     }
 
     @Test
-    void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionId() throws Exception {
-      //Submission
-      //httpSession
-//      UUID submissionUUID = UUID.randomUUID();
-//      UserFile userFile1 = UserFile.builder()
-//          .fileId(UUID.randomUUID()).build();
-//
-//      submission =  Submission.builder().id(submissionUUID).build();
+    void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForMultiFileEndpoint() throws Exception {
       session.setAttribute("id", UUID.randomUUID());
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
               .session(session))
           .andExpect(status().is(403));
-
-
     }
-    //test that when you hit the endpoint only you can download a document from your submission
-    //test that if generate a zip with your documents if you pass in a submission.
-    //test that you generate a document when you pass in a submision and the userfile id.
   }
 
 }
