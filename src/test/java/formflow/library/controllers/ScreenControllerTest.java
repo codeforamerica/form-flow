@@ -14,13 +14,11 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.hibernate.validator.constraints.URL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,6 +34,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
+
+  public final String uuidPatternString = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
 
   @Override
   @BeforeEach
@@ -123,7 +123,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void fieldsStillHaveValuesWhenFieldValidationFailsInSubflow() throws Exception {
+  public void fieldsStillHaveValuesWhenFieldValidationFailsInSubflowNewIteration() throws Exception {
     var params = new HashMap<String, List<String>>();
     params.put("firstNameSubflow", List.of("tester"));
     params.put("textInputSubflow", List.of("text input value"));
@@ -159,7 +159,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     assertEquals("Select C", page.getSelectValue("selectInputSubflow"));
   }
 
-  public final String uuidPatternString = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
 
   @Test
   public void fieldsStillHaveValuesWhenFieldValidationFailsInSubflowPage2() throws Exception {
@@ -194,7 +193,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     paramsPage2.put("selectInputSubflowPage2", List.of("Select C"));
     paramsPage2.put("moneyInputSubflowPage2", List.of("-11"));  // bad data
     paramsPage2.put("phoneInputSubflowPage2", List.of("(413) 123-1234"));
-    paramsPage2.put("dateSubflowPage2Day", List.of("12"));
+    paramsPage2.put("dateSubflowPage2Day", List.of("35"));
     paramsPage2.put("dateSubflowPage2Month", List.of("12"));
     paramsPage2.put("dateSubflowPage2Year", List.of("2012"));
 
@@ -202,8 +201,18 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     int lastSlash = redirectedUrl.lastIndexOf('/');
     String pageNamePage2 = "subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1);
     postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
+
     var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash)));
+    assertTrue(page2.hasDateInputError());
+    assertTrue(page2.hasInputError("numberInputSubflowPage2"));
+    assertTrue(page2.hasInputError("moneyInputSubflowPage2"));
+    assertFalse(page2.hasInputError("phoneInputSubflow"));
 
-
+    assertEquals("text input value", page2.getInputValue("textInputSubflowPage2"));
+    assertEquals("area input value", page2.getTextAreaValue("areaInputSubflowPage2"));
+    assertEquals(List.of("Checkbox-A"), page2.getCheckboxSetValues("checkboxSetSubflowPage2"));
+    assertEquals(List.of("checkbox-value"), page2.getCheckboxSetValues("checkboxInputSubflowPage2"));
+    assertEquals("Radio B", page2.getRadioValue("radioInputSubflowPage2"));
+    assertEquals("Select C", page2.getSelectValue("selectInputSubflowPage2"));
   }
 }

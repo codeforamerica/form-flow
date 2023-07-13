@@ -229,9 +229,6 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
-    // subflow data will be already set in the "fieldData" field.  We keep "currentSubflowItem" for
-    // backwards compatability at this point
-    model.put("currentSubflowItem", model.get("fieldData"));
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
@@ -626,6 +623,8 @@ public class ScreenController extends FormFlowController {
         // this is a new subflow iteration, we have submission data, so share that
         model.put("fieldData", httpSession.getAttribute("formDataSubmission"));
       }
+      // We keep "currentSubflowItem" for backwards compatability at this point
+      model.put("currentSubflowItem", model.get("fieldData"));
     }
 
     return model;

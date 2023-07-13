@@ -46,6 +46,6 @@ flow:
 subflows:
   testSubflow:
     entryScreen: testEntryScreen
-    iterationStartScreen: testIterationStartScreen
+    iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
