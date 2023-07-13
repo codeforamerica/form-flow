@@ -19,11 +19,14 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -244,40 +247,46 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void multiFileEndpointShouldReturnZipOfUserFilesReturnedByTheCloudFileRepository() throws Exception {
       session.setAttribute("id", submission.getId());
-      byte[] firstTestFileBytes = "foo".getBytes();
-      byte[] secondTestFileBytes = "bar".getBytes();
-      byte[] thirdTestFileBytes = "baz".getBytes();
+      byte[] firstTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test.jpeg"));
+      byte[] secondTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test-platypus.gif"));
       long firstTestFileSize = firstTestFileBytes.length;
       long secondTestFileSize = secondTestFileBytes.length;
-      long thirdTestFileSize = thirdTestFileBytes.length;
       CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes);
       CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes);
-      CloudFile thirdTestcloudFile = new CloudFile(thirdTestFileSize, thirdTestFileBytes);
 
-      UserFile firstTestUserFile = UserFile.builder().originalName("testFileName").mimeType("image/jpeg")
+      UserFile firstTestUserFile = UserFile.builder().originalName("test.jpeg").mimeType("image/jpeg")
           .repositoryPath("testPath")
+          .filesize((float) firstTestFileSize)
           .submissionId(submission).build();
-      UserFile secondTestUserFile = UserFile.builder().originalName("testFileName2").mimeType("image/jpeg")
+      UserFile secondTestUserFile = UserFile.builder().originalName("test-platypus.gif").mimeType("image/gif")
           .repositoryPath("testPath2")
-          .submissionId(submission).build();
-      UserFile thirdTestUserFile = UserFile.builder().originalName("testFileName3").mimeType("image/jpeg")
-          .repositoryPath("testPath3")
+          .filesize((float) secondTestFileSize)
           .submissionId(submission).build();
 
-      List<UserFile> userFiles = Arrays.asList(firstTestUserFile, secondTestUserFile, thirdTestUserFile);
+      List<UserFile> userFiles = Arrays.asList(firstTestUserFile, secondTestUserFile);
       when(userFileRepositoryService.findAllBySubmissionId(submission)).thenReturn(userFiles);
+      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       when(cloudFileRepository.get("testPath")).thenReturn(firstTestcloudFile);
       when(cloudFileRepository.get("testPath2")).thenReturn(secondTestcloudFile);
-      when(cloudFileRepository.get("testPath3")).thenReturn(thirdTestcloudFile);
-      
+
       byte[] response = mockMvc.perform(
               MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
                   .session(session))
           .andExpect(status().isOk())
           .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-              "attachment; filename=\"" + submission.getId() + ".zip\""))
+              "attachment; filename=\"UserFiles-" + submission.getId() + ".zip\""))
           .andReturn().getResponse().getContentAsByteArray();
-      assertThat(Arrays.equals(testcloudFile.getFileBytes(), response)).isTrue();
+
+      byte[] testZipFile = Files.readAllBytes(Paths.get("src/test/resources/test-archive.zip"));
+
+      Map<String, byte[]> responseContents = getZipContentsMap(response);
+      Map<String, byte[]> testZipContents = getZipContentsMap(testZipFile);
+
+      assertThat(responseContents.keySet()).isEqualTo(testZipContents.keySet());
+
+      for (String name : responseContents.keySet()) {
+        assertThat(Arrays.equals(responseContents.get(name), testZipContents.get(name))).isTrue();
+      }
     }
   }
 }
