@@ -16,6 +16,7 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFileRepository;
+import formflow.library.upload.FileType;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.sql.Date;
 import java.time.Instant;
@@ -25,6 +26,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -98,6 +101,12 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     session.setAttribute("userFiles", testDzInstanceMap);
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
+  }
+
+  @EnumSource(FileType.class)
+  @ParameterizedTest
+  void fileUploadEndpointRejectsAnyUnsupportedFileType() {
+
   }
 
   @Nested
@@ -181,3 +190,5 @@ public class UploadControllerTest extends AbstractMockMvcTest {
     }
   }
 }
+
+//.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp
