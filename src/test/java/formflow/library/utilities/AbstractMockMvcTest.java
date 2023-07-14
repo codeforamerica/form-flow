@@ -186,11 +186,13 @@ public abstract class AbstractMockMvcTest {
 
       while ((entry = zis.getNextEntry()) != null) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
+        byte[] buffer;
+        long remaining = entry.getSize();
 
-        while ((len = zis.read(buffer)) > 0) {
-          outputStream.write(buffer, 0, len);
+        while (remaining > 0) {
+          buffer = zis.readNBytes((int) Math.min(1024, remaining));
+          outputStream.write(buffer);
+          remaining -= buffer.length;
         }
 
         contents.put(entry.getName(), outputStream.toByteArray());

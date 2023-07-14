@@ -247,14 +247,14 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void multiFileEndpointShouldReturnZipOfUserFilesReturnedByTheCloudFileRepository() throws Exception {
       session.setAttribute("id", submission.getId());
-      byte[] firstTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test.jpeg"));
+      byte[] firstTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test.png"));
       byte[] secondTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test-platypus.gif"));
       long firstTestFileSize = firstTestFileBytes.length;
       long secondTestFileSize = secondTestFileBytes.length;
       CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes);
       CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes);
 
-      UserFile firstTestUserFile = UserFile.builder().originalName("test.jpeg").mimeType("image/jpeg")
+      UserFile firstTestUserFile = UserFile.builder().originalName("test.png").mimeType("image/png")
           .repositoryPath("testPath")
           .filesize((float) firstTestFileSize)
           .submissionId(submission).build();
