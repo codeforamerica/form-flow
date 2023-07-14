@@ -247,9 +247,8 @@
       dictMaxFilesExceeded: [[#{upload-documents.error-maximum-number-of-files}]],
       dictInvalidFileType: [[#{upload-documents.error-invalid-file-type}]]
           + ' '
-          + [[${@environment.getProperty('form-flow.uploads.accepted-file-types')}]].toString().replaceAll(
-              ",", ", "),
-      acceptedFiles: [[${@environment.getProperty('form-flow.uploads.accepted-file-types')}]],
+          + [[${acceptedFileTypes}]],
+      acceptedFiles: [[${acceptedFileTypes}]],
       clickable: ".drag-and-drop-box",
       previewTemplate: `
             <div class="dz-preview dz-file-preview spacing-below-15">

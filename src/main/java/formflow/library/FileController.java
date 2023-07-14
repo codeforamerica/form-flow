@@ -5,8 +5,9 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.upload.CloudFile;
-import formflow.library.upload.CloudFileRepository;
+import formflow.library.file.FileTypeService;
+import formflow.library.file.CloudFile;
+import formflow.library.file.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,6 +46,7 @@ public class FileController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
 
   private final MessageSource messageSource;
+  private final FileTypeService fileTypeService;
 
   private final String SESSION_USERFILES_KEY = "userFiles";
 
@@ -52,11 +54,13 @@ public class FileController extends FormFlowController {
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      FileTypeService fileTypeService) {
     super(submissionRepositoryService);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
+    this.fileTypeService = fileTypeService;
   }
 
   /**
@@ -87,10 +91,16 @@ public class FileController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
+
+      if (!fileTypeService.isAcceptedMimeType(file)) {
+        String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
+        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
       if (fileExtension.equals("pdf")) {
-        try (PDDocument pdfFile = PDDocument.load(file.getInputStream())) {
+        try (PDDocument ignored = PDDocument.load(file.getInputStream())) {
         } catch (InvalidPasswordException e) {
           // TODO update when we add internationalization to use locale for message source
           String message = messageSource.getMessage("upload-documents.error-password-protected", null, null);

@@ -1,4 +1,4 @@
-package formflow.library.upload;
+package formflow.library.file;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;

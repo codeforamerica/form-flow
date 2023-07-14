@@ -1,4 +1,4 @@
-package formflow.library.upload;
+package formflow.library.file;
 
 import java.io.IOException;
 import org.springframework.web.multipart.MultipartFile;

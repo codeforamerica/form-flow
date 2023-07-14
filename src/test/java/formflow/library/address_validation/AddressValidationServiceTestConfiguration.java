@@ -1,7 +1,5 @@
 package formflow.library.address_validation;
 
-import formflow.library.controllers.ScreenControllerTest.AddressValidation;
-import formflow.library.framework.InputsTest.Address;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

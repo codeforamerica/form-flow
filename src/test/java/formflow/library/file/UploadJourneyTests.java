@@ -1,4 +1,4 @@
-package formflow.library.upload;
+package formflow.library.file;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -30,10 +30,9 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     // Extension list comes from application.yaml -- form-flow.uploads.accepted-file-types
     uploadFile("test-platypus.gif", "uploadTest");
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
-
         .isEqualTo(messageSource
             .getMessage("upload-documents.error-invalid-file-type", null, Locale.ENGLISH)
-            + " .jpeg, .fake, .heic, .tif, .tiff, .pdf");
+            + " .jpeg, .pdf");
     testPage.clickLink("remove");
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
 

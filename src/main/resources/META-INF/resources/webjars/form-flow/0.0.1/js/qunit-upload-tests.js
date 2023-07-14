@@ -5,7 +5,7 @@ QUnit.module('Dropzone', function () {
   QUnit.module('Configuration options', function () {
     QUnit.test('loads accepted files from application.yaml', assert => {
       assert.equal(window['myDropZoneuploadTest'].options.acceptedFiles,
-          ".jpeg, .fake, .heic, .tif, .tiff, .pdf");
+          ".jpeg, .pdf");
     });
 
     QUnit.test('loads max file size from application.yaml', assert => {
@@ -31,7 +31,7 @@ QUnit.module('Dropzone', function () {
           window['myDropZoneuploadTest'].addFile(heicFile);
           assert.equal(
               document.getElementsByClassName('text--error')[0].innerHTML,
-              "We are unable to process HEIC files. Please convert your file to a JPG or PNG and try again.")
+              "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .pdf")
         });
     QUnit.test('TIFF files throw an error even when allowed to be uploaded',
         assert => {
@@ -39,7 +39,7 @@ QUnit.module('Dropzone', function () {
           window['myDropZoneuploadTest'].addFile(tiffFile);
           assert.equal(
               document.getElementsByClassName('text--error')[0].innerHTML,
-              "We are unable to process TIFF files. Please convert your file to a JPG or PNG and try again.")
+              "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .pdf")
         });
   });
 });
