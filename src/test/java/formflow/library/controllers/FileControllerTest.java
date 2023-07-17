@@ -276,14 +276,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(cloudFileRepository.get("testPath")).thenReturn(firstTestcloudFile);
       when(cloudFileRepository.get("testPath2")).thenReturn(secondTestcloudFile);
 
-//      byte[] response = mockMvc.perform(
-//              MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
-//                  .session(session))
-//          .andExpect(status().isOk())
-//          .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-//              "attachment; filename=\"UserFiles-" + submission.getId() + ".zip\""))
-//          .andReturn().getResponse().getContentAsByteArray();
-
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
                   .session(session))
