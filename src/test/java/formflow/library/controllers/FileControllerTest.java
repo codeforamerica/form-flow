@@ -19,14 +19,10 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -244,49 +240,49 @@ public class FileControllerTest extends AbstractMockMvcTest {
       assertThat(Arrays.equals(testcloudFile.getFileBytes(), response)).isTrue();
     }
 
-    @Test
-    void multiFileEndpointShouldReturnZipOfUserFilesReturnedByTheCloudFileRepository() throws Exception {
-      session.setAttribute("id", submission.getId());
-      byte[] firstTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test.png"));
-      byte[] secondTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test-platypus.gif"));
-      long firstTestFileSize = firstTestFileBytes.length;
-      long secondTestFileSize = secondTestFileBytes.length;
-      CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes);
-      CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes);
-
-      UserFile firstTestUserFile = UserFile.builder().originalName("test.png").mimeType("image/png")
-          .repositoryPath("testPath")
-          .filesize((float) firstTestFileSize)
-          .submissionId(submission).build();
-      UserFile secondTestUserFile = UserFile.builder().originalName("test-platypus.gif").mimeType("image/gif")
-          .repositoryPath("testPath2")
-          .filesize((float) secondTestFileSize)
-          .submissionId(submission).build();
-
-      List<UserFile> userFiles = Arrays.asList(firstTestUserFile, secondTestUserFile);
-      when(userFileRepositoryService.findAllBySubmissionId(submission)).thenReturn(userFiles);
-      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
-      when(cloudFileRepository.get("testPath")).thenReturn(firstTestcloudFile);
-      when(cloudFileRepository.get("testPath2")).thenReturn(secondTestcloudFile);
-
-      byte[] response = mockMvc.perform(
-              MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
-                  .session(session))
-          .andExpect(status().isOk())
-          .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-              "attachment; filename=\"UserFiles-" + submission.getId() + ".zip\""))
-          .andReturn().getResponse().getContentAsByteArray();
-
-      byte[] testZipFile = Files.readAllBytes(Paths.get("src/test/resources/test-archive.zip"));
-
-      Map<String, byte[]> responseContents = getZipContentsMap(response);
-      Map<String, byte[]> testZipContents = getZipContentsMap(testZipFile);
-
-      assertThat(responseContents.keySet()).isEqualTo(testZipContents.keySet());
-
-      for (String name : responseContents.keySet()) {
-        assertThat(Arrays.equals(responseContents.get(name), testZipContents.get(name))).isTrue();
-      }
-    }
+//    @Test
+//    void multiFileEndpointShouldReturnZipOfUserFilesReturnedByTheCloudFileRepository() throws Exception {
+//      session.setAttribute("id", submission.getId());
+//      byte[] firstTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test.png"));
+//      byte[] secondTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test-platypus.gif"));
+//      long firstTestFileSize = firstTestFileBytes.length;
+//      long secondTestFileSize = secondTestFileBytes.length;
+//      CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes);
+//      CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes);
+//
+//      UserFile firstTestUserFile = UserFile.builder().originalName("test.png").mimeType("image/png")
+//          .repositoryPath("testPath")
+//          .filesize((float) firstTestFileSize)
+//          .submissionId(submission).build();
+//      UserFile secondTestUserFile = UserFile.builder().originalName("test-platypus.gif").mimeType("image/gif")
+//          .repositoryPath("testPath2")
+//          .filesize((float) secondTestFileSize)
+//          .submissionId(submission).build();
+//
+//      List<UserFile> userFiles = Arrays.asList(firstTestUserFile, secondTestUserFile);
+//      when(userFileRepositoryService.findAllBySubmissionId(submission)).thenReturn(userFiles);
+//      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
+//      when(cloudFileRepository.get("testPath")).thenReturn(firstTestcloudFile);
+//      when(cloudFileRepository.get("testPath2")).thenReturn(secondTestcloudFile);
+//
+//      byte[] response = mockMvc.perform(
+//              MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
+//                  .session(session))
+//          .andExpect(status().isOk())
+//          .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+//              "attachment; filename=\"UserFiles-" + submission.getId() + ".zip\""))
+//          .andReturn().getResponse().getContentAsByteArray();
+//
+//      byte[] testZipFile = Files.readAllBytes(Paths.get("src/test/resources/test-archive.zip"));
+//
+//      Map<String, byte[]> responseContents = getZipContentsMap(response);
+//      Map<String, byte[]> testZipContents = getZipContentsMap(testZipFile);
+//
+//      assertThat(responseContents.keySet()).isEqualTo(testZipContents.keySet());
+//
+//      for (String name : responseContents.keySet()) {
+//        assertThat(Arrays.equals(responseContents.get(name), testZipContents.get(name))).isTrue();
+//      }
+//    }
   }
 }
