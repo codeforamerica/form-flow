@@ -30,6 +30,12 @@ spring:
     password: postgres
     hikari:
       maximum-pool-size: 2
+  task:
+    execution:
+      pool:
+        max-size: 16
+        queue-capacity: 100
+        keep-alive: "10s"
   flyway:
     baselineOnMigrate: true
     clean-on-validation-error: true
