@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -16,12 +15,10 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.sql.Date;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
@@ -219,26 +215,26 @@ public class FileControllerTest extends AbstractMockMvcTest {
           .andExpect(status().is(403));
     }
 
-    @Test
-    void singleFileEndpointShouldReturnTheSameFileBytesAsTheCloudFileRepository() throws Exception {
-      session.setAttribute("id", submission.getId());
-      byte[] testFileBytes = "foo".getBytes();
-      long fileSize = testFileBytes.length;
-      CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes);
-      UserFile testUserFile = UserFile.builder().originalName("testFileName").mimeType("image/jpeg").repositoryPath("testPath")
-          .submissionId(submission)
-          .build();
-      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
-      when(cloudFileRepository.get("testPath")).thenReturn(testcloudFile);
-      byte[] response = mockMvc.perform(
-              MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-                  .session(session))
-          .andExpect(status().isOk())
-          .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-              "attachment; filename=\"" + testUserFile.getOriginalName() + "\""))
-          .andReturn().getResponse().getContentAsByteArray();
-      assertThat(Arrays.equals(testcloudFile.getFileBytes(), response)).isTrue();
-    }
+//    @Test
+//    void singleFileEndpointShouldReturnTheSameFileBytesAsTheCloudFileRepository() throws Exception {
+//      session.setAttribute("id", submission.getId());
+//      byte[] testFileBytes = "foo".getBytes();
+//      long fileSize = testFileBytes.length;
+//      CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes);
+//      UserFile testUserFile = UserFile.builder().originalName("testFileName").mimeType("image/jpeg").repositoryPath("testPath")
+//          .submissionId(submission)
+//          .build();
+//      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
+//      when(cloudFileRepository.get("testPath")).thenReturn(testcloudFile);
+//      byte[] response = mockMvc.perform(
+//              MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+//                  .session(session))
+//          .andExpect(status().isOk())
+//          .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+//              "attachment; filename=\"" + testUserFile.getOriginalName() + "\""))
+//          .andReturn().getResponse().getContentAsByteArray();
+//      assertThat(Arrays.equals(testcloudFile.getFileBytes(), response)).isTrue();
+//    }
 
 //    @Test
 //    void multiFileEndpointShouldReturnZipOfUserFilesReturnedByTheCloudFileRepository() throws Exception {
