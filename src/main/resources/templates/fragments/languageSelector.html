@@ -5,7 +5,7 @@
      th:with="
         lang=${#locale.toString()},
         appPropsLanguages=${#strings.replace(@environment.getProperty('form-flow.languages'), ' ', '')},
-        supportedLanguages=${appPropsLanguages != null ? appPropsLanguages.split(',') : 'default'},
+        supportedLanguages=${appPropsLanguages != null ? appPropsLanguages.split(',') : 'en'},
         useLinksForDesktopView=${#arrays.length(supportedLanguages) <= 3},
         buttonLabel=${
           #messages.msgOrNull('language-preferences.preview.first') != '' &&
@@ -43,6 +43,7 @@
   <nav th:aria-label="#{language-preferences.button}" class="translate-links"
        th:classappend="${useLinksForDesktopView ? 'use-links-for-desktop' : ''}">
     <a th:each="language : ${supportedLanguages}"
+       th:lang="${language}"
        th:text="${#messages.msg('language-preferences.link-text.' + language)}"
        th:href="|?lang=${language}|"></a>
   </nav>
