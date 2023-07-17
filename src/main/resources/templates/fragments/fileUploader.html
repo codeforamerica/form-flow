@@ -247,9 +247,9 @@
       dictMaxFilesExceeded: [[#{upload-documents.error-maximum-number-of-files}]],
       dictInvalidFileType: [[#{upload-documents.error-invalid-file-type}]]
           + ' '
-          + [[${T(formflow.library.utils.AcceptedFileTypeService).acceptedFileTypes()}]].toString().replaceAll(
+          + [[${T(formflow.library.upload.AcceptedFileTypeService).acceptedFileTypes()}]].toString().replaceAll(
               ",", ", "),
-      acceptedFiles: [[${T(formflow.library.utils.AcceptedFileTypeService).acceptedFileTypes()}]],
+      acceptedFiles: [[${T(formflow.library.upload.AcceptedFileTypeService).acceptedFileTypes()}]],
       clickable: ".drag-and-drop-box",
       previewTemplate: `
             <div class="dz-preview dz-file-preview spacing-below-15">

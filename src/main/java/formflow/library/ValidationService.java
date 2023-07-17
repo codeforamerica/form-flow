@@ -104,7 +104,6 @@ public class ValidationService {
         throw new RuntimeException(e);
       }
 
-      // TODO: this requires explicitly using annotations NotNull, NotEmpty, NotBlank in addition to other constraints. Is that desirable?
       if (Collections.disjoint(annotationNames, requiredAnnotationsList) && value.equals("")) {
         log.info("skipping validation - found empty input for non-required field");
         return;

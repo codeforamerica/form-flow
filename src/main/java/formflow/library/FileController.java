@@ -7,6 +7,7 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
+import formflow.library.upload.AcceptedFileTypeService;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -86,6 +87,9 @@ public class FileController extends FormFlowController {
         submission.setFlow(flow);
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
+      }
+      if (!AcceptedFileTypeService.isAcceptedMimeType(file)) {
+        return new ResponseEntity<>("Content type of the file does not match", HttpStatus.INTERNAL_SERVER_ERROR);
       }
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
