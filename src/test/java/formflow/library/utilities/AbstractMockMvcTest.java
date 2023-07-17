@@ -43,6 +43,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
@@ -213,6 +214,17 @@ public abstract class AbstractMockMvcTest {
     ).andExpect(redirectedUrl(redirectUrl));
   }
 
+  protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
+      Map<String, List<String>> params)
+      throws Exception {
+    return mockMvc.perform(
+        post(postUrl)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .params(new LinkedMultiValueMap<>(params))
+    ).andExpect(redirectedUrlPattern(redirectUrlPattern));
+  }
+
   protected void postExpectingNextPageElementText(String pageName,
       String inputName,
       String value,
@@ -316,7 +328,15 @@ public abstract class AbstractMockMvcTest {
     return postExpectingFailure(pageName, fixInputNamesForParams(Map.of(inputName, values)));
   }
 
-  protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params)
+  protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params) throws Exception {
+    return postExpectingFailure(pageName, params, pageName);
+  }
+
+  // we may not always go back to the page we started with.
+  // With subflows, we start with a post to 'someSubflowPage/new', but go back to the page without the '/new' in the case of
+  // validation errors
+  protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params,
+      String redirectUrl)
       throws Exception {
 
     String postUrl = getUrlForPageName(pageName);
@@ -325,7 +345,7 @@ public abstract class AbstractMockMvcTest {
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
-    ).andExpect(redirectedUrl(postUrl));
+    ).andExpect(redirectedUrl(getUrlForPageName(redirectUrl)));
   }
 
   protected ResultActions postExpectingFailures(String pageName, Map<String, String> params)
@@ -428,10 +448,12 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected String getUrlForPageName(String pageName, String subflow) {
+    // TODO - remove assumption that flow is named testFlow - may not always be
     return "/flow/testFlow/" + pageName + "/" + subflow;
   }
 
   protected String getUrlForPageName(String pageName) {
+    // TODO - remove assumption that flow is named testFlow - may not always be
     return "/flow/testFlow/" + pageName;
   }
 
@@ -484,6 +506,7 @@ public abstract class AbstractMockMvcTest {
 
   @NotNull
   protected ResultActions getPage(String pageName) throws Exception {
+    // TODO - remove assumption that flow is named testFlow - may not always be
     return mockMvc.perform(get("/flow/testFlow/" + pageName));
   }
 
@@ -505,6 +528,7 @@ public abstract class AbstractMockMvcTest {
 
   @NotNull
   private String followRedirectsForPageName(String currentPageName) throws Exception {
+    // TODO - remove assumption that flow is named testFlow - may not always be
     var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects

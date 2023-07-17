@@ -21,6 +21,10 @@ flow:
   subflowAddItem:
     subflow: testSubflow
     nextScreens:
+      - name: subflowAddItemPage2
+  subflowAddItemPage2:
+    subflow: testSubflow
+    nextScreens:
       - name: test
   test:
     nextScreens:
@@ -42,6 +46,6 @@ flow:
 subflows:
   testSubflow:
     entryScreen: testEntryScreen
-    iterationStartScreen: testIterationStartScreen
+    iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen

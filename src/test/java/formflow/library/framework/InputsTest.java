@@ -73,7 +73,7 @@ public class InputsTest extends AbstractMockMvcTest {
     List<String> removedHiddenCheckboxInput = checkboxInput.stream().filter(e -> !e.isEmpty()).toList();
 
     assertThat(inputsScreen.getInputValue("textInput")).isEqualTo(textInput);
-    assertThat(inputsScreen.getTextAreaAreaValue("areaInput")).isEqualTo(areaInput);
+    assertThat(inputsScreen.getTextAreaValue("areaInput")).isEqualTo(areaInput);
     assertThat(inputsScreen.getInputValue("dateMonth")).isEqualTo(dateMonth);
     assertThat(inputsScreen.getInputValue("dateDay")).isEqualTo(dateDay);
     assertThat(inputsScreen.getInputValue("dateYear")).isEqualTo(dateYear);
