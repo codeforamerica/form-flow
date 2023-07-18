@@ -36,6 +36,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
+/**
+ * A controller that manages the uploading, downloading, and deletion of files from an endpoint
+ */
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -59,6 +62,18 @@ public class FileController extends FormFlowController {
     this.messageSource = messageSource;
   }
 
+  /**
+   * File upload endpoint.
+   *
+   * @param file         A MultipartFile file
+   * @param flow         The current flow name, not null
+   * @param inputName    The current inputName
+   * @param thumbDataUrl The thumbnail URL generated from the upload
+   * @param httpSession  The current httpSession
+   * @return ON SUCCESS: A ResponseEntity with a status of (HttpStatus.OK), a * contentType of (MediaType.TEXT_PLAIN) and a
+   * body(newFileId.toString()).
+   * <p>ON FAILURE: A RepsonseEntity with an error message and a status code.</p>
+   */
   @PostMapping("/file-upload")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
@@ -139,6 +154,14 @@ public class FileController extends FormFlowController {
     }
   }
 
+  /**
+   * @param fileId               The UUID tied to an uploaded file
+   * @param returnPath           The path to the page that they came from
+   * @param dropZoneInstanceName The drop zone instance used to get the user file name
+   * @param httpSession          The current http session
+   * @return ON SUCCESS: Returns a RedirectView to the returnPath
+   * <p>ON FAILURE: Returns a RedirectView to the 'error' page</p>
+   */
   @PostMapping("/file-delete")
   RedirectView delete(
       @RequestParam("id") UUID fileId,
@@ -191,6 +214,14 @@ public class FileController extends FormFlowController {
     }
   }
 
+  /**
+   * @param httpSession  - The current httpsession
+   * @param submissionId - The submissionId of the file to be downloaded
+   * @param fileId       - The UUID of the file to be downloaded.
+   * @return ON SUCCESS: A ResponseEntity with a status of ok, a header, the contentType, the content size, and a responseBody
+   * that includes the file.
+   * <p>ON FAILURE: A ResponseEntity with a status of forbidden-403 or not found- 404</p>
+   */
   @GetMapping("/file-download/{submissionId}/{fileId}")
   public ResponseEntity<StreamingResponseBody> downloadSingleFile(
       HttpSession httpSession,
@@ -238,6 +269,13 @@ public class FileController extends FormFlowController {
         .body(responseBody);
   }
 
+  /**
+   * @param httpSession  The current httpsession.
+   * @param submissionId The submissionId of the all the files that you would like to download.
+   * @return ON SUCCESS: A ResponseEntity with a status of ok, a header, and a responseBody that a zip folder with all the files
+   * assoicated with a submission.
+   * <p>ON FAILURE: A ResponseEntity with a status of forbidden-403 or not found- 404</p>
+   */
   @GetMapping("/file-download/{submissionId}")
   ResponseEntity<StreamingResponseBody> downloadAllFiles(
       HttpSession httpSession,
