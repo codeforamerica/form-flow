@@ -711,6 +711,7 @@ body,
 
 .language-selector .translate-links {
   display: none;
+  line-height: 1;
 }
 
 .language-selector .translate-links a {
