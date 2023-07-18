@@ -75,7 +75,7 @@ dependencies {
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'com.mailgun:mailgun-java:1.0.8'
-    implementation 'com.google.crypto.tink:tink:1.9.0'
+    implementation 'com.google.crypto.tink:tink:1.10.0'
     implementation 'org.springframework.session:spring-session-jdbc'
 
     compileOnly 'org.projectlombok:lombok'
