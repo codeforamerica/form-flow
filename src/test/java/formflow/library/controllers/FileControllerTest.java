@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-conditional-navigation.yaml"})
 public class FileControllerTest extends AbstractMockMvcTest {
@@ -204,9 +205,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
           .andExpect(status().is(403));
     }
 
-    //Does sessionId match submissionId on the file
     @Test
-    void shouldReturnForbiddenIfSessionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
+    void shouldReturnForbiddenIfAFilesSessionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
       Submission differentSubmissionIdFromUserFile = Submission.builder().id(UUID.randomUUID()).build();
       session.setAttribute("id", submission.getId());
       UserFile userFile = UserFile.builder().submissionId(differentSubmissionIdFromUserFile)
@@ -220,9 +220,30 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForMultiFileEndpoint() throws Exception {
       session.setAttribute("id", UUID.randomUUID());
+      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
               .session(session))
           .andExpect(status().is(403));
+    }
+
+    @Test
+    void shouldReturnNotFoundIfSubmissionCanNotBeFoundForMultiFileEndpoint() throws Exception {
+      session.setAttribute("id", submission.getId());
+      UUID differentSubmissionId = UUID.randomUUID();
+      when(submissionRepositoryService.findById(differentSubmissionId)).thenReturn(Optional.ofNullable(null));
+      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
+              .session(session))
+          .andExpect(status().is(404));
+    }
+
+    @Test
+    void shouldReturnNotFoundIfSubmissionDoesNotContainAnyFiles() throws Exception {
+      session.setAttribute("id", submission.getId());
+      when(userFileRepositoryService.findAllBySubmissionId(submission)).thenReturn(Collections.emptyList());
+      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
+      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
+              .session(session))
+          .andExpect(status().is(404));
     }
 
     @Test
