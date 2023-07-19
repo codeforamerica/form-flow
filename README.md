@@ -47,6 +47,7 @@ Table of Contents
     * [PDF Generation](#pdf-generation)
     * [Sending Email](#sending-email)
         * [Mailgun](#mailgun)
+    * [Localization](#localization)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -2144,6 +2145,31 @@ error code and a corresponding error message as seen below.
 The error message thrown by mailgun is passed to the response object when an email fails. Common
 Mailgun error codes can be found
 [here](https://documentation.mailgun.com/en/latest/api-sending.html#error-codes).
+
+## Localization
+
+### Setting application properties
+
+Form flow library will read the languages set in an apps `application.properties`.
+
+```yaml
+# application.yaml
+form-flow:
+  languages: en, es
+```
+
+#### Language support
+
+TODO: talk about the language standard that's expected by Spring Boot
+
+### Supplying translation files
+
+Translation need to be added to `messages_xx.properties` files, where `xx` is the language the
+translations are for.
+
+### How Spring Boot handles localization
+
+### Mixpanel event from language selector
 
 # How to use
 
