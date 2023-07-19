@@ -11,28 +11,33 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-@ActiveProfiles("test")
-@SpringBootTest(properties = {"form-flow.uploads.accepted-file-types='.foo,.bar,.jpeg'"})
+//@TestPropertySource(properties = {"form-flow.uploads.accepted-file-types='.foo,.bar,.jpeg'"})
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 class AcceptedFileTypeUtilTest extends AbstractMockMvcTest {
 
   @Nested
+      // @TestPropertySource(properties = {"form-flow.uploads.accepted-file-types=.bmp,.fake"})
   class AcceptedFileTypeUtilsTestNoConfig {
 
     @Test
     void acceptedFileTypesShouldReturnTheDefaultIfNoFileTypesAreProvided() {
-      List<String> resultList = List.of(AcceptedFileTypeUtils.acceptedFileTypes().split(","));
-      List<String> expected = List.of(".jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp".split( ","));
+      AcceptedFileTypeUtils acceptedFileTypeUtils = new AcceptedFileTypeUtils();
 
-      assertThat(resultList.containsAll(expected));
+      List<String> expected = List.of(".jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp".split(","));
+
+      assertThat(acceptedFileTypeUtils.getAcceptableFileExts()).containsAll(expected);
     }
 
   }
 
   @Nested
+      // @TestPropertySource(properties = {"form-flow.uploads.accepted-file-types=.bmp,.fake"})
   class AcceptedFileTypeUtilsBadValues {
+
     @Test
     void acceptedFileTypesShouldReturnTheIntersectionOfDefaultTypesWithUserProvidedOnes() {
-      assertThat(AcceptedFileTypeUtils.acceptedFileTypes()).isEqualTo(".jpeg");
+      AcceptedFileTypeUtils acceptedFileTypeUtils = new AcceptedFileTypeUtils();
+      assertThat(acceptedFileTypeUtils.acceptedFileTypes()).isEqualTo(".jpeg");
     }
   }
 }
