@@ -2158,18 +2158,40 @@ form-flow:
   languages: en, es
 ```
 
-#### Language support
+Our language selector menu button will create links both inside of the button and nav links based on
+the value provided in `form-flow.languages`. If none is given, the default is: `en`.
 
-TODO: talk about the language standard that's expected by Spring Boot
+#### Language tag syntax
+
+Refer to
+the [language tag syntax](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang#language_tag_syntax)
+to see what language you want to support.
 
 ### Supplying translation files
 
-Translation need to be added to `messages_xx.properties` files, where `xx` is the language the
-translations are for.
+Translations need to be added to `messages_xx.properties` files in the `src/main/resources`
+directory, where `xx` is the language the translations are for.
+
+#### Messages in the library
+
+The library comes with [English](src/main/resources/messages-form-flow.properties)
+and [Spanish](src/main/resources/messages-form-flow_es.properties) messages. These load into the
+app messages and get override by message keys that exist in
+the [starter app repository](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources).
 
 ### How Spring Boot handles localization
 
+Spring boot uses
+a [locale change interceptor](https://www.baeldung.com/spring-boot-internationalization#localechangeinterceptor)
+to intercept a `lang` query parameter (by default) to then change the locale
+and [sets a cookie](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/i18n/CookieLocaleResolver.html)
+to remember the locale.
+
 ### Mixpanel event from language selector
+
+If your application is using mixpanel, and you want to keep track clicks into the language selector
+button, we send an event called `language-selector-click`
+in [our JavaScript](https://github.com/codeforamerica/form-flow/blob/9a1c6f7a25336e3f9660c2ad9efea013268c860f/src/main/resources/META-INF/resources/webjars/form-flow/0.0.1/js/formFlowLanguageSelector.js#L252).
 
 # How to use
 
