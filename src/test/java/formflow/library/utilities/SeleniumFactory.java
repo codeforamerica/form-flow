@@ -37,7 +37,8 @@ public class SeleniumFactory implements FactoryBean<RemoteWebDriver> {
     // once you have the version, you don't seem to need to specify it anymore.
     // (or maybe you can upgrade your driver outside of this)
     // WebDriverManager.chromedriver().driverVersion("111.0.5563.64").setup();
-    WebDriverManager.chromedriver().setup();
+    WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup();
+    //WebDriverManager.chromedriver().setup();
     ChromeOptions options = new ChromeOptions();
     HashMap<String, Object> chromePrefs = new HashMap<>();
     chromePrefs.put("download.default_directory", tempdir.toString());
