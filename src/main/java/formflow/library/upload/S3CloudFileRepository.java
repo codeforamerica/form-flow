@@ -89,7 +89,7 @@ public class S3CloudFileRepository implements CloudFileRepository {
       log.info("File {} successfully downloaded", filepath);
       return new CloudFile(fileSize, fileBytes);
     } catch (IOException e) {
-      log.error("Exception occurred while attempting to get file in S3 code: " + e.getMessage());
+      log.error("Exception occurred while attempting to get the file with path %s: " + e.getMessage(), filepath);
       throw new RuntimeException(e.getMessage());
     }
   }

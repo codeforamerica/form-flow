@@ -8,6 +8,15 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
@@ -18,20 +27,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-/**
- * A controller that manages the uploading, downloading, and deletion of files from an endpoint
- */
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -220,8 +224,11 @@ public class FileController extends FormFlowController {
       @PathVariable String fileId
   ) {
 
+    if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     Optional<UserFile> maybeFile = userFileRepositoryService.findById(UUID.fromString(fileId));
-    //We test whether a file was found in the db
     if (maybeFile.isEmpty()) {
       log.error(String.format("Could not find the file with id: %s.", fileId));
       return ResponseEntity.notFound().build();
@@ -229,13 +236,6 @@ public class FileController extends FormFlowController {
 
     UserFile file = maybeFile.get();
 
-    //we test whether the submissionId in the path matches the session id
-    if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
-
-    //Why does file.getSubmissionId() return a submission and not the submissionId.  This method call works
-    //but it is confusing
     if (!httpSession.getAttribute("id").toString().equals(file.getSubmissionId().getId().toString())) {
       log.error(String.format("Attempt to download file with submission ID %s but session ID %s does not match",
           file.getSubmissionId().getId(), httpSession.getAttribute("id")));
@@ -276,12 +276,6 @@ public class FileController extends FormFlowController {
       HttpSession httpSession,
       @PathVariable String submissionId
   ) {
-    Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
-    if (maybeSubmission.isEmpty()) {
-      log.error(String.format("The Submission %s was not found.", submissionId));
-      return ResponseEntity.notFound().build();
-    }
-    Submission submission = maybeSubmission.get();
 
     if (!httpSession.getAttribute("id").toString().equals(submissionId)) {
       log.error(
@@ -289,6 +283,13 @@ public class FileController extends FormFlowController {
               "id") + " does not match.");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+
+    Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
+    if (maybeSubmission.isEmpty()) {
+      log.error(String.format("The Submission %s was not found.", submissionId));
+      return ResponseEntity.notFound().build();
+    }
+    Submission submission = maybeSubmission.get();
 
     List<UserFile> userFiles = userFileRepositoryService.findAllBySubmissionId(submission);
 

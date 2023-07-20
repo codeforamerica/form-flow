@@ -118,7 +118,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @BeforeEach
     void setUp() {
-      // reset submission.
       UUID submissionUUID_1 = UUID.randomUUID();
       UUID submissionUUID_2 = UUID.randomUUID();
       submission = Submission.builder().id(submissionUUID_1).build();
@@ -206,7 +205,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     }
 
     @Test
-    void shouldReturnForbiddenIfAFilesSessionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
+    void shouldReturnForbiddenIfAFilesSubmissionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
       Submission differentSubmissionIdFromUserFile = Submission.builder().id(UUID.randomUUID()).build();
       session.setAttribute("id", submission.getId());
       UserFile userFile = UserFile.builder().submissionId(differentSubmissionIdFromUserFile)
@@ -230,7 +229,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     void shouldReturnNotFoundIfSubmissionCanNotBeFoundForMultiFileEndpoint() throws Exception {
       session.setAttribute("id", submission.getId());
       UUID differentSubmissionId = UUID.randomUUID();
-      when(submissionRepositoryService.findById(differentSubmissionId)).thenReturn(Optional.ofNullable(null));
+      when(submissionRepositoryService.findById(differentSubmissionId)).thenReturn(Optional.empty());
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
               .session(session))
           .andExpect(status().is(404));
@@ -242,6 +241,15 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findAllBySubmissionId(submission)).thenReturn(Collections.emptyList());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
+              .session(session))
+          .andExpect(status().is(404));
+    }
+
+    @Test
+    void singleFileEndpointShouldReturnNotFoundIfNoUserFileIsFoundForAGivenFileId() throws Exception {
+      session.setAttribute("id", submission.getId());
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.empty());
+      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
               .session(session))
           .andExpect(status().is(404));
     }
