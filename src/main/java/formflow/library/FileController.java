@@ -7,7 +7,7 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
-import formflow.library.upload.AcceptedFileTypeService;
+import formflow.library.utils.AcceptedFileTypeUtils;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -80,6 +80,7 @@ public class FileController extends FormFlowController {
       @RequestParam("thumbDataURL") String thumbDataUrl,
       HttpSession httpSession
   ) {
+    AcceptedFileTypeUtils acceptedFileTypeUtils = new AcceptedFileTypeUtils();
     try {
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
@@ -88,9 +89,12 @@ public class FileController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-      if (!AcceptedFileTypeService.isAcceptedMimeType(file)) {
-        return new ResponseEntity<>("Content type of the file does not match", HttpStatus.INTERNAL_SERVER_ERROR);
+
+      if (!acceptedFileTypeUtils.isAcceptedMimeType(file)) {
+        String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
+        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
+
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
       if (fileExtension.equals("pdf")) {
