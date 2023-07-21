@@ -17,6 +17,12 @@ public class NoOpCloudFileRepository implements CloudFileRepository {
   }
 
   @Override
+  public CloudFile get(String filepath) {
+    log.info("Pretending to get file {}", filepath);
+    return null;
+  }
+
+  @Override
   public void delete(String filepath) {
     log.info("Pretending to delete file from s3: {}", filepath);
   }

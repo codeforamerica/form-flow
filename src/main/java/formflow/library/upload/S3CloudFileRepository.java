@@ -9,9 +9,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.util.IOUtils;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +71,25 @@ public class S3CloudFileRepository implements CloudFileRepository {
       throw new RuntimeException(e.getErrorMessage());
     } catch (InterruptedException | IOException e) {
       log.error("Exception occurred in S3 code: " + e.getMessage());
+      throw new RuntimeException(e.getMessage());
+    }
+  }
+
+  public CloudFile get(String filepath) {
+    try {
+      log.info("Getting file at filepath {} from S3", filepath);
+      S3Object s3Object = s3Client.getObject(bucketName, filepath);
+      S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      IOUtils.copy(inputStream, outputStream);
+      byte[] fileBytes = outputStream.toByteArray();
+      long fileSize = fileBytes.length;
+
+      log.info("File {} successfully downloaded", filepath);
+      return new CloudFile(fileSize, fileBytes);
+    } catch (IOException e) {
+      log.error("Exception occurred while attempting to get the file with path %s: " + e.getMessage(), filepath);
       throw new RuntimeException(e.getMessage());
     }
   }

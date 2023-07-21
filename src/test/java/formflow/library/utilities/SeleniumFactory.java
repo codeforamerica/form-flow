@@ -36,7 +36,6 @@ public class SeleniumFactory implements FactoryBean<RemoteWebDriver> {
     // Warning: you may need this line to get a later version of the chromedriver.
     // once you have the version, you don't seem to need to specify it anymore.
     // (or maybe you can upgrade your driver outside of this)
-    // WebDriverManager.chromedriver().driverVersion("111.0.5563.64").setup();
     WebDriverManager.chromedriver().setup();
     ChromeOptions options = new ChromeOptions();
     HashMap<String, Object> chromePrefs = new HashMap<>();

@@ -5,51 +5,71 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.upload.CloudFile;
 import formflow.library.upload.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @EnableAutoConfiguration
 @Slf4j
-public class UploadController extends FormFlowController {
+public class FileController extends FormFlowController {
 
-  private final UserFileRepositoryService uploadedFileRepositoryService;
+  private final UserFileRepositoryService userFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
 
   private final MessageSource messageSource;
 
   private final String SESSION_USERFILES_KEY = "userFiles";
 
-  public UploadController(
+  public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
       MessageSource messageSource) {
     super(submissionRepositoryService);
-    this.uploadedFileRepositoryService = userFileRepositoryService;
+    this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
   }
 
+  /**
+   * File upload endpoint.
+   *
+   * @param file         A MultipartFile file
+   * @param flow         The current flow name
+   * @param inputName    The current inputName
+   * @param thumbDataUrl The thumbnail URL generated from the upload
+   * @param httpSession  The current HTTP session
+   * @return ON SUCCESS: ResponseEntity with a body containing the id of a file. body.
+   * <p>ON FAILURE: RepsonseEntity with an error message and a status code.</p>
+   */
   @PostMapping("/file-upload")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
@@ -87,13 +107,13 @@ public class UploadController extends FormFlowController {
       cloudFileRepository.upload(uploadLocation, file);
 
       UserFile uploadedFile = UserFile.builder()
-          .submission_id(submission)
+          .submission(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
           .mimeType(file.getContentType()).build();
 
-      UUID newFileId = uploadedFileRepositoryService.save(uploadedFile);
+      UUID newFileId = userFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
       //TODO: change userFiles special string to constant to be referenced in thymeleaf
@@ -130,6 +150,14 @@ public class UploadController extends FormFlowController {
     }
   }
 
+  /**
+   * @param fileId               The id of an uploaded file that should be deleted
+   * @param returnPath           The path to the page that they came from
+   * @param dropZoneInstanceName The drop zone instance used to get the user file name
+   * @param httpSession          The current HTTP session
+   * @return ON SUCCESS: Returns a RedirectView to the returnPath
+   * <p>ON FAILURE: Returns a RedirectView to the 'error' page</p>
+   */
   @PostMapping("/file-delete")
   RedirectView delete(
       @RequestParam("id") UUID fileId,
@@ -144,26 +172,26 @@ public class UploadController extends FormFlowController {
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
       if (maybeSubmission.isEmpty()) {
-        log.error(String.format("Session %d does not exist", submissionId));
+        log.error(String.format("Submission %s does not exist", submissionId.toString()));
         return new RedirectView("/error");
       }
 
-      Optional<UserFile> maybeFile = uploadedFileRepositoryService.findById(fileId);
+      Optional<UserFile> maybeFile = userFileRepositoryService.findById(fileId);
       if (maybeFile.isEmpty()) {
         log.error(String.format("File with id %s may have already been deleted", fileId));
         return new RedirectView("/error");
       }
 
       UserFile file = maybeFile.get();
-      if (!submissionId.equals(file.getSubmission_id().getId())) {
-        log.error(String.format("Submission %d does not match file %s's submission id %d", submissionId, fileId,
-            file.getSubmission_id().getId()));
+      if (!submissionId.equals(file.getSubmission().getId())) {
+        log.error(String.format("Submission %s does not match file %s's submission id %s", submissionId, fileId,
+            file.getSubmission().getId()));
         return new RedirectView("/error");
       }
 
       log.info("Delete file {} from cloud storage", fileId);
       cloudFileRepository.delete(file.getRepositoryPath());
-      uploadedFileRepositoryService.deleteById(file.getFile_id());
+      userFileRepositoryService.deleteById(file.getFileId());
       HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
           (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
       HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
@@ -180,5 +208,121 @@ public class UploadController extends FormFlowController {
       log.error("Error occurred while deleting file " + e.getLocalizedMessage());
       return new RedirectView("/error");
     }
+  }
+
+  /**
+   * @param httpSession  The current HTTP session
+   * @param submissionId The submissionId of the file to be downloaded
+   * @param fileId       The UUID of the file to be downloaded.
+   * @return ON SUCCESS: ResponseEntity with a response body that includes the file.
+   * <p>ON FAILURE: A ResponseEntity returns an HTTP error code</p>
+   */
+  @GetMapping("/file-download/{submissionId}/{fileId}")
+  public ResponseEntity<StreamingResponseBody> downloadSingleFile(
+      HttpSession httpSession,
+      @PathVariable String submissionId,
+      @PathVariable String fileId
+  ) {
+
+    if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    Optional<UserFile> maybeFile = userFileRepositoryService.findById(UUID.fromString(fileId));
+    if (maybeFile.isEmpty()) {
+      log.error(String.format("Could not find the file with id: %s.", fileId));
+      return ResponseEntity.notFound().build();
+    }
+
+    UserFile file = maybeFile.get();
+
+    if (!httpSession.getAttribute("id").toString().equals(file.getSubmission().getId().toString())) {
+      log.error(String.format("Attempt to download file with submission ID %s but session ID %s does not match",
+          file.getSubmission().getId(), httpSession.getAttribute("id")));
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    String repositoryPath = file.getRepositoryPath();
+    String filename = file.getOriginalName();
+    String contentType = file.getMimeType();
+
+    CloudFile cloudFile = cloudFileRepository.get(repositoryPath);
+    byte[] fileData = cloudFile.getFileBytes();
+    long fileSize = cloudFile.getFileSize();
+
+    StreamingResponseBody responseBody = outputStream -> {
+      try {
+        outputStream.write(fileData);
+      } catch (IOException e) {
+        log.error("Error occurred while downloading file " + e.getMessage());
+      }
+    };
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+        .contentType(MediaType.parseMediaType(contentType))
+        .contentLength(fileSize)
+        .body(responseBody);
+  }
+
+  /**
+   * @param httpSession  The current HTTP session.
+   * @param submissionId The submissionId of the all the files that you would like to download.
+   * @return ON SUCCESS: ResponseEntity with a zip file containing all the files in a submission.
+   * <p>ON FAILURE: ResponseEntity with a HTTP error message</p>
+   */
+  @GetMapping("/file-download/{submissionId}")
+  ResponseEntity<StreamingResponseBody> downloadAllFiles(
+      HttpSession httpSession,
+      @PathVariable String submissionId
+  ) {
+
+    if (!httpSession.getAttribute("id").toString().equals(submissionId)) {
+      log.error(
+          "Attempted to download files belonging to submission " + submissionId + " but session id " + httpSession.getAttribute(
+              "id") + " does not match.");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
+    if (maybeSubmission.isEmpty()) {
+      log.error(String.format("The Submission %s was not found.", submissionId));
+      return ResponseEntity.notFound().build();
+    }
+    Submission submission = maybeSubmission.get();
+
+    List<UserFile> userFiles = userFileRepositoryService.findAllBySubmissionId(submission);
+
+    if (userFiles.isEmpty()) {
+      log.error("No files belonging to submission " + submissionId + " were found.");
+      return ResponseEntity.notFound().build();
+    }
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+      for (UserFile userFile : userFiles) {
+        ZipEntry fileEntry = new ZipEntry(userFile.getOriginalName());
+        fileEntry.setSize(userFile.getFilesize().longValue());
+        zos.putNextEntry(fileEntry);
+
+        CloudFile cloudFile = cloudFileRepository.get(userFile.getRepositoryPath());
+        byte[] fileBytes = cloudFile.getFileBytes();
+        zos.write(fileBytes);
+        zos.closeEntry();
+      }
+    } catch (IOException e) {
+      log.error("Error occurred while downloading file " + e.getMessage());
+      return ResponseEntity.internalServerError().build();
+    }
+
+    StreamingResponseBody responseBody = outputStream -> {
+      baos.writeTo(outputStream);
+      baos.close();
+    };
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
+        .body(responseBody);
+
   }
 }

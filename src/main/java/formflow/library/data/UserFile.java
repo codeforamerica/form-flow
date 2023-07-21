@@ -43,11 +43,11 @@ public class UserFile {
   @GeneratedValue
   //@Type(type = "org.hibernate.type.UUIDCharType")
   //@Type(type = "pg-uuid")
-  private UUID file_id;
+  private UUID fileId;
 
   @ManyToOne
   @JoinColumn(name = "submission_id")
-  private Submission submission_id;
+  private Submission submission;
 
   @CreationTimestamp
   @Temporal(TIMESTAMP)
@@ -75,7 +75,7 @@ public class UserFile {
       return false;
     }
     UserFile userFile = (UserFile) o;
-    return file_id != null && Objects.equals(file_id, userFile.file_id);
+    return fileId != null && Objects.equals(fileId, userFile.fileId);
   }
 
   @Override

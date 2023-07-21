@@ -40,6 +40,9 @@ Table of Contents
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
+    * [Document Download](#document-download)
+        * [Downloading individual files](#downloading-individual-files)
+        * [Downloading all files](#downloading-all-files)
     * [Address Validation](#address-validation)
     * [PDF Generation](#pdf-generation)
     * [Sending Email](#sending-email)
@@ -73,7 +76,7 @@ Table of Contents
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
-A Spring Boot Java library that provide a framework for developing *form-flow* based applications.
+A Spring Boot Java library that provide a framework for developing **form flow** based applications.
 The intention is to speed up the creation of web applications that are a series of forms that
 collect input from users.
 
@@ -244,24 +247,37 @@ class Submission {
 
   @Id
   @GeneratedValue
-  private Long id;
+  private UUID id;
 
+  @Column(name = "flow")
   private String flow;
+
+  @Type(JsonType.class)
+  @Column(name = "input_data", columnDefinition = "jsonb")
+  private Map<String, Object> inputData;
+
+  @Type(JsonType.class)
+  @Column(name = "url_params", columnDefinition = "jsonb")
+  private Map<String, String> urlParams;
 
   @CreationTimestamp
   @Temporal(TIMESTAMP)
-  private Timestamp createdAt;
+  @Column(name = "created_at")
+  private Date createdAt;
 
   @UpdateTimestamp
   @Temporal(TIMESTAMP)
-  private Timestamp updatedAt;
+  @Column(name = "updated_at")
+  private Date updatedAt;
 
   @Temporal(TIMESTAMP)
-  private Timestamp submittedAt;
+  @Column(name = "submitted_at")
+  private Date submittedAt;
 
-  @Type(JsonType.class)
-  private Map<String, String> inputData = new HashMap<>();
-
+  public Submission() {
+    inputData = new HashMap<>();
+    urlParams = new HashMap<>();
+  }
 }
 ```
 
@@ -272,7 +288,7 @@ have access to it.
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
-form-flow configuration file. They are generally used to help determine template or page flow.
+form flow configuration file. They are generally used to help determine template or page flow.
 
 Conditions are defined in Java and are objects that implement the `Condition`
 [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Condition.java)
@@ -949,7 +965,7 @@ The Yes or No input has an optional but recommended `ariaDescribe` parameter whi
 value
 of the HTML ID of the element that describes the input. Most often this is `header` which is the
 default
-ID of page headers in the form-flow library.
+ID of page headers in the form flow library.
 
 A convenience live template for yes or no inputs is provided through `cfa:inputYesOrNo`.
 
@@ -1376,9 +1392,36 @@ bucket. This will automatically delete files in your bucket that are older than 
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
+## Document Download
+
+Form flow library allows users to either:
+
+1. Download individual files
+2. Download a zipped archive with all the files associated with a submission.
+
+In order to download from these endpoints, the HTTP session must have an attribute of "id" that
+matches
+the submission's UUID.
+
+### Downloading individual files
+
+To download individual files a user can use the single-file download
+endpoint: `/file-download/{submissionId}/{fileId}`.  
+The `submissionId` must be included in the session as an attribute and the `fileId` must be found in
+the `user_files` table in order for the file to be retrieved.
+
+### Downloading all files
+
+In order to download all the files associated with a submission a user needs to use the download-all
+endpoint:  `/file-download/{submissionId}`. The download-all endpoint requires that the `id`
+attribute for the HTTP session matches the `submissionId` for the group of files in the submission
+that
+you would like to download. When you use the download-all endpoint, every file in the `user_files`
+table associated with a submission are zipped together and downloaded.
+
 ## Address Validation
 
-Form-flow library will support address validation through [Smarty](https://www.smarty.com/).
+Form flow library will support address validation through [Smarty](https://www.smarty.com/).
 
 ### Smarty
 
@@ -1392,7 +1435,7 @@ and make note of your `auth-id` and `auth-token`. You will need these to configu
 
 You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
 the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
-file in the starter app repo has an example for creating the `.env` for a form-flow application.
+file in the starter app repo has an example for creating the `.env` for a form flow application.
 You will also need to add the following to your `application.yaml` file:
 
 ```yaml
@@ -1912,7 +1955,7 @@ the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 ## Sending Email
 
-Form-flow library(FFL) is using [Mailgun](#mailgun) as its default email service provider. If you
+Form flow library(FFL) is using [Mailgun](#mailgun) as its default email service provider. If you
 would like to use an alternative email service, then you have two choices:
 
 1. Build a custom email client service that does not implement the EmailClient interface.
@@ -1992,7 +2035,7 @@ Each email message can also include these fields:
   connection.  `requireTls` is set to `true` by default. SNE's can call `setRequireTls()`, of
   the `MailgunEmailClient` class. Passing `false` as an argument to the `setRequireTls()` will turn
   off `requireTls` for emails.
-  
+
 | Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
 |-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
 | subject         | String       | *              | The subject of an email                                     |            |
@@ -2028,7 +2071,7 @@ You can either analyze the response or exit the action after emails have been se
 ##### How to send an email
 
 To pass an email message to the email service, first you need to import the MailgunEmailClient from
-the form-flow library using:
+the form flow library using:
 
 ```java 
 import formflow.library.email.MailgunEmailClient;
@@ -2059,7 +2102,7 @@ arguments. SendEmail is overloaded allowing it to be called in three ways:
 3. `sendEmail( String subject, String recipientEmail, String emailBody, List<String> emailsToCC,
    List<String> emailsToBCC, List<File> attachments, boolean requireTls)`
 
-Below is and example of a sendEmail() call being made by an application using the form-flow library.
+Below is and example of a sendEmail() call being made by an application using the form flow library.
 Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
@@ -2108,14 +2151,14 @@ Mailgun error codes can be found
 
 ### Environment Variables
 
-When configuring your application, the form-flow library will expect to find your secret information
+When configuring your application, the form flow library will expect to find your secret information
 in the environment. One way to do this is by creating an `.env` file that is a copy of
 this [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env). The
 sample file has a detailed description of information that would be expected in the setup.
 
 From there you can add your information and source the file into your environment:
 `source .env`. Now the information will be loaded into your environment and available to the
-form-flow library.
+form flow library.
 
 You can also tell IntelliJ to load environment information from this file, too, by using
 the [Env File Plugin](https://plugins.jetbrains.com/plugin/7861-envfile/).
@@ -2499,4 +2542,4 @@ or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake
 
 ## Maintainer information
 
-This form-flow library was created and is maintained by the Platform team at Code for America.
+This form flow library was created and is maintained by the Platform team at Code for America.

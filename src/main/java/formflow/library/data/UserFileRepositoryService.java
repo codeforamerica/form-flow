@@ -1,6 +1,7 @@
 package formflow.library.data;
 
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class UserFileRepositoryService {
    * @return UUID of the file
    */
   public UUID save(UserFile userFile) {
-    return repository.save(userFile).getFile_id();
+    return repository.save(userFile).getFileId();
   }
 
   /**
@@ -48,5 +49,9 @@ public class UserFileRepositoryService {
   public void deleteById(UUID id) {
     log.info(String.format("Deleting file with id: '%s'", id));
     repository.deleteById(id);
+  }
+
+  public List<UserFile> findAllBySubmissionId(Submission submission) {
+    return repository.findBySubmissionId(submission);
   }
 }
