@@ -121,7 +121,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       UUID submissionUUID_1 = UUID.randomUUID();
       UUID submissionUUID_2 = UUID.randomUUID();
       submission = Submission.builder().id(submissionUUID_1).build();
-      UserFile testUserFile = UserFile.builder().submissionId(submission).build();
+      UserFile testUserFile = UserFile.builder().submission(submission).build();
       when(submissionRepositoryService.findById(submissionUUID_1)).thenReturn(Optional.ofNullable(submission));
       when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
@@ -197,7 +197,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForSingleFileEndpoint() throws Exception {
       session.setAttribute("id", UUID.randomUUID());
-      UserFile userFile = UserFile.builder().submissionId(submission).build();
+      UserFile userFile = UserFile.builder().submission(submission).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
               .session(session))
@@ -208,7 +208,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     void shouldReturnForbiddenIfAFilesSubmissionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
       Submission differentSubmissionIdFromUserFile = Submission.builder().id(UUID.randomUUID()).build();
       session.setAttribute("id", submission.getId());
-      UserFile userFile = UserFile.builder().submissionId(differentSubmissionIdFromUserFile)
+      UserFile userFile = UserFile.builder().submission(differentSubmissionIdFromUserFile)
           .fileId(fileId).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
@@ -261,7 +261,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       long fileSize = testFileBytes.length;
       CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes);
       UserFile testUserFile = UserFile.builder().originalName("testFileName").mimeType("image/jpeg").repositoryPath("testPath")
-          .submissionId(submission)
+          .submission(submission)
           .build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       when(cloudFileRepository.get("testPath")).thenReturn(testcloudFile);
@@ -293,11 +293,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
       UserFile firstTestUserFile = UserFile.builder().originalName("test.png").mimeType("image/png")
           .repositoryPath("testPath")
           .filesize((float) firstTestFileSize)
-          .submissionId(submission).build();
+          .submission(submission).build();
       UserFile secondTestUserFile = UserFile.builder().originalName("test-platypus.gif").mimeType("image/gif")
           .repositoryPath("testPath2")
           .filesize((float) secondTestFileSize)
-          .submissionId(submission).build();
+          .submission(submission).build();
 
       List<UserFile> userFiles = Arrays.asList(firstTestUserFile, secondTestUserFile);
       when(userFileRepositoryService.findAllBySubmissionId(submission)).thenReturn(userFiles);
