@@ -2169,15 +2169,30 @@ to see what language you want to support.
 
 ### Supplying translation files
 
-Translations need to be added to `messages_xx.properties` files in the `src/main/resources`
+Translations need to be added to `messages_xx.properties` files in the
+applications `src/main/resources`
 directory, where `xx` is the language the translations are for.
 
 #### Messages in the library
 
 The library comes with [English](src/main/resources/messages-form-flow.properties)
-and [Spanish](src/main/resources/messages-form-flow_es.properties) messages. These load into the
-app messages and get override by message keys that exist in
-the [starter app repository](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources).
+and [Spanish](src/main/resources/messages-form-flow_es.properties) messages. These are loaded into
+the application's messages and can get overridden by message keys that exist in the
+[application's message files](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources).
+
+To override a message from the library, use the same key in each of your messages files in your
+application.
+
+#### Using Tranifex
+
+##### File encoding in your application
+
+TODO: Mentioning that the message files are encoded for ISO-8859 (rather than the Spring Boot
+default UTF-8), in order to support Transifex
+
+##### Connect to Tranifex
+
+TODO: Making it clear which files they need to point Transifex too
 
 ### How Spring Boot handles localization
 
@@ -2189,9 +2204,12 @@ to remember the locale.
 
 ### Mixpanel event from language selector
 
-If your application is using mixpanel, and you want to keep track clicks into the language selector
+If your application is using [Mixpanel](https://mixpanel.com/), and you want to keep track clicks
+into the language selector
 button, we send an event called `language-selector-click`
 in [our JavaScript](https://github.com/codeforamerica/form-flow/blob/9a1c6f7a25336e3f9660c2ad9efea013268c860f/src/main/resources/META-INF/resources/webjars/form-flow/0.0.1/js/formFlowLanguageSelector.js#L252).
+
+We send the whole url to Mixpanel, including any query parameters, such as `lang`.
 
 # How to use
 
