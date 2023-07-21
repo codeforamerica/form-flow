@@ -53,7 +53,8 @@
   </div>
   <input type="hidden" th:name="${inputName}">
   <script src="/webjars/dropzone/5.9.3/dist/min/dropzone.min.js"></script>
-  <script th:inline="javascript">
+  <script th:inline="javascript"
+          th:with="acceptedFileTypeUtils=${T(formflow.library.utils.AcceptedFileTypeUtils).create()}">
     Dropzone.autoDiscover = false;
     window.dropzonePrefix = 'myDropZone';
     window['documentIcon'
@@ -247,9 +248,9 @@
       dictMaxFilesExceeded: [[#{upload-documents.error-maximum-number-of-files}]],
       dictInvalidFileType: [[#{upload-documents.error-invalid-file-type}]]
           + ' '
-          + [[${T(formflow.library.utils.AcceptedFileTypeUtils).acceptedFileTypes()}]].toString().replaceAll(
+          + [[${acceptedFileTypeUtils.acceptedFileTypes()}]].toString().replaceAll(
               ",", ", "),
-      acceptedFiles: [[${T(formflow.library.utils.AcceptedFileTypeUtils).acceptedFileTypes()}]],
+      acceptedFiles: [[${acceptedFileTypeUtils.acceptedFileTypes()}]],
       clickable: ".drag-and-drop-box",
       previewTemplate: `
             <div class="dz-preview dz-file-preview spacing-below-15">

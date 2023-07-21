@@ -60,6 +60,10 @@ public class AcceptedFileTypeUtils {
     log.info(String.format("Files accepted by the server: %s", ACCEPTED_FILE_EXTS.stream().collect(Collectors.joining(","))));
   }
 
+  public static AcceptedFileTypeUtils create() {
+    return new AcceptedFileTypeUtils();
+  }
+
   public List<String> getAcceptableMimeTypes() {
     return ACCEPTED_MIME_TYPES;
   }
