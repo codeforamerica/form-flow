@@ -47,7 +47,7 @@ public class UserFile {
 
   @ManyToOne
   @JoinColumn(name = "submission_id")
-  private Submission submissionId;
+  private Submission submission;
 
   @CreationTimestamp
   @Temporal(TIMESTAMP)

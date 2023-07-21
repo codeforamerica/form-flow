@@ -107,7 +107,7 @@ public class FileController extends FormFlowController {
       cloudFileRepository.upload(uploadLocation, file);
 
       UserFile uploadedFile = UserFile.builder()
-          .submissionId(submission)
+          .submission(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
@@ -183,9 +183,9 @@ public class FileController extends FormFlowController {
       }
 
       UserFile file = maybeFile.get();
-      if (!submissionId.equals(file.getSubmissionId().getId())) {
+      if (!submissionId.equals(file.getSubmission().getId())) {
         log.error(String.format("Submission %s does not match file %s's submission id %s", submissionId, fileId,
-            file.getSubmissionId().getId()));
+            file.getSubmission().getId()));
         return new RedirectView("/error");
       }
 
@@ -236,9 +236,9 @@ public class FileController extends FormFlowController {
 
     UserFile file = maybeFile.get();
 
-    if (!httpSession.getAttribute("id").toString().equals(file.getSubmissionId().getId().toString())) {
+    if (!httpSession.getAttribute("id").toString().equals(file.getSubmission().getId().toString())) {
       log.error(String.format("Attempt to download file with submission ID %s but session ID %s does not match",
-          file.getSubmissionId().getId(), httpSession.getAttribute("id")));
+          file.getSubmission().getId(), httpSession.getAttribute("id")));
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
