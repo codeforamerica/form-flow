@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
-public class AcceptedFileTypeUtils {
+@Component
+public class AcceptedFileTypeService {
 
   private final Map<String, String> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
       Map.entry(".bmp", "image/bmp"),
@@ -31,11 +33,11 @@ public class AcceptedFileTypeUtils {
 
   private final List<String> ACCEPTED_FILE_EXTS;
 
-  @Value("${form-flow.uploads.accepted-file-types:''}")
   private String userProvidedFileTypes;
 
-  public AcceptedFileTypeUtils() {
-
+  public AcceptedFileTypeService(
+      @Value("${form-flow.uploads.accepted-file-types:''}") String userProvidedFileTypes) {
+    this.userProvidedFileTypes = userProvidedFileTypes;
     List<String> userFileExts;
     List<String> serverFileExts = FILE_EXT_MIME_TYPE_MAP.keySet().stream().toList();
 
@@ -46,22 +48,18 @@ public class AcceptedFileTypeUtils {
     }
 
     ACCEPTED_FILE_EXTS = userFileExts.stream()
-        .filter(fileExt -> serverFileExts.contains(fileExt))
+        .filter(serverFileExts::contains)
         .sorted()
         .toList();
 
     ACCEPTED_MIME_TYPES = ACCEPTED_FILE_EXTS.stream()
-        .filter(value -> FILE_EXT_MIME_TYPE_MAP.containsKey(value))
-        .map(value -> FILE_EXT_MIME_TYPE_MAP.get(value))
+        .filter(FILE_EXT_MIME_TYPE_MAP::containsKey)
+        .map(FILE_EXT_MIME_TYPE_MAP::get)
         .sorted()
         .toList();
 
     log.info(String.format("User provided file types: %s", userProvidedFileTypes));
-    log.info(String.format("Files accepted by the server: %s", ACCEPTED_FILE_EXTS.stream().collect(Collectors.joining(","))));
-  }
-
-  public static AcceptedFileTypeUtils create() {
-    return new AcceptedFileTypeUtils();
+    log.info(String.format("Files accepted by the server: %s", String.join(",", ACCEPTED_FILE_EXTS)));
   }
 
   public List<String> getAcceptableMimeTypes() {
