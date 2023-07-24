@@ -238,6 +238,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnNotFoundIfSubmissionDoesNotContainAnyFiles() throws Exception {
       session.setAttribute("id", submission.getId());
+      
       when(userFileRepositoryService.findAllBySubmission(submission)).thenReturn(Collections.emptyList());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
@@ -301,6 +302,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
       List<UserFile> userFiles = Arrays.asList(firstTestUserFile, secondTestUserFile);
       when(userFileRepositoryService.findAllBySubmission(submission)).thenReturn(userFiles);
+
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       when(cloudFileRepository.get("testPath")).thenReturn(firstTestcloudFile);
       when(cloudFileRepository.get("testPath2")).thenReturn(secondTestcloudFile);
