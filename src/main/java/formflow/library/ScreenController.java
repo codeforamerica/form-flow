@@ -61,7 +61,7 @@ public class ScreenController extends FormFlowController {
 
   private final ConditionManager conditionManager;
   private final ActionManager actionManager;
-  private FileService fileService;
+  private final FileService fileService;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,

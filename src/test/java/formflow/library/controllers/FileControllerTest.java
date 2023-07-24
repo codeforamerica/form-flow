@@ -33,7 +33,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -78,7 +77,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     doNothing().when(cloudFileRepository).upload(any(), any());
-    // the "name" param has to match what the endpoint expects "file"
+    // the "name" param has to match what the endpoint expects: "file"
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
     session = new MockHttpSession();
