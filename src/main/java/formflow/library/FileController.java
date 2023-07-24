@@ -291,7 +291,7 @@ public class FileController extends FormFlowController {
     }
     Submission submission = maybeSubmission.get();
 
-    List<UserFile> userFiles = userFileRepositoryService.findAllBySubmissionId(submission);
+    List<UserFile> userFiles = userFileRepositoryService.findAllBySubmission(submission);
 
     if (userFiles.isEmpty()) {
       log.error("No files belonging to submission " + submissionId + " were found.");
