@@ -16,8 +16,8 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.upload.CloudFile;
-import formflow.library.upload.CloudFileRepository;
+import formflow.library.file.CloudFile;
+import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -33,6 +33,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -77,15 +78,16 @@ public class FileControllerTest extends AbstractMockMvcTest {
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     doNothing().when(cloudFileRepository).upload(any(), any());
-    MockMultipartFile testImage = new MockMultipartFile("file.jpeg", "someImage.jpg",
+    // the "name" param has to match what the endpoint expects "file"
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
     session = new MockHttpSession();
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-            .file("file", testImage.getBytes())
+            .file(testImage)
+            .param("flow", "testFlow")
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
-            .param("flow", "testFlow")
             .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().is(200))

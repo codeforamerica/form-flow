@@ -5,9 +5,9 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.upload.CloudFile;
-import formflow.library.upload.CloudFileRepository;
-import formflow.library.utils.AcceptedFileTypeService;
+import formflow.library.file.FileService;
+import formflow.library.file.CloudFile;
+import formflow.library.file.CloudFileRepository;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class FileController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
 
   private final MessageSource messageSource;
-  private final AcceptedFileTypeService acceptedFileTypeService;
+  private final FileService fileService;
 
   private final String SESSION_USERFILES_KEY = "userFiles";
 
@@ -55,12 +55,12 @@ public class FileController extends FormFlowController {
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
       MessageSource messageSource,
-      AcceptedFileTypeService acceptedFileTypeService) {
+      FileService fileService) {
     super(submissionRepositoryService);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
-    this.acceptedFileTypeService = acceptedFileTypeService;
+    this.fileService = fileService;
   }
 
   /**
@@ -92,7 +92,7 @@ public class FileController extends FormFlowController {
         httpSession.setAttribute("id", submission.getId());
       }
 
-      if (!acceptedFileTypeService.isAcceptedMimeType(file)) {
+      if (!fileService.isAcceptedMimeType(file)) {
         String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
