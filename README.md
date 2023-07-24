@@ -47,6 +47,7 @@ Table of Contents
     * [PDF Generation](#pdf-generation)
     * [Sending Email](#sending-email)
         * [Mailgun](#mailgun)
+    * [Localization](#localization)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -2144,6 +2145,96 @@ error code and a corresponding error message as seen below.
 The error message thrown by mailgun is passed to the response object when an email fails. Common
 Mailgun error codes can be found
 [here](https://documentation.mailgun.com/en/latest/api-sending.html#error-codes).
+
+## Localization
+
+### Setting application properties
+
+Form flow library will read the languages set in an apps `application.properties`.
+
+```yaml
+# application.yaml
+form-flow:
+  languages: en, es
+```
+
+Our language selector menu button will create links both inside of the button and nav links based on
+the value provided in `form-flow.languages`. If none is given, the default is: `en`.
+
+#### Language tag syntax
+
+Refer to
+the [language tag syntax](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang#language_tag_syntax)
+to see what language you want to support.
+
+### Supplying translation files
+
+Translations need to be added to `messages_xx.properties` files in the
+applications `src/main/resources`
+directory, where `xx` is the language the translations are for.
+
+#### Messages in the library
+
+The library comes with [English](src/main/resources/messages-form-flow.properties)
+and [Spanish](src/main/resources/messages-form-flow_es.properties) messages. These are loaded into
+the application's messages and can get overridden by message keys that exist in the
+[application's message files](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources).
+
+To override a message from the library, use the same key in each of your messages files in your
+application.
+
+#### Using [Transifex](https://www.transifex.com/)
+
+##### File encoding in your application
+
+Java properties requires ISO-8859-1 by default in order to support Transifex.
+
+Steps to change
+the [default file encoding for Intellij](https://www.jetbrains.com/help/idea/properties-files.html#encoding):
+
+1. In the Settings, select **Editor | File Encodings**.
+2. Select `ISO-8859-1` from the **Default encoding for properties files** list.
+
+##### Connect to [Transifex](https://www.transifex.com/)
+
+You can use
+a [GitHub integration to allow Transifex](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration)
+to create pull requests automatically.
+
+1. You will need to follow the steps in the Transifex interface as suggested in
+   this [help article](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration).
+2. You will need a `transifex.yml` file in root of your application. (See an example in
+   the [doc-LA repository](https://github.com/codeforamerica/la-doc-uploader/pull/16/files))
+
+Here's an example `transifex.yml` file:
+
+```yaml
+git:
+  filters:
+    - filter_type: file
+      file_format: PROPERTIES
+      source_language: en
+      source_file: src/main/resources/messages.properties
+      translation_files_expression: 'src/main/resources/messages_<lang>.properties'
+
+```
+
+### How Spring Boot handles localization
+
+Spring boot uses
+a [locale change interceptor](https://www.baeldung.com/spring-boot-internationalization#localechangeinterceptor)
+to intercept a `lang` query parameter (by default) to then change the locale
+and [sets a cookie](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/i18n/CookieLocaleResolver.html)
+to remember the locale.
+
+### Mixpanel event from language selector
+
+If your application is using [Mixpanel](https://mixpanel.com/), and you want to keep track of clicks
+into the language selector
+button, we send an event called `language-selector-click`
+in [our JavaScript](https://github.com/codeforamerica/form-flow/blob/9a1c6f7a25336e3f9660c2ad9efea013268c860f/src/main/resources/META-INF/resources/webjars/form-flow/0.0.1/js/formFlowLanguageSelector.js#L252).
+
+We send the whole url to Mixpanel, including any query parameters, such as `lang`.
 
 # How to use
 
