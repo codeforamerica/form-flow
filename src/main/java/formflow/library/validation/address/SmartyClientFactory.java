@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.validation.address;
 
 import com.smartystreets.api.ClientBuilder;
 import com.smartystreets.api.StaticCredentials;
@@ -7,9 +7,9 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ClientFactory {
+public class SmartyClientFactory {
 
-  public ClientFactory() {}
+  public SmartyClientFactory() {}
 
   public Client create(String authId, String authToken, String license) {
     return new ClientBuilder(new StaticCredentials(authId, authToken)).withLicenses(List.of(license)).buildUsStreetApiClient();

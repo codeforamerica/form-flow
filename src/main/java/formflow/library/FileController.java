@@ -62,7 +62,7 @@ public class FileController extends FormFlowController {
       MessageSource messageSource,
       FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
-    super(submissionRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, new FlowConfigurationManager(flowConfigurations));
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
@@ -93,10 +93,8 @@ public class FileController extends FormFlowController {
   ) {
     log.info("POST upload (url: {}): flow: {}, inputName: {}", request.getRequestURI().toLowerCase(), flow, inputName);
     try {
-      if (!doesFlowExist(flow)) {
-        throwNotFoundError(flow, null, String.format("Could not find flow with name %s in your application's flow configuration.", flow));
-      }
-      
+      getFlowConfigOr404(flow);
+
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
@@ -180,7 +178,6 @@ public class FileController extends FormFlowController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
       }
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
-      // TODO update when we add internationalization to use locale for message source
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, null);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -203,7 +200,8 @@ public class FileController extends FormFlowController {
       HttpServletRequest request
   ) {
     try {
-      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId, dropZoneInstanceName);
+      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId,
+          dropZoneInstanceName);
       UUID submissionId = (UUID) httpSession.getAttribute("id");
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
@@ -260,7 +258,8 @@ public class FileController extends FormFlowController {
       @PathVariable String fileId,
       HttpServletRequest request
   ) {
-    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId, fileId);
+    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId,
+        fileId);
     if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }

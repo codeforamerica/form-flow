@@ -165,7 +165,6 @@ public class Submission {
    * @param inputName name of the address field to clear the data of
    */
   public void clearAddressFields(String inputName) {
-    // we want to clear out
     inputData.remove(inputName + AddressParts.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED);
     inputData.remove(inputName + AddressParts.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED);
     inputData.remove(inputName + AddressParts.CITY + UnvalidatedField.VALIDATED);

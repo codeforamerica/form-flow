@@ -1,21 +1,25 @@
 package formflow.library;
 
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.ScreenNavigationConfiguration;
+import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 public abstract class FormFlowController {
 
   protected final SubmissionRepositoryService submissionRepositoryService;
+  protected final FlowConfigurationManager flowConfigurationManager;
 
-  protected final List<FlowConfiguration> flowConfigurations;
-
-  FormFlowController(SubmissionRepositoryService submissionRepositoryService, List<FlowConfiguration> flowConfigurations) {
+  FormFlowController(SubmissionRepositoryService submissionRepositoryService, FlowConfigurationManager flowConfigurationManager) {
     this.submissionRepositoryService = submissionRepositoryService;
-    this.flowConfigurations = flowConfigurations;
+    this.flowConfigurationManager = flowConfigurationManager;
   }
 
   protected void saveToRepository(Submission submission) {
@@ -29,26 +33,34 @@ public abstract class FormFlowController {
     submissionRepositoryService.save(submission);
   }
 
-  protected FlowConfiguration getFlowConfigurationByName(String flow) {
-      List<FlowConfiguration> flowConfigurationList = flowConfigurations.stream().filter(
-          flowConfiguration -> flowConfiguration.getName().equals(flow)).toList();
-      
-      if (flowConfigurationList.isEmpty()) {
-        throwNotFoundError(flow, null, String.format("Could not find flow %s in your applications flow configuration file.", flow));
-      }
-      
-      return flowConfigurationList.get(0);
+  protected void handleErrors(HttpSession httpSession, Map<String, List<String>> errorMessages,
+      FormSubmission formSubmission) {
+    if (!errorMessages.isEmpty()) {
+      httpSession.setAttribute("errorMessages", errorMessages);
+      httpSession.setAttribute("formDataSubmission", formSubmission.getFormData());
+    } else {
+      httpSession.removeAttribute("errorMessages");
+      httpSession.removeAttribute("formDataSubmission");
+    }
   }
 
-  protected Boolean doesFlowExist(String flow) {
-    return flowConfigurations.stream().anyMatch(
-        flowConfiguration -> flowConfiguration.getName().equals(flow)
-    );
+  protected FlowConfiguration getFlowConfigOr404(String flow) {
+    try {
+      return flowConfigurationManager.get(flow);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "There was a problem with the request: Could not find flow with name %s in your application's flow configuration.".formatted(
+              flow));
+    }
   }
 
-  protected static void throwNotFoundError(String flow,String screen, String message) {
-    throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("There was a problem with the request (flow: %s, screen: %s): %s",
-        flow, screen, message));
-
+  protected ScreenNavigationConfiguration getScreenOr404(String flow, String screen) {
+    try {
+      return getFlowConfigOr404(flow).getScreen(screen);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "There was a problem with the request: Could not find screen with name %s in flow %s.".formatted(
+              screen, flow));
+    }
   }
 }

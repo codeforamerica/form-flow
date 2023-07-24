@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.smartystreets.api.exceptions.SmartyException;
+import formflow.library.validation.address.AddressValidationService;
+import formflow.library.validation.address.ValidatedAddress;
 import formflow.library.utilities.AbstractBasePageTest;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,7 +39,7 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
             "validatedZipCode-1234"
         ));
 
-    when(addressValidationService.validate(any())).thenReturn(goodValidatedAddress);
+    when(addressValidationService.runValidationRequest(any())).thenReturn(goodValidatedAddress);
 
     assertThat(testPage.getTitle()).isEqualTo("Enter Address");
     testPage.enter("validationOnStreetAddress1", "1111 N State St");
@@ -57,7 +59,7 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
     Map<String, ValidatedAddress> badValidationAddress = new HashMap<>();
     badValidationAddress.put("validationOn", null);
 
-    when(addressValidationService.validate(any())).thenReturn(badValidationAddress);
+    when(addressValidationService.runValidationRequest(any())).thenReturn(badValidationAddress);
 
     testPage.enter("validationOnStreetAddress1", "1234 junk");
     testPage.enter("validationOnStreetAddress2", "Apt 2");
@@ -82,7 +84,7 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
             "validatedZipCode-1234"
         ));
 
-    when(addressValidationService.validate(any())).thenReturn(goodValidatedAddress);
+    when(addressValidationService.runValidationRequest(any())).thenReturn(goodValidatedAddress);
 
     assertThat(testPage.getTitle()).isEqualTo("Enter Address (subflow)");
     testPage.enter("validationOnStreetAddress1", "1111 N State St");
@@ -102,7 +104,7 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
     Map<String, ValidatedAddress> badValidationAddress = new HashMap<>();
     badValidationAddress.put("validationOn", null);
 
-    when(addressValidationService.validate(any())).thenReturn(badValidationAddress);
+    when(addressValidationService.runValidationRequest(any())).thenReturn(badValidationAddress);
 
     testPage.enter("validationOnStreetAddress1", "1234 junk");
     testPage.enter("validationOnStreetAddress2", "Apt 2");

@@ -34,7 +34,7 @@ public class PdfController extends FormFlowController {
   public PdfController(MessageSource messageSource, PdfService pdfService,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations) {
-    super(submissionRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, new FlowConfigurationManager(flowConfigurations));
     this.messageSource = messageSource;
     this.pdfService = pdfService;
   }
@@ -47,9 +47,7 @@ public class PdfController extends FormFlowController {
       HttpServletRequest request
   ) throws IOException {
     log.info("GET downloadPdf (url: {}): flow: {}, submissionId: {}", request.getRequestURI().toLowerCase(), flow, submissionId);
-    if (!doesFlowExist(flow)) {
-      throwNotFoundError(flow, null, String.format("Could not find flow %s in your application's flow configuration.", flow));
-    }
+    getFlowConfigOr404(flow);
 
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
     if (httpSession.getAttribute("id").toString().equals(submissionId) && maybeSubmission.isPresent()) {

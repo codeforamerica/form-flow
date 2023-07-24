@@ -12,6 +12,10 @@ import com.smartystreets.api.us_street.Candidate;
 import com.smartystreets.api.us_street.Client;
 import com.smartystreets.api.us_street.Components;
 import com.smartystreets.api.us_street.Lookup;
+import formflow.library.validation.address.AddressValidationService;
+import formflow.library.validation.address.SmartyClientFactory;
+import formflow.library.validation.address.ValidatedAddress;
+import formflow.library.validation.address.ValidationRequestFactory;
 import formflow.library.data.FormSubmission;
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,7 +28,7 @@ class AddressValidationServiceTest {
 
   ValidationRequestFactory validationRequestFactory = mock(ValidationRequestFactory.class);
   Client client = mock(Client.class);
-  ClientFactory clientFactory = mock(ClientFactory.class);
+  SmartyClientFactory smartyClientFactory = mock(SmartyClientFactory.class);
 
   String authId = "authId";
   String authToken = "authToken";
@@ -32,7 +36,7 @@ class AddressValidationServiceTest {
 
   @BeforeEach
   void setUp() {
-    when(clientFactory.create(authId, authToken, license)).thenReturn(client);
+    when(smartyClientFactory.create(authId, authToken, license)).thenReturn(client);
   }
 
   @Test
@@ -41,7 +45,7 @@ class AddressValidationServiceTest {
 
     AddressValidationService addressValidationService = new AddressValidationService(
         validationRequestFactory,
-        clientFactory,
+        smartyClientFactory,
         authId,
         authToken,
         license,
@@ -73,7 +77,7 @@ class AddressValidationServiceTest {
 
     when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
 
-    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of(
+    assertThat(addressValidationService.runValidationRequest(formSubmission)).isEqualTo(Map.of(
         "validatedInput",
         new ValidatedAddress("validatedStreetAddress",
             "validatedAptNumber",
@@ -90,7 +94,7 @@ class AddressValidationServiceTest {
 
     AddressValidationService addressValidationService = new AddressValidationService(
         validationRequestFactory,
-        clientFactory,
+        smartyClientFactory,
         authId,
         authToken,
         license,
@@ -105,7 +109,7 @@ class AddressValidationServiceTest {
 
     var result = new HashMap<>();
     result.put("validatedInput", null);
-    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(result);
+    assertThat(addressValidationService.runValidationRequest(formSubmission)).isEqualTo(result);
     verify(client, times(1)).send(batch);
   }
 
@@ -113,12 +117,12 @@ class AddressValidationServiceTest {
   void shouldNotRunAddressValidationWhenFlagIsSetToOff() throws SmartyException, IOException, InterruptedException {
     AddressValidationService addressValidationService = new AddressValidationService(
         validationRequestFactory,
-        clientFactory,
+        smartyClientFactory,
         authId,
         authToken,
         license,
         true);
     FormSubmission formSubmission = new FormSubmission(Map.of());
-    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of());
+    assertThat(addressValidationService.runValidationRequest(formSubmission)).isEqualTo(Map.of());
   }
 }

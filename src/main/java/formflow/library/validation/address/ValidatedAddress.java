@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.validation.address;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,6 +3,7 @@ package formflow.library.address_validation;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.smartystreets.api.us_street.Batch;
+import formflow.library.validation.address.ValidationRequestFactory;
 import formflow.library.data.FormSubmission;
 import formflow.library.inputs.UnvalidatedField;
 import java.util.Map;

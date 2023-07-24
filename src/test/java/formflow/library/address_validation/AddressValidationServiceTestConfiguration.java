@@ -1,5 +1,6 @@
 package formflow.library.address_validation;
 
+import formflow.library.validation.address.AddressValidationService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

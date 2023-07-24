@@ -1,6 +1,6 @@
 package formflow.library.data;
 
-import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.validation.address.ValidatedAddress;
 import formflow.library.inputs.UnvalidatedField;
 import formflow.library.inputs.AddressParts;
 import java.util.ArrayList;

@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import formflow.library.address_validation.AddressValidationService;
-import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.validation.address.AddressValidationService;
+import formflow.library.validation.address.ValidatedAddress;
 import formflow.library.inputs.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
@@ -130,7 +130,7 @@ public class InputsTest extends AbstractMockMvcTest {
             city + "Validated",
             state,
             zipCode + "Validated");
-        when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
+        when(addressValidationService.runValidationRequest(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
 
         nextScreen = postAndFollowRedirect("testAddressValidation",
             Map.ofEntries(
@@ -166,7 +166,7 @@ public class InputsTest extends AbstractMockMvcTest {
         String inputName = "validationOn";
         HashMap<String, ValidatedAddress> testMap = new HashMap();
         testMap.put(inputName, null);
-        when(addressValidationService.validate(any())).thenReturn(testMap);
+        when(addressValidationService.runValidationRequest(any())).thenReturn(testMap);
 
         var nextScreen = postAndFollowRedirect("testAddressValidation",
             Map.ofEntries(
@@ -198,7 +198,7 @@ public class InputsTest extends AbstractMockMvcTest {
             "OZ",
             "12345" + "Validated");
 
-        when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, otherValidatedAddress));
+        when(addressValidationService.runValidationRequest(any())).thenReturn(Map.of(inputName, otherValidatedAddress));
 
         var nextScreen = postAndFollowRedirect("testAddressValidation",
             Map.ofEntries(

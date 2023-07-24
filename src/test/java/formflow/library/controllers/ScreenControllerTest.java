@@ -11,8 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import formflow.library.address_validation.AddressValidationService;
-import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.validation.address.AddressValidationService;
+import formflow.library.validation.address.ValidatedAddress;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
@@ -118,12 +118,12 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       params.put("validationOnZipCode", List.of("88201"));
 
       postExpectingFailure("testAddressValidation", params);
-      verify(addressValidationService, times(0)).validate(any());
+      verify(addressValidationService, times(0)).runValidationRequest(any());
     }
 
     @Test
     public void addressValidationShouldOnlyRunWhenSetToTrue() throws Exception {
-      when(addressValidationService.validate(any())).thenReturn(Map.of(
+      when(addressValidationService.runValidationRequest(any())).thenReturn(Map.of(
           "validationOn",
           new ValidatedAddress("validatedStreetAddress",
               "validatedAptNumber",
@@ -148,7 +148,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
       postExpectingSuccess("testAddressValidation", params);
 
-      verify(addressValidationService, times(1)).validate(any());
+      verify(addressValidationService, times(1)).runValidationRequest(any());
     }
   }
 

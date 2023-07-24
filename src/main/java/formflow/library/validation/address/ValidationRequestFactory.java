@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.validation.address;
 
 
 import com.smartystreets.api.exceptions.BatchFullException;
