@@ -2183,16 +2183,41 @@ the application's messages and can get overridden by message keys that exist in 
 To override a message from the library, use the same key in each of your messages files in your
 application.
 
-#### Using Tranifex
+#### Using [Transifex](https://www.transifex.com/)
 
 ##### File encoding in your application
 
-TODO: Mentioning that the message files are encoded for ISO-8859 (rather than the Spring Boot
-default UTF-8), in order to support Transifex
+Java properties requires ISO-8859-1 by default in order to support Transifex.
 
-##### Connect to Tranifex
+Steps to change
+the [default file encoding for Intellij](https://www.jetbrains.com/help/idea/properties-files.html#encoding):
 
-TODO: Making it clear which files they need to point Transifex too
+1. In the Settings, select **Editor | File Encodings**.
+2. Select `ISO-8859-1` from the **Default encoding for properties files** list.
+
+##### Connect to [Transifex](https://www.transifex.com/)
+
+You can use
+a [GitHub integration to allow Transifex](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration)
+to create pull requests automatically.
+
+1. You will need to follow the steps in the Transifex interface as suggested in
+   this [help article](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration).
+2. You will need a `transifex.yml` file in root of your application. (See an example in
+   the [doc-LA repository](https://github.com/codeforamerica/la-doc-uploader/pull/16/files))
+
+Here's an example `transifex.yml` file:
+
+```yaml
+git:
+  filters:
+    - filter_type: file
+      file_format: PROPERTIES
+      source_language: en
+      source_file: src/main/resources/messages.properties
+      translation_files_expression: 'src/main/resources/messages_<lang>.properties'
+
+```
 
 ### How Spring Boot handles localization
 
@@ -2204,7 +2229,7 @@ to remember the locale.
 
 ### Mixpanel event from language selector
 
-If your application is using [Mixpanel](https://mixpanel.com/), and you want to keep track clicks
+If your application is using [Mixpanel](https://mixpanel.com/), and you want to keep track of clicks
 into the language selector
 button, we send an event called `language-selector-click`
 in [our JavaScript](https://github.com/codeforamerica/form-flow/blob/9a1c6f7a25336e3f9660c2ad9efea013268c860f/src/main/resources/META-INF/resources/webjars/form-flow/0.0.1/js/formFlowLanguageSelector.js#L252).
