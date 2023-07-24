@@ -4,11 +4,11 @@ import static java.util.Arrays.stream;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -30,33 +30,30 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Slf4j
 @Service
-public class FileService {
+public class FileTypeService {
 
-  private final Map<String, String> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
-      Map.entry(".bmp", "image/bmp"),
-      Map.entry(".doc", "application/msword"),
-      Map.entry(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-      Map.entry(".gif", "image/gif"),
-      Map.entry(".jpeg", "image/jpeg"),
-      Map.entry(".jpg", "image/jpeg"),
-      Map.entry(".pdf", "application/pdf"),
-      Map.entry(".png", "image/png"),
-      Map.entry(".odp", "application/vnd.oasis.opendocument.presentation"),
-      Map.entry(".ods", "application/vnd.oasis.opendocument.spreadsheet"),
-      Map.entry(".odt", "application/vnd.oasis.opendocument.text")
+  private final Map<String, MimeType> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
+      Map.entry(".gif", MediaType.IMAGE_GIF),
+      Map.entry(".png", MediaType.IMAGE_PNG),
+      Map.entry(".jpg", MediaType.IMAGE_JPEG),
+      Map.entry(".jpeg", MediaType.IMAGE_JPEG),
+      Map.entry(".bmp", new MimeType("image", "bmp")),
+      Map.entry(".pdf", new MimeType("application", "pdf")),
+      Map.entry(".doc", new MimeType("application", "msword")),
+      Map.entry(".docx", new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document")),
+      Map.entry(".odp", new MimeType("application", "vnd.oasis.opendocument.presentation")),
+      Map.entry(".ods", new MimeType("application", "vnd.oasis.opendocument.spreadsheet")),
+      Map.entry(".odt", new MimeType("application", "vnd.oasis.opendocument.text"))
   );
 
-  private final List<String> ACCEPTED_MIME_TYPES;
+  private final List<MimeType> ACCEPTED_MIME_TYPES;
 
   private final List<String> ACCEPTED_FILE_EXTS;
 
-  private String userProvidedFileTypes;
-
   private final String JOIN_DELIMITER = ", ";
 
-  public FileService(
+  public FileTypeService(
       @Value("${form-flow.uploads.accepted-file-types:''}") String userProvidedFileTypes) {
-    this.userProvidedFileTypes = userProvidedFileTypes;
     List<String> userFileExts;
     List<String> serverFileExts = FILE_EXT_MIME_TYPE_MAP.keySet().stream().toList();
 
@@ -82,16 +79,6 @@ public class FileService {
   }
 
   /**
-   * Returns the list of mime types the system accepts, in the form of full mime type strings: ["image/bmp",
-   * "application/msword"]
-   *
-   * @return List of strings containing acceptable mime types for the system
-   */
-  public List<String> getAcceptableMimeTypes() {
-    return ACCEPTED_MIME_TYPES;
-  }
-
-  /**
    * Returns the list of file extensions the system accepts: ".bmp, .doc"
    *
    * @return List of strings containing the acceptable file extensions for the system
@@ -108,8 +95,10 @@ public class FileService {
    * @return Boolean True if the mimetype is one of the ones the system accepts, False otherwise.
    */
   public Boolean isAcceptedMimeType(MultipartFile file) {
-    String contentType = file.getContentType();
-    return ACCEPTED_MIME_TYPES.contains(contentType);
+    if (file.getContentType() == null || file.getContentType().isBlank()) {
+      return false;
+    }
+    return ACCEPTED_MIME_TYPES.contains(MimeType.valueOf(file.getContentType()));
   }
 
   /**
@@ -118,6 +107,6 @@ public class FileService {
    * @return String a string containing a list of acceptable file extensions: ".bmp,.jpg"
    */
   public String acceptedFileTypes() {
-    return ACCEPTED_FILE_EXTS.stream().collect(Collectors.joining(JOIN_DELIMITER));
+    return String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS);
   }
 }

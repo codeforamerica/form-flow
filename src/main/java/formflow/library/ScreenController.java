@@ -12,7 +12,7 @@ import formflow.library.config.SubflowConfiguration;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.file.FileService;
+import formflow.library.file.FileTypeService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -61,7 +61,7 @@ public class ScreenController extends FormFlowController {
 
   private final ConditionManager conditionManager;
   private final ActionManager actionManager;
-  private final FileService fileService;
+  private final FileTypeService fileTypeService;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
@@ -70,14 +70,14 @@ public class ScreenController extends FormFlowController {
       AddressValidationService addressValidationService,
       ConditionManager conditionManager,
       ActionManager actionManager,
-      FileService fileService) {
+      FileTypeService fileTypeService) {
     super(submissionRepositoryService);
     this.flowConfigurations = flowConfigurations;
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;
     this.actionManager = actionManager;
-    this.fileService = fileService;
+    this.fileTypeService = fileTypeService;
     log.info("Screen Controller Created!");
   }
 
@@ -575,7 +575,7 @@ public class ScreenController extends FormFlowController {
     model.put("flow", flow);
     model.put("screen", screen);
     model.put("conditionManager", conditionManager);
-    model.put("acceptedFileTypes", fileService.acceptedFileTypes());
+    model.put("acceptedFileTypes", fileTypeService.acceptedFileTypes());
 
     if (subflowName != null) {
       model.put("subflow", subflowName);
