@@ -51,7 +51,7 @@ public class UserFileRepositoryService {
     repository.deleteById(id);
   }
 
-  public List<UserFile> findAllBySubmissionId(Submission submission) {
-    return repository.findBySubmissionId(submission);
+  public List<UserFile> findAllBySubmission(Submission submission) {
+    return repository.findBySubmission(submission);
   }
 }
