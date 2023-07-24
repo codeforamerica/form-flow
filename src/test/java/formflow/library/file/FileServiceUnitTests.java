@@ -18,6 +18,6 @@ class FileServiceUnitTests {
   @Test
   void acceptedFileTypesShouldReturnTheIntersectionOfDefaultTypesWithUserProvidedOnes() {
     FileService fileService = new FileService(".bmp,.jpeg,.fake");
-    assertThat(fileService.acceptedFileTypes()).isEqualTo(".bmp,.jpeg");
+    assertThat(fileService.acceptedFileTypes()).isEqualTo(".bmp, .jpeg");
   }
 }

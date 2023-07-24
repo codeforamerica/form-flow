@@ -32,7 +32,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource
             .getMessage("upload-documents.error-invalid-file-type", null, Locale.ENGLISH)
-            + " .jpeg,.pdf");
+            + " .jpeg, .pdf");
     testPage.clickLink("remove");
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
 

@@ -12,15 +12,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * FileService This service is intended to help with miscellaneous file things.
- * TODO: fix formatting
- * <p>
- * This service will help with checking mime types, both proper mime-type names like "image/jpeg" and with file extensions. The
- * current list of accepted file mime-types are: .bmp : image/bmp .doc : application/msword" .docx :
- * application/vnd.openxmlformats-officedocument.wordprocessingml.document .gif : image/gif .jpeg : image/jpeg .jpg : image/jpeg
- * .pdf : application/pdf .png : image/png .odp : application/vnd.oasis.opendocument.presentation .ods :
- * application/vnd.oasis.opendocument.spreadsheet .odt : application/vnd.oasis.opendocument.text
- * </p>
+ * This service is intended to help with miscellaneous file things. This service will help with checking mime types, both proper
+ * mime-type names like "image/jpeg" and with file extensions. The current list of accepted file mime-types are:
+ * <ul>
+ *   <li> .bmp : image/bmp </li>
+ *   <li> .doc : application/msword"</li>
+ *   <li> .docx : application/vnd.openxmlformats-officedocument.wordprocessingml.document</li>
+ *   <li> .gif : image/gif </li>
+ *   <li> .jpeg : image/jpeg </li>
+ *   <li> .jpg : image/jpeg </li>
+ *   <li> .pdf : application/pdf </li>
+ *   <li> .png : image/png </li>
+ *   <li> .odp : application/vnd.oasis.opendocument.presentation </li>
+ *   <li> .ods : application/vnd.oasis.opendocument.spreadsheet </li>
+ *   <li> .odt : application/vnd.oasis.opendocument.text </li>
+ * </ul>
  */
 @Slf4j
 @Service
@@ -46,6 +52,8 @@ public class FileService {
 
   private String userProvidedFileTypes;
 
+  private final String JOIN_DELIMITER = ", ";
+
   public FileService(
       @Value("${form-flow.uploads.accepted-file-types:''}") String userProvidedFileTypes) {
     this.userProvidedFileTypes = userProvidedFileTypes;
@@ -70,7 +78,7 @@ public class FileService {
         .toList();
 
     log.info(String.format("User provided file types: %s", userProvidedFileTypes));
-    log.info(String.format("Files accepted by the server: %s", String.join(",", ACCEPTED_FILE_EXTS)));
+    log.info(String.format("Files accepted by the server: %s", String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS)));
   }
 
   /**
@@ -110,6 +118,6 @@ public class FileService {
    * @return String a string containing a list of acceptable file extensions: ".bmp,.jpg"
    */
   public String acceptedFileTypes() {
-    return ACCEPTED_FILE_EXTS.stream().collect(Collectors.joining(","));
+    return ACCEPTED_FILE_EXTS.stream().collect(Collectors.joining(JOIN_DELIMITER));
   }
 }
