@@ -1,10 +1,12 @@
 package formflow.library;
 
+import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.pdf.PdfService;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +31,9 @@ public class PdfController extends FormFlowController {
   private final PdfService pdfService;
 
   public PdfController(MessageSource messageSource, PdfService pdfService,
-      SubmissionRepositoryService submissionRepositoryService) {
-    super(submissionRepositoryService);
+      SubmissionRepositoryService submissionRepositoryService,
+      List<FlowConfiguration> flowConfigurations) {
+    super(submissionRepositoryService, flowConfigurations);
     this.messageSource = messageSource;
     this.pdfService = pdfService;
   }

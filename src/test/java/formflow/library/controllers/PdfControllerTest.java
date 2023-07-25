@@ -11,10 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.PdfController;
+import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.pdf.PdfService;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,14 +36,15 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
   private byte[] filledPdfByteArray;
-  private String flow;
-
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
-    flow = "ubi";
-    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService);
+    String flow = "ubi";
+    FlowConfiguration flowConfiguration = new FlowConfiguration();
+    flowConfiguration.setName(flow);
+    List<FlowConfiguration> flowConfigurations = List.of(flowConfiguration);
+    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService, flowConfigurations);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
     submission = Submission.builder()
         .id(UUID.randomUUID())

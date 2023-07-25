@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +52,6 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping("/flow")
 public class ScreenController extends FormFlowController {
 
-  private final List<FlowConfiguration> flowConfigurations;
   private final ValidationService validationService;
 
   private final AddressValidationService addressValidationService;
@@ -68,8 +66,7 @@ public class ScreenController extends FormFlowController {
       AddressValidationService addressValidationService,
       ConditionManager conditionManager,
       ActionManager actionManager) {
-    super(submissionRepositoryService);
-    this.flowConfigurations = flowConfigurations;
+    super(submissionRepositoryService, flowConfigurations);
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;
@@ -496,18 +493,6 @@ public class ScreenController extends FormFlowController {
   private ScreenNavigationConfiguration getScreenConfig(String flow, String screen) {
     FlowConfiguration currentFlowConfiguration = getFlowConfigurationByName(flow);
     return currentFlowConfiguration.getScreenNavigation(screen);
-  }
-
-  private FlowConfiguration getFlowConfigurationByName(String flow) {
-    try {
-      return flowConfigurations.stream().filter(
-          flowConfiguration -> flowConfiguration.getName().equals(flow)
-      ).toList().get(0);
-
-    } catch (ArrayIndexOutOfBoundsException e) {
-      throw new NoSuchElementException("Could not find flow=" + flow + " in templates");
-    }
-
   }
 
   private Boolean isConditionalNavigation(ScreenNavigationConfiguration currentScreen) {

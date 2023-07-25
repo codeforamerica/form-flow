@@ -1,6 +1,7 @@
 package formflow.library;
 
 import com.google.common.io.Files;
+import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -52,8 +53,9 @@ public class FileController extends FormFlowController {
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
+      List<FlowConfiguration> flowConfigurations,
       MessageSource messageSource) {
-    super(submissionRepositoryService);
+    super(submissionRepositoryService, flowConfigurations);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
