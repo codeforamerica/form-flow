@@ -11,10 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.PdfController;
+import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.pdf.PdfService;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 public class PdfControllerTest extends AbstractMockMvcTest {
@@ -34,14 +37,15 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
   private byte[] filledPdfByteArray;
-  private String flow;
-
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
-    flow = "ubi";
-    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService);
+    String flow = "ubi";
+    FlowConfiguration flowConfiguration = new FlowConfiguration();
+    flowConfiguration.setName(flow);
+    List<FlowConfiguration> flowConfigurations = List.of(flowConfiguration);
+    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService, flowConfigurations);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
     submission = Submission.builder()
         .id(UUID.randomUUID())
@@ -51,6 +55,12 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     when(pdfService.getFilledOutPDF(submission)).thenReturn(filledPdfByteArray);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
+  }
+  
+  @Test
+  void shouldReturn404WhenFlowDoesNotExist() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/download/{flow}/{submissionId}", "flowThatDoesNotExist", "submissionId"))
+        .andExpect(status().isNotFound());
   }
 
   @Test

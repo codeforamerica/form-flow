@@ -7,6 +7,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
@@ -22,6 +25,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
@@ -45,6 +50,31 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
+  }
+
+
+  @ParameterizedTest
+  @CsvSource({
+      "GET, /flow/{flow}/{screen}, flowThatDoesNotExist, screen",
+      "GET, /flow/{flow}/{screen}, testFlow, screenThatDoesNotExist",
+      "POST, /flow/{flow}/{screen}, flowThatDoesNotExist, screen",
+      "POST, /flow/{flow}/{screen}, testFlow, screenThatDoesNotExist",
+      "POST, /flow/{flow}/{screen}/submit, flowThatDoesNotExist, screen",
+      "POST, /flow/{flow}/{screen}/submit, testFlow, screenThatDoesNotExist",
+      "GET, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, flowThatDoesNotExist, screen",
+      "GET, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, testFlow, screenThatDoesNotExist",
+      "POST, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, flowThatDoesNotExist, screen",
+      "POST, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, testFlow, screenThatDoesNotExist",
+      "GET, /flow/{flow}/{subflowName}/thisIsAUUIDForASubflow/deleteConfirmation, flowThatDoesNotExist, testSubflow",
+      "POST, /flow/{flow}/{subflowName}/thisIsAUUIDForASubflow/delete, flowThatDoesNotExist, testSubflow",
+      "GET, /flow/{flow}/{screen}/navigation, flowThatDoesNotExist, screen",
+      "GET, /flow/{flow}/{screen}/navigation, testFlow, screenThatDoesNotExist"
+  })
+  void endpointShouldReturn404IfFlowOrScreenDoesNotExist(String method, String path, String flow, String screen) throws Exception {
+    switch (method) {
+      case "GET" -> mockMvc.perform(get(path, flow, screen)).andExpect(status().isNotFound());
+      case "POST" -> mockMvc.perform(post(path, flow, screen)).andExpect(status().isNotFound());
+    }
   }
 
   @Nested

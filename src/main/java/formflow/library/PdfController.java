@@ -1,10 +1,13 @@
 package formflow.library;
 
+import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.pdf.PdfService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +32,9 @@ public class PdfController extends FormFlowController {
   private final PdfService pdfService;
 
   public PdfController(MessageSource messageSource, PdfService pdfService,
-      SubmissionRepositoryService submissionRepositoryService) {
-    super(submissionRepositoryService);
+      SubmissionRepositoryService submissionRepositoryService,
+      List<FlowConfiguration> flowConfigurations) {
+    super(submissionRepositoryService, flowConfigurations);
     this.messageSource = messageSource;
     this.pdfService = pdfService;
   }
@@ -39,8 +43,14 @@ public class PdfController extends FormFlowController {
   ResponseEntity<?> downloadPdf(
       @PathVariable String flow,
       @PathVariable String submissionId,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) throws IOException {
+    log.info("GET downloadPdf (url: {}): flow: {}, submissionId: {}", request.getRequestURI().toLowerCase(), flow, submissionId);
+    if (!doesFlowExist(flow)) {
+      throwNotFoundError(flow, null, String.format("Could not find flow %s in your application's flow configuration.", flow));
+    }
+
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
     if (httpSession.getAttribute("id").toString().equals(submissionId) && maybeSubmission.isPresent()) {
       log.info("Downloading PDF with submission_id: " + submissionId);

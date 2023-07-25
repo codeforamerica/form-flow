@@ -16,11 +16,11 @@ public class ShowErrorStackTraceTest extends AbstractBasePageTest {
     String errorMessages = testPage.findElementsByClass("data-table").get(0).getText();
     String stackTrace = testPage.findElementsByClass("stack-trace").get(0).getText();
     assertThat(errorMessages).containsSequence("Timestamp:");
-    assertThat(errorMessages).containsSequence("Status: 500");
-    assertThat(errorMessages).containsSequence("Message: Could not find flow=inputs in templates");
+    assertThat(errorMessages).containsSequence("Status: 404");
+    assertThat(errorMessages).containsSequence("Message: There was a problem with the request (flow: inputs, screen: null): Could not find flow inputs in your applications flow configuration file.");
     assertThat(errorMessages).containsSequence("Path: /flow/inputs/asdf");
-    assertThat(errorMessages).containsSequence("Exception: java.util.NoSuchElementException");
-    assertThat(stackTrace).containsSequence("java.util.NoSuchElementException: Could not find flow=inputs in templates");
+    assertThat(errorMessages).containsSequence("Exception: org.springframework.web.server.ResponseStatusException");
+    assertThat(stackTrace).containsSequence("org.springframework.web.server.ResponseStatusException: 404 NOT_FOUND \"There was a problem with the request (flow: inputs, screen: null): Could not find flow inputs in your applications flow configuration file.");
   }
 
   @Test

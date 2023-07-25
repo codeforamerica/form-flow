@@ -22,15 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -42,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -54,11 +50,8 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping("/flow")
 public class ScreenController extends FormFlowController {
 
-  private final List<FlowConfiguration> flowConfigurations;
   private final ValidationService validationService;
-
   private final AddressValidationService addressValidationService;
-
   private final ConditionManager conditionManager;
   private final ActionManager actionManager;
   private final FileValidationService fileValidationService;
@@ -71,8 +64,7 @@ public class ScreenController extends FormFlowController {
       ConditionManager conditionManager,
       ActionManager actionManager,
       FileValidationService fileValidationService) {
-    super(submissionRepositoryService);
-    this.flowConfigurations = flowConfigurations;
+    super(submissionRepositoryService, flowConfigurations);
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;
@@ -96,11 +88,13 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String uuid,
-      HttpSession httpSession
-  ) throws NoHandlerFoundException {
-    log.info("getScreen: flow: " + flow + ", screen: " + screen);
-
+      HttpSession httpSession,
+      HttpServletRequest request
+  ) {
+    log.info("GET getScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
+    // this will ensure that the screen and flow actually exist
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
+
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
       submission.mergeUrlParamsWithData(query_params);
@@ -111,14 +105,11 @@ public class ScreenController extends FormFlowController {
     submission.setFlow(flow);
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
-    if (currentScreen == null) {
-      throwNotFoundError(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen));
+    
+    if (uuid != null) {
+      actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     } else {
-      if (uuid != null) {
-        actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
-      } else {
-        actionManager.handleBeforeDisplayAction(currentScreen, submission);
-      }
+      actionManager.handleBeforeDisplayAction(currentScreen, submission);
     }
 
     Map<String, Object> model = createModel(flow, screen, httpSession, submission, null);
@@ -132,7 +123,6 @@ public class ScreenController extends FormFlowController {
       }
     }
 
-    log.info("getScreen: flow: " + flow + ", screen: " + screen);
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
 
@@ -158,13 +148,14 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession,
-      HttpServletRequest httpServletRequest
+      HttpServletRequest request
   ) throws SmartyException, IOException, InterruptedException {
-    log.info("postScreen: flow: " + flow + ", screen: " + screen);
+    log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
+    // Checks if screen and flow exist
+    var currentScreen = getScreenConfig(flow, screen);
+    
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     FormSubmission formSubmission = new FormSubmission(formData);
-    var currentScreen = getScreenConfig(flow, screen);
-
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission);
 
     // Field validation
@@ -179,7 +170,7 @@ public class ScreenController extends FormFlowController {
     handleAddressValidation(submission, formSubmission);
 
     // handle submit actions, if requested
-    if (httpServletRequest.getRequestURI().toLowerCase().contains("submit")) {
+    if (request.getRequestURI().toLowerCase().contains("submit")) {
       log.info(
           String.format(
               "Marking the application (%s) as submitted",
@@ -219,8 +210,12 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       @PathVariable String uuid,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) throws ResponseStatusException {
+    log.info("GET getSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, screen, uuid);
+    // Checks if screen and flow exist
+    var currentScreen = getScreenConfig(flow, screen);
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById((UUID) httpSession.getAttribute("id"));
 
     if (maybeSubmission.isEmpty()) {
@@ -230,7 +225,6 @@ public class ScreenController extends FormFlowController {
     }
 
     Submission submission = maybeSubmission.get();
-    var currentScreen = getScreenConfig(flow, screen);
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
@@ -261,14 +255,16 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       @PathVariable String uuid,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) throws ResponseStatusException, SmartyException, IOException, InterruptedException {
-    log.info("addToIteration: flow: " + flow + ", screen: " + screen + ", uuid: " + uuid);
+    log.info("POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, screen, uuid);
+    // Checks to see if flow and screen exist
+    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
     String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
     FormSubmission formSubmission = new FormSubmission(formData);
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
-    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     String subflowName = currentScreen.getSubflow();
 
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
@@ -374,8 +370,11 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String subflow,
       @PathVariable String uuid,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) {
+    log.info("GET deleteConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, uuid);
+    // Checks to see if flow exists
     String deleteConfirmationScreen = getFlowConfigurationByName(flow)
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
     UUID id = (UUID) httpSession.getAttribute("id");
@@ -407,12 +406,15 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String subflow,
       @PathVariable String uuid,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) throws ResponseStatusException {
-    UUID id = (UUID) httpSession.getAttribute("id");
-    Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
+    log.info("POST deleteSubflowIteration (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, uuid);
+    // Checks to make sure flow exists
     String subflowEntryScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getEntryScreen();
+    UUID id = (UUID) httpSession.getAttribute("id");
+    Optional<Submission> submissionOptional = submissionRepositoryService.findById(id);
     if (submissionOptional.isPresent()) {
       Submission submission = submissionOptional.get();
       var existingInputData = submission.getInputData();
@@ -454,22 +456,16 @@ public class ScreenController extends FormFlowController {
   ModelAndView navigation(
       @PathVariable String flow,
       @PathVariable String screen,
-      HttpSession httpSession
-  ) throws NoHandlerFoundException {
+      HttpSession httpSession,
+      HttpServletRequest request
+  ) {
+    log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
+    // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
-    log.info("navigation: flow: " + flow + ", screen: " + screen);
-    if (currentScreen == null) {
-      throwNotFoundError(HttpMethod.GET.toString(), String.format("/flow/%s/%s", flow, screen));
-    }
     String nextScreen = getNextScreenName(submissionRepositoryService.findOrCreate(httpSession), currentScreen, null);
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
-  }
-
-  private static void throwNotFoundError(String method, String url) throws NoHandlerFoundException {
-    HttpHeaders headers = new HttpHeaders();
-    throw new NoHandlerFoundException(method, url, headers);
   }
 
   private String getNextScreenName(Submission submission,
@@ -499,19 +495,11 @@ public class ScreenController extends FormFlowController {
    */
   private ScreenNavigationConfiguration getScreenConfig(String flow, String screen) {
     FlowConfiguration currentFlowConfiguration = getFlowConfigurationByName(flow);
-    return currentFlowConfiguration.getScreenNavigation(screen);
-  }
-
-  private FlowConfiguration getFlowConfigurationByName(String flow) {
-    try {
-      return flowConfigurations.stream().filter(
-          flowConfiguration -> flowConfiguration.getName().equals(flow)
-      ).toList().get(0);
-
-    } catch (ArrayIndexOutOfBoundsException e) {
-      throw new NoSuchElementException("Could not find flow=" + flow + " in templates");
+    ScreenNavigationConfiguration currentScreen = currentFlowConfiguration.getScreenNavigation(screen);
+    if (currentScreen == null) {
+      throwNotFoundError(flow, screen, "Screen could not be found in flow configuration for flow " + flow + ".");
     }
-
+    return currentFlowConfiguration.getScreenNavigation(screen);
   }
 
   private Boolean isConditionalNavigation(ScreenNavigationConfiguration currentScreen) {
