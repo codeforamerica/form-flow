@@ -78,7 +78,7 @@ jobs:
           GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
       - name: Confirm version ${{ inputs.version }} published to Sonatype
-        timeout-minutes: 60
+        timeout-minutes: 120
         run: |
           until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/${{inputs.version}}"
           do
