@@ -130,7 +130,7 @@ jobs:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-version-bumped
           client-payload: '{"version": "${{env.NEW_SNAPSHOT_VERSION}}"}'
-          token: ${{ secrets.PLATFORM_ROBOT_PAT }}
+          token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
       - name: "Announce successful release of ${{inputs.version}} to #platform-help"
         uses: ravsamhq/notify-slack-action@v2
         with:
