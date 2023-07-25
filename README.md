@@ -36,7 +36,6 @@ Table of Contents
         * [AWS S3](#aws-s3)
         * [File Naming Conventions](#file-naming-conventions)
         * [File Upload Widget](#file-upload-widget)
-        * [Configuring the Dropzone Widget](#configuring-the-dropzone-widget)
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
@@ -1274,85 +1273,6 @@ we will display a default image for those thumbnails.
 
 We do not store the thumbnails on the server side at all.
 
-### Configuring the Dropzone Widget
-
-#### Accepted file types
-
-In the [application.yaml](#application-configuration) file, an implementor may update the file types
-that the uploader can accept.
-
-```yaml
-form-flow:
-  uploads:
-    accepted-file-types: '.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp,.heic'
-```
-
-This list is passed to DropZone and anything not listed in `accepted-file-types` will be rejected by
-the file upload widget.
-
-_Note: `.tif`/`.tiff` and `heic` extensions do not seem to work right in DropZone, and we do not
-recommend including these file types. We've noticed that thumbnails are not created correctly for
-TIFF and HEIC files and they fail to correct upload when batched with other uploaded files._
-
-#### Max File Size
-
-You can configure a max file in MB, in `application.yaml`
-you just need to declare as `max-file-size` like below:
-
-```yaml
-form-flow:
-  uploads:
-    max-file-size: '20'
-```
-
-This will prevent a user from uploading any file that is larger than this set limit.
-
-Notice that the number value is in Megabytes but does not need the trailing MB.
-
-**Note:** if this value is not set, then the server will use it's default value of 1MB preventing
-any uploads larger than 1MB. When configuring this value, be sure to also
-set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
-and `server.tomcat.max-http-form-post-size` to be equal to the set value, in MB. Example below:
-
-```yaml
-spring:
-  servlet:
-  multipart:
-    max-file-size: ${form-flow.uploads.max-file-size}MB
-    max-request-size: ${form-flow.uploads.max-file-size}MB
-server:
-  tomcat:
-    max-http-form-post-size: ${form-flow.uploads.max-file-size}MB
-```
-
-#### Max number of files
-
-You can configure a maximum number of files allowed to be uploaded in your `application.yaml`. Just
-set `max-files` to the value you desire like below:
-
-```yaml
-form-flow:
-  uploads:
-    max-files: '20'
-```
-
-This will prevent a user from uploading more than that number of files.
-
-#### Thumbnail Size Configuration
-
-You can configure the desired width and height of the thumbnails the dropzone widget creates. To do
-so set a `thumbnail-width` and `thumbnail-height` value like so:
-
-```yaml
-form-flow:
-  uploads:
-    thumbnail-width: '64'
-    thumbnail-height: '60'
-```
-
-Note that these values are in pixels. We don't recommend going much larger than the values listed
-here to maintain a good-looking responsive design across both desktop and mobile.
-
 ### Uploaded File Storage
 
 The resulting file information will be stored in the database in two places:
@@ -2287,13 +2207,39 @@ your `application.yaml` like such:
 form-flow:
   path: 'name-of-file.yaml'
 ```
+#### File upload properties
+
+| Property                                | Default                                                    | Description                                                                                                                           |
+|-----------------------------------------|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.uploads.accepted-file-types` | `.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp` | Allowed subset of default file types. Anything not in that list (i.e. `.exe`) will be rejected, regardless of what is provided here.  |
+| `form-flow.uploads.max-file-size`       | `1`                                                        | Maximum file size limit. **IMPORTANT**: See [this note](#max-file-size-configuration) for how to configure other necessary properties |
+| `form-flow.uploads.max-files`           | `20`                                                       | Maximum number of files that can be uploaded                                                                                          |
+| `form-flow.uploads.thumbnail-width`     | `64`                                                       | Thumbnail width in pixels                                                                                                             |
+| `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
+
+##### Max file size configuration
+If `form-flow.uploads.max-file-size` is not set, then the server will use it's default value of 1MB preventing
+any uploads larger than 1MB. When configuring this value, be sure to also
+set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
+and `server.tomcat.max-http-form-post-size` to be equal to the set value, in MB. Example below:
+
+```yaml
+spring:
+  servlet:
+  multipart:
+    max-file-size: ${form-flow.uploads.max-file-size}MB
+    max-request-size: ${form-flow.uploads.max-file-size}MB
+server:
+  tomcat:
+    max-http-form-post-size: ${form-flow.uploads.max-file-size}MB
+```
 
 #### Error properties
 
-| Property                                | Value                    | Default    | Description                                                                                                        |
-|-----------------------------------------|--------------------------|------------|--------------------------------------------------------------------------------------------------------------------|
-| `form-flow.error.show-stack-trace`      | `boolean`                | `true`     | Show full the full stack trace and error codes on our '/error' template (on your local or staging env for example) |
-| `form-flow.error.pretty-print-packages` | Comma seperated `String` | `formflow` | A comma seperated list of packages that will be highlighted on the stacktrace for easier identification.           |
+| Property                                | Default    | Description                                                                                                        |
+|-----------------------------------------|------------|--------------------------------------------------------------------------------------------------------------------|
+| `form-flow.error.show-stack-trace`      | `true`     | Show full the full stack trace and error codes on our '/error' template (on your local or staging env for example) |
+| `form-flow.error.pretty-print-packages` | `formflow` | A comma seperated list of packages that will be highlighted on the stacktrace for easier identification.           |
 
 We've chosen to use a yaml version of the application file, but you could also store this as a
 `application.properties` file. In that file, the hierarchy would be all in one line, where the
