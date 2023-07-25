@@ -83,7 +83,7 @@ jobs:
           until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/${{inputs.version}}"
           do
             echo "Waiting for version ${{ inputs.version }} to be published to Sonatype..."
-            sleep 5
+            sleep 30
           done
       - name: "Announce failure to release of ${{inputs.version}} to #platform-help"
         uses: ravsamhq/notify-slack-action@v2
