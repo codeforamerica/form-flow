@@ -54,4 +54,8 @@ public class UserFileRepositoryService {
   public List<UserFile> findAllBySubmission(Submission submission) {
     return repository.findAllBySubmission(submission);
   }
+
+  public long countBySubmission(Submission submission) {
+    return repository.countBySubmission(submission);
+  }
 }

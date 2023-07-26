@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-conditional-navigation.yaml"})
+@SpringBootTest(properties = {
+    "form-flow.path=flows-config/test-conditional-navigation.yaml",
+    "form-flow.uploads.max-file-size=1",
+    "form-flow.uploads.max-files=10"
+})
 public class FileControllerTest extends AbstractMockMvcTest {
 
   Submission submission;
@@ -69,13 +74,13 @@ public class FileControllerTest extends AbstractMockMvcTest {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     submission = Submission.builder().id(submissionUUID).build();
+    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     super.setUp();
   }
 
   @Test
   public void fileUploadEndpointHitsCloudFileRepositoryAndAddsUserFileToSession() throws Exception {
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     doNothing().when(cloudFileRepository).upload(any(), any());
     // the "name" param has to match what the endpoint expects: "file"
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
@@ -110,6 +115,40 @@ public class FileControllerTest extends AbstractMockMvcTest {
     session.setAttribute("userFiles", testDzInstanceMap);
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
+  }
+
+  //  Todo: Update error code to reflect message we want to send for max-file constraint violation
+  @Test
+  void shouldReturn4xxIfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
+    MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, new byte[(int) (FileUtils.ONE_MB + 1)]);
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .andExpect(status().is(400))
+        .andExpect(content().string("This file is too large and cannot be uploaded (max size: 1 MB)"));
+  }
+
+  @Test
+  void shouldReturn4xxIfUploadFileViolatesMaxFilesConstraint() throws Exception {
+    MockMultipartFile testImage2 = new MockMultipartFile("file", "testFileSizeImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, new byte[10]);
+    when(userFileRepositoryService.countBySubmission(submission)).thenReturn(10L);
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage2)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .andExpect(status().is(400))
+        .andExpect(content().string(
+            "You have uploaded the maximum number of files. You will have the opportunity to share more with a caseworker later."));
   }
 
   @Nested
@@ -239,7 +278,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnNotFoundIfSubmissionDoesNotContainAnyFiles() throws Exception {
       session.setAttribute("id", submission.getId());
-      
+
       when(userFileRepositoryService.findAllBySubmission(submission)).thenReturn(Collections.emptyList());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())

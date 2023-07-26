@@ -5,9 +5,9 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.file.FileTypeService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
+import formflow.library.file.FileTypeService;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +21,7 @@ import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
@@ -49,18 +50,24 @@ public class FileController extends FormFlowController {
   private final FileTypeService fileTypeService;
 
   private final String SESSION_USERFILES_KEY = "userFiles";
+  private final Integer maxFileSize;
+  private final Integer maxFiles;
 
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
       MessageSource messageSource,
-      FileTypeService fileTypeService) {
+      FileTypeService fileTypeService,
+      @Value("${form-flow.uploads.max-file-size}") Integer maxFileSize,
+      @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
     super(submissionRepositoryService);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
     this.fileTypeService = fileTypeService;
+    this.maxFileSize = maxFileSize;
+    this.maxFiles = maxFiles;
   }
 
   /**
@@ -74,7 +81,7 @@ public class FileController extends FormFlowController {
    * @return ON SUCCESS: ResponseEntity with a body containing the id of a file. body.
    * <p>ON FAILURE: RepsonseEntity with an error message and a status code.</p>
    */
-  @PostMapping("/file-upload")
+  @PostMapping(value = "/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
       @RequestParam("file") MultipartFile file,
@@ -97,6 +104,11 @@ public class FileController extends FormFlowController {
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
+      if (file.getSize() > (maxFileSize * (1024 * 1024))) {
+        String message = messageSource.getMessage("upload-documents.this-file-is-too-large", List.of(maxFileSize).toArray(),
+            null);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+      }
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
       if (fileExtension.equals("pdf")) {
@@ -111,6 +123,11 @@ public class FileController extends FormFlowController {
         }
       }
 
+      var totalNumberOfFiles = userFileRepositoryService.countBySubmission(submission);
+      if (totalNumberOfFiles >= maxFiles) {
+        String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, null);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+      }
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
