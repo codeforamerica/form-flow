@@ -7,7 +7,7 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
-import formflow.library.file.FileTypeService;
+import formflow.library.file.FileValidationService;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,10 +47,8 @@ public class FileController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
 
   private final MessageSource messageSource;
-  private final FileTypeService fileTypeService;
-
+  private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
-  private final Integer maxFileSize;
   private final Integer maxFiles;
 
   public FileController(
@@ -58,15 +56,13 @@ public class FileController extends FormFlowController {
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
       MessageSource messageSource,
-      FileTypeService fileTypeService,
-      @Value("${form-flow.uploads.max-file-size}") Integer maxFileSize,
+      FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
     super(submissionRepositoryService);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
-    this.fileTypeService = fileTypeService;
-    this.maxFileSize = maxFileSize;
+    this.fileValidationService = fileValidationService;
     this.maxFiles = maxFiles;
   }
 
@@ -99,18 +95,19 @@ public class FileController extends FormFlowController {
         httpSession.setAttribute("id", submission.getId());
       }
 
-      if (!fileTypeService.isAcceptedMimeType(file)) {
+      if (!fileValidationService.isAcceptedMimeType(file)) {
         String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
-      if (file.getSize() > (maxFileSize * (1024 * 1024))) {
-        String message = messageSource.getMessage("upload-documents.this-file-is-too-large", List.of(maxFileSize).toArray(),
+      if (fileValidationService.isTooLarge(file)) {
+        String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
+            List.of(fileValidationService.getFileMaxSize()).toArray(),
             null);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
-      String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
+      String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
       if (fileExtension.equals("pdf")) {
         try (PDDocument ignored = PDDocument.load(file.getInputStream())) {
         } catch (InvalidPasswordException e) {
@@ -123,8 +120,7 @@ public class FileController extends FormFlowController {
         }
       }
 
-      var totalNumberOfFiles = userFileRepositoryService.countBySubmission(submission);
-      if (totalNumberOfFiles >= maxFiles) {
+      if (userFileRepositoryService.countBySubmission(submission) >= maxFiles) {
         String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, null);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
@@ -350,6 +346,5 @@ public class FileController extends FormFlowController {
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
         .body(responseBody);
-
   }
 }

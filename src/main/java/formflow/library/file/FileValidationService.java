@@ -30,8 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Slf4j
 @Service
-public class FileTypeService {
+public class FileValidationService {
 
+  public static final int MB_IN_BYTES = 1024 * 1024;
   private final Map<String, MimeType> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
       Map.entry(".gif", MediaType.IMAGE_GIF),
       Map.entry(".png", MediaType.IMAGE_PNG),
@@ -51,9 +52,13 @@ public class FileTypeService {
   private final List<String> ACCEPTED_FILE_EXTS;
 
   private final String JOIN_DELIMITER = ", ";
+  private final long maxFileSize;
 
-  public FileTypeService(
-      @Value("${form-flow.uploads.accepted-file-types:''}") String userProvidedFileTypes) {
+  public FileValidationService(
+      @Value("${form-flow.uploads.accepted-file-types:''}") String userProvidedFileTypes,
+      @Value("${form-flow.uploads.max-file-size}") Integer maxFileSize
+  ) {
+    this.maxFileSize = maxFileSize;
     List<String> userFileExts;
     List<String> serverFileExts = FILE_EXT_MIME_TYPE_MAP.keySet().stream().toList();
 
@@ -109,4 +114,13 @@ public class FileTypeService {
   public String acceptedFileTypes() {
     return String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS);
   }
+
+  public boolean isTooLarge(MultipartFile file) {
+    return file.getSize() > (maxFileSize * MB_IN_BYTES);
+  }
+
+  public Long getFileMaxSize() {
+    return maxFileSize;
+  }
+
 }

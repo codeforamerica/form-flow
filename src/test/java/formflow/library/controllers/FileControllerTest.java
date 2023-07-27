@@ -65,8 +65,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
-
-  private UUID fileId = UUID.randomUUID();
+  private final UUID fileId = UUID.randomUUID();
 
   @Override
   @BeforeEach
@@ -93,7 +92,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
             .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(200))
         .andExpect(content().string(fileId.toString()));
 
@@ -129,23 +128,22 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
             .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(400))
         .andExpect(content().string("This file is too large and cannot be uploaded (max size: 1 MB)"));
   }
 
   @Test
   void shouldReturn4xxIfUploadFileViolatesMaxFilesConstraint() throws Exception {
-    MockMultipartFile testImage2 = new MockMultipartFile("file", "testFileSizeImage.jpg",
-        MediaType.IMAGE_JPEG_VALUE, new byte[10]);
     when(userFileRepositoryService.countBySubmission(submission)).thenReturn(10L);
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-            .file(testImage2)
+            .file(new MockMultipartFile("file", "testFileSizeImage.jpg",
+                MediaType.IMAGE_JPEG_VALUE, new byte[10]))
             .param("flow", "testFlow")
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
             .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(400))
         .andExpect(content().string(
             "You have uploaded the maximum number of files. You will have the opportunity to share more with a caseworker later."));
