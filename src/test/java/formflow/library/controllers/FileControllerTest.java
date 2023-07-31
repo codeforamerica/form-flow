@@ -39,6 +39,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
@@ -93,7 +94,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .param("thumbDataURL", "base64string")
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-        .andExpect(status().is(200))
+        .andExpect(status().is(HttpStatus.OK.value()))
         .andExpect(content().string(fileId.toString()));
 
     verify(cloudFileRepository, times(1)).upload(any(), any());
@@ -116,9 +117,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
 
-  //  Todo: Update error code to reflect message we want to send for max-file constraint violation
   @Test
-  void shouldReturn4xxIfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
+  void shouldReturn13IfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, new byte[(int) (FileUtils.ONE_MB + 1)]);
 
@@ -129,7 +129,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .param("thumbDataURL", "base64string")
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-        .andExpect(status().is(400))
+        .andExpect(status().is(HttpStatus.PAYLOAD_TOO_LARGE.value()))
         .andExpect(content().string("This file is too large and cannot be uploaded (max size: 1 MB)"));
   }
 
@@ -144,7 +144,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .param("thumbDataURL", "base64string")
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-        .andExpect(status().is(400))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
         .andExpect(content().string(
             "You have uploaded the maximum number of files. You will have the opportunity to share more with a caseworker later."));
   }
@@ -188,7 +188,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
               .param("id", fileId.toString()))
-          .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
+          .andExpect(status().is(HttpStatus.FOUND.value())).andExpect(redirectedUrl("/error"));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("inputName", dzWidgetInputName)
               .param("id", UUID.randomUUID().toString())
               .session(session))
-          .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
+          .andExpect(status().is(HttpStatus.FOUND.value())).andExpect(redirectedUrl("/error"));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("inputName", dzWidgetInputName)
               .param("id", fileId.toString())
               .session(session))
-          .andExpect(status().is(302)).andExpect(redirectedUrl("/error"));
+          .andExpect(status().is(HttpStatus.FOUND.value())).andExpect(redirectedUrl("/error"));
     }
 
     @Test
@@ -221,7 +221,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("inputName", dzWidgetInputName)
               .param("id", fileId.toString())
               .session(session))
-          .andExpect(status().is(302));
+          .andExpect(status().is(HttpStatus.FOUND.value()));
 
       verify(cloudFileRepository, times(1)).delete(any());
       verify(userFileRepositoryService, times(1)).deleteById(any());
@@ -239,7 +239,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
               .session(session))
-          .andExpect(status().is(403));
+          .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
               .session(session))
-          .andExpect(status().is(403));
+          .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test
@@ -260,7 +260,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
               .session(session))
-          .andExpect(status().is(403));
+          .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test

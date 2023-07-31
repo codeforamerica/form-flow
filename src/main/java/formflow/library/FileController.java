@@ -97,14 +97,14 @@ public class FileController extends FormFlowController {
 
       if (!fileValidationService.isAcceptedMimeType(file)) {
         String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
-        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
 
       if (fileValidationService.isTooLarge(file)) {
         String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
             List.of(fileValidationService.getFileMaxSize()).toArray(),
             null);
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(message, HttpStatus.PAYLOAD_TOO_LARGE);
       }
 
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
