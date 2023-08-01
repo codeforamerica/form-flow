@@ -6,6 +6,11 @@ on:
         description: 'Version to release'
         type: string
         required: true
+      hotfix:
+        description: 'Is this a hotfix release?'
+        type: boolean
+        required: true
+        default: false
       sonatypeUsername:
         description: 'Sonatype username'
         type: string
@@ -97,6 +102,7 @@ jobs:
     name: Clean up after release
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ inputs.hotfix == false }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -122,6 +128,12 @@ jobs:
           event-type: form-flow-snapshot-version-bumped
           client-payload: '{"version": "${{env.NEW_SNAPSHOT_VERSION}}"}'
           token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
+  release_announcement:
+    name: Announce release
+    if: ${{ always() }}
+    needs: post_release_success
+    runs-on: ubuntu-latest
+    steps:
       - name: "Announce successful release of ${{inputs.version}} to #platform-help"
         uses: ravsamhq/notify-slack-action@v2
         with:
