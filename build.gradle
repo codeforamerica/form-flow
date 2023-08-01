@@ -19,7 +19,7 @@ targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
 group = "org.codeforamerica.platform"
-version = "0.0.9-SNAPSHOT"
+version = "0.0.10-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
