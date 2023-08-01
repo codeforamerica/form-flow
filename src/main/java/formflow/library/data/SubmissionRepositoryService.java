@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
+@Slf4j
 public class SubmissionRepositoryService {
 
   SubmissionRepository repository;
@@ -31,7 +34,11 @@ public class SubmissionRepositoryService {
    * @return UUID of the saved submission
    */
   public UUID save(Submission submission) {
+    var newRecord = submission.getId() == null;
     UUID id = repository.save(encryptionService.encrypt(submission)).getId();
+    if (newRecord) {
+      log.info("created submission id: " + id);
+    }
     submission.setId(id);
     return id;
   }
@@ -85,9 +92,18 @@ public class SubmissionRepositoryService {
     var id = (UUID) httpSession.getAttribute("id");
     if (id != null) {
       Optional<Submission> submissionOptional = findById(id);
-      return submissionOptional.orElseGet(Submission::new);
+      if (submissionOptional.isEmpty()) {
+        log.error("findOrCreate could not find submission: " + id);
+        Submission newSubmission = new Submission();
+        log.info("findOrCreate created new submission: " + newSubmission.getId());
+        return newSubmission;
+      } else {
+        return submissionOptional.get();
+      }
     } else {
-      return new Submission();
+      Submission newSubmission = new Submission();
+      log.info("findOrCreate got no submission id from session, so created new submission: " + newSubmission.getId());
+      return newSubmission;
     }
   }
 }
