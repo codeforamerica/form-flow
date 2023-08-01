@@ -103,12 +103,6 @@ jobs:
           ref: main
           fetch-depth: 0
           token: ${{ secrets.PLATFORM_ROBOT_PAT }}
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{inputs.version}}
-          draft: false
-          prerelease: false
       - name: Create new snapshot version string
         run: echo NEW_SNAPSHOT_VERSION=$(echo ${{ inputs.version }}  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
       - name: Update snapshot version
