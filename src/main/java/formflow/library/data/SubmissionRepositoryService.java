@@ -34,7 +34,11 @@ public class SubmissionRepositoryService {
    * @return UUID of the saved submission
    */
   public UUID save(Submission submission) {
+    var newRecord = submission.getId() == null;
     UUID id = repository.save(encryptionService.encrypt(submission)).getId();
+    if (newRecord) {
+      log.info("created submission id: " + id);
+    }
     submission.setId(id);
     return id;
   }
