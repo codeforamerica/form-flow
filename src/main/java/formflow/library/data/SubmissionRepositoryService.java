@@ -95,6 +95,7 @@ public class SubmissionRepositoryService {
       if (submissionOptional.isEmpty()) {
         log.error("findOrCreate could not find submission: " + id);
         Submission newSubmission = new Submission();
+        newSubmission.setId(UUID.randomUUID());
         log.info("findOrCreate created new submission: " + newSubmission.getId());
         return newSubmission;
       } else {
@@ -102,6 +103,7 @@ public class SubmissionRepositoryService {
       }
     } else {
       Submission newSubmission = new Submission();
+      newSubmission.setId(UUID.randomUUID());
       log.info("findOrCreate got no submission id from session, so created new submission: " + newSubmission.getId());
       return newSubmission;
     }
