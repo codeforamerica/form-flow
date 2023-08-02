@@ -5,9 +5,9 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.file.FileTypeService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
+import formflow.library.file.FileValidationService;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +21,7 @@ import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
@@ -46,21 +47,23 @@ public class FileController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
 
   private final MessageSource messageSource;
-  private final FileTypeService fileTypeService;
-
+  private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
+  private final Integer maxFiles;
 
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
       MessageSource messageSource,
-      FileTypeService fileTypeService) {
+      FileValidationService fileValidationService,
+      @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
     super(submissionRepositoryService);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
-    this.fileTypeService = fileTypeService;
+    this.fileValidationService = fileValidationService;
+    this.maxFiles = maxFiles;
   }
 
   /**
@@ -74,7 +77,7 @@ public class FileController extends FormFlowController {
    * @return ON SUCCESS: ResponseEntity with a body containing the id of a file. body.
    * <p>ON FAILURE: RepsonseEntity with an error message and a status code.</p>
    */
-  @PostMapping("/file-upload")
+  @PostMapping(value = "/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> upload(
       @RequestParam("file") MultipartFile file,
@@ -92,13 +95,19 @@ public class FileController extends FormFlowController {
         httpSession.setAttribute("id", submission.getId());
       }
 
-      if (!fileTypeService.isAcceptedMimeType(file)) {
+      if (!fileValidationService.isAcceptedMimeType(file)) {
         String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
-        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+      }
+
+      if (fileValidationService.isTooLarge(file)) {
+        String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
+            List.of(fileValidationService.getMaxFileSizeInMb()).toArray(),
+            null);
+        return new ResponseEntity<>(message, HttpStatus.PAYLOAD_TOO_LARGE);
       }
 
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
-
       if (fileExtension.equals("pdf")) {
         try (PDDocument ignored = PDDocument.load(file.getInputStream())) {
         } catch (InvalidPasswordException e) {
@@ -111,6 +120,10 @@ public class FileController extends FormFlowController {
         }
       }
 
+      if (userFileRepositoryService.countBySubmission(submission) >= maxFiles) {
+        String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, null);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+      }
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
@@ -333,6 +346,5 @@ public class FileController extends FormFlowController {
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
         .body(responseBody);
-
   }
 }

@@ -10,5 +10,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
+
   List<UserFile> findAllBySubmission(Submission submission);
+
+  long countBySubmission(Submission submission);
 }
