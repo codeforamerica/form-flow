@@ -61,6 +61,6 @@ class FileValidationServiceTest {
   @Test
   void getFileMaxSizeReturnsMaxFileSize() {
     FileValidationService fileValidationService = new FileValidationService(".jpeg,.bmp", 1);
-    assertThat(fileValidationService.getFileMaxSize()).isEqualTo(1);
+    assertThat(fileValidationService.getMaxFileSizeInMb()).isEqualTo(1);
   }
 }

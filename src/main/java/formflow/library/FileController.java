@@ -102,7 +102,7 @@ public class FileController extends FormFlowController {
 
       if (fileValidationService.isTooLarge(file)) {
         String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
-            List.of(fileValidationService.getFileMaxSize()).toArray(),
+            List.of(fileValidationService.getMaxFileSizeInMb()).toArray(),
             null);
         return new ResponseEntity<>(message, HttpStatus.PAYLOAD_TOO_LARGE);
       }

@@ -32,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileValidationService {
 
-  public static final int MB_IN_BYTES = 1024 * 1024;
+  public static final long MB_IN_BYTES = 1024 * 1024;
   private final Map<String, MimeType> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
       Map.entry(".gif", MediaType.IMAGE_GIF),
       Map.entry(".png", MediaType.IMAGE_PNG),
@@ -119,7 +119,7 @@ public class FileValidationService {
     return file.getSize() > (maxFileSize * MB_IN_BYTES);
   }
 
-  public Long getFileMaxSize() {
+  public Long getMaxFileSizeInMb() {
     return maxFileSize;
   }
 
