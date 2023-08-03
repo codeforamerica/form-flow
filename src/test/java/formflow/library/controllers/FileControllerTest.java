@@ -77,6 +77,20 @@ public class FileControllerTest extends AbstractMockMvcTest {
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     super.setUp();
   }
+  
+  @Test
+  void shouldReturn404IfFlowDoesNotExist() throws Exception {
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "flowThatDoesNotExist")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(404));
+  }
 
   @Test
   public void fileUploadEndpointHitsCloudFileRepositoryAndAddsUserFileToSession() throws Exception {

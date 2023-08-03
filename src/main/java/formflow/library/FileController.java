@@ -1,6 +1,7 @@
 package formflow.library;
 
 import com.google.common.io.Files;
+import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -8,6 +9,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -55,10 +58,11 @@ public class FileController extends FormFlowController {
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
       SubmissionRepositoryService submissionRepositoryService,
+      List<FlowConfiguration> flowConfigurations,
       MessageSource messageSource,
       FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
-    super(submissionRepositoryService);
+    super(submissionRepositoryService, flowConfigurations);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
@@ -84,9 +88,15 @@ public class FileController extends FormFlowController {
       @RequestParam("flow") String flow,
       @RequestParam("inputName") String inputName,
       @RequestParam("thumbDataURL") String thumbDataUrl,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) {
+    log.info("POST upload (url: {}): flow: {}, inputName: {}", request.getRequestURI().toLowerCase(), flow, inputName);
     try {
+      if (!doesFlowExist(flow)) {
+        throwNotFoundError(flow, null, String.format("Could not find flow with name %s in your application's flow configuration.", flow));
+      }
+      
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
@@ -166,6 +176,9 @@ public class FileController extends FormFlowController {
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
+      if (e instanceof ResponseStatusException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+      }
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
       // TODO update when we add internationalization to use locale for message source
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, null);
@@ -186,11 +199,11 @@ public class FileController extends FormFlowController {
       @RequestParam("id") UUID fileId,
       @RequestParam("returnPath") String returnPath,
       @RequestParam("inputName") String dropZoneInstanceName,
-      HttpSession httpSession
+      HttpSession httpSession,
+      HttpServletRequest request
   ) {
     try {
-      log.info("\uD83D\uDD25 Try to delete: " + fileId);
-
+      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId, dropZoneInstanceName);
       UUID submissionId = (UUID) httpSession.getAttribute("id");
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
@@ -244,9 +257,10 @@ public class FileController extends FormFlowController {
   public ResponseEntity<StreamingResponseBody> downloadSingleFile(
       HttpSession httpSession,
       @PathVariable String submissionId,
-      @PathVariable String fileId
+      @PathVariable String fileId,
+      HttpServletRequest request
   ) {
-
+    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId, fileId);
     if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -297,9 +311,10 @@ public class FileController extends FormFlowController {
   @GetMapping("/file-download/{submissionId}")
   ResponseEntity<StreamingResponseBody> downloadAllFiles(
       HttpSession httpSession,
-      @PathVariable String submissionId
+      @PathVariable String submissionId,
+      HttpServletRequest request
   ) {
-
+    log.info("GET downloadAllFiles (url: {}): submissionId: {}", request.getRequestURI().toLowerCase(), submissionId);
     if (!httpSession.getAttribute("id").toString().equals(submissionId)) {
       log.error(
           "Attempted to download files belonging to submission " + submissionId + " but session id " + httpSession.getAttribute(
