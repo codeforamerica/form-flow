@@ -61,6 +61,7 @@ Table of Contents
 * [Developer Setup](#developer-setup)
     * [Mac and Linux](#mac-and-linux)
     * [Windows](#windows)
+    * [Scripts](#scripts)
     * [Spring Profiles](#spring-profiles)
         * [DevController](#devcontroller)
         * [IntelliJ Configuration](#intellij-configuration)
