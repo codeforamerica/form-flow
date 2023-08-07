@@ -2432,13 +2432,13 @@ manually.
 ## Scripts
 
 We provide a directory in our starter application that holds helpful scripts.
-Information on the scripts can be found in the starter application's
-[README](https://github.com/codeforamerica/form-flow-starter-app#scripts) file.
+Please see the starter application's
+[README](https://github.com/codeforamerica/form-flow-starter-app#scripts) for more information.
 
 ## Spring Profiles
 
-There are a few  
-[Spring Profiles](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
+There are a
+few [Spring Profiles](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
 we use in the Form Flow library.
 
 ### `dev` profile
