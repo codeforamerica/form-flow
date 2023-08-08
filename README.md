@@ -61,6 +61,7 @@ Table of Contents
 * [Developer Setup](#developer-setup)
     * [Mac and Linux](#mac-and-linux)
     * [Windows](#windows)
+    * [Scripts](#scripts)
     * [Spring Profiles](#spring-profiles)
         * [DevController](#devcontroller)
         * [IntelliJ Configuration](#intellij-configuration)
@@ -2207,6 +2208,7 @@ your `application.yaml` like such:
 form-flow:
   path: 'name-of-file.yaml'
 ```
+
 #### File upload properties
 
 | Property                                | Default                                                    | Description                                                                                                                           |
@@ -2218,7 +2220,9 @@ form-flow:
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
 
 ##### Max file size configuration
-If `form-flow.uploads.max-file-size` is not set, then the server will use it's default value of 1MB preventing
+
+If `form-flow.uploads.max-file-size` is not set, then the server will use it's default value of 1MB
+preventing
 any uploads larger than 1MB. When configuring this value, be sure to also
 set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
 and `server.tomcat.max-http-form-post-size` to be equal to the set value, in MB. Example below:
@@ -2425,10 +2429,16 @@ After cloning the repository, run `./setupsh` from the root of the repo's direct
 Check the setup script for the most up to date list of dependencies and steps you'll need to install
 manually.
 
+## Scripts
+
+We provide a directory in our starter application that holds helpful scripts.
+Please see the starter application's
+[README](https://github.com/codeforamerica/form-flow-starter-app#scripts) for more information.
+
 ## Spring Profiles
 
-There are a few  
-[Spring Profiles](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
+There are a
+few [Spring Profiles](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
 we use in the Form Flow library.
 
 ### `dev` profile
