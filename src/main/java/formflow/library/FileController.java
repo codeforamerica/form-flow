@@ -94,9 +94,10 @@ public class FileController extends FormFlowController {
     log.info("POST upload (url: {}): flow: {}, inputName: {}", request.getRequestURI().toLowerCase(), flow, inputName);
     try {
       if (!doesFlowExist(flow)) {
-        throwNotFoundError(flow, null, String.format("Could not find flow with name %s in your application's flow configuration.", flow));
+        throwNotFoundError(flow, null,
+            String.format("Could not find flow with name %s in your application's flow configuration.", flow));
       }
-      
+
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
@@ -173,6 +174,7 @@ public class FileController extends FormFlowController {
       userFileMap.put(newFileId, fileInfo);
       dzFilesMap.put(inputName, userFileMap);
       httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
+      log.info("setAttribute {}", dzFilesMap);
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
@@ -203,7 +205,8 @@ public class FileController extends FormFlowController {
       HttpServletRequest request
   ) {
     try {
-      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId, dropZoneInstanceName);
+      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId,
+          dropZoneInstanceName);
       UUID submissionId = (UUID) httpSession.getAttribute("id");
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
@@ -238,6 +241,7 @@ public class FileController extends FormFlowController {
       }
 
       httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
+      log.info("setAttribute {}", dzFilesMap);
 
       return new RedirectView(returnPath);
     } catch (Exception e) {
@@ -260,7 +264,8 @@ public class FileController extends FormFlowController {
       @PathVariable String fileId,
       HttpServletRequest request
   ) {
-    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId, fileId);
+    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId,
+        fileId);
     if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }

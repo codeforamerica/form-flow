@@ -42,6 +42,26 @@ QUnit.module('Dropzone', function () {
               "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .pdf")
         });
   });
+  QUnit.module('Cancel file upload', function () {
+    QUnit.test(
+        'Cancel a file during upload and later upload same file',
+        assert => {
+          var jpegFile = new File([""], "test.jpeg", {type: "image/jpeg"});
+          window['cancelledFilesuploadTest'].push(jpegFile)
+          window.deleteCancelledFiles(heicFile);
+          assert.equal(
+              document.getElementsByClassName('text--error')[0].innerHTML,
+              "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .pdf")
+        });
+    QUnit.test('TIFF files throw an error even when allowed to be uploaded',
+        assert => {
+          var tiffFile = new File([""], "test.tiff", {type: "image/tiff"});
+          window['myDropZoneuploadTest'].addFile(tiffFile);
+          assert.equal(
+              document.getElementsByClassName('text--error')[0].innerHTML,
+              "We aren't able to upload this type of file. Please try another file that ends in one of the following: .jpeg, .pdf")
+        });
+  });
 });
 QUnit.testDone(function () {
   document.querySelector("#uploadTest").className += " display-none";

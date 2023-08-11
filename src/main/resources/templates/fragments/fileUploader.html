@@ -188,6 +188,7 @@
     }
 
     function removeFileFromDropzone(file, id) {
+      console.log("🔴 Remove file", file);
       window[dropzonePrefix + [[${inputName}]]].removeFile(file);
       if (id) {
         let toDeleteIdx = window['userFileIds' + [[${inputName}]]].indexOf(id);
@@ -202,16 +203,22 @@
       + [[${inputName}]]].options.maxFiles) {
         toggleMaxFileMessage('off');
       }
+      console.log("After", window['userFileIds' + [[${inputName}]]]);
     }
 
     function deleteCancelledFiles(file, id) {
+      console.log("Before", window['cancelledFiles' + [[${inputName}]]]);
       let filesToDelete = window['cancelledFiles' + [[${inputName}]]];
       filesToDelete.forEach(fTD => {
         if (fTD.name === file.name) {
           removeFileFromDropzone(file, id);
           sendDeleteXhrRequest(id);
+          window['cancelledFiles' + [[${inputName}]]] =
+              window['cancelledFiles' + [[${inputName}]]]
+              .filter(cancelledFile => cancelledFile.name !== file.name);
         }
-      })
+      });
+      console.log("After", window['cancelledFiles' + [[${inputName}]]]);
     }
 
     function sendDeleteXhrRequest(id) {
