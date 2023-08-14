@@ -241,7 +241,6 @@ public class FileController extends FormFlowController {
       }
 
       httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
-      log.info("setAttribute {}", dzFilesMap);
 
       return new RedirectView(returnPath);
     } catch (Exception e) {
