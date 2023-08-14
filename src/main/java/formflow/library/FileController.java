@@ -163,8 +163,9 @@ public class FileController extends FormFlowController {
       } else {
         dzFilesMap = (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
         if (dzFilesMap.containsKey(inputName)) {
-          // a map for this dropzone widget already exists, let's add more files to it
           userFileMap = dzFilesMap.get(inputName);
+          // Double check that files in session cookie are in db
+          userFileMap.entrySet().removeIf(e -> userFileRepositoryService.findById(e.getKey()).isEmpty());
         } else {
           // a map for this inputName dropzone instance does not exist yet, let's create it so we can add files to it
           userFileMap = new HashMap<>();
@@ -174,7 +175,6 @@ public class FileController extends FormFlowController {
       userFileMap.put(newFileId, fileInfo);
       dzFilesMap.put(inputName, userFileMap);
       httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
-      log.info("setAttribute {}", dzFilesMap);
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
