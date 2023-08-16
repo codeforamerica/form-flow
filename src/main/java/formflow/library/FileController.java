@@ -94,9 +94,10 @@ public class FileController extends FormFlowController {
     log.info("POST upload (url: {}): flow: {}, inputName: {}", request.getRequestURI().toLowerCase(), flow, inputName);
     try {
       if (!doesFlowExist(flow)) {
-        throwNotFoundError(flow, null, String.format("Could not find flow with name %s in your application's flow configuration.", flow));
+        throwNotFoundError(flow, null,
+            String.format("Could not find flow with name %s in your application's flow configuration.", flow));
       }
-      
+
       Submission submission = submissionRepositoryService.findOrCreate(httpSession);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
@@ -162,8 +163,9 @@ public class FileController extends FormFlowController {
       } else {
         dzFilesMap = (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
         if (dzFilesMap.containsKey(inputName)) {
-          // a map for this dropzone widget already exists, let's add more files to it
           userFileMap = dzFilesMap.get(inputName);
+          // Double check that files in session cookie are in db
+          userFileMap.entrySet().removeIf(e -> userFileRepositoryService.findById(e.getKey()).isEmpty());
         } else {
           // a map for this inputName dropzone instance does not exist yet, let's create it so we can add files to it
           userFileMap = new HashMap<>();
@@ -203,7 +205,8 @@ public class FileController extends FormFlowController {
       HttpServletRequest request
   ) {
     try {
-      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId, dropZoneInstanceName);
+      log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId,
+          dropZoneInstanceName);
       UUID submissionId = (UUID) httpSession.getAttribute("id");
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
@@ -260,7 +263,8 @@ public class FileController extends FormFlowController {
       @PathVariable String fileId,
       HttpServletRequest request
   ) {
-    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId, fileId);
+    log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId,
+        fileId);
     if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
