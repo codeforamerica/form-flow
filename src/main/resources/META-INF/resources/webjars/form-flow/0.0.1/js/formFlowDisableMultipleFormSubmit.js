@@ -11,9 +11,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// This prevents the button from being disabled when the user navigates back to 
+// the page after submitting the form using back button. 
+// (Safari caches the page in it's back-forward cache).
 window.addEventListener('pageshow', function (event) {
   if (event.persisted) {
-    console.log("pageshow event: the page was restored from the bfcache" + event.persisted)
     const formSubmitButton = document.getElementById("form-submit-button");
     if (formSubmitButton) {
       formSubmitButton.classList.remove("button--disabled");
