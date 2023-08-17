@@ -210,8 +210,11 @@
         if (fTD.name === file.name) {
           removeFileFromDropzone(file, id);
           sendDeleteXhrRequest(id);
+          window['cancelledFiles' + [[${inputName}]]] =
+              window['cancelledFiles' + [[${inputName}]]]
+              .filter(cancelledFile => cancelledFile.name !== file.name);
         }
-      })
+      });
     }
 
     function sendDeleteXhrRequest(id) {
