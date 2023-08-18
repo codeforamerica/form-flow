@@ -2422,7 +2422,7 @@ file.
 
 ## Mac and Linux
 
-After cloning the repository, run `./setupsh` from the root of the repo's directory.
+After cloning the repository, run `./setup.sh` from the root of the repo's directory.
 
 ## Windows
 
@@ -2491,7 +2491,7 @@ of `flows-config.yaml`:
 1. Name can be anything (i.e. "Flow Config")
 1. "Schema file or URL" needs to be set to the `flows-config-schema.json` file you just downloaded
 1. "Schema version" set to "JSON Schema version 7"
-1. Use the "+" under schema version to add:
+1. Use the "+" under schema version to add a file:
     - a new file and connect to `src/main/resources/flows-config.yaml`
     - a folder and connect to `src/test/resources/flows-config`
 
@@ -2543,6 +2543,11 @@ you can contribute it to this project so that other teams can use it.
 - Set the Project SDK to Java 17 in `File -> Project Structure -> SDK`
 - Enable annotation processing
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
+
+**note**: if you do not see the option to select Java 17, you may need to create a symlink by using this command:
+
+`sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk`
+
 - Set the Gradle JVM version to `17 Eclipse Temurin version 17.0.5`
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
 - Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.X`
