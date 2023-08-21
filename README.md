@@ -51,6 +51,7 @@ Table of Contents
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
         * [Application Configuration](#application-configuration)
+            * [Actuator Endpoints](#actuator-endpoints)
         * [flows-config.yaml file](#flows-configyaml-file)
         * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
         * [Screens](#screens)
@@ -2250,6 +2251,38 @@ We've chosen to use a yaml version of the application file, but you could also s
 inputs line would look like this: `form-flow.path='flows-config.yaml'`. Throughout this document,
 when we reference a configuration from this file, we will write it as dot separated parameters.
 
+#### Actuator Endpoints
+
+Spring Boot provides a module,
+called [`spring-boot-starter-actuator`](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints),
+that will expose endpoints that will allow you to monitor and interact with your application.
+
+**While these are very powerful, they can also reveal sensitive information about your
+application. They are a huge security concern.**
+
+It's best to disable them in production and demo environments, or just leave the `health` and
+`info` endpoints exposed.
+
+In our starter application, we have left all endpoints open in the `dev` environment, while we close
+most of them down in our `demo` environment.
+
+* Starter Application
+  [`dev`](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application-dev.yaml)
+  environment
+* Starter Application
+  [`demo`](ihttps://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application-demo.yaml)
+  environment
+
+Both of these build on / override the setup in the
+basic [`application.yaml`](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application.yaml)
+file.
+
+We recommend reading up on these to fully understand the implications of working with the
+actuator endpoints.
+
+* [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints)
+* [Actuator API](https://docs.spring.io/spring-boot/docs/3.1.2/actuator-api/htmlsingle)
+
 ### flows-config.yaml file
 
 ### Flow and Subflow Configuration
@@ -2544,7 +2577,8 @@ you can contribute it to this project so that other teams can use it.
 - Enable annotation processing
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
 
-**note**: if you do not see the option to select Java 17, you may need to create a symlink by using this command:
+**note**: if you do not see the option to select Java 17, you may need to create a symlink by using
+this command:
 
 `sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk`
 
