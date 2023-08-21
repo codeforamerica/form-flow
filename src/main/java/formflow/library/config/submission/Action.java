@@ -55,7 +55,7 @@ public interface Action {
   /*
    * Runs validation code with the expectation that error messages may be returned.
    */
-  default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
+  default Map<String, List<String>> runValidation(final FormSubmission formSubmission, Submission submission) {
     throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
 }

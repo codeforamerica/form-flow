@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActionManager {
 
-  private HashMap<String, Action> actions = new HashMap<>();
+  private final HashMap<String, Action> actions = new HashMap<>();
 
   public ActionManager(List<Action> actionsList) {
     actionsList.forEach(action -> this.actions.put(action.getClass().getSimpleName(), action));
@@ -166,14 +166,15 @@ public class ActionManager {
    *
    * @param currentScreen  The screen that we are currently saving data from.
    * @param formSubmission The current form submission
+   * @param submission     The submission object after changes to the current screen have been saved to the repository
    * @return A map of validation results
    */
   public Map<String, List<String>> handleCrossFieldValidationAction(ScreenNavigationConfiguration currentScreen,
-      FormSubmission formSubmission) {
+      FormSubmission formSubmission, Submission submission) {
     Map<String, List<String>> messageMap = new HashMap<>();
     String actionName = currentScreen.getCrossFieldValidationAction();
     if (actionName != null) {
-      messageMap.putAll(runValidationAction(actionName, formSubmission));
+      messageMap.putAll(runValidationAction(actionName, formSubmission, submission));
     }
     return messageMap;
   }
@@ -207,10 +208,10 @@ public class ActionManager {
     }
   }
 
-  private Map<String, List<String>> runValidationAction(String name, FormSubmission formSubmission) {
+  private Map<String, List<String>> runValidationAction(String name, FormSubmission formSubmission, Submission submission) {
     Map<String, List<String>> errorMessages = new HashMap<>();
     try {
-      Map<String, List<String>> messages = getAction(name).runValidation(formSubmission);
+      Map<String, List<String>> messages = getAction(name).runValidation(formSubmission, submission);
       if (messages != null) {
         errorMessages.putAll(messages);
       }
