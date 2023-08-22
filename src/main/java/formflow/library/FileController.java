@@ -21,6 +21,8 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBufferedFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.beans.factory.annotation.Value;
@@ -120,7 +122,7 @@ public class FileController extends FormFlowController {
 
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
       if (fileExtension.equals("pdf")) {
-        try (PDDocument ignored = PDDocument.load(file.getInputStream())) {
+        try (PDDocument ignored = Loader.loadPDF(new RandomAccessReadBufferedFile(file.getName()))) {
         } catch (InvalidPasswordException e) {
           // TODO update when we add internationalization to use locale for message source
           String message = messageSource.getMessage("upload-documents.error-password-protected", null, null);
