@@ -84,6 +84,7 @@ dependencies {
     implementation 'com.mailgun:mailgun-java:1.0.8'
     implementation 'com.google.crypto.tink:tink:1.10.0'
     implementation 'org.springframework.session:spring-session-jdbc'
+    compileOnly 'org.springframework.boot:spring-boot-starter-webflux'
 
     compileOnly 'org.projectlombok:lombok'
 
