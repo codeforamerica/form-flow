@@ -201,7 +201,7 @@ public class FileController extends FormFlowController {
       if (e instanceof ResponseStatusException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
       }
-      log.error("Error occurred while uploading file " + e.getLocalizedMessage());
+      log.error("Error occurred while uploading file: " + e.getLocalizedMessage());
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, locale);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
