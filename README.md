@@ -413,7 +413,7 @@ es). It should look like this:
 
 ```yaml
 form-flow:
-  inputs: 'org.formflowstartertemplate.app.inputs.'
+  inputs: '<your-apps-custom-path-to-inputs>.inputs.'
 ```
 
 The library will expect a class that matches the name of the flow there. So if the flow name, as
@@ -2193,7 +2193,7 @@ file.
 
 ```yaml
 form-flow:
-  inputs: 'org.formflowstartertemplate.app.inputs.'
+  inputs: '<your-apps-custom-path-to-inputs>.inputs.'
   aws:
     region: 'us-west-1'
     s3_bucket_name: 'form-flow'

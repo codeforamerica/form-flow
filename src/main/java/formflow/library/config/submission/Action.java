@@ -51,11 +51,25 @@ public interface Action {
     throw new UnsupportedOperationException("Not implemented " + this.getClass().getName());
   }
 
-
-  /*
+  /**
    * Runs validation code with the expectation that error messages may be returned.
+   *
+   * @param formSubmission form submission object the action is associated with, not null
+   * @deprecated use `runValidation(final FormSubmission formSubmission, Submission submission)` instead.
    */
+  @Deprecated
   default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
+    throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
+  }
+
+
+  /**
+   * Runs validation code with the expectation that error messages may be returned.
+   *
+   * @param formSubmission form submission object the action is associated with, not null
+   * @param submission     submission object the action is associated with, not null
+   */
+  default Map<String, List<String>> runValidation(final FormSubmission formSubmission, Submission submission) {
     throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
 }

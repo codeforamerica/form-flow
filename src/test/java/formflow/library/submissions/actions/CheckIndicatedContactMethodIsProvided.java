@@ -2,6 +2,7 @@ package formflow.library.submissions.actions;
 
 import formflow.library.config.submission.Action;
 import formflow.library.data.FormSubmission;
+import formflow.library.data.Submission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CheckIndicatedContactMethodIsProvided implements Action {
 
-  public Map<String, List<String>> runValidation(FormSubmission formSubmission) {
+  public Map<String, List<String>> runValidation(FormSubmission formSubmission, Submission submission) {
 
     String HOW_TO_CONTACT_YOU_INPUT = "howToContactYou[]";
     String PHONE_NUMBER_INPUT = "phoneNumber";

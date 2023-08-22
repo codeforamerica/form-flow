@@ -105,7 +105,7 @@ public class ScreenController extends FormFlowController {
     submission.setFlow(flow);
     saveToRepository(submission);
     httpSession.setAttribute("id", submission.getId());
-    
+
     if (uuid != null) {
       actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     } else {
@@ -153,16 +153,16 @@ public class ScreenController extends FormFlowController {
     log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     // Checks if screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
-    
+
     Submission submission = submissionRepositoryService.findOrCreate(httpSession);
     FormSubmission formSubmission = new FormSubmission(formData);
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission);
 
     // Field validation
-    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
+    var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
     handleErrors(httpSession, errorMessages, formSubmission);
 
-    if (errorMessages.size() > 0) {
+    if (!errorMessages.isEmpty()) {
       return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, screen));
     }
 
@@ -213,7 +213,12 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession,
       HttpServletRequest request
   ) throws ResponseStatusException {
-    log.info("GET getSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, screen, uuid);
+    log.info(
+        "GET getSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
+        request.getRequestURI().toLowerCase(),
+        flow,
+        screen,
+        uuid);
     // Checks if screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById((UUID) httpSession.getAttribute("id"));
@@ -258,7 +263,12 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession,
       HttpServletRequest request
   ) throws ResponseStatusException, SmartyException, IOException, InterruptedException {
-    log.info("POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, screen, uuid);
+    log.info(
+        "POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}",
+        request.getRequestURI().toLowerCase(),
+        flow,
+        screen,
+        uuid);
     // Checks to see if flow and screen exist
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
@@ -279,9 +289,9 @@ public class ScreenController extends FormFlowController {
           .orElse(null);
     }
 
-    var errorMessages = validationService.validate(currentScreen, flow, formSubmission);
+    var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
     handleErrors(httpSession, errorMessages, formSubmission);
-    if (errorMessages.size() > 0) {
+    if (!errorMessages.isEmpty()) {
       if (isNewIteration) {
         return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, screen));
       } else {
@@ -373,7 +383,7 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession,
       HttpServletRequest request
   ) {
-    log.info("GET deleteConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, uuid);
+    log.info("GET deleteConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(), flow, uuid);
     // Checks to see if flow exists
     String deleteConfirmationScreen = getFlowConfigurationByName(flow)
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
@@ -409,7 +419,11 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession,
       HttpServletRequest request
   ) throws ResponseStatusException {
-    log.info("POST deleteSubflowIteration (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(),flow, uuid);
+    log.info(
+        "POST deleteSubflowIteration (url: {}): flow: {}, uuid: {}",
+        request.getRequestURI().toLowerCase(),
+        flow,
+        uuid);
     // Checks to make sure flow exists
     String subflowEntryScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getEntryScreen();
@@ -474,7 +488,7 @@ public class ScreenController extends FormFlowController {
 
     List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, submission, subflowUuid);
 
-    if (isConditionalNavigation(currentScreen) && nextScreens.size() > 0) {
+    if (isConditionalNavigation(currentScreen) && !nextScreens.isEmpty()) {
       nextScreen = nextScreens.get(0);
     } else {
       // TODO this needs to throw an error if there are more than 1 next screen that don't have a condition or more than one evaluate to true
@@ -625,7 +639,7 @@ public class ScreenController extends FormFlowController {
 
   private void handleErrors(HttpSession httpSession, Map<String, List<String>> errorMessages,
       FormSubmission formSubmission) {
-    if (errorMessages.size() > 0) {
+    if (!errorMessages.isEmpty()) {
       httpSession.setAttribute("errorMessages", errorMessages);
       httpSession.setAttribute("formDataSubmission", formSubmission.getFormData());
     } else {

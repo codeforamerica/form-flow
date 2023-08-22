@@ -24,16 +24,17 @@ public class SubmissionEncryptionService {
 
   public final String ENCRYPT_SUFFIX = "_encrypted";
   private final Aead encDec;
-
-  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
-  private String inputConfigPath;
+  private final String inputConfigPath;
 
   private enum EncryptionDirection {
     ENCRYPT,
     DECRYPT
   }
 
-  public SubmissionEncryptionService(@Value("${form-flow.encryption-key:#{null}}") String key) {
+  public SubmissionEncryptionService(
+      @Value("${form-flow.encryption-key:#{null}}") String key,
+      @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
+    this.inputConfigPath = inputConfigPath;
     if (key == null || key.isEmpty()) {
       encDec = null;
       return;

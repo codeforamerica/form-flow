@@ -3,6 +3,7 @@ package formflow.library;
 import formflow.library.config.ActionManager;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
+import formflow.library.data.Submission;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -34,8 +35,7 @@ public class ValidationService {
 
   private final Validator validator;
   private final ActionManager actionManager;
-  @Value("${form-flow.inputs: 'org.formflowstartertemplate.app.inputs'}")
-  private String inputConfigPath;
+  private final String inputConfigPath;
   private final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
       NotEmpty.class.getName(),
@@ -47,9 +47,11 @@ public class ValidationService {
    *
    * @param validator Validator from Jakarta package.
    */
-  public ValidationService(Validator validator, ActionManager actionManager) {
+  public ValidationService(Validator validator, ActionManager actionManager,
+      @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
     this.validator = validator;
     this.actionManager = actionManager;
+    this.inputConfigPath = inputConfigPath;
   }
 
   /**
@@ -61,7 +63,7 @@ public class ValidationService {
    * @return a HashMap of field to list of error messages, will be empty if no field violations
    */
   public Map<String, List<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
-      FormSubmission formSubmission) {
+      FormSubmission formSubmission, Submission submission) {
 
     Map<String, List<String>> crossFieldValidationMessages;
     FormSubmission filteredSubmission = new FormSubmission(formSubmission.getValidatableFields());
@@ -70,7 +72,7 @@ public class ValidationService {
     Map<String, List<String>> validationMessages = performFieldLevelValidation(flowName, filteredSubmission);
 
     // perform cross-field validations, if supplied in action
-    crossFieldValidationMessages = actionManager.handleCrossFieldValidationAction(currentScreen, filteredSubmission);
+    crossFieldValidationMessages = actionManager.handleCrossFieldValidationAction(currentScreen, filteredSubmission, submission);
 
     // combine messages and return them
     validationMessages.putAll(crossFieldValidationMessages);
