@@ -9,6 +9,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
+import formflow.library.file.FileVirusScanner;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -51,6 +53,11 @@ public class FileController extends FormFlowController {
   private final UserFileRepositoryService userFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
 
+  @Value("${form-flow.uploads.virus-scanning.enabled:false}")
+  private Boolean shouldScanForViruses;
+
+  private final FileVirusScanner fileVirusScanner;
+
   private final MessageSource messageSource;
   private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
@@ -59,6 +66,8 @@ public class FileController extends FormFlowController {
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
+      @Autowired(required = false)
+      FileVirusScanner fileVirusScanner,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations,
       MessageSource messageSource,
@@ -70,6 +79,7 @@ public class FileController extends FormFlowController {
     this.messageSource = messageSource;
     this.fileValidationService = fileValidationService;
     this.maxFiles = maxFiles;
+    this.fileVirusScanner = fileVirusScanner;
   }
 
   /**
@@ -107,6 +117,13 @@ public class FileController extends FormFlowController {
         submission.setFlow(flow);
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
+      }
+
+      if (shouldScanForViruses) {
+        if (fileVirusScanner.doesFileHaveVirus(file)) {
+          String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
+          return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
       }
 
       if (!fileValidationService.isAcceptedMimeType(file)) {
@@ -185,7 +202,6 @@ public class FileController extends FormFlowController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
       }
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
-      // TODO update when we add internationalization to use locale for message source
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, locale);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
