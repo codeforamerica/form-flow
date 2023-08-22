@@ -166,7 +166,7 @@ public class ActionManager {
    *
    * @param currentScreen  The screen that we are currently saving data from.
    * @param formSubmission The current form submission
-   * @param submission     The submission object after changes to the current screen have been saved to the repository
+   * @param submission     The submission object before changes to the current screen have been saved to the repository
    * @return A map of validation results
    */
   public Map<String, List<String>> handleCrossFieldValidationAction(ScreenNavigationConfiguration currentScreen,
