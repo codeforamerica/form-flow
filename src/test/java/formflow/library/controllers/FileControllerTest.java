@@ -130,6 +130,25 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
+  
+  @Test
+  void shouldShowFileContainsVirusErrorIfClammitScanFindsVirus() throws Exception {
+    MockMultipartFile testVirusFile = new MockMultipartFile(
+        "file",                
+        "test-virus-file.jpg",            
+        MediaType.IMAGE_JPEG_VALUE,          
+        "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testVirusFile)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(500))
+        .andExpect(content().string("File test-virus-file.jpg has a virus!"));
+  }
 
   @Test
   void shouldReturn13IfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {

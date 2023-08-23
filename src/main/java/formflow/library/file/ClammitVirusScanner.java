@@ -54,8 +54,8 @@ public class ClammitVirusScanner implements FileVirusScanner {
           .body(BodyInserters.fromMultipartData(body))
           .retrieve()
           // take this onStatus out if things are not working. It works okay with out it.
-          .onStatus(HttpStatus.I_AM_A_TEAPOT::equals,
-              response -> response.bodyToMono(String.class).map(FileHasVirusException::new))
+//          .onStatus(HttpStatus.I_AM_A_TEAPOT::equals,
+//              response -> response.bodyToMono(String.class).map(FileHasVirusException::new))
           .bodyToMono(String.class)
           .timeout(Duration.ofMillis(TIMEOUT))
           .doOnError(TimeoutException.class, error -> {
@@ -98,11 +98,10 @@ public class ClammitVirusScanner implements FileVirusScanner {
           connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
         });
 */
-    WebClient client = WebClient.builder()
+
+    return WebClient.builder()
         .baseUrl(url)
         //       .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
         .build();
-
-    return client;
   }
 }
