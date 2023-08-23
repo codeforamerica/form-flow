@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,8 +20,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.TcpClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Slf4j
 public class ClammitVirusScanner implements FileVirusScanner {
@@ -39,7 +39,7 @@ public class ClammitVirusScanner implements FileVirusScanner {
 
     // TODO: we need a way to identify failure based on URL not being live
 
-    String fullUrl = clammitUrl + "/" + SCAN_PATH;
+    String fullUrl = clammitUrl.endsWith("/") ? clammitUrl + SCAN_PATH : clammitUrl + "/" + SCAN_PATH;
 
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
     body.add("file", file.getResource());
@@ -66,8 +66,16 @@ public class ClammitVirusScanner implements FileVirusScanner {
 
       log.info("Clammit response: {}", responseBody);
       return responseBody.contains("OK");
-
+    } catch (WebClientResponseException e) {
+      if (e.getStatusCode().equals(HttpStatus.I_AM_A_TEAPOT)) {
+        log.error("File uploaded contains virus");
+        return true; // virus alert!!
+        //throw new FileHasVirusException("File contains virus. Not accepting file.");
+      } else {
+        throw new RuntimeException(e.getMessage());
+      }
     } catch (Exception e) {
+      // something else failed with the service
       log.error("received exception from clammit server: {}", e.getMessage());
       throw new VirusScanException(
           String.format("Clammit service unable to process request for file. It returned: %s", e.getMessage()));

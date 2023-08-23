@@ -86,6 +86,8 @@ dependencies {
     implementation 'com.google.crypto.tink:tink:1.10.0'
     implementation 'org.springframework.session:spring-session-jdbc'
 
+    // For M1 issue? 
+    //runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.97.Final:osx-aarch_64'
     compileOnly 'org.projectlombok:lombok'
 
     annotationProcessor 'org.projectlombok:lombok'

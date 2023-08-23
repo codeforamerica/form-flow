@@ -16,8 +16,10 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.exceptions.FileHasVirusException;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
+import formflow.library.file.ClammitVirusScanner;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -66,6 +70,9 @@ public class FileControllerTest extends AbstractMockMvcTest {
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
+  @MockBean
+  private ClammitVirusScanner clammitVirusScanner;
+
   private final UUID fileId = UUID.randomUUID();
 
   @Override
@@ -75,9 +82,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     submission = Submission.builder().id(submissionUUID).build();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    when(clammitVirusScanner.doesFileHaveVirus(any())).thenReturn(false);
     super.setUp();
   }
-  
+
   @Test
   void shouldReturn404IfFlowDoesNotExist() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
@@ -130,14 +138,23 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
-  
+
+  // tests
+  // * can we test when configured not to run?
+  //    TEST with file with virus, make sure not marked as "scanned" in the user_files table
+  // * if configured to run and SNE set property to still allow upload when service can't be reached
+  //    TEST to see upload is still allowed and that file is marked as not checked in user_files table
+  // * if configured to run and SNE set property to NOT allow upload when service can't be reached
+  //    TEST that no upload occurs and error message is returned.
+
   @Test
   void shouldShowFileContainsVirusErrorIfClammitScanFindsVirus() throws Exception {
     MockMultipartFile testVirusFile = new MockMultipartFile(
-        "file",                
-        "test-virus-file.jpg",            
-        MediaType.IMAGE_JPEG_VALUE,          
+        "file",
+        "test-virus-file.jpg",
+        MediaType.IMAGE_JPEG_VALUE,
         "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
+    when(clammitVirusScanner.doesFileHaveVirus(testVirusFile)).thenReturn(true);
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testVirusFile)
@@ -146,8 +163,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .param("thumbDataURL", "base64string")
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-        .andExpect(status().is(500))
-        .andExpect(content().string("File test-virus-file.jpg has a virus!"));
+        .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
+        .andExpect(content().string(this.messageSource.getMessage("upload-documents.error-virus-found", null, Locale.ENGLISH)));
   }
 
   @Test
