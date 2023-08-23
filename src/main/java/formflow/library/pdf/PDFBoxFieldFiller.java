@@ -38,7 +38,7 @@ public class PDFBoxFieldFiller {
   @NotNull
   private PDDocument fillOutPdfs(Collection<PdfField> fields, Resource pdfResource) {
     try {
-      PDDocument loadedDoc = Loader.loadPDF(new RandomAccessReadBufferedFile(pdfResource.getFilename()));
+      PDDocument loadedDoc = Loader.loadPDF(pdfResource.getContentAsByteArray());
       PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
       acroForm.setNeedAppearances(true);
       fillAcroForm(fields, acroForm);
