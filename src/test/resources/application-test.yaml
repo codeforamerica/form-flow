@@ -9,8 +9,7 @@ form-flow:
     thumbnail-height: '50'
     virus-scanning:
       enabled: true
-      clammit-url: 'https://app-58915.on-aptible.com/clammit/'
-      block-if-unreachable: false
+      clammit-url: 'https://app-58915.on-aptible.com/clammit/scan'
   address-validation:
     smarty:
       auth-id: "authId"

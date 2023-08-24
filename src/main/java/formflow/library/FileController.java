@@ -57,7 +57,7 @@ public class FileController extends FormFlowController {
   @Value("${form-flow.uploads.virus-scanning.enabled:false}")
   private Boolean shouldScanForViruses;
 
-  @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:true}")
+  @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}")
   private Boolean blockIfClammitCannotBeReached;
 
   private final FileVirusScanner fileVirusScanner;
@@ -122,7 +122,12 @@ public class FileController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-      
+
+      if (!fileValidationService.isAcceptedMimeType(file)) {
+        String message = messageSource.getMessage("upload-documents.error-mime-type", null, locale);
+        return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+      }
+
       try {
         if (shouldScanForViruses && fileVirusScanner.doesFileHaveVirus(file)) {
           String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
@@ -134,11 +139,6 @@ public class FileController extends FormFlowController {
           String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
           return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
         }
-      }
-
-      if (!fileValidationService.isAcceptedMimeType(file)) {
-        String message = messageSource.getMessage("upload-documents.error-mime-type", null, locale);
-        return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
 
       if (fileValidationService.isTooLarge(file)) {

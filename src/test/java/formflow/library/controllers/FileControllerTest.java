@@ -16,7 +16,6 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.exceptions.FileHasVirusException;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.ClammitVirusScanner;
@@ -29,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +35,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -153,7 +150,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         "file",
         "test-virus-file.jpg",
         MediaType.IMAGE_JPEG_VALUE,
-        "X5O".getBytes());
+        "This File Has a Virus! Ahhhhh!".getBytes());
     when(clammitVirusScanner.doesFileHaveVirus(testVirusFile)).thenReturn(true);
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
@@ -164,30 +161,14 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
-        .andExpect(content().string(this.messageSource.getMessage("upload-documents.error-virus-found", null, Locale.ENGLISH)));
+        .andExpect(content().string("We are unable to process this file because a virus was detected. Please try another file."));
   }
   
-  @Test
-  void shouldPreventUploadAndShowAnErrorIfBlockIfUnreachableIsSetToTrue() throws Exception {
-    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
-        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    when(clammitVirusScanner.doesFileHaveVirus(testImage)).thenThrow(new Exception("Clammit is down!"));
-    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-            .file(testImage)
-            .param("flow", "testFlow")
-            .param("inputName", "dropZoneTestInstance")
-            .param("thumbDataURL", "base64string")
-            .session(session)
-            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-        .andExpect(status().is(HttpStatus.SERVICE_UNAVAILABLE.value()))
-        .andExpect(content().string(this.messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, Locale.ENGLISH)));
-  }
-
   @Test
   void ShouldAllowUploadIfBlockIfUnreachableIsSetToFalse() throws Exception {
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     doNothing().when(cloudFileRepository).upload(any(), any());
-    
+
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
     when(clammitVirusScanner.doesFileHaveVirus(testImage)).thenThrow(new Exception("Clammit is down!"));

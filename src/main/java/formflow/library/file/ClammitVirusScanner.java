@@ -18,8 +18,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @Slf4j
 public class ClammitVirusScanner implements FileVirusScanner {
 
-  private final String SCAN_PATH = "scan";
-  private final String READY_PATH = "readyz";
   private final int TIMEOUT = 5000;
 
   @Value("${form-flow.uploads.virus-scanning.clammit-url}")
@@ -30,12 +28,11 @@ public class ClammitVirusScanner implements FileVirusScanner {
   public Boolean doesFileHaveVirus(MultipartFile file) throws Exception {
     log.info("Clammit URL is " + clammitUrl);
 
-    String fullUrl = clammitUrl.endsWith("/") ? clammitUrl + SCAN_PATH : clammitUrl + "/" + SCAN_PATH;
 
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
     body.add("file", file.getResource());
 
-    WebClient client = getWebClient(fullUrl);
+    WebClient client = getWebClient(clammitUrl);
 
     try {
       String responseBody = client
