@@ -1,10 +1,9 @@
 package formflow.library.pdf;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.Loader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Pdf;
 import org.springframework.boot.system.ApplicationTemp;
 
 import java.io.IOException;
@@ -42,7 +41,7 @@ class PdfFileTest {
     byte[] originalBytes = tempPdfFile.fileBytes();
     tempPdfFile.finalizeForSending();
 
-    assertThat(PDDocument.load(tempPdfFile.fileBytes()).getDocumentCatalog().getAcroForm().getFields()).isEmpty();
+    assertThat(Loader.loadPDF(tempPdfFile.fileBytes()).getDocumentCatalog().getAcroForm().getFields()).isEmpty();
     assertThat(originalBytes.length).isGreaterThan(tempPdfFile.fileBytes().length);
   }
 

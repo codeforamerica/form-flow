@@ -6,6 +6,7 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
+import org.apache.pdfbox.Loader;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -36,7 +37,7 @@ public class PDFBoxFieldFiller {
   @NotNull
   private PDDocument fillOutPdfs(Collection<PdfField> fields, Resource pdfResource) {
     try {
-      PDDocument loadedDoc = PDDocument.load(pdfResource.getInputStream());
+      PDDocument loadedDoc = Loader.loadPDF(pdfResource.getContentAsByteArray());
       PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
       acroForm.setNeedAppearances(true);
       fillAcroForm(fields, acroForm);

@@ -1,6 +1,7 @@
 package formflow.library.pdf;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.boot.system.ApplicationTemp;
 
@@ -67,7 +68,7 @@ public record PdfFile(String path, String name) {
    * @throws IOException Thrown if the file cannot be read in.
    */
   public void finalizeForSending() throws IOException {
-    PDDocument pdDocument = PDDocument.load(fileBytes());
+    PDDocument pdDocument = Loader.loadPDF(fileBytes());
     pdDocument.getDocumentCatalog().getAcroForm().flatten();
     pdDocument.save(path);
     pdDocument.close();
