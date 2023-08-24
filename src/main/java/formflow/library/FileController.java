@@ -57,6 +57,9 @@ public class FileController extends FormFlowController {
   @Value("${form-flow.uploads.virus-scanning.enabled:false}")
   private Boolean shouldScanForViruses;
 
+  @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:true}")
+  private Boolean blockIfClammitCannotBeReached;
+
   private final FileVirusScanner fileVirusScanner;
 
   private final MessageSource messageSource;
@@ -119,11 +122,17 @@ public class FileController extends FormFlowController {
         saveToRepository(submission);
         httpSession.setAttribute("id", submission.getId());
       }
-
-      if (shouldScanForViruses) {
-        if (fileVirusScanner.doesFileHaveVirus(file)) {
+      
+      try {
+        if (shouldScanForViruses && fileVirusScanner.doesFileHaveVirus(file)) {
           String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+      } catch (Exception e) {
+        if (blockIfClammitCannotBeReached) {
+          log.error("The virus scan service could not be reached. Blocking upload.");
+          String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
+          return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
         }
       }
 

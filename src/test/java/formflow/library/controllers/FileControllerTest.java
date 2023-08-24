@@ -153,7 +153,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         "file",
         "test-virus-file.jpg",
         MediaType.IMAGE_JPEG_VALUE,
-        "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
+        "X5O".getBytes());
     when(clammitVirusScanner.doesFileHaveVirus(testVirusFile)).thenReturn(true);
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
@@ -165,6 +165,44 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
         .andExpect(content().string(this.messageSource.getMessage("upload-documents.error-virus-found", null, Locale.ENGLISH)));
+  }
+  
+  @Test
+  void shouldPreventUploadAndShowAnErrorIfBlockIfUnreachableIsSetToTrue() throws Exception {
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    when(clammitVirusScanner.doesFileHaveVirus(testImage)).thenThrow(new Exception("Clammit is down!"));
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(HttpStatus.SERVICE_UNAVAILABLE.value()))
+        .andExpect(content().string(this.messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, Locale.ENGLISH)));
+  }
+
+  @Test
+  void ShouldAllowUploadIfBlockIfUnreachableIsSetToFalse() throws Exception {
+    when(userFileRepositoryService.save(any())).thenReturn(fileId);
+    doNothing().when(cloudFileRepository).upload(any(), any());
+    
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    when(clammitVirusScanner.doesFileHaveVirus(testImage)).thenThrow(new Exception("Clammit is down!"));
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value()))
+        .andExpect(content().string(fileId.toString()));
+
+    verify(cloudFileRepository, times(1)).upload(any(), any());
   }
 
   @Test

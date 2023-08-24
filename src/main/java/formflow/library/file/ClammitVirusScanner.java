@@ -1,20 +1,13 @@
 package formflow.library.file;
 
-import formflow.library.exceptions.FileHasVirusException;
-import formflow.library.exceptions.VirusScanException;
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
+
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,15 +40,11 @@ public class ClammitVirusScanner implements FileVirusScanner {
     WebClient client = getWebClient(fullUrl);
 
     try {
-      boolean timeout = false;
       String responseBody = client
           .post()
           .contentType(MediaType.MULTIPART_FORM_DATA)
           .body(BodyInserters.fromMultipartData(body))
           .retrieve()
-          // take this onStatus out if things are not working. It works okay with out it.
-//          .onStatus(HttpStatus.I_AM_A_TEAPOT::equals,
-//              response -> response.bodyToMono(String.class).map(FileHasVirusException::new))
           .bodyToMono(String.class)
           .timeout(Duration.ofMillis(TIMEOUT))
           .doOnError(TimeoutException.class, error -> {
@@ -63,22 +52,20 @@ public class ClammitVirusScanner implements FileVirusScanner {
             throw new RuntimeException("Timeout connecting to the clammit service.");
           })
           .block();
-
       log.info("Clammit response: {}", responseBody);
-      return responseBody.contains("OK");
+      return !responseBody.contains("No virus found");
     } catch (WebClientResponseException e) {
       if (e.getStatusCode().equals(HttpStatus.I_AM_A_TEAPOT)) {
-        log.error("File uploaded contains virus");
-        return true; // virus alert!!
-        //throw new FileHasVirusException("File contains virus. Not accepting file.");
+        log.error("The uploaded file contains a virus.");
+        return true;
       } else {
+        // I'm not sure we actually need this?
         throw new RuntimeException(e.getMessage());
       }
     } catch (Exception e) {
       // something else failed with the service
       log.error("received exception from clammit server: {}", e.getMessage());
-      throw new VirusScanException(
-          String.format("Clammit service unable to process request for file. It returned: %s", e.getMessage()));
+      return false;
     }
   }
 
@@ -88,13 +75,17 @@ public class ClammitVirusScanner implements FileVirusScanner {
   public Boolean isReady() {
     String fullUrl = clammitUrl + "/" + READY_PATH;
     WebClient client = getWebClient(fullUrl);
-    HttpResponse httpResponse = client
-        .get()
-        .retrieve()
-        .bodyToMono(HttpResponse.class)
-        .block();
-
-    return httpResponse.statusCode() == 200;
+    try {
+      HttpResponse httpResponse = client
+          .get()
+          .retrieve()
+          .bodyToMono(HttpResponse.class)
+          .block();
+      return httpResponse.statusCode() == 200;
+    } catch (Exception e) {
+      log.error("Received exception from clammit server while checking for readiness: {}", e.getMessage());
+      return false;
+    }
   }
 
   private WebClient getWebClient(String url) {
