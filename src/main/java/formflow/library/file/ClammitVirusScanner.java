@@ -30,8 +30,6 @@ public class ClammitVirusScanner implements FileVirusScanner {
   public Boolean doesFileHaveVirus(MultipartFile file) throws Exception {
     log.info("Clammit URL is " + clammitUrl);
 
-    // TODO: we need a way to identify failure based on URL not being live
-
     String fullUrl = clammitUrl.endsWith("/") ? clammitUrl + SCAN_PATH : clammitUrl + "/" + SCAN_PATH;
 
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -59,34 +57,16 @@ public class ClammitVirusScanner implements FileVirusScanner {
         log.error("The uploaded file contains a virus.");
         return true;
       } else {
-        // I'm not sure we actually need this?
+        log.error("Received unexpected exception from clammit server: {}", e.getMessage());
         throw new RuntimeException(e.getMessage());
       }
     } catch (Exception e) {
-      // something else failed with the service
-      log.error("received exception from clammit server: {}", e.getMessage());
-      return false;
+      // something else failed within the service
+      log.error("Received unexpected exception from clammit server: {}", e.getMessage());
+      throw new RuntimeException(e.getMessage());
     }
   }
 
-  // added in case we want to do a check in the above function to see that the end point is live. That would
-  // allow us to send an exception if not.  But it would be two calls, versus one.
-  // Or we could/should have a constructor that checks if the endpoint is live.  Seems like we should check.
-  public Boolean isReady() {
-    String fullUrl = clammitUrl + "/" + READY_PATH;
-    WebClient client = getWebClient(fullUrl);
-    try {
-      HttpResponse httpResponse = client
-          .get()
-          .retrieve()
-          .bodyToMono(HttpResponse.class)
-          .block();
-      return httpResponse.statusCode() == 200;
-    } catch (Exception e) {
-      log.error("Received exception from clammit server while checking for readiness: {}", e.getMessage());
-      return false;
-    }
-  }
 
   private WebClient getWebClient(String url) {
    /* final TcpClient tcpClient = TcpClient
