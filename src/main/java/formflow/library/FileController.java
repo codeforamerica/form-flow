@@ -6,7 +6,6 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.exceptions.FileHasVirusException;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
@@ -129,7 +128,7 @@ public class FileController extends FormFlowController {
       }
 
       try {
-        if (shouldScanForViruses && fileVirusScanner.doesFileHaveVirus(file)) {
+        if (shouldScanForViruses && fileVirusScanner.virusDetected(file)) {
           String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -208,10 +207,6 @@ public class FileController extends FormFlowController {
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
-      //  if (e instanceof FileHasVirusException) {
-      //    String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
-      //    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
-      //  }
       if (e instanceof ResponseStatusException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
       }

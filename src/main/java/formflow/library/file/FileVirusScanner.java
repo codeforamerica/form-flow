@@ -7,5 +7,5 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface FileVirusScanner {
 
-  Boolean doesFileHaveVirus(MultipartFile file) throws Exception;
+  boolean virusDetected(MultipartFile file) throws Exception;
 }

@@ -79,7 +79,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     submission = Submission.builder().id(submissionUUID).build();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
-    when(clammitVirusScanner.doesFileHaveVirus(any())).thenReturn(false);
+    when(clammitVirusScanner.virusDetected(any())).thenReturn(false);
     super.setUp();
   }
 
@@ -151,7 +151,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         "test-virus-file.jpg",
         MediaType.IMAGE_JPEG_VALUE,
         "This File Has a Virus! Ahhhhh!".getBytes());
-    when(clammitVirusScanner.doesFileHaveVirus(testVirusFile)).thenReturn(true);
+    when(clammitVirusScanner.virusDetected(testVirusFile)).thenReturn(true);
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testVirusFile)
@@ -171,7 +171,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    when(clammitVirusScanner.doesFileHaveVirus(testImage)).thenThrow(new Exception("Clammit is down!"));
+    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new Exception("Clammit is down!"));
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
