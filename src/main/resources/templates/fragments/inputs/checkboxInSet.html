@@ -31,7 +31,7 @@
       <span th:text="${label}"></span>
       <p th:if="${hasHelpText}"
          th:id="${id} + '-help-text'"
-         th:text="${checkboxHelpText}"
+         th:utext="${checkboxHelpText}"
          class="text--help with-no-padding"></p>
     </div>
   </label>
