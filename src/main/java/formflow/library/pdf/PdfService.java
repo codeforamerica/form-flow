@@ -34,12 +34,12 @@ public class PdfService {
   }
 
   /**
-   * Generates a generic pdf file name from a flow and submissionId
+   * Generates a generic pdf file name from the flow and submission id that are part of the Submission.
    *
-   * @param submission
-   * @return a generic filename string
+   * @param submission Submission to create the PDF filename for
+   * @return a generic filename string, including the '.pdf' extension
    */
   public String generatePdfName(Submission submission) {
-    return String.format("%s_%s", submission.getFlow(), submission.getId().toString());
+    return String.format("%s_%s.pdf", submission.getFlow(), submission.getId().toString());
   }
 }

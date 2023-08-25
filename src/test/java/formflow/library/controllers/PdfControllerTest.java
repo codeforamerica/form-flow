@@ -56,7 +56,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
   }
-  
+
   @Test
   void shouldReturn404WhenFlowDoesNotExist() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.get("/download/{flow}/{submissionId}", "flowThatDoesNotExist", "submissionId"))
@@ -68,7 +68,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     session.setAttribute("id", submission.getId());
     MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
         .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=%s.pdf".formatted(pdfService.generatePdfName(submission))))
+            "attachment; filename=%s".formatted(pdfService.generatePdfName(submission))))
         .andExpect(status().is2xxSuccessful())
         .andReturn();
     assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdfByteArray);
