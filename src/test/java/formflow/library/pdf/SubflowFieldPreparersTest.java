@@ -1,6 +1,7 @@
 package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 import formflow.library.data.Submission;
 import java.util.HashMap;
@@ -211,5 +212,34 @@ class SubflowFieldPreparersTest {
     assertThat(resultMap.keySet().equals(expectedMap.keySet())).isTrue();
 
     assertThat(resultMap.equals(expectedMap)).isTrue();
+  }
+
+  @Test
+  void shouldNotThrownWhenNoSubflow() {
+    PdfMap pdfMapWithoutSubflow = new PdfMap();
+    pdfMapWithoutSubflow.setInputFields(Map.of(
+            "fieldThatGetsOverwritten", "TEST_FIELD",
+            "fieldThatDoesNotGetOverwritten", "TEST_FIELD_2"
+        )
+    );
+    pdfMapWithoutSubflow.setFlow("flow1");
+    PdfMapSubflow noSubflow = new PdfMapSubflow();
+    pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMapWithoutSubflow));
+
+    SubflowFieldPreparer noSubflowFieldPreparer = new SubflowFieldPreparer();
+
+    submission = Submission.builder().flow("flow1")
+        .inputData(
+            Map.of(
+                "fieldThatGetsOverwritten", "willBeOverwritten",
+                "fieldThatDoesNotGetOverwritten", "willNotBeOverwritten"
+            )).build();
+
+    noSubflowFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap("flow1"));
+
+    assertThatCode(() -> noSubflowFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap("flow1"))
+    ).doesNotThrowAnyException();
   }
 }
