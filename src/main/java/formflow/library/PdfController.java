@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,8 @@ public class PdfController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String submissionId,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      Locale locale
   ) throws IOException {
     log.info("GET downloadPdf (url: {}): flow: {}, submissionId: {}", request.getRequestURI().toLowerCase(), flow, submissionId);
     if (!doesFlowExist(flow)) {
@@ -70,7 +72,7 @@ public class PdfController extends FormFlowController {
           "Attempted to download PDF with submission_id: " + submissionId + " but session_id was: "
               + httpSession.getAttribute(
               "id"));
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(messageSource.getMessage("error.forbidden", null, null));
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(messageSource.getMessage("error.forbidden", null, locale));
     }
   }
 }
