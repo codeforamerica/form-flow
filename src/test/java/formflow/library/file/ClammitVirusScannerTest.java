@@ -22,7 +22,7 @@ class ClammitVirusScannerTest {
 
   ClammitVirusScanner clammitVirusScanner;
   MockWebServer mockWebServer;
-  int timeout = 500;
+  int timeout = 2000;
 
   @BeforeEach
   void setUp() throws IOException {

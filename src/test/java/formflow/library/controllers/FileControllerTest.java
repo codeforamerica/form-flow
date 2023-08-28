@@ -16,12 +16,10 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
-import formflow.library.file.ClammitVirusScanner;
 import formflow.library.utilities.AbstractMockMvcTest;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Date;
@@ -53,6 +51,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @SpringBootTest(properties = {
     "form-flow.path=flows-config/test-conditional-navigation.yaml",
@@ -74,11 +73,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
   @MockBean
   private ClammitVirusScanner clammitVirusScanner;
   @Captor
-  private ArgumentCaptor<UserFile> userFileArgumentCaptor; 
-
-  @PersistenceContext
-  EntityManager entityManager;
-
+  private ArgumentCaptor<UserFile> userFileArgumentCaptor;
   private final UUID fileId = UUID.randomUUID();
 
   @Override
@@ -174,7 +169,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
         .andExpect(content().string("We are unable to process this file because a virus was detected. Please try another file."));
   }
-  
+
   @Test
   void shouldAllowUploadIfBlockIfUnreachableIsSetToFalse() throws Exception {
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
@@ -182,7 +177,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new Exception("Clammit is down!"));
+    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
+        new WebClientResponseException(500, "Failed!", null, null, null));
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
@@ -201,10 +197,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
   void shouldSetFalseIfVirusScannerDidNotRun() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new Exception("Clammit is down!"));
+    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new WebClientResponseException(500, "Failed!", null, null, null));
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     doNothing().when(cloudFileRepository).upload(any(), any());
-    
+
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")

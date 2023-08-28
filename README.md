@@ -2220,6 +2220,15 @@ form-flow:
 | `form-flow.uploads.thumbnail-width`     | `64`                                                       | Thumbnail width in pixels                                                                                                             |
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
 
+##### Virus scanner properties
+
+| Property                                                | Default | Description                                                                                                                                        |
+|---------------------------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.uploads.virus-scanning.enabled`              | `true`  | Turns on virus scanning component                                                                                                                  |
+| `form-flow.uploads.virus-scanning.clammit-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                   |
+| `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                             |
+| `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesnt return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
+
 ##### Max file size configuration
 
 If `form-flow.uploads.max-file-size` is not set, then the server will use it's default value of 1MB

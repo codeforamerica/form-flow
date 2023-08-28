@@ -10,6 +10,7 @@ form-flow:
     virus-scanning:
       enabled: true
       clammit-url: 'https://app-58915.on-aptible.com/clammit/scan'
+      timeout: 20000
   address-validation:
     smarty:
       auth-id: "authId"

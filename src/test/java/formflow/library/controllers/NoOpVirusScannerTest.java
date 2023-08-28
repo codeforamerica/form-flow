@@ -9,9 +9,7 @@ import formflow.library.FileController;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.file.ClammitVirusScanner;
 import formflow.library.utilities.AbstractMockMvcTest;
-import java.util.Locale;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,38 +22,37 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @SpringBootTest(properties = {
     "form-flow.path=flows-config/test-conditional-navigation.yaml",
-    "form-flow.uploads.virus-scanning.block-if-unreachable=true",
+    "form-flow.uploads.virus-scanning.enabled=false",
 })
-public class UploadBlockedIfVirusScanUnreachableTest extends AbstractMockMvcTest {
+public class NoOpVirusScannerTest extends AbstractMockMvcTest {
   private MockMvc mockMvc;
+  private UUID fileUuid;
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
-  @Autowired
-  UserFileRepositoryService userFileRepositoryService;
+  @MockBean
+  private UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
-  @MockBean
-  private ClammitVirusScanner clammitVirusScanner;
-  
+
   @Override
   @BeforeEach
   public void setUp() throws Exception {
+    fileUuid = UUID.randomUUID();
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     Submission submission = Submission.builder().id(submissionUUID).build();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    when(userFileRepositoryService.save(any())).thenReturn(fileUuid);
     super.setUp();
   }
 
   @Test
-  void shouldPreventUploadAndShowAnErrorIfBlockIfUnreachableIsSetToTrue() throws Exception {
+  void shouldBypassRealVirusScanningIfDisabled() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new WebClientResponseException(500, "Failed!", null, null, null));
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")
@@ -63,7 +60,7 @@ public class UploadBlockedIfVirusScanUnreachableTest extends AbstractMockMvcTest
             .param("thumbDataURL", "base64string")
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-        .andExpect(status().is(HttpStatus.SERVICE_UNAVAILABLE.value()))
-        .andExpect(content().string(this.messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, Locale.ENGLISH)));
+        .andExpect(status().is(HttpStatus.OK.value()))
+        .andExpect(content().string(fileUuid.toString()));
   }
 }

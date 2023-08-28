@@ -51,18 +51,10 @@ import org.springframework.web.servlet.view.RedirectView;
 @EnableAutoConfiguration
 @Slf4j
 public class FileController extends FormFlowController {
-
   private final UserFileRepositoryService userFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
-
-  @Value("${form-flow.uploads.virus-scanning.enabled:false}")
-  private Boolean shouldScanForViruses;
-
-  @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}")
-  private Boolean blockIfClammitCannotBeReached;
-
+  private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
-
   private final MessageSource messageSource;
   private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
@@ -71,13 +63,13 @@ public class FileController extends FormFlowController {
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      @Autowired(required = false)
-      FileVirusScanner fileVirusScanner,
+      @Autowired(required = false) FileVirusScanner fileVirusScanner,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations,
       MessageSource messageSource,
       FileValidationService fileValidationService,
-      @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
+      @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
+      @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
     super(submissionRepositoryService, flowConfigurations);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
@@ -85,6 +77,7 @@ public class FileController extends FormFlowController {
     this.fileValidationService = fileValidationService;
     this.maxFiles = maxFiles;
     this.fileVirusScanner = fileVirusScanner;
+    this.blockIfClammitUnreachable = blockIfClammitUnreachable;
   }
 
   /**
@@ -128,15 +121,15 @@ public class FileController extends FormFlowController {
         String message = messageSource.getMessage("upload-documents.error-mime-type", null, locale);
         return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
-      
+
       boolean wasScannedForVirus = true;
       try {
-        if (shouldScanForViruses && fileVirusScanner.virusDetected(file)) {
+        if (fileVirusScanner.virusDetected(file)) {
           String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
         }
       } catch (WebClientResponseException | TimeoutException e) {
-        if (blockIfClammitCannotBeReached) {
+        if (blockIfClammitUnreachable) {
           log.error("The virus scan service could not be reached. Blocking upload.");
           String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
           return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);

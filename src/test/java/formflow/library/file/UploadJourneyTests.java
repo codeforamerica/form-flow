@@ -13,7 +13,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-upload-flow.yaml"}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {
+    "form-flow.path=flows-config/test-upload-flow.yaml",
+    "form-flow.uploads.virus-scanning.enabled=false",
+}, webEnvironment = RANDOM_PORT)
 public class UploadJourneyTests extends AbstractBasePageTest {
 
   @Override
@@ -41,7 +44,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     driver.executeScript(
         "$('#document-upload-uploadTest').get(0).dropzone.addFile({name: 'testFile.pdf', size: "
             + largeFilesize + ", type: 'not-an-image'})");
-    Integer maxFileSize = Integer.valueOf(17);
+    int maxFileSize = 17;
     assertThat(driver.findElement(By.className("text--error")).getText()).contains(messageSource
         .getMessage("upload-documents.this-file-is-too-large", new Object[]{maxFileSize}, Locale.ENGLISH));
     testPage.clickLink("remove");
@@ -58,6 +61,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
+    takeSnapShot("test.png");
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource.getMessage("upload-documents.error-password-protected", null, Locale.ENGLISH));
     testPage.clickLink("remove");
@@ -80,7 +84,7 @@ public class UploadJourneyTests extends AbstractBasePageTest {
         testPage.findElementsByClass("text--error").stream().map(WebElement::getText).collect(Collectors.toList()))
         .allMatch(String::isEmpty);
     // Delete all elements on the page and then assert there are no longer any uploaded files on the page
-    while (testPage.findElementsByClass("dz-remove").size() > 0) {
+    while (!testPage.findElementsByClass("dz-remove").isEmpty()) {
       testPage.clickLink("delete");
       driver.switchTo().alert().accept();
     }

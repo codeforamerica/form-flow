@@ -40,7 +40,6 @@ public class ClammitVirusScanner implements FileVirusScanner {
 
   @Override
   public boolean virusDetected(MultipartFile file) throws Exception {
-    log.info("Clammit URL is " + clammitUrl);
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
     body.add("file", file.getResource());
 
