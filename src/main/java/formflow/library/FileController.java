@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
@@ -133,7 +135,7 @@ public class FileController extends FormFlowController {
           String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
         }
-      } catch (Exception e) {
+      } catch (WebClientResponseException | TimeoutException e) {
         if (blockIfClammitCannotBeReached) {
           log.error("The virus scan service could not be reached. Blocking upload.");
           String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
