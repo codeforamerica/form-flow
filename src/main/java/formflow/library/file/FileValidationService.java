@@ -44,7 +44,8 @@ public class FileValidationService {
       Map.entry(".docx", new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document")),
       Map.entry(".odp", new MimeType("application", "vnd.oasis.opendocument.presentation")),
       Map.entry(".ods", new MimeType("application", "vnd.oasis.opendocument.spreadsheet")),
-      Map.entry(".odt", new MimeType("application", "vnd.oasis.opendocument.text"))
+      Map.entry(".odt", new MimeType("application", "vnd.oasis.opendocument.text")),
+      Map.entry(".txt", new MimeType("text", "plain"))
   );
 
   private final List<MimeType> ACCEPTED_MIME_TYPES;

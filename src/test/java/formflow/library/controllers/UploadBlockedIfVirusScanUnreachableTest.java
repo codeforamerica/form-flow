@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
     "form-flow.path=flows-config/test-conditional-navigation.yaml",
     "form-flow.uploads.virus-scanning.block-if-unreachable=true",
 })
-public class FileControllerVirusScanTest extends AbstractMockMvcTest {
+public class UploadBlockedIfVirusScanUnreachableTest extends AbstractMockMvcTest {
 
   Submission submission;
   private MockMvc mockMvc;

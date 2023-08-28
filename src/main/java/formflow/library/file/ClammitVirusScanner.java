@@ -20,7 +20,6 @@ public class ClammitVirusScanner implements FileVirusScanner {
   @Value("${form-flow.uploads.virus-scanning.clammit-url}")
   String clammitUrl;
 
-
   @Override
   public boolean virusDetected(MultipartFile file) throws Exception {
     log.info("Clammit URL is " + clammitUrl);
@@ -42,6 +41,9 @@ public class ClammitVirusScanner implements FileVirusScanner {
           .onErrorResume(e -> {
             if (e instanceof TimeoutException) {
               throw webClientException(408, "WebClient timed out while attempting to reach " + clammitUrl);
+            }
+            if (e instanceof WebClientResponseException && ((WebClientResponseException) e).getStatusCode() == HttpStatus.I_AM_A_TEAPOT) {
+              throw webClientException(418, "The uploaded file has a virus.");
             }
             if (e instanceof WebClientResponseException
                 && ((WebClientResponseException) e).getStatusCode() != HttpStatus.I_AM_A_TEAPOT) {

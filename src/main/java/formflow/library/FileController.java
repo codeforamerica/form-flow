@@ -126,7 +126,8 @@ public class FileController extends FormFlowController {
         String message = messageSource.getMessage("upload-documents.error-mime-type", null, locale);
         return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
-
+      
+      boolean wasScannedForVirus = true;
       try {
         if (shouldScanForViruses && fileVirusScanner.virusDetected(file)) {
           String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
@@ -138,6 +139,7 @@ public class FileController extends FormFlowController {
           String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
           return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
         }
+        wasScannedForVirus = false;
       }
 
       if (fileValidationService.isTooLarge(file)) {
@@ -174,7 +176,9 @@ public class FileController extends FormFlowController {
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
-          .mimeType(file.getContentType()).build();
+          .mimeType(file.getContentType())
+          .virusScanned(wasScannedForVirus)
+          .build();
 
       UUID newFileId = userFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
