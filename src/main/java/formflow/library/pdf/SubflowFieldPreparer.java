@@ -3,6 +3,7 @@ package formflow.library.pdf;
 import formflow.library.config.ActionManager;
 import formflow.library.data.Submission;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,10 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
     Map<String, SubmissionField> preppedFields = new HashMap<>();
     List<Map<String, Object>> subflowDataList = new ArrayList<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
+
+    if (subflowMap == null) {
+      return Collections.emptyMap();
+    }
 
     subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
       if (submission.getInputData().containsKey(pdfSubflowName)) {
