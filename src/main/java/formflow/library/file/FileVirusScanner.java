@@ -7,5 +7,13 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface FileVirusScanner {
 
+  /**
+   * This method will send the passed in `file` to a virus scanner service defined in the implementation and return a boolean
+   * value indicating if the file contains a virus.
+   *
+   * @param file file to check for virus in
+   * @return true if virus is found, false otherwise
+   * @throws Exception
+   */
   boolean virusDetected(MultipartFile file) throws Exception;
 }

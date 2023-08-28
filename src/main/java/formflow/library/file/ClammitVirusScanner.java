@@ -16,7 +16,13 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-
+/**
+ * Clammit Virus Scanner An implementation of the FileVirusScanner interface that will use the
+ * <a href="https://github.com/codeforamerica/form-flow/tree/create-clammit-av-service">Clammit Virus Scanner Server</a> to check
+ * files for viruses.
+ * <p>
+ * The Clammit Virus Scanner Server itself is set up independently of this code base.
+ */
 @Slf4j
 @Service
 @ConditionalOnProperty(name = "form-flow.uploads.virus-scanning.enabled", havingValue = "true")
@@ -39,7 +45,6 @@ public class ClammitVirusScanner implements FileVirusScanner {
     body.add("file", file.getResource());
 
     WebClient client = WebClient.builder().baseUrl(clammitUrl).build();
-//        WebClient client = createWebClient(clammitUrl);
 
     try {
       String responseBody = client
