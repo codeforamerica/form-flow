@@ -39,6 +39,7 @@ Table of Contents
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
+        * [Virus Scanning](#virus-scanning)
     * [Document Download](#document-download)
         * [Downloading individual files](#downloading-individual-files)
         * [Downloading all files](#downloading-all-files)
@@ -1314,6 +1315,12 @@ We recommend setting a maximum file retention period in S3 by setting up a reten
 bucket. This will automatically delete files in your bucket that are older than the retention policy
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
+
+## Virus Scanning
+
+Uploads made through form flow can be scanned for viruses by making requests to a server running ClamAV. Our team maintains [a service](https://github.com/codeforamerica/clamav-server) deployed in our environment, to run it yourself you'll need to deploy it, provide the endpoint url to form-flow and turn on the feature. After virus scanning is enabled, by default it will return an error message if a client uploads a virus by default and reject the file.  
+
+All configuration properties for virus scanning [are provided here.](#virus-scanner-properties)
 
 ## Document Download
 
