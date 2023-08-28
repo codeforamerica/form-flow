@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -90,7 +91,8 @@ public class FileController extends FormFlowController {
       @RequestParam("inputName") String inputName,
       @RequestParam("thumbDataURL") String thumbDataUrl,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      Locale locale
   ) {
     log.info("POST upload (url: {}): flow: {}, inputName: {}", request.getRequestURI().toLowerCase(), flow, inputName);
     try {
@@ -108,14 +110,14 @@ public class FileController extends FormFlowController {
       }
 
       if (!fileValidationService.isAcceptedMimeType(file)) {
-        String message = messageSource.getMessage("upload-documents.error-mime-type", null, null);
+        String message = messageSource.getMessage("upload-documents.error-mime-type", null, locale);
         return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
 
       if (fileValidationService.isTooLarge(file)) {
         String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
             List.of(fileValidationService.getMaxFileSizeInMb()).toArray(),
-            null);
+            locale);
         return new ResponseEntity<>(message, HttpStatus.PAYLOAD_TOO_LARGE);
       }
 
@@ -124,16 +126,16 @@ public class FileController extends FormFlowController {
         try (PDDocument ignored = Loader.loadPDF(file.getBytes())) {
         } catch (InvalidPasswordException e) {
           // TODO update when we add internationalization to use locale for message source
-          String message = messageSource.getMessage("upload-documents.error-password-protected", null, null);
+          String message = messageSource.getMessage("upload-documents.error-password-protected", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (IOException e) {
-          String message = messageSource.getMessage("upload-documents.error-could-not-read-file", null, null);
+          String message = messageSource.getMessage("upload-documents.error-could-not-read-file", null, locale);
           return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
       }
 
       if (userFileRepositoryService.countBySubmission(submission) >= maxFiles) {
-        String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, null);
+        String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
@@ -184,7 +186,7 @@ public class FileController extends FormFlowController {
       }
       log.error("Error occurred while uploading file " + e.getLocalizedMessage());
       // TODO update when we add internationalization to use locale for message source
-      String message = messageSource.getMessage("upload-documents.file-upload-error", null, null);
+      String message = messageSource.getMessage("upload-documents.file-upload-error", null, locale);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
