@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@ConditionalOnProperty(name = "form-flow.uploads.virus-scanning.enabled", havingValue = "false")
+@ConditionalOnProperty(name = "form-flow.uploads.virus-scanning.enabled", havingValue = "false", matchIfMissing = true)
 public class NoOpVirusScanner implements FileVirusScanner {
 
   @Override
