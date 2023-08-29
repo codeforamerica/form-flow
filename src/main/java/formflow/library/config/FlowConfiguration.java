@@ -19,7 +19,7 @@ public class FlowConfiguration {
 
   private HashMap<String, SubflowConfiguration> subflows;
 
-  private HashMap<String, String> landmark;
+  private LandmarkConfiguration landmarks;
 
   /**
    * Returns the screen navigation for a particular screen.

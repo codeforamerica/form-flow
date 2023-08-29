@@ -1,4 +1,4 @@
-name: testFlow
+name: testLandmarkFlow
 flow:
   first:
     nextScreens:
@@ -9,5 +9,5 @@ flow:
   success:
     nextScreens:
       - name: null
-landmark:
+landmarks:
   firstScreen: first
