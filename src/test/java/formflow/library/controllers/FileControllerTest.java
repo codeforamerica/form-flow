@@ -142,14 +142,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
   }
 
-  // tests
-  // * can we test when configured not to run?
-  //    TEST with file with virus, make sure not marked as "scanned" in the user_files table
-  // * if configured to run and SNE set property to still allow upload when service can't be reached
-  //    TEST to see upload is still allowed and that file is marked as not checked in user_files table
-  // * if configured to run and SNE set property to NOT allow upload when service can't be reached
-  //    TEST that no upload occurs and error message is returned.
-
   @Test
   void shouldShowFileContainsVirusErrorIfClammitScanFindsVirus() throws Exception {
     MockMultipartFile testVirusFile = new MockMultipartFile(
