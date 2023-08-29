@@ -9,6 +9,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
+import formflow.library.file.FileVirusScanner;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
@@ -47,10 +50,10 @@ import org.springframework.web.servlet.view.RedirectView;
 @EnableAutoConfiguration
 @Slf4j
 public class FileController extends FormFlowController {
-
   private final UserFileRepositoryService userFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
-
+  private final Boolean blockIfClammitUnreachable;
+  private final FileVirusScanner fileVirusScanner;
   private final MessageSource messageSource;
   private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
@@ -59,17 +62,21 @@ public class FileController extends FormFlowController {
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
+      FileVirusScanner fileVirusScanner,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations,
       MessageSource messageSource,
       FileValidationService fileValidationService,
-      @Value("${form-flow.uploads.max-files}") Integer maxFiles) {
+      @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
+      @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
     super(submissionRepositoryService, flowConfigurations);
     this.userFileRepositoryService = userFileRepositoryService;
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
     this.fileValidationService = fileValidationService;
     this.maxFiles = maxFiles;
+    this.fileVirusScanner = fileVirusScanner;
+    this.blockIfClammitUnreachable = blockIfClammitUnreachable;
   }
 
   /**
@@ -114,6 +121,21 @@ public class FileController extends FormFlowController {
         return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
 
+      boolean wasScannedForVirus = true;
+      try {
+        if (fileVirusScanner.virusDetected(file)) {
+          String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
+          return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+      } catch (WebClientResponseException | TimeoutException e) {
+        if (blockIfClammitUnreachable) {
+          log.error("The virus scan service could not be reached. Blocking upload.");
+          String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
+          return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        wasScannedForVirus = false;
+      }
+
       if (fileValidationService.isTooLarge(file)) {
         String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
             List.of(fileValidationService.getMaxFileSizeInMb()).toArray(),
@@ -148,7 +170,9 @@ public class FileController extends FormFlowController {
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
           .filesize((float) file.getSize())
-          .mimeType(file.getContentType()).build();
+          .mimeType(file.getContentType())
+          .virusScanned(wasScannedForVirus)
+          .build();
 
       UUID newFileId = userFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
@@ -184,8 +208,7 @@ public class FileController extends FormFlowController {
       if (e instanceof ResponseStatusException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
       }
-      log.error("Error occurred while uploading file " + e.getLocalizedMessage());
-      // TODO update when we add internationalization to use locale for message source
+      log.error("Error occurred while uploading file: " + e.getLocalizedMessage());
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, locale);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

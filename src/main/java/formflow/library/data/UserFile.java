@@ -65,6 +65,9 @@ public class UserFile {
 
   @Column
   private Float filesize;
+  
+  @Column(name = "virus_scanned")
+  private boolean virusScanned;
 
   @Override
   public boolean equals(Object o) {

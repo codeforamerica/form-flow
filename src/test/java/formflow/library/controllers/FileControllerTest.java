@@ -16,6 +16,7 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
@@ -34,6 +35,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,6 +51,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @SpringBootTest(properties = {
     "form-flow.path=flows-config/test-conditional-navigation.yaml",
@@ -66,6 +70,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
+  @MockBean
+  private ClammitVirusScanner clammitVirusScanner;
+  @Captor
+  private ArgumentCaptor<UserFile> userFileArgumentCaptor;
   private final UUID fileId = UUID.randomUUID();
 
   @Override
@@ -75,9 +83,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     submission = Submission.builder().id(submissionUUID).build();
     when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    when(clammitVirusScanner.virusDetected(any())).thenReturn(false);
     super.setUp();
   }
-  
+
   @Test
   void shouldReturn404IfFlowDoesNotExist() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
@@ -119,7 +128,9 @@ public class FileControllerTest extends AbstractMockMvcTest {
         "coolFile.jpg",
         "pathToS3",
         ".pdf",
-        Float.valueOf("10"));
+        Float.valueOf("10"),
+        false
+    );
     HashMap<String, HashMap<Long, HashMap<String, String>>> testDzInstanceMap = new HashMap<>();
     HashMap<Long, HashMap<String, String>> userFiles = new HashMap<>();
     userFiles.put(1L, UserFile.createFileInfo(testUserFile, "thumbnail"));
@@ -129,6 +140,70 @@ public class FileControllerTest extends AbstractMockMvcTest {
     session.setAttribute("userFiles", testDzInstanceMap);
 
     assertThat(session.getAttribute("userFiles")).isEqualTo(testDzInstanceMap);
+  }
+
+  @Test
+  void shouldShowFileContainsVirusErrorIfClammitScanFindsVirus() throws Exception {
+    MockMultipartFile testVirusFile = new MockMultipartFile(
+        "file",
+        "test-virus-file.jpg",
+        MediaType.IMAGE_JPEG_VALUE,
+        "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
+    when(clammitVirusScanner.virusDetected(testVirusFile)).thenReturn(true);
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testVirusFile)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
+        .andExpect(content().string("We are unable to process this file because a virus was detected. Please try another file."));
+  }
+
+  @Test
+  void shouldAllowUploadIfBlockIfUnreachableIsSetToFalse() throws Exception {
+    when(userFileRepositoryService.save(any())).thenReturn(fileId);
+    doNothing().when(cloudFileRepository).upload(any(), any());
+
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
+        new WebClientResponseException(500, "Failed!", null, null, null));
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value()))
+        .andExpect(content().string(fileId.toString()));
+
+    verify(cloudFileRepository, times(1)).upload(any(), any());
+  }
+
+  @Test
+  void shouldSetFalseIfVirusScannerDidNotRun() throws Exception {
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new WebClientResponseException(500, "Failed!", null, null, null));
+    when(userFileRepositoryService.save(any())).thenReturn(fileId);
+    doNothing().when(cloudFileRepository).upload(any(), any());
+
+    mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "testFlow")
+            .param("inputName", "dropZoneTestInstance")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value()));
+
+    verify(userFileRepositoryService).save(userFileArgumentCaptor.capture());
+    assertThat(userFileArgumentCaptor.getValue().isVirusScanned()).isFalse();
   }
 
   @Test
@@ -188,7 +263,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
               "coolFile.jpg",
               "pathToS3",
               ".pdf",
-              Float.valueOf("10")
+              Float.valueOf("10"),
+              false
           ), "thumbnail"));
       dzWidgets.put(dzWidgetInputName, userFiles);
       session = new MockHttpSession();

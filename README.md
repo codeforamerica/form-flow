@@ -39,6 +39,7 @@ Table of Contents
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
+        * [Virus Scanning](#virus-scanning)
     * [Document Download](#document-download)
         * [Downloading individual files](#downloading-individual-files)
         * [Downloading all files](#downloading-all-files)
@@ -1315,6 +1316,22 @@ bucket. This will automatically delete files in your bucket that are older than 
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
+## Virus Scanning
+
+File uploads made through form flow can be scanned for viruses. We provide a way to pass
+files to a ClamAV server.
+
+Our team maintains a [ClamAV based service](https://github.com/codeforamerica/clamav-server)
+that can be deployed alongside of a form flow application. The form flow library can send files to
+this service to be scanned for viruses.
+
+To run the ClamAV server you'll need to deploy it, enable virus scanning in your app, and then
+provide the endpoint url to the form flow library. After virus scanning is enabled, the file upload
+widget will return an error message if a client uploads a file containing a virus and reject it.
+
+Configuration for this feature can be found in
+our [configuration section](#virus-scanner-properties).
+
 ## Document Download
 
 Form flow library allows users to either:
@@ -2211,7 +2228,6 @@ form-flow:
 ```
 
 #### File upload properties
-
 | Property                                | Default                                                    | Description                                                                                                                           |
 |-----------------------------------------|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `form-flow.uploads.accepted-file-types` | `.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp` | Allowed subset of default file types. Anything not in that list (i.e. `.exe`) will be rejected, regardless of what is provided here.  |
@@ -2220,9 +2236,17 @@ form-flow:
 | `form-flow.uploads.thumbnail-width`     | `64`                                                       | Thumbnail width in pixels                                                                                                             |
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
 
+##### Virus scanner properties
+| Property                                                | Default | Description                                                                                                                                         |
+|---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.uploads.virus-scanning.enabled`              | `false` | Turns on virus scanning component                                                                                                                   |
+| `form-flow.uploads.virus-scanning.service-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                    |
+| `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                              |
+| `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesn't return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
+
 ##### Max file size configuration
 
-If `form-flow.uploads.max-file-size` is not set, then the server will use it's default value of 1MB
+If `form-flow.uploads.max-file-size` is not set, then the server will use its default value of 1MB
 preventing
 any uploads larger than 1MB. When configuring this value, be sure to also
 set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
