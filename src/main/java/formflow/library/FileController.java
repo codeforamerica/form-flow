@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -63,7 +62,7 @@ public class FileController extends FormFlowController {
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
       CloudFileRepository cloudFileRepository,
-      @Autowired(required = false) FileVirusScanner fileVirusScanner,
+      FileVirusScanner fileVirusScanner,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations,
       MessageSource messageSource,
