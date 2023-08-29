@@ -1318,9 +1318,19 @@ permits.
 
 ## Virus Scanning
 
-Uploads made through form flow can be scanned for viruses by making requests to a server running ClamAV. Our team maintains [a service](https://github.com/codeforamerica/clamav-server) deployed in our environment, to run it yourself you'll need to deploy it, provide the endpoint url to form-flow and turn on the feature. After virus scanning is enabled, by default it will return an error message if a client uploads a virus by default and reject the file.  
+File uploads made through form flow can be scanned for viruses. We provide a way to pass
+files to a ClamAV server.
 
-All configuration properties for virus scanning [are provided here.](#virus-scanner-properties)
+Our team maintains a [ClamAV based service](https://github.com/codeforamerica/clamav-server)
+that can be deployed alongside of a form flow application. Form flow library can send files to this
+service to be scanned for viruses.
+
+To run the ClamAV server you'll need to deploy it, enable virus scanning in your app, and then
+provide the endpoint url to the form flow library. After virus scanning is enabled, the file upload
+widget will return an error message if a client uploads a file containing a virus and reject it.
+
+Configuration for this feature can be found in
+our [configuration section](#virus scanner properties).
 
 ## Document Download
 
@@ -2229,16 +2239,16 @@ form-flow:
 
 ##### Virus scanner properties
 
-| Property                                                | Default | Description                                                                                                                                        |
-|---------------------------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.uploads.virus-scanning.enabled`              | `true`  | Turns on virus scanning component                                                                                                                  |
-| `form-flow.uploads.virus-scanning.clammit-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                   |
-| `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                             |
-| `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesnt return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
+| Property                                                | Default | Description                                                                                                                                         |
+|---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.uploads.virus-scanning.enabled`              | `true`  | Turns on virus scanning component                                                                                                                   |
+| `form-flow.uploads.virus-scanning.clammit-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                    |
+| `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                              |
+| `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesn't return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
 
 ##### Max file size configuration
 
-If `form-flow.uploads.max-file-size` is not set, then the server will use it's default value of 1MB
+If `form-flow.uploads.max-file-size` is not set, then the server will use its default value of 1MB
 preventing
 any uploads larger than 1MB. When configuring this value, be sure to also
 set `spring.servlet.multipart.max-file-size` as well as `spring.servlet.multipart.max-request-size`
