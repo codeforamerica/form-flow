@@ -2228,7 +2228,6 @@ form-flow:
 ```
 
 #### File upload properties
-
 | Property                                | Default                                                    | Description                                                                                                                           |
 |-----------------------------------------|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `form-flow.uploads.accepted-file-types` | `.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp` | Allowed subset of default file types. Anything not in that list (i.e. `.exe`) will be rejected, regardless of what is provided here.  |
@@ -2238,11 +2237,10 @@ form-flow:
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
 
 ##### Virus scanner properties
-
 | Property                                                | Default | Description                                                                                                                                         |
 |---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.uploads.virus-scanning.enabled`              | `true`  | Turns on virus scanning component                                                                                                                   |
-| `form-flow.uploads.virus-scanning.clammit-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                    |
+| `form-flow.uploads.virus-scanning.enabled`              | `false` | Turns on virus scanning component                                                                                                                   |
+| `form-flow.uploads.virus-scanning.service-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                    |
 | `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                              |
 | `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesn't return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
 

@@ -32,7 +32,7 @@ public class ClammitVirusScanner implements FileVirusScanner {
   int timeout;
 
   public ClammitVirusScanner(
-      @Value("${form-flow.uploads.virus-scanning.clammit-url}") String clammitUrl,
+      @Value("${form-flow.uploads.virus-scanning.service-url}") String clammitUrl,
       @Value("${form-flow.uploads.virus-scanning.timeout:5000}") int timeout) {
     this.clammitUrl = clammitUrl;
     this.timeout = timeout;

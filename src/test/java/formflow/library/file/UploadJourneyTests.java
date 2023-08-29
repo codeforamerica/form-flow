@@ -61,7 +61,6 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    takeSnapShot("test.png");
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource.getMessage("upload-documents.error-password-protected", null, Locale.ENGLISH));
     testPage.clickLink("remove");
