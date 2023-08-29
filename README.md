@@ -1322,15 +1322,15 @@ File uploads made through form flow can be scanned for viruses. We provide a way
 files to a ClamAV server.
 
 Our team maintains a [ClamAV based service](https://github.com/codeforamerica/clamav-server)
-that can be deployed alongside of a form flow application. Form flow library can send files to this
-service to be scanned for viruses.
+that can be deployed alongside of a form flow application. The form flow library can send files to
+this service to be scanned for viruses.
 
 To run the ClamAV server you'll need to deploy it, enable virus scanning in your app, and then
 provide the endpoint url to the form flow library. After virus scanning is enabled, the file upload
 widget will return an error message if a client uploads a file containing a virus and reject it.
 
 Configuration for this feature can be found in
-our [configuration section](#virus scanner properties).
+our [configuration section](#virus-scanner-properties).
 
 ## Document Download
 
