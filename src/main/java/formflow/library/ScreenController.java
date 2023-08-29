@@ -473,6 +473,7 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession,
       HttpServletRequest request
   ) {
+    log.info("Your submission ID is :" + httpSession.getAttribute("id") + " and your Session ID is :" + httpSession.getId());
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);

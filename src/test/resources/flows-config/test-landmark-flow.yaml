@@ -1,0 +1,13 @@
+name: testFlow
+flow:
+  first:
+    nextScreens:
+      - name: nonFormPage
+  nonFormPage:
+    nextScreens:
+      - name: success
+  success:
+    nextScreens:
+      - name: null
+landmark:
+  firstScreen: first
