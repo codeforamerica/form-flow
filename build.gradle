@@ -61,7 +61,6 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly 'org.springframework.boot:spring-boot-properties-migrator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
