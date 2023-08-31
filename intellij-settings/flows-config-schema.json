@@ -2,10 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Flows Configuration",
   "type": "object",
-  "required": [
-    "name",
-    "flow"
-  ],
+  "required": ["name", "flow"],
   "properties": {
     "name": {
       "type": "string",
@@ -17,21 +14,14 @@
         "^.*$": {
           "type": "object",
           "description": "Identify screens in a flow.",
-          "required": [
-            "nextScreens"
-          ],
+          "required": ["nextScreens"],
           "properties": {
             "nextScreens": {
-              "type": [
-                "array",
-                "null"
-              ],
+              "type": ["array", "null"],
               "description": "Required, an array of next screens or empty.",
               "items": {
                 "type": "object",
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string"
@@ -43,13 +33,29 @@
                 }
               }
             },
+            "onPostAction": {
+              "type": "string",
+              "description": "A method name to run on a POST."
+            },
+            "crossFieldValidationAction": {
+              "type": "string",
+              "description": "A method name to to validate one field based on another field."
+            },
+            "beforeSaveAction": {
+              "type": "string",
+              "description": "A method name to run before a database save."
+            },
+            "afterSaveAction": {
+              "type": "string",
+              "description": "A method name to run after saving data."
+            },
+            "beforeDisplayAction": {
+              "type": "string",
+              "description": "A method name to run before displaying the screen."
+            },
             "subflow": {
               "type": "string",
               "description": "For screen within a subflow, they need the name of the subflow defined."
-            },
-            "beforeSave": {
-              "type": "string",
-              "description": "A method name to run before a database save."
             },
             "callback": {
               "type": "string",
@@ -65,12 +71,7 @@
         "^.*$": {
           "type": "object",
           "description": "Identify subflow screens.",
-          "required": [
-            "entryScreen",
-            "iterationStartScreen",
-            "reviewScreen",
-            "deleteConfirmationScreen"
-          ],
+          "required": ["entryScreen", "iterationStartScreen", "reviewScreen", "deleteConfirmationScreen"],
           "properties": {
             "entryScreen": {
               "type": "string",
