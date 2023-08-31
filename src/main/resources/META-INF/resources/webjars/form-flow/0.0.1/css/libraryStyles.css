@@ -291,11 +291,6 @@ url('/webjars/form-flow/0.0.1/fonts/MaterialIcons-Regular.svg') format('svg');
   background-image: url('/webjars/form-flow/0.0.1/images/emojis/crossmark.png');
 }
 
-/* TODO: delete/fix in other way */
-.page-wrapper {
-  padding-bottom: 253px;
-}
-
 @media screen and (min-width: 601px) {
   .toolbar__wrapper {
     margin-left: -3.5rem;
@@ -339,6 +334,10 @@ url('/webjars/form-flow/0.0.1/fonts/MaterialIcons-Regular.svg') format('svg');
   border: 2px solid #AAAAAA;
   border-radius: 3px;
   max-width: 35rem;
+}
+
+body {
+  margin-bottom: initial;
 }
 
 body,
@@ -434,6 +433,7 @@ body,
 .main-footer {
   font-weight: normal;
   height: auto;
+  position: static;
 }
 
 .slab a:not(.button):not(.reveal__link):not(.text--red),
