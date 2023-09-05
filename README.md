@@ -2357,7 +2357,7 @@ flow:
 ```
 
 You can have autocomplete and validation for flows-config by connecting your IntelliJ to the
-flows-config-schema.json [as described here.](#applying-live-templates-to-your-intellij-ide)
+flows-config-schema.json [as described here](#connect-flows-config-schema).
 
 ### Screens
 
