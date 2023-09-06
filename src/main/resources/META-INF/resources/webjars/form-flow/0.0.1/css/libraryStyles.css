@@ -291,7 +291,6 @@ url('/webjars/form-flow/0.0.1/fonts/MaterialIcons-Regular.svg') format('svg');
   background-image: url('/webjars/form-flow/0.0.1/images/emojis/crossmark.png');
 }
 
-/* TODO: delete/fix in other way */
 .page-wrapper {
   padding-bottom: 253px;
 }
@@ -341,6 +340,7 @@ url('/webjars/form-flow/0.0.1/fonts/MaterialIcons-Regular.svg') format('svg');
   max-width: 35rem;
 }
 
+html,
 body,
 .slab--off-white {
   background-color: #E9F6FF;
