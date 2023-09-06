@@ -16,35 +16,53 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 @Slf4j
 public class DataRequiredInterceptor implements HandlerInterceptor {
-    public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
-    public static final String NAVIGATION_FLOW_PATH_FORMAT = "/flow/{flow}/{screen}/navigation";
-    
-    List<FlowConfiguration> flowConfigurations;
-    
-    public DataRequiredInterceptor(List<FlowConfiguration> flowConfigurations){
-        this.flowConfigurations = flowConfigurations;
+
+  public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
+  public static final String NAVIGATION_FLOW_PATH_FORMAT = "/flow/{flow}/{screen}/navigation";
+
+  List<FlowConfiguration> flowConfigurations;
+
+  public DataRequiredInterceptor(List<FlowConfiguration> flowConfigurations) {
+    this.flowConfigurations = flowConfigurations;
+  }
+
+  @Override
+  public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
+      throws Exception {
+    try {
+      String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
+      Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
+      String redirect_url = "/";
+      String screen = parsedUrl.get("screen");
+      String flow = parsedUrl.get("flow");
+      HttpSession session = request.getSession(false);
+      FlowConfiguration flowConfiguration = flowConfigurations.stream().filter(fc -> fc.getName().equals(flow)).findFirst()
+          .orElse(null);
+
+      if (flowConfiguration == null){
+        return true;
+      }
+
+      boolean landmarkNotImplemented = flowConfiguration.getLandmarks() == null;
+      if (landmarkNotImplemented) {
+        return true;
+      }
+
+      var onFirstScreen = screen.equals(flowConfiguration.getLandmarks().getFirstScreen());
+      if (session == null && onFirstScreen) {
+        return true;
+      }else if(session == null){
+        response.sendRedirect(redirect_url);
+        return false;
+      }
+
+      if (session.getAttribute("id") == null){
+        response.sendRedirect(redirect_url);
+        return false;
+      }
+      return true;
+    } catch (IllegalStateException e) {
+      return true;
     }
-    
-    @Override
-    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
-        try {
-            String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
-            Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
-            String redirect_url = "/";
-            String screen = parsedUrl.get("screen");
-            String flow = parsedUrl.get("flow");
-            FlowConfiguration flowConfiguration = flowConfigurations.stream().filter(fc -> fc.getName().equals(flow)).findFirst()
-                .orElse(null);
-            // TODO Do we return 404 if flow config is null here instead of in controller?
-            String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
-            HttpSession session = request.getSession(false);
-            if (session == null && !screen.equals(firstScreen)) {
-                response.sendRedirect(redirect_url);
-                return false;
-            }
-            return true;
-        } catch (IllegalStateException e) {
-            return true;
-        }
-    }
+  }
 }
