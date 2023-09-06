@@ -1332,6 +1332,13 @@ widget will return an error message if a client uploads a file containing a viru
 Configuration for this feature can be found in
 our [configuration section](#virus-scanner-properties).
 
+There is a field `virus_scanned` in the `user_files` table with `Boolean` as it's value.
+
+* `true` if the file was scanned by the service and did not have a virus.
+* `false` if not scanned, either because the service is down or disabled.
+
+> ⚠️ If a file has a virus, it is rejected and not saved in our systems.
+
 ## Document Download
 
 Form flow library allows users to either:
