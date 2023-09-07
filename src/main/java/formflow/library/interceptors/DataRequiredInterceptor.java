@@ -1,19 +1,23 @@
 package formflow.library.interceptors;
 
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.ScreenNavigationConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 @Slf4j
+//@ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true", matchIfMissing = true)
 public class DataRequiredInterceptor implements HandlerInterceptor {
 
   public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
@@ -43,11 +47,23 @@ public class DataRequiredInterceptor implements HandlerInterceptor {
       }
 
       boolean landmarkNotImplemented = flowConfiguration.getLandmarks() == null;
+
       if (landmarkNotImplemented) {
-        return true;
+        throw new RuntimeException("Please make sure to set a landmark section to your flow configuration file.");
       }
 
-      var onFirstScreen = screen.equals(flowConfiguration.getLandmarks().getFirstScreen());
+      boolean firstScreenNotSet = flowConfiguration.getLandmarks().getFirstScreen() == null;
+
+      if (firstScreenNotSet) {
+        throw new RuntimeException("Please make sure to set a firstScreen under your flow configuration files landmark section.");
+      }
+
+      String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
+      boolean firstScreenExists = flowConfiguration.getFlow().containsKey(firstScreen);
+      if (!firstScreenExists) {
+        throw new RuntimeException(String.format("Please make sure that you have correctly set the firstScreen under your flow configuration files landmark section. Your flow configuration file does not contain a screen with the name %s.", firstScreen));
+      }
+      var onFirstScreen = screen.equals(firstScreen);
       if (session == null && onFirstScreen) {
         return true;
       }else if(session == null){
