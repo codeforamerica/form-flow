@@ -1,6 +1,5 @@
 package formflow.library.config;
 
-import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.interceptors.DataRequiredInterceptor;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
