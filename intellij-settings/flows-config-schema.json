@@ -2,54 +2,60 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Flows Configuration",
   "type": "object",
-  "required": [
-    "name",
-    "flow"
-  ],
+  "required": ["name", "flow"],
   "properties": {
     "name": {
       "type": "string",
-      "description": "A name for a complete flow."
+      "description": "The name for a given flow. This is used to identify the flow in the URL that will be displayed for a given flows screens. Additionally, this will,be the name that is displayed for the flow in the database JSON."
     },
     "flow": {
       "type": "object",
       "patternProperties": {
         "^.*$": {
           "type": "object",
-          "description": "Identify screens in a flow.",
-          "required": [
-            "nextScreens"
-          ],
+          "description": "The configuration for a given flow, including screens, their next screens, conditions and actions, as well as subflows.",
+          "required": ["nextScreens"],
           "properties": {
             "nextScreens": {
-              "type": [
-                "array",
-                "null"
-              ],
+              "type": ["array", "null"],
               "description": "Required, an array of next screens or empty.",
               "items": {
                 "type": "object",
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string"
                   },
                   "condition": {
                     "type": "string",
-                    "description": "A method name to determine if a screen is shown next."
+                    "description": "The name of a Condition whose run method will be executed to determine if a screen is shown next."
                   }
                 }
               }
             },
+            "onPostAction": {
+              "type": "string",
+              "description": "On POST - An action of this type is run when data has been sent to the server, but before any validation has been performed on the data. It's a way to inject/update any data before any validation occurs."
+            },
+            "crossFieldValidationAction": {
+              "type": "string",
+              "description": "On POST - An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will not be validated before being saved."
+            },
+            "beforeSaveAction": {
+              "type": "string",
+              "description": "On POST - An action of this type is run after data validation and just before the data is saved to the database. It's a spot that data can be updated before it is saved. An example would be encrypting any sensitive data. Note that since validation has been done before this point any changes to data will not be validated before being saved."
+            },
+            "afterSaveAction": {
+              "type": "string",
+              "description": "On POST - An action of this type is run after data has been sent to the server and saved to submission. It's a way to add a hook into a page after a save. For example, you could add a method that sends an email or fires a task after a save is complete."
+            },
+            "beforeDisplayAction": {
+              "type": "string",
+              "description": "On GET - An action of this type is run after data is retrieved from the database just before it's sent to the template. It provides a spot where data can be unencrypted or updated before sending the data to the template for rendering."
+            },
             "subflow": {
               "type": "string",
-              "description": "For screen within a subflow, they need the name of the subflow defined."
-            },
-            "beforeSave": {
-              "type": "string",
-              "description": "A method name to run before a database save."
+              "description": "For screens within a subflow, they need the name of the subflow defined."
             },
             "callback": {
               "type": "string",
@@ -64,29 +70,24 @@
       "patternProperties": {
         "^.*$": {
           "type": "object",
-          "description": "Identify subflow screens.",
-          "required": [
-            "entryScreen",
-            "iterationStartScreen",
-            "reviewScreen",
-            "deleteConfirmationScreen"
-          ],
+          "description": "Configuration for a given subflow. Identifies key screens within the subflow.",
+          "required": ["entryScreen", "iterationStartScreen", "reviewScreen", "deleteConfirmationScreen"],
           "properties": {
             "entryScreen": {
               "type": "string",
-              "description": "The name of the entry screen for this subflow."
+              "description": "The name of the subflows entry screen. This screen represents the entry point to a subflow, it is usually the point at which a user makes a decision to enter the subflow or not. Example: a screen that asks 'Would you like to add household members?' could be the entry screen for a household based subflow. This screen is used as the screen a user will be redirected to if they delete all iterations within a given subflow."
             },
             "iterationStartScreen": {
               "type": "string",
-              "description": "The name of the iteration start screen for this subflow."
+              "description": "The name of the subflows iteration start screen. This screen is the first screen in a subflows set of repeating screens. When this screen is submitted, it creates a new iteration which is then saved to the subflow array within the Submission object."
             },
             "reviewScreen": {
               "type": "string",
-              "description": "The name of the review screen for this subflow."
+              "description": "The name of the review screen for this subflow. This is the last screen in a subflow. This screen lists each iteration completed within a subflow, and provides options to edit, delete  or add a new iteration."
             },
             "deleteConfirmationScreen": {
               "type": "string",
-              "description": "The name of the delete confirmation screen for this subflow."
+              "description": "The name of the delete confirmation screen for this subflow. This screen appears when a user selects delete on a iteration listed on the review screen. It asks the user to confirm their deletion before submitting the actual deletion request to the server."
             }
           }
         }
