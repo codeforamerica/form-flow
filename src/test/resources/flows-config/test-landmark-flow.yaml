@@ -10,4 +10,4 @@ flow:
     nextScreens:
       - name: null
 landmarks:
-  firstScreen:
+  firstScreen: first

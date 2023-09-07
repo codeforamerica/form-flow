@@ -17,7 +17,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 @Slf4j
-//@ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true", matchIfMissing = true)
 public class DataRequiredInterceptor implements HandlerInterceptor {
 
   public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
