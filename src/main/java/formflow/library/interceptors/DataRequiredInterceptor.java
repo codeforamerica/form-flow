@@ -72,11 +72,13 @@ public class DataRequiredInterceptor implements HandlerInterceptor {
       } 
       
       if (session == null) {
+        log.error("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
         response.sendRedirect(redirect_url);
         return false;
       }
 
       if (session.getAttribute("id") == null) {
+        log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.", request.getRequestURI());
         response.sendRedirect(redirect_url);
         return false;
       }
