@@ -42,14 +42,15 @@ public class DataRequiredInterceptor implements HandlerInterceptor {
       FlowConfiguration flowConfiguration = flowConfigurations.stream().filter(fc -> fc.getName().equals(flow)).findFirst()
           .orElse(null);
 
-      if (flowConfiguration == null){
+      if (flowConfiguration == null) {
+        // The flow doesn't exist, but we will pass the request through to the controller to handle it and return the appropriate error response.
         return true;
       }
 
       boolean landmarkNotImplemented = flowConfiguration.getLandmarks() == null;
 
       if (landmarkNotImplemented) {
-        throw new RuntimeException("Please make sure to set a landmark section to your flow configuration file.");
+        throw new RuntimeException("You have enabled session continuity interception but have not created a landmark section in your applications flow configuration file.");
       }
 
       boolean firstScreenNotSet = flowConfiguration.getLandmarks().getFirstScreen() == null;
@@ -60,21 +61,26 @@ public class DataRequiredInterceptor implements HandlerInterceptor {
 
       String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
       boolean firstScreenExists = flowConfiguration.getFlow().containsKey(firstScreen);
+      
       if (!firstScreenExists) {
         throw new RuntimeException(String.format("Please make sure that you have correctly set the firstScreen under your flow configuration files landmark section. Your flow configuration file does not contain a screen with the name %s.", firstScreen));
       }
-      var onFirstScreen = screen.equals(firstScreen);
+      
+      boolean onFirstScreen = screen.equals(firstScreen);
       if (session == null && onFirstScreen) {
         return true;
-      }else if(session == null){
+      } 
+      
+      if (session == null) {
         response.sendRedirect(redirect_url);
         return false;
       }
 
-      if (session.getAttribute("id") == null){
+      if (session.getAttribute("id") == null) {
         response.sendRedirect(redirect_url);
         return false;
       }
+      
       return true;
     } catch (IllegalStateException e) {
       return true;
