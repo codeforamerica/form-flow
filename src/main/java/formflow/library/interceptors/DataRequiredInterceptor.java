@@ -2,6 +2,7 @@ package formflow.library.interceptors;
 
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.ScreenNavigationConfiguration;
+import formflow.library.exceptions.LandmarkNotSetException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -11,6 +12,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,7 +20,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 @Slf4j
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
-public class DataRequiredInterceptor implements HandlerInterceptor {
+public class DataRequiredInterceptor implements HandlerInterceptor, Ordered {
 
   public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
   public static final String NAVIGATION_FLOW_PATH_FORMAT = "/flow/{flow}/{screen}/navigation";
@@ -50,20 +52,20 @@ public class DataRequiredInterceptor implements HandlerInterceptor {
       boolean landmarkNotImplemented = flowConfiguration.getLandmarks() == null;
 
       if (landmarkNotImplemented) {
-        throw new RuntimeException("You have enabled session continuity interception but have not created a landmark section in your applications flow configuration file.");
+        throw new LandmarkNotSetException("You have enabled session continuity interception but have not created a landmark section in your applications flow configuration file.");
       }
 
       boolean firstScreenNotSet = flowConfiguration.getLandmarks().getFirstScreen() == null;
 
       if (firstScreenNotSet) {
-        throw new RuntimeException("Please make sure to set a firstScreen under your flow configuration files landmark section.");
+        throw new LandmarkNotSetException("Please make sure to set a firstScreen under your flow configuration files landmark section.");
       }
 
       String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
       boolean firstScreenExists = flowConfiguration.getFlow().containsKey(firstScreen);
       
       if (!firstScreenExists) {
-        throw new RuntimeException(String.format("Please make sure that you have correctly set the firstScreen under your flow configuration files landmark section. Your flow configuration file does not contain a screen with the name %s.", firstScreen));
+        throw new LandmarkNotSetException(String.format("Please make sure that you have correctly set the firstScreen under your flow configuration files landmark section. Your flow configuration file does not contain a screen with the name %s.", firstScreen));
       }
       
       boolean onFirstScreen = screen.equals(firstScreen);
@@ -87,5 +89,11 @@ public class DataRequiredInterceptor implements HandlerInterceptor {
     } catch (IllegalStateException e) {
       return true;
     }
+  }
+  
+  @Override
+  public int getOrder() {
+    // Max value ensures that this interceptor is executed last.
+    return Integer.MAX_VALUE;
   }
 }
