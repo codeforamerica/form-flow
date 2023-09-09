@@ -1,8 +1,6 @@
 form-flow:
   path: 'test-flow.yaml'
   inputs: 'formflow.library.inputs.'
-  session-continuity-interceptor:
-    enabled: true
   uploads:
     accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
     max-files: '5'
