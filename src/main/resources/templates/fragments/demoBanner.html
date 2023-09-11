@@ -1,10 +1,5 @@
-<!DOCTYPE html>
-<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
-<body>
 <div th:fragment="demoBanner"
      th:if="${!#arrays.isEmpty(@environment.getActiveProfiles()) && !#strings.isEmpty(profile) && #arrays.contains(@environment.getActiveProfiles(), profile)}"
      class="demo-banner"
      th:utext="${demoText}">
 </div>
-</body>
-</html>

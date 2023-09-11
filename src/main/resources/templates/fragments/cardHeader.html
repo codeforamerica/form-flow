@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
-<body>
-<header
+<div
     th:fragment="cardHeader"
     th:with="hasSubtext=${!#strings.isEmpty(subtext)}"
     th:assert="${!#strings.isEmpty(header)}"
@@ -10,6 +7,4 @@
   <p id="header-help-message"
      th:if="${hasSubtext}"
      th:utext="${subtext}"></p>
-</header>
-</body>
-</html>
+</div>
