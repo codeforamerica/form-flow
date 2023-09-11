@@ -1,4 +1,4 @@
-<div
+<header
     th:fragment="cardHeader"
     th:with="hasSubtext=${!#strings.isEmpty(subtext)}"
     th:assert="${!#strings.isEmpty(header)}"
@@ -7,4 +7,4 @@
   <p id="header-help-message"
      th:if="${hasSubtext}"
      th:utext="${subtext}"></p>
-</div>
+</header>

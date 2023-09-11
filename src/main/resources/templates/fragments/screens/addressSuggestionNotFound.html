@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
-<body>
 <th:block th:fragment="addressSuggestionNotFound(addressInputToCheck, inputName)">
   <div class="grid__item spacing-above-35 spacing-below-35">
     <h1 class="h2"
@@ -31,5 +28,3 @@
   <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
       text=#{address-validation.button.use-this-address}, classes='button')}"/>
 </th:block>
-</body>
-</html>
