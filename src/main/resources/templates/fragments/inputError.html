@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <p th:if="${null != errorMessages}" th:fragment="validationError(inputName)" class="text--error"
    th:assert="${!#strings.isEmpty(inputName)}"
    th:aria-label="#{error.error}"
@@ -11,4 +9,3 @@
     <br>
   </th:block>
 </p>
-</html>

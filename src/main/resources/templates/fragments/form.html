@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<body>
 <form th:fragment="form"
       th:assert="${!#strings.isEmpty(action)}, ${!#strings.isEmpty(content)}"
       th:action="@{${action}}"
@@ -10,5 +7,3 @@
       method="post">
   <th:block th:replace="${content}"/>
 </form>
-</body>
-</html>

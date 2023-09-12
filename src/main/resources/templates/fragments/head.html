@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="head" th:assert="${!#strings.isEmpty(title)}">
   <th:block th:replace="~{fragments/libraryHead :: headLinks}"></th:block>
   <meta charset="UTF-8">
@@ -7,4 +5,3 @@
   <meta name="format-detection" content="telephone=no">
   <title th:text="${title}"></title>
 </head>
-</html>

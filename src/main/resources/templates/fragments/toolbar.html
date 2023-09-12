@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
-<body>
 <th:block th:fragment="toolbar">
   <header class="main-header toolbar__wrapper">
     <div class="toolbar">
@@ -21,5 +18,3 @@
         th:replace="~{fragments/demoBanner :: demoBanner(demoText=#{demo.banner-text}, profile='demo')}"/>
   </header>
 </th:block>
-</body>
-</html>
