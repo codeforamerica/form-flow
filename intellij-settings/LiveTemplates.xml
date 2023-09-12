@@ -65,12 +65,6 @@
   <option name="HTML" value="true" />
 </context>
 </template>
-<template name="cfa:fragment" value="&lt;!DOCTYPE html&gt;&#10;&lt;html th:lang=&quot;${#locale.language}&quot; xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;&#10;&lt;body&gt;&#10; $CONTENT$&#10;&lt;/body&gt;&#10;&lt;/html&gt;" description="Base Thymeleaf fragment" toReformat="false" toShortenFQNames="true">
-<variable name="CONTENT" expression="" defaultValue="" alwaysStopAt="true" />
-<context>
-  <option name="HTML" value="true" />
-</context>
-</template>
 <template name="cfa:head" value="&lt;head th:replace=&quot;~{fragments/head :: head(title='$TITLE$')}&quot;&gt;&lt;/head&gt;" description="Insert global head, define title" toReformat="false" toShortenFQNames="true">
 <variable name="TITLE" expression="" defaultValue="" alwaysStopAt="true" />
 <context>
