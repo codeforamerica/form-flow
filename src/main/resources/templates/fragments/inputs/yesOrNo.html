@@ -11,7 +11,7 @@
   </div>
   <button
       th:name="${inputName}"
-      th:aria-describedby="${hasHelpText ? ariaDescribe + ' ' + inputName + '-help-text' : ariaDescribe}"
+      th:aria-describedby="${hasHelpText ? inputName + '-help-text' : ariaDescribe}"
       type="submit"
       value="true"
       class="button">
