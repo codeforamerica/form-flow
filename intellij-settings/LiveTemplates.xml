@@ -108,6 +108,15 @@
   <option name="HTML" value="true" />
 </context>
 </template>
+<template name="cfa:checkbox" value="&lt;th:block th:replace=&quot;~{fragments/inputs/checkbox ::&#10;  checkbox(inputName='$INPUT_NAME$',&#10;  label=#{$LABEL$},&#10; value=#{$VALUE$},&#10; helpText=#{$CHECKBOX_HELP_TEXT$})}&quot;/&gt;" description="A field checkbox with label, name, optional help text and optional icon" toReformat="false" toShortenFQNames="true">
+<variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="CHECKBOX_HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
+<context>
+  <option name="HTML" value="true" />
+</context>
+</template>
 <template name="cfa:inputFieldsetWithRadio" value="&lt;th:block th:replace=&quot;~{fragments/inputs/radioFieldset ::&#10;              radioFieldset(inputName='$INPUT_NAME$',&#10;              label=#{$LABEL$},&#10;              fieldsetHelpText=#{$OPTIONAL_HELP_TEXT$},&#10;              content=~{::$CONTENTREF$})}&quot;&gt;&#10;              &lt;th:block th:ref=&quot;$CONTENTREF$&quot;&gt;&#10;                &lt;!-- Copy the below input if you want to add more --&gt;&#10;                &lt;th:block&#10;                    th:replace=&quot;~{fragments/inputs/radio :: radio(inputName='$INPUT_NAME$',value='$VALUE$', label=#{$VALUE_LABEL$})}&quot;/&gt;&#10;              &lt;/th:block&gt;&#10;            &lt;/th:block&gt;" description="A fieldset with legend and radio input(s) with optional help text." toReformat="false" toShortenFQNames="true">
 <variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="LABEL" expression="" defaultValue="" alwaysStopAt="true" />
