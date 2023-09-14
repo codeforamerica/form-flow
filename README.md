@@ -48,6 +48,11 @@ Table of Contents
     * [Sending Email](#sending-email)
         * [Mailgun](#mailgun)
     * [Localization](#localization)
+    * [Interceptors](#interceptors)
+        * [DataRequiredInterceptor](#datarequiredinterceptor)
+            * [Configuration](#configuration)
+                * [Setup Application.yaml for DataRequiredIncerceptors](#setup-applicationyaml-for-datarequired-interceptor)
+                * [Setup Flows-Config](#setup-flows-config)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -2181,6 +2186,85 @@ button, we send an event called `language-selector-click`
 in [our JavaScript](https://github.com/codeforamerica/form-flow/blob/9a1c6f7a25336e3f9660c2ad9efea013268c860f/src/main/resources/META-INF/resources/webjars/form-flow/0.0.1/js/formFlowLanguageSelector.js#L252).
 
 We send the whole url to Mixpanel, including any query parameters, such as `lang`.
+
+## Interceptors
+
+[Interceptors](https://www.baeldung.com/spring-mvc-handlerinterceptor#Interceptor) are used in
+spring boot to intercept requests between the DispatcherServlet and our
+Controllers. Form-flow library uses the `DataRequiredInterceptor` to prevent users from entering a
+flow without a session.
+
+### DataRequiredInterceptor
+
+The `DataRequiredInterceptor` prevents clients from entering the middle of a flow without starting a
+submission. If no session has been established or a `session` lacks the appropriate `submissionId`,
+a client will be returned to the index page of the application.
+
+`DataRequiredInterceptor` intercepts a users request to enter a flow. When
+the `session-continuity-interceptor.enabled` flag is set to true, the `DataRequiredInterceptor` is
+on. The `DataRequiredInterceptor` is the last interceptor run by any application using FFL.
+
+#### Configuration
+
+Configuring `DataRequiredInterceptor` requires two steps:
+
+1. Set the application.yaml to enable or disable the interceptor (Note: the `DataRequiredINterceptor
+   is on by default)
+2. Set the flow-config.yaml with the `landmarks.firstScreen` yaml field.
+
+##### Setup application.yaml for DataRequired Interceptor
+
+The `DataRequiredInterceptor` can be turned on or off by adding true or false to
+the `session-continuity-interceptor.enabled` fields of the `application.yaml` file.
+
+```yaml
+form-flow:
+  session-continuity-interceptor:
+    enabled: true
+```
+
+Note: `DataRequiredInterceptor` is on by default. If you do not include
+the `session-continuity-interceptor.enabled` field in your `application.yaml` file the application
+will run the `DataRequiredInterceptor`.
+
+<table>
+<tr></tr>
+<tr>
+<td></td>
+<td><b>Not Present</b></td>
+<td><code>session-continuity-interceptor.enabled=true</code></td>
+<td><code>session-continuity-interceptor.enabled=false</code></td>
+</tr>
+<tr>
+<td>Interceptor State</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>See <code>session-continuity-interceptor.enabled=true</code>.</td>
+<td>Turns on the <code>DataRequiredInterceptor</code>.  The <code>DataRequiredInterceptor</code> has the lowest priority. It will always be the last interceptor executed.</td>
+<td>Turns off the <code>DataRequiredInterceptor</code>.  This means that the flows-config will not be checked for landmark pages and users will be able to access any page in a flow.</td>
+</tr>
+</table>
+
+##### Setup flows-config
+
+`DataRequiredInterceptor` requires that `landmarks.firstScreen` is set to the first screen in the
+flow. The `firstScreen` is the first screen to start a flow. An omitted or malformed landmark field
+will throw an error. Please review an example of `flows-config.yaml` setup for landing pages below.
+
+```yaml
+name: ubi
+flow:
+  howThisWorks:
+    nextScreens:
+      - name: languagePreference
+#...
+landmarks:
+  firstScreen: howThisWorks
+```
 
 # How to use
 
