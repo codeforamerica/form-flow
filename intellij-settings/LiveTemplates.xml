@@ -113,7 +113,6 @@
 <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="LABEL" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="CHECKBOX_HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
-<variable name="REF_CONTENT" expression="" defaultValue="" alwaysStopAt="true" />
 <context>
   <option name="HTML" value="true" />
 </context>
