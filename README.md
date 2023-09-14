@@ -709,7 +709,7 @@ The template HTML can look like:
 
 ```html
 <!DOCTYPE html>
-<html th:lang="${#locale.language}">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head(title='')}"></head>
 <body>
 <div class="page-wrapper">
@@ -2235,6 +2235,7 @@ form-flow:
 ```
 
 #### File upload properties
+
 | Property                                | Default                                                    | Description                                                                                                                           |
 |-----------------------------------------|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `form-flow.uploads.accepted-file-types` | `.jpeg,.jpg,.png,.pdf,.bmp,.gif,.doc,.docx,.odt,.ods,.odp` | Allowed subset of default file types. Anything not in that list (i.e. `.exe`) will be rejected, regardless of what is provided here.  |
@@ -2244,6 +2245,7 @@ form-flow:
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
 
 ##### Virus scanner properties
+
 | Property                                                | Default | Description                                                                                                                                         |
 |---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `form-flow.uploads.virus-scanning.enabled`              | `false` | Turns on virus scanning component                                                                                                                   |
