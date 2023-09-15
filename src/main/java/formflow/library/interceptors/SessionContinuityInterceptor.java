@@ -21,14 +21,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 @Slf4j
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
-public class DataRequiredInterceptor implements HandlerInterceptor, Ordered {
+public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered {
 
   public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
   public static final String NAVIGATION_FLOW_PATH_FORMAT = "/flow/{flow}/{screen}/navigation";
 
   List<FlowConfiguration> flowConfigurations;
 
-  public DataRequiredInterceptor(List<FlowConfiguration> flowConfigurations) {
+  public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
     this.flowConfigurations = flowConfigurations;
   }
 

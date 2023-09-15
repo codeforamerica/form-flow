@@ -25,8 +25,8 @@ public class SpyInterceptorConfig implements WebMvcConfigurer {
 
     @Bean
     @Primary // Ensure this bean takes precedence over the real one
-    public DataRequiredInterceptor dataRequiredInterceptor() {
-        return Mockito.spy(new DataRequiredInterceptor(flowConfigurations));
+    public SessionContinuityInterceptor dataRequiredInterceptor() {
+        return Mockito.spy(new SessionContinuityInterceptor(flowConfigurations));
     }
 
     @Override
