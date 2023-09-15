@@ -34,14 +34,14 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
   private LocaleChangeInterceptor localeChangeInterceptor;
   
   @Autowired
-  private DataRequiredInterceptor dataRequiredInterceptor;
+  private SessionContinuityInterceptor sessionContinuityInterceptor;
 
   @Override
   @BeforeEach
   protected void setUp() throws Exception {
     // These tests dirty the context of the data, so we need to reset it before each test.
     // We do this rather than use @DirtiesContext because it's much faster.
-    dataRequiredInterceptor.flowConfigurations = List.of();
+    sessionContinuityInterceptor.flowConfigurations = List.of();
     super.setUp();
   }
   
@@ -59,20 +59,20 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
     LandmarkConfiguration landmarkConfiguration = new LandmarkConfiguration();
     landmarkConfiguration.setFirstScreen("first");
     flowConfiguration.setLandmarks(landmarkConfiguration);
-    dataRequiredInterceptor.flowConfigurations = List.of(flowConfiguration);
+    sessionContinuityInterceptor.flowConfigurations = List.of(flowConfiguration);
     mockMvc.perform(get("/flow/testLandmarkFlow/first?lang=es"))
         .andExpect(status().isOk());
 
-    InOrder inOrder = inOrder(localeChangeInterceptor, dataRequiredInterceptor);
+    InOrder inOrder = inOrder(localeChangeInterceptor, sessionContinuityInterceptor);
     inOrder.verify(localeChangeInterceptor).preHandle(any(), any(), any());
-    inOrder.verify(dataRequiredInterceptor).preHandle(any(), any(), any());
+    inOrder.verify(sessionContinuityInterceptor).preHandle(any(), any(), any());
   }
   
   @Test
   void shouldErrorIfLandmarkIsNotSet() throws Exception {
     FlowConfiguration flowConfiguration = new FlowConfiguration();
     flowConfiguration.setName("testLandmarkFlow");
-    dataRequiredInterceptor.flowConfigurations = List.of(flowConfiguration);
+    sessionContinuityInterceptor.flowConfigurations = List.of(flowConfiguration);
     mockMvc.perform(MockMvcRequestBuilders.get("/flow/testLandmarkFlow/first"))
         .andExpect(status().is5xxServerError())
         .andExpect(result -> {
@@ -89,7 +89,7 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
     LandmarkConfiguration landmarkConfiguration = new LandmarkConfiguration();
     landmarkConfiguration.setFirstScreen(null);
     flowConfiguration.setLandmarks(landmarkConfiguration);
-    dataRequiredInterceptor.flowConfigurations = List.of(flowConfiguration);
+    sessionContinuityInterceptor.flowConfigurations = List.of(flowConfiguration);
     mockMvc.perform(MockMvcRequestBuilders.get("/flow/testLandmarkFlow/first"))
         .andExpect(status().is5xxServerError())
         .andExpect(result -> {
@@ -113,7 +113,7 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
     LandmarkConfiguration landmarkConfiguration = new LandmarkConfiguration();
     landmarkConfiguration.setFirstScreen("nonExistentScreen");
     flowConfiguration.setLandmarks(landmarkConfiguration);
-    dataRequiredInterceptor.flowConfigurations = List.of(flowConfiguration);
+    sessionContinuityInterceptor.flowConfigurations = List.of(flowConfiguration);
     
     mockMvc.perform(MockMvcRequestBuilders.get("/flow/testLandmarkFlow/first"))
         .andExpect(status().is5xxServerError())

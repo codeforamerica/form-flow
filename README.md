@@ -49,10 +49,7 @@ Table of Contents
         * [Mailgun](#mailgun)
     * [Localization](#localization)
     * [Interceptors](#interceptors)
-        * [DataRequiredInterceptor](#datarequiredinterceptor)
-            * [Configuration](#configuration)
-                * [Setup Application.yaml for DataRequiredIncerceptors](#setup-applicationyaml-for-datarequired-interceptor)
-                * [Setup Flows-Config](#setup-flows-config)
+        * [SessionContinuityInterceptor](#sessioncontinuityinterceptor)
 * [How to use](#how-to-use)
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
@@ -2190,31 +2187,35 @@ We send the whole url to Mixpanel, including any query parameters, such as `lang
 ## Interceptors
 
 [Interceptors](https://www.baeldung.com/spring-mvc-handlerinterceptor#Interceptor) are used in
-spring boot to intercept requests between the DispatcherServlet and our
-Controllers. Form-flow library uses the `DataRequiredInterceptor` to prevent users from entering a
+Spring Boot to intercept requests between the `DispatcherServlet` and our
+controllers. Form-flow library uses the `SessionContinuityInterceptor` to prevent users from
+entering a
 flow without a session.
 
-### DataRequiredInterceptor
+### SessionContinuityInterceptor
 
-The `DataRequiredInterceptor` prevents clients from entering the middle of a flow without starting a
-submission. If no session has been established or a `session` lacks the appropriate `submissionId`,
-a client will be returned to the index page of the application.
+The `SessionContinuityInterceptor` prevents clients from entering the middle of a flow without
+starting a
+session. If no HttpSession has been established or a session lacks an appropriate Submission id,
+a client will be returned to the index page of an application.
 
-`DataRequiredInterceptor` intercepts a users request to enter a flow. When
-the `session-continuity-interceptor.enabled` flag is set to true, the `DataRequiredInterceptor` is
-on. The `DataRequiredInterceptor` is the last interceptor run by any application using FFL.
+⚠️ __This interceptor is enabled by default. It is set to be the last interceptor run by any
+application using Form Flow Library.__
 
 #### Configuration
 
-Configuring `DataRequiredInterceptor` requires two steps:
+1. In the `application.yaml`, set the `session-continuity-interceptor.enabled` field
+   to `true`/`false` to enable
+   or disable the interceptor (Note: the `SessionContinuityInterceptor` is on by default)
+2. Set the `flows-config.yaml` with the `landmarks.firstScreen` yaml field.
 
-1. Set the application.yaml to enable or disable the interceptor (Note: the `DataRequiredINterceptor
-   is on by default)
-2. Set the flow-config.yaml with the `landmarks.firstScreen` yaml field.
+If this interceptor is enabled, but the `landmarks.firstScreen` is not set correctly, an error will
+be thrown. The error will identify
+the malformed `landmarks.firstScreen` element.
 
-##### Setup application.yaml for DataRequired Interceptor
+##### Setup application.yaml for SessionContinuityInterceptor
 
-The `DataRequiredInterceptor` can be turned on or off by adding true or false to
+The `SessionContinuityInterceptor` can be turned on or off by adding true or false to
 the `session-continuity-interceptor.enabled` fields of the `application.yaml` file.
 
 ```yaml
@@ -2223,37 +2224,38 @@ form-flow:
     enabled: true
 ```
 
-Note: `DataRequiredInterceptor` is on by default. If you do not include
+Note: `SessionContinuityInterceptor` is on by default. If you do not include
 the `session-continuity-interceptor.enabled` field in your `application.yaml` file the application
-will run the `DataRequiredInterceptor`.
+will run the `SessionContinuityInterceptor`. These options can be seen in the table below:
 
 <table>
-<tr></tr>
-<tr>
-<td></td>
-<td><b>Not Present</b></td>
-<td><code>session-continuity-interceptor.enabled=true</code></td>
-<td><code>session-continuity-interceptor.enabled=false</code></td>
-</tr>
-<tr>
-<td>Interceptor State</td>
-<td>on</td>
-<td>on</td>
-<td>off</td>
-</tr>
-<tr>
-<td>Description</td>
-<td>See <code>session-continuity-interceptor.enabled=true</code>.</td>
-<td>Turns on the <code>DataRequiredInterceptor</code>.  The <code>DataRequiredInterceptor</code> has the lowest priority. It will always be the last interceptor executed.</td>
-<td>Turns off the <code>DataRequiredInterceptor</code>.  This means that the flows-config will not be checked for landmark pages and users will be able to access any page in a flow.</td>
-</tr>
+    <tr><th colspan="4" style="text-align: center">SessionContinuityInterceptor table</th></tr>
+    <tr>
+        <td>Configuration in <code>application.yaml</code></td>
+        <td><b>Not Present</b></td>
+        <td><code>session-continuity-interceptor.enabled=true</code></td>
+        <td><code>session-continuity-interceptor.enabled=false</code></td>
+    </tr>
+    <tr>
+        <td>Interceptor State</td>
+        <td>on</td>
+        <td>on</td>
+        <td>off</td>
+    </tr>
+    <tr>
+        <td>Description</td>
+        <td>See <code>session-continuity-interceptor.enabled=true</code>.</td>
+        <td>Turns on the <code>SessionContinuityInterceptor</code>.  This means that the flows-config will check for the <code>landmarks.firstScreen</code> page.  Users will not be able to randomly access any page in the flow. The <code>SessionContinuityInterceptor</code> has the lowest priority. It will always be the last interceptor executed.</td>
+        <td>Turns off the <code>SessionContinuityInterceptor</code>.  This means that the flows-config will not be checked for the presence of the <code>landmark.firstScreen</code> page and users will be able to access any page in a flow.</td>
+    </tr>
 </table>
 
 ##### Setup flows-config
 
-`DataRequiredInterceptor` requires that `landmarks.firstScreen` is set to the first screen in the
+`SessionContinuityInterceptor` requires that `landmarks.firstScreen` is set to the first screen in
+the
 flow. The `firstScreen` is the first screen to start a flow. An omitted or malformed landmark field
-will throw an error. Please review an example of `flows-config.yaml` setup for landing pages below.
+will throw an error. Please review an example of `flows-config.yaml` setup for landmark pages below.
 
 ```yaml
 name: ubi
@@ -2265,6 +2267,29 @@ flow:
 landmarks:
   firstScreen: howThisWorks
 ```
+
+## Landmarks
+
+Landmarks are a way of indicating that a page has a special purpose. Landmarks are added to
+the `flows-config.yaml` as seen below:
+
+```yaml
+flow:
+  ...
+landmarks:
+  firstScreen: something
+```
+
+More Landmarks will be added as needed. The `landmarks` section includes fields that identify
+important pages, i.e. `firstScreen`.
+
+### `firstScreen`
+
+This landmark is used by the [SessionContinuityInterceptor](#sessioncontinuityinterceptor) to
+help identify what the first page of a flow is. This is the page that the interceptor will check
+to see if a user is on, in the event that they don't have a Session or Submission ID in the Session.
+It is a page in the flow that a user can enter without having an active Session; it is marking
+that this page is an entry point into a flow.
 
 # How to use
 
