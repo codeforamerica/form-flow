@@ -92,6 +92,16 @@
           }
         }
       }
+    },
+    "landmarks": {
+      "type": "object",
+      "description": "Landmarks are a way to designate pages in a flow that have special meaning or significance to the flow.",
+      "properties": {
+        "firstScreen": {
+          "type": "string",
+          "description": "This landmark identifies the first screen in the flow.  Put the first screen's name here."
+        }
+      }
     }
   }
 }
