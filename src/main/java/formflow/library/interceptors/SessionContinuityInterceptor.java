@@ -26,6 +26,8 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
   public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
   public static final String NAVIGATION_FLOW_PATH_FORMAT = "/flow/{flow}/{screen}/navigation";
 
+  private static final String REDIRECT_URL = "/";
+
   List<FlowConfiguration> flowConfigurations;
 
   public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
@@ -43,65 +45,56 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
   @Override
   public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
       throws Exception {
-    try {
       String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
       Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
-      String redirect_url = "/";
-      String screen = parsedUrl.get("screen");
-      String flow = parsedUrl.get("flow");
+
       HttpSession session = request.getSession(false);
-      FlowConfiguration flowConfiguration = flowConfigurations.stream().filter(fc -> fc.getName().equals(flow)).findFirst()
+
+      FlowConfiguration flowConfiguration = flowConfigurations.stream()
+          .filter(fc -> fc.getName().equals(parsedUrl.get("flow")))
+          .findFirst()
           .orElse(null);
 
       if (flowConfiguration == null) {
         return true;
       }
 
-      boolean landmarkNotImplemented = flowConfiguration.getLandmarks() == null;
-
-      if (landmarkNotImplemented) {
+      if (flowConfiguration.getLandmarks() == null) {
         throw new LandmarkNotSetException(
             "You have enabled session continuity interception but have not created a landmark section in your applications flow configuration file.");
       }
 
-      boolean firstScreenNotSet = flowConfiguration.getLandmarks().getFirstScreen() == null;
-
-      if (firstScreenNotSet) {
+      if (flowConfiguration.getLandmarks().getFirstScreen() == null) {
         throw new LandmarkNotSetException(
             "Please make sure to set a firstScreen under your flow configuration files landmark section.");
       }
 
       String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
-      boolean firstScreenExists = flowConfiguration.getFlow().containsKey(firstScreen);
 
-      if (!firstScreenExists) {
+      if (!flowConfiguration.getFlow().containsKey(firstScreen)) {
         throw new LandmarkNotSetException(String.format(
             "Please make sure that you have correctly set the firstScreen under your flow configuration files landmark section. Your flow configuration file does not contain a screen with the name %s.",
             firstScreen));
       }
 
-      boolean onFirstScreen = screen.equals(firstScreen);
-      if (session == null && onFirstScreen) {
-        return true;
-      }
 
       if (session == null) {
+        if(parsedUrl.get("screen").equals(firstScreen)){
+          return true;
+        }
         log.error("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
-        response.sendRedirect(redirect_url);
+        response.sendRedirect(REDIRECT_URL);
         return false;
       }
 
       if (session.getAttribute("id") == null) {
         log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
             request.getRequestURI());
-        response.sendRedirect(redirect_url);
+        response.sendRedirect(REDIRECT_URL);
         return false;
       }
 
       return true;
-    } catch (IllegalStateException e) {
-      return true;
-    }
   }
 
   /**
@@ -111,7 +104,6 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
    */
   @Override
   public int getOrder() {
-    // Max value ensures that this interceptor is executed last.
     return Integer.MAX_VALUE;
   }
 }
