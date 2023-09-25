@@ -81,29 +81,4 @@ public class SubmissionRepositoryService {
       }
     }
   }
-
-  /**
-   * If the submission exists in the session, find it in the db. If not or can't be found, create a new one.
-   *
-   * @param httpSession submission
-   * @return Submission
-   */
-  public Submission findOrCreate(HttpSession httpSession) {
-    var id = (UUID) httpSession.getAttribute("id");
-    if (id != null) {
-      Optional<Submission> submissionOptional = findById(id);
-      if (submissionOptional.isEmpty()) {
-        log.error("findOrCreate could not find submission: " + id);
-        Submission newSubmission = new Submission();
-        log.info("findOrCreate created new submission: " + newSubmission.getId());
-        return newSubmission;
-      } else {
-        return submissionOptional.get();
-      }
-    } else {
-      Submission newSubmission = new Submission();
-      log.info("findOrCreate got no submission id from session, so created new submission: " + newSubmission.getId());
-      return newSubmission;
-    }
-  }
 }

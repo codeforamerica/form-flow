@@ -1,7 +1,6 @@
 package formflow.library.framework;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import formflow.library.ScreenController;
@@ -11,7 +10,6 @@ import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,9 +39,14 @@ public class OnPostActionTest extends AbstractMockMvcTest {
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
 
     super.setUp();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
-    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(session.getAttribute(screenController.SUBMISSION_MAP_NAME)).thenReturn(
+        Map.of("testFlow", submissionUUID));
+    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    //when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    //doReturn(submission).when(screenController).findOrCreateSubmission(any(), "testFlow)");
+    //when(screenController.findOrCreateSubmission(session, "testFlow")).thenReturn(submission);
   }
+
 
   @Test
   void shouldSaveFormattedDataInNewFieldAndValidateSuccessfully() throws Exception {

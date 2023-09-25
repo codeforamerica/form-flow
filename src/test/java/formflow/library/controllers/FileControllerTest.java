@@ -2,6 +2,7 @@ package formflow.library.controllers;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
+import jakarta.servlet.http.HttpSession;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Date;
@@ -82,7 +84,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     submission = Submission.builder().id(submissionUUID).build();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    when(fileController.findOrCreateSubmission(any(HttpSession.class), anyString())).thenReturn(submission);
     when(clammitVirusScanner.virusDetected(any())).thenReturn(false);
     super.setUp();
   }
@@ -189,7 +192,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
   void shouldSetFalseIfVirusScannerDidNotRun() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(new WebClientResponseException(500, "Failed!", null, null, null));
+    when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
+        new WebClientResponseException(500, "Failed!", null, null, null));
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
     doNothing().when(cloudFileRepository).upload(any(), any());
 
@@ -224,6 +228,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
   @Test
   void shouldReturn4xxIfUploadFileViolatesMaxFilesConstraint() throws Exception {
+    when(fileController.findOrCreateSubmission(any(), any())).thenReturn(submission);
     when(userFileRepositoryService.countBySubmission(submission)).thenReturn(10L);
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(new MockMultipartFile("file", "testFileSizeImage.jpg",
@@ -277,6 +282,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
+              .param("flow", "testFlow")
               .param("id", fileId.toString()))
           .andExpect(status().is(HttpStatus.FOUND.value())).andExpect(redirectedUrl("/error"));
     }
@@ -286,6 +292,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
+              .param("flow", "testFlow")
               .param("id", UUID.randomUUID().toString())
               .session(session))
           .andExpect(status().is(HttpStatus.FOUND.value())).andExpect(redirectedUrl("/error"));
@@ -300,6 +307,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
               .param("id", fileId.toString())
+              .param("flow", "testFlow")
               .session(session))
           .andExpect(status().is(HttpStatus.FOUND.value())).andExpect(redirectedUrl("/error"));
     }
@@ -310,6 +318,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
               .param("id", fileId.toString())
+              .param("flow", "testFlow")
               .session(session))
           .andExpect(status().is(HttpStatus.FOUND.value()));
 
@@ -327,8 +336,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
       session.setAttribute("id", UUID.randomUUID());
       UserFile userFile = UserFile.builder().submission(submission).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
-      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-              .session(session))
+      mockMvc.perform(
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+                  .param("flow", "testFlow")
+                  .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
@@ -339,8 +351,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
       UserFile userFile = UserFile.builder().submission(differentSubmissionIdFromUserFile)
           .fileId(fileId).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
-      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-              .session(session))
+      mockMvc.perform(
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+                  .param("flow", "testFlow")
+                  .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
@@ -348,8 +363,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
     void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForMultiFileEndpoint() throws Exception {
       session.setAttribute("id", UUID.randomUUID());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
-      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
-              .session(session))
+      mockMvc.perform(
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}", submission.getId().toString())
+                  .param("flow", "testFlow")
+                  .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
@@ -358,8 +376,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
       session.setAttribute("id", submission.getId());
       UUID differentSubmissionId = UUID.randomUUID();
       when(submissionRepositoryService.findById(differentSubmissionId)).thenReturn(Optional.empty());
-      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
-              .session(session))
+      mockMvc.perform(
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}", submission.getId().toString())
+                  .param("flow", "testFlow")
+                  .session(session))
           .andExpect(status().is(404));
     }
 
@@ -369,8 +390,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
       when(userFileRepositoryService.findAllBySubmission(submission)).thenReturn(Collections.emptyList());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
-      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
-              .session(session))
+      mockMvc.perform(
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}", submission.getId().toString())
+                  .param("flow", "testFlow")
+                  .session(session))
           .andExpect(status().is(404));
     }
 
@@ -378,8 +402,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
     void singleFileEndpointShouldReturnNotFoundIfNoUserFileIsFoundForAGivenFileId() throws Exception {
       session.setAttribute("id", submission.getId());
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.empty());
-      mockMvc.perform(MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-              .session(session))
+      mockMvc.perform(
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+                  .param("flow", "testFlow")
+                  .session(session))
           .andExpect(status().is(404));
     }
 
@@ -396,7 +423,9 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(cloudFileRepository.get("testPath")).thenReturn(testcloudFile);
 
       MvcResult mvcResult = mockMvc.perform(
-              MockMvcRequestBuilders.get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
+                  .param("flow", "testFlow")
                   .session(session))
           .andExpect(MockMvcResultMatchers.request().asyncStarted())
           .andReturn();
@@ -419,11 +448,17 @@ public class FileControllerTest extends AbstractMockMvcTest {
       CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes);
       CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes);
 
-      UserFile firstTestUserFile = UserFile.builder().originalName("test.png").mimeType("image/png")
+      UserFile firstTestUserFile = UserFile.builder()
+          .originalName("test.png")
+          .mimeType("image/png")
           .repositoryPath("testPath")
           .filesize((float) firstTestFileSize)
-          .submission(submission).build();
-      UserFile secondTestUserFile = UserFile.builder().originalName("test-platypus.gif").mimeType("image/gif")
+          .submission(submission)
+          .build();
+
+      UserFile secondTestUserFile = UserFile.builder()
+          .originalName("test-platypus.gif")
+          .mimeType("image/gif")
           .repositoryPath("testPath2")
           .filesize((float) secondTestFileSize)
           .submission(submission).build();
@@ -436,7 +471,9 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(cloudFileRepository.get("testPath2")).thenReturn(secondTestcloudFile);
 
       MvcResult mvcResult = mockMvc.perform(
-              MockMvcRequestBuilders.get("/file-download/{submissionId}", submission.getId().toString())
+              MockMvcRequestBuilders
+                  .get("/file-download/{submissionId}", submission.getId().toString())
+                  .param("flow", "testFlow")
                   .session(session))
           .andExpect(MockMvcResultMatchers.request().asyncStarted())
           .andReturn();

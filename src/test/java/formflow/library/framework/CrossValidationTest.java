@@ -44,7 +44,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
 
     super.setUp();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
   }
 

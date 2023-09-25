@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
     "form-flow.uploads.virus-scanning.enabled=false",
 })
 public class NoOpVirusScannerTest extends AbstractMockMvcTest {
+
   private MockMvc mockMvc;
   private UUID fileUuid;
   @MockBean
@@ -44,7 +45,7 @@ public class NoOpVirusScannerTest extends AbstractMockMvcTest {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     Submission submission = Submission.builder().id(submissionUUID).build();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(userFileRepositoryService.save(any())).thenReturn(fileUuid);
     super.setUp();
   }

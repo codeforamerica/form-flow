@@ -50,6 +50,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @EnableAutoConfiguration
 @Slf4j
 public class FileController extends FormFlowController {
+
   private final UserFileRepositoryService userFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
   private final Boolean blockIfClammitUnreachable;
@@ -88,7 +89,7 @@ public class FileController extends FormFlowController {
    * @param thumbDataUrl The thumbnail URL generated from the upload
    * @param httpSession  The current HTTP session
    * @return ON SUCCESS: ResponseEntity with a body containing the id of a file. body.
-   * <p>ON FAILURE: RepsonseEntity with an error message and a status code.</p>
+   * <p>ON FAILURE: ResponseEntity with an error message and a status code.</p>
    */
   @PostMapping(value = "/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.OK)
@@ -108,12 +109,12 @@ public class FileController extends FormFlowController {
             String.format("Could not find flow with name %s in your application's flow configuration.", flow));
       }
 
-      Submission submission = submissionRepositoryService.findOrCreate(httpSession);
+      Submission submission = findOrCreateSubmission(httpSession, flow);
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
         submission.setFlow(flow);
         saveToRepository(submission);
-        httpSession.setAttribute("id", submission.getId());
+        setSubmissionInSession(httpSession, submission, flow);
       }
 
       if (!fileValidationService.isAcceptedMimeType(file)) {
@@ -218,39 +219,44 @@ public class FileController extends FormFlowController {
    * @param fileId               The id of an uploaded file that should be deleted
    * @param returnPath           The path to the page that they came from
    * @param dropZoneInstanceName The drop zone instance used to get the user file name
+   * @param flow                 The name of the current (active) flow
    * @param httpSession          The current HTTP session
    * @return ON SUCCESS: Returns a RedirectView to the returnPath
    * <p>ON FAILURE: Returns a RedirectView to the 'error' page</p>
    */
   @PostMapping("/file-delete")
-  RedirectView delete(
+  public RedirectView delete(
       @RequestParam("id") UUID fileId,
       @RequestParam("returnPath") String returnPath,
       @RequestParam("inputName") String dropZoneInstanceName,
+      @RequestParam("flow") String flow,
       HttpSession httpSession,
       HttpServletRequest request
   ) {
     try {
       log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId,
           dropZoneInstanceName);
-      UUID submissionId = (UUID) httpSession.getAttribute("id");
-      Optional<Submission> maybeSubmission = submissionRepositoryService.findById(submissionId);
 
-      if (maybeSubmission.isEmpty()) {
-        log.error(String.format("Submission %s does not exist", submissionId.toString()));
+      Submission submission = getSubmissionFromSession(httpSession, flow);
+      if (submission == null) {
+        log.error("Submission does not exist for file '{}', not deleting file", fileId);
         return new RedirectView("/error");
       }
 
       Optional<UserFile> maybeFile = userFileRepositoryService.findById(fileId);
       if (maybeFile.isEmpty()) {
-        log.error(String.format("File with id %s may have already been deleted", fileId));
+        log.error("File with id '{}' not found. It may have already been deleted?", fileId);
         return new RedirectView("/error");
       }
 
       UserFile file = maybeFile.get();
-      if (!submissionId.equals(file.getSubmission().getId())) {
-        log.error(String.format("Submission %s does not match file %s's submission id %s", submissionId, fileId,
-            file.getSubmission().getId()));
+      if (!submission.getId().equals(file.getSubmission().getId())) {
+        log.error(
+            String.format(
+                "Submission %s does not match file %s's submission id %s",
+                submission.getId(),
+                fileId,
+                file.getSubmission().getId()));
         return new RedirectView("/error");
       }
 
@@ -276,22 +282,32 @@ public class FileController extends FormFlowController {
   }
 
   /**
-   * @param httpSession  The current HTTP session
    * @param submissionId The submissionId of the file to be downloaded
    * @param fileId       The UUID of the file to be downloaded.
+   * @param flow         The name of the current (active) flow
+   * @param httpSession  The current HTTP session
+   * @param request      The HttpServletRequest
    * @return ON SUCCESS: ResponseEntity with a response body that includes the file.
    * <p>ON FAILURE: A ResponseEntity returns an HTTP error code</p>
    */
   @GetMapping("/file-download/{submissionId}/{fileId}")
   public ResponseEntity<StreamingResponseBody> downloadSingleFile(
-      HttpSession httpSession,
       @PathVariable String submissionId,
       @PathVariable String fileId,
+      @RequestParam("flow") String flow,
+      HttpSession httpSession,
       HttpServletRequest request
   ) {
     log.info("GET downloadSingleFile (url: {}): submissionId: {} fileId {}", request.getRequestURI().toLowerCase(), submissionId,
         fileId);
-    if (!submissionId.equals(httpSession.getAttribute("id").toString())) {
+    Submission submission = getSubmissionFromSession(httpSession, flow);
+    if (submission == null) {
+      log.error("Submission does not exist for that file");
+      return ResponseEntity.notFound().build();
+    }
+
+    if (!submissionId.equals(submission.getId().toString())) {
+      log.error("Submission ID handed in doesn't match the one associated with the file.");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -302,7 +318,6 @@ public class FileController extends FormFlowController {
     }
 
     UserFile file = maybeFile.get();
-
     if (!httpSession.getAttribute("id").toString().equals(file.getSubmission().getId().toString())) {
       log.error(String.format("Attempt to download file with submission ID %s but session ID %s does not match",
           file.getSubmission().getId(), httpSession.getAttribute("id")));
@@ -333,31 +348,34 @@ public class FileController extends FormFlowController {
   }
 
   /**
-   * @param httpSession  The current HTTP session.
    * @param submissionId The submissionId of the all the files that you would like to download.
+   * @param httpSession  The current HTTP session.
+   * @param flow         The name of the current (active) flow
+   * @param request      The HttpServletRequest
    * @return ON SUCCESS: ResponseEntity with a zip file containing all the files in a submission.
    * <p>ON FAILURE: ResponseEntity with a HTTP error message</p>
    */
   @GetMapping("/file-download/{submissionId}")
-  ResponseEntity<StreamingResponseBody> downloadAllFiles(
-      HttpSession httpSession,
+  public ResponseEntity<StreamingResponseBody> downloadAllFiles(
       @PathVariable String submissionId,
+      @RequestParam("flow") String flow,
+      HttpSession httpSession,
       HttpServletRequest request
   ) {
     log.info("GET downloadAllFiles (url: {}): submissionId: {}", request.getRequestURI().toLowerCase(), submissionId);
-    if (!httpSession.getAttribute("id").toString().equals(submissionId)) {
+
+    Submission submission = getSubmissionFromSession(httpSession, flow);
+    if (submission == null) {
+      log.error(String.format("The Submission %s was not found.", submissionId));
+      return ResponseEntity.notFound().build();
+    }
+
+    if (!submissionId.equals(submission.getId().toString())) {
       log.error(
           "Attempted to download files belonging to submission " + submissionId + " but session id " + httpSession.getAttribute(
               "id") + " does not match.");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-
-    Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
-    if (maybeSubmission.isEmpty()) {
-      log.error(String.format("The Submission %s was not found.", submissionId));
-      return ResponseEntity.notFound().build();
-    }
-    Submission submission = maybeSubmission.get();
 
     List<UserFile> userFiles = userFileRepositoryService.findAllBySubmission(submission);
 

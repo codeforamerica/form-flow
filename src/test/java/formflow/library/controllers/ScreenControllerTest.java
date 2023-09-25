@@ -47,7 +47,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
   }
@@ -70,7 +70,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       "GET, /flow/{flow}/{screen}/navigation, flowThatDoesNotExist, screen",
       "GET, /flow/{flow}/{screen}/navigation, testFlow, screenThatDoesNotExist"
   })
-  void endpointShouldReturn404IfFlowOrScreenDoesNotExist(String method, String path, String flow, String screen) throws Exception {
+  void endpointShouldReturn404IfFlowOrScreenDoesNotExist(String method, String path, String flow, String screen)
+      throws Exception {
     switch (method) {
       case "GET" -> mockMvc.perform(get(path, flow, screen)).andExpect(status().isNotFound());
       case "POST" -> mockMvc.perform(post(path, flow, screen)).andExpect(status().isNotFound());
