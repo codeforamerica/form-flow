@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.LandmarkConfiguration;
 import formflow.library.config.NextScreen;
@@ -29,10 +30,10 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 @TestPropertySource(properties = {"form-flow.session-continuity-interceptor.enabled=true"})
 @Import(SpyInterceptorConfig.class)
 class InterceptorMockMvcTest extends AbstractMockMvcTest {
-  
+
   @Autowired
   private LocaleChangeInterceptor localeChangeInterceptor;
-  
+
   @Autowired
   private SessionContinuityInterceptor sessionContinuityInterceptor;
 
@@ -44,7 +45,7 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
     sessionContinuityInterceptor.flowConfigurations = List.of();
     super.setUp();
   }
-  
+
   @Test
   void shouldRunTheDataRequiredInterceptorLast() throws Exception {
     FlowConfiguration flowConfiguration = new FlowConfiguration();
@@ -67,7 +68,7 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
     inOrder.verify(localeChangeInterceptor).preHandle(any(), any(), any());
     inOrder.verify(sessionContinuityInterceptor).preHandle(any(), any(), any());
   }
-  
+
   @Test
   void shouldErrorIfLandmarkIsNotSet() throws Exception {
     FlowConfiguration flowConfiguration = new FlowConfiguration();
@@ -78,7 +79,10 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
         .andExpect(result -> {
           Exception resolvedException = result.getResolvedException();
           assertTrue(resolvedException instanceof LandmarkNotSetException, "Expected RuntimeException to be thrown");
-          assertEquals("You have enabled session continuity interception but have not created a landmark section in your applications flow configuration file.", resolvedException.getMessage());
+
+          assertEquals(
+              "The SessionContinuityInterceptor is enabled, but no 'landmarks' section has been created in the application's form flows configuration file.",
+              resolvedException.getMessage());
         });
   }
 
@@ -95,7 +99,9 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
         .andExpect(result -> {
           Exception resolvedException = result.getResolvedException();
           assertTrue(resolvedException instanceof LandmarkNotSetException, "Expected RuntimeException to be thrown");
-          assertEquals("Please make sure to set a firstScreen under your flow configuration files landmark section.", resolvedException.getMessage());
+          assertEquals(
+              "The SessionContinuityInterceptor is enabled, but a 'firstScreen' page has not been identified in the 'landmarks' section in the application's form flows configuration file.",
+              resolvedException.getMessage());
         });
   }
 
@@ -114,13 +120,15 @@ class InterceptorMockMvcTest extends AbstractMockMvcTest {
     landmarkConfiguration.setFirstScreen("nonExistentScreen");
     flowConfiguration.setLandmarks(landmarkConfiguration);
     sessionContinuityInterceptor.flowConfigurations = List.of(flowConfiguration);
-    
+
     mockMvc.perform(MockMvcRequestBuilders.get("/flow/testLandmarkFlow/first"))
         .andExpect(status().is5xxServerError())
         .andExpect(result -> {
           Exception resolvedException = result.getResolvedException();
           assertTrue(resolvedException instanceof LandmarkNotSetException, "Expected RuntimeException to be thrown");
-          assertEquals("Please make sure that you have correctly set the firstScreen under your flow configuration files landmark section. Your flow configuration file does not contain a screen with the name nonExistentScreen.", resolvedException.getMessage());
+          assertEquals(
+              "The form flows configuration file does not contain a screen with the name 'nonExistentScreen'. Please make sure to correctly set the 'firstScreen' in the form flows configuration file 'landmarks' section.",
+              resolvedException.getMessage());
         });
   }
 }
