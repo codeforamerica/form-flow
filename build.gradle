@@ -82,7 +82,7 @@ dependencies {
     implementation 'org.apache.pdfbox:pdfbox:3.0.0'
     implementation 'org.yaml:snakeyaml:2.2'
     implementation 'com.mailgun:mailgun-java:1.0.8'
-    implementation 'com.google.crypto.tink:tink:1.10.0'
+    implementation 'com.google.crypto.tink:tink:1.11.0'
     implementation 'org.springframework.session:spring-session-jdbc'
 
     // For M1 issue? 
