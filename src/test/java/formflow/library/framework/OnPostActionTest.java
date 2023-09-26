@@ -1,7 +1,9 @@
 package formflow.library.framework;
 
+import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import formflow.library.ScreenController;
 import formflow.library.data.Submission;
@@ -10,6 +12,7 @@ import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,17 +35,26 @@ public class OnPostActionTest extends AbstractMockMvcTest {
   @Autowired
   private ScreenController screenController;
 
+  private Map<String, Object> sessionAttributes;
+
   @BeforeEach
   public void setUp() throws Exception {
     mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
 
+    sessionAttributes = Map.of(
+        SUBMISSION_MAP_NAME,
+        new HashMap<String, Object>(
+            Map.of("testFlow", submission.getId())
+        )
+    );
+
     super.setUp();
-    when(session.getAttribute(screenController.SUBMISSION_MAP_NAME)).thenReturn(
-        Map.of("testFlow", submissionUUID));
+    //when(session.getAttribute(screenController.SUBMISSION_MAP_NAME)).thenReturn(
+    //   Map.of("testFlow", submissionUUID));
     //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
-    //when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     //doReturn(submission).when(screenController).findOrCreateSubmission(any(), "testFlow)");
     //when(screenController.findOrCreateSubmission(session, "testFlow")).thenReturn(submission);
   }
@@ -54,7 +66,9 @@ public class OnPostActionTest extends AbstractMockMvcTest {
         Map.of(
             "dateMonth", List.of("1"),
             "dateDay", List.of("3"),
-            "dateYear", List.of("1999")));
+            "dateYear", List.of("1999")),
+        sessionAttributes
+    );
 
     assertThat(submission.getInputData().get("dateFull")).isEqualTo("1/3/1999");
   }
@@ -66,7 +80,9 @@ public class OnPostActionTest extends AbstractMockMvcTest {
         Map.of(
             "dateMonth", List.of("abc"),
             "dateDay", List.of("1"),
-            "dateYear", List.of("1999")));
+            "dateYear", List.of("1999")),
+        sessionAttributes
+    );
 
     assertPageHasInputError("inputs", "dateFull", dateErrorMessage);
   }

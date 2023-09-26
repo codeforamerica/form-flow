@@ -21,7 +21,7 @@ public abstract class FormFlowController {
 
   protected final List<FlowConfiguration> flowConfigurations;
 
-  public final String SUBMISSION_MAP_NAME = "submissionMap";
+  public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
   FormFlowController(SubmissionRepositoryService submissionRepositoryService, List<FlowConfiguration> flowConfigurations) {
     this.submissionRepositoryService = submissionRepositoryService;
@@ -78,6 +78,21 @@ public abstract class FormFlowController {
       submission = new Submission();
     }
     return submission;
+  }
+
+  protected UUID getSubmissionIdForFlow(HttpSession session, String flow) {
+    if (session == null) {
+      log.error("Unable to retrieve the Submission information for the flow '{}', as session is null.", flow);
+      return null;
+    }
+
+    Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+    if (submissionMap == null) {
+      log.error("There was no '" + SUBMISSION_MAP_NAME + "' attribute in the session.");
+      return null;
+    }
+
+    return submissionMap.get(flow);
   }
 
   /**

@@ -32,14 +32,20 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
   @Autowired
   private ScreenController screenController;
 
+  private Map<String, Object> sessionAttributes;
+
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
-
+    sessionAttributes = Map.of(
+        screenController.SUBMISSION_MAP_NAME,
+        new HashMap<String, Object>(
+            Map.of("testFlow", submission.getId())
+        )
+    );
     super.setUp();
-    ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
   }
 
@@ -49,7 +55,8 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
         Map.of(
             "dateMonth", List.of("1"),
             "dateDay", List.of("2"),
-            "dateYear", List.of("1934")));
+            "dateYear", List.of("1934")),
+        sessionAttributes);
 
     assertThat(submission.getInputData().get("formattedDate")).isEqualTo("1/2/1934");
   }
@@ -57,7 +64,6 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
   @Test
   void shouldSaveTotalIncome() throws Exception {
     String subflowUuid = UUID.randomUUID().toString();
-    Map<String, Object> sessionAttrs = new HashMap<>();
     List<Map<String, Object>> subflowList = new ArrayList<>();
 
     subflowList.add(Map.of("uuid", subflowUuid));
@@ -69,10 +75,9 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
         "iterationIsComplete", true));
 
     submission.getInputData().put("income", subflowList);
-    sessionAttrs.put("id", submission.getId());
 
     postToUrlExpectingSuccess("/flow/testFlow/next", "/flow/testFlow/subflowReview",
-        Map.of("textInput", List.of("1000")), subflowUuid, sessionAttrs);
+        Map.of("textInput", List.of("1000")), subflowUuid, sessionAttributes);
 
     assertThat(submission.getInputData().get("totalIncome")).isEqualTo(6530.0);
   }
