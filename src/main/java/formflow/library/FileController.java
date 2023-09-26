@@ -182,6 +182,7 @@ public class FileController extends FormFlowController {
       //TODO: change userFiles special string to constant to be referenced in thymeleaf
       Map<String, Map<UUID, Map<String, String>>> dzFilesMap;
       Map<UUID, Map<String, String>> userFileMap;
+      HashMap<String, String> fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
 
       if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
         // no dropzone data exists at all yet, let's create space for the session map as well
