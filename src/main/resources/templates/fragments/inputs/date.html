@@ -19,7 +19,7 @@
   <div
       th:class="'form-group' + ${((hasErrorMonth || hasErrorDay || hasErrorYear) ? ' form-group--error' : '')}">
     <fieldset th:id="${groupName}" class="input-group input-group--inline">
-      <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}"
+      <legend th:if="${hasLabel}" th:for="${inputName}" th:text="${label}"
              class="form-question"/>
       <p class="text--help">
         <label th:for="${inputName}+'-month'"
