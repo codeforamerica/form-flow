@@ -2199,14 +2199,14 @@ starting a
 session. If no HttpSession has been established or a session lacks an appropriate Submission id,
 a client will be returned to the index page of an application.
 
-⚠️ __This interceptor is enabled by default. It is set to be the last interceptor run by any
+⚠️ __It is set to be the last interceptor run by any
 application using Form Flow Library.__
 
 #### Configuration
 
 1. In the `application.yaml`, set the `session-continuity-interceptor.enabled` field
    to `true`/`false` to enable
-   or disable the interceptor (Note: the `SessionContinuityInterceptor` is on by default)
+   or disable the interceptor
 2. Set the `flows-config.yaml` with the `landmarks.firstScreen` yaml field.
 
 If this interceptor is enabled, but the `landmarks.firstScreen` is not set correctly, an error will
@@ -2224,9 +2224,11 @@ form-flow:
     enabled: true
 ```
 
-Note: `SessionContinuityInterceptor` is on by default. If you do not include
+Note: If you do not include
 the `session-continuity-interceptor.enabled` field in your `application.yaml` file the application
-will run the `SessionContinuityInterceptor`. These options can be seen in the table below:
+will not load the `SessionContinuityInterceptor`.
+
+These options can be seen in the table below:
 
 <table>
     <tr><th colspan="4" style="text-align: center">SessionContinuityInterceptor table</th></tr>
@@ -2238,13 +2240,13 @@ will run the `SessionContinuityInterceptor`. These options can be seen in the ta
     </tr>
     <tr>
         <td>Interceptor State</td>
-        <td>on</td>
+        <td>off</td>
         <td>on</td>
         <td>off</td>
     </tr>
     <tr>
         <td>Description</td>
-        <td>See <code>session-continuity-interceptor.enabled=true</code>.</td>
+        <td>The <code>SessionContinuityInterceptor</code> bean will not be loaded.</td>
         <td>Turns on the <code>SessionContinuityInterceptor</code>.  This means that the flows-config will check for the <code>landmarks.firstScreen</code> page.  Users will not be able to randomly access any page in the flow. The <code>SessionContinuityInterceptor</code> has the lowest priority. It will always be the last interceptor executed.</td>
         <td>Turns off the <code>SessionContinuityInterceptor</code>.  This means that the flows-config will not be checked for the presence of the <code>landmark.firstScreen</code> page and users will be able to access any page in a flow.</td>
     </tr>
