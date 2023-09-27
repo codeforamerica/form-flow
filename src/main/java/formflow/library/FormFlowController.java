@@ -80,7 +80,14 @@ public abstract class FormFlowController {
     return submission;
   }
 
-  protected UUID getSubmissionIdForFlow(HttpSession session, String flow) {
+  /**
+   * Returns the UUID of the Submission associated with the given flow.
+   *
+   * @param session The HttpSession the user is in
+   * @param flow    The flow to look up the submission ID for
+   * @return The submission id if it exists for the given flow, else null
+   */
+  public static UUID getSubmissionIdForFlow(HttpSession session, String flow) {
     if (session == null) {
       log.error("Unable to retrieve the Submission information for the flow '{}', as session is null.", flow);
       return null;
@@ -144,7 +151,7 @@ public abstract class FormFlowController {
       return;
     }
 
-    Map<String, UUID> submissionMap = (HashMap<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME);
+    Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
     UUID id = submission != null ? submission.getId() : null;
 
     if (submissionMap == null) {

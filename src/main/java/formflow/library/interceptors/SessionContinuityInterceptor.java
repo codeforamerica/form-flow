@@ -1,5 +1,6 @@
 package formflow.library.interceptors;
 
+import formflow.library.FormFlowController;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.exceptions.LandmarkNotSetException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -91,7 +92,8 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       return false;
     }
 
-    if (session.getAttribute("id") == null) {
+    //if (session.getAttribute("id") == null) {
+    if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null) {
       log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());
       response.sendRedirect(REDIRECT_URL);

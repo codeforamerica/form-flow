@@ -1,5 +1,6 @@
 package formflow.library;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
@@ -10,6 +11,7 @@ import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
 import formflow.library.file.FileVirusScanner;
+import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
@@ -24,10 +26,12 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.persistence.Index;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -43,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.reactive.function.client.WebClientResponseException.NotAcceptable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
@@ -60,6 +65,8 @@ public class FileController extends FormFlowController {
   private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
+
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public FileController(
       UserFileRepositoryService userFileRepositoryService,
@@ -179,18 +186,26 @@ public class FileController extends FormFlowController {
       UUID newFileId = userFileRepositoryService.save(uploadedFile);
       log.info("Created new file with id: " + newFileId);
 
-      //TODO: change userFiles special string to constant to be referenced in thymeleaf
-      Map<String, Map<UUID, Map<String, String>>> dzFilesMap;
-      Map<UUID, Map<String, String>> userFileMap;
-      HashMap<String, String> fileInfo = UserFile.createFileInfo(uploadedFile, thumbDataUrl);
+      UserFileMap userFileMap = null;
+      if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
+        userFileMap = new UserFileMap();
+      } else {
+        userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
+            UserFileMap.class);
+      }
+      //UserFileMap userFileMap = (UserFileMap) httpSession.getAttribute(SESSION_USERFILES_KEY);
 
+      userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
+      httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
+      // httpSession.setAttribute(SESSION_USERFILES_KEY, userFileMap);
+/*
       if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
         // no dropzone data exists at all yet, let's create space for the session map as well
         // as for the current file being uploaded
         dzFilesMap = new HashMap<>();
         userFileMap = new HashMap<>();
       } else {
-        dzFilesMap = (Map<String, Map<UUID, Map<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
+        dzFilesMap = (Map) httpSession.getAttribute(SESSION_USERFILES_KEY);
         if (dzFilesMap.containsKey(inputName)) {
           userFileMap = dzFilesMap.get(inputName);
           // Double check that files in session cookie are in db
@@ -200,10 +215,8 @@ public class FileController extends FormFlowController {
           userFileMap = new HashMap<>();
         }
       }
-
-      userFileMap.put(newFileId, fileInfo);
-      dzFilesMap.put(inputName, userFileMap);
-      httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
+      httpSession.setAttribute(SESSION_USERFILES_KEY, userFileMap);
+ */
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
@@ -264,16 +277,27 @@ public class FileController extends FormFlowController {
       log.info("Delete file {} from cloud storage", fileId);
       cloudFileRepository.delete(file.getRepositoryPath());
       userFileRepositoryService.deleteById(file.getFileId());
-      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
-          (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
-      HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
 
-      userFileMap.remove(fileId);
-      if (userFileMap.isEmpty()) {
-        dzFilesMap.remove(dropZoneInstanceName);
+      //HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
+      //   (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
+      //HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
+
+      UserFileMap userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
+          UserFileMap.class);
+      //UserFileMap userFileMap = (UserFileMap) httpSession.getAttribute(SESSION_USERFILES_KEY);
+      if (userFileMap == null) {
+        log.error("User file map not set in session. Unable to update file information");
+        throw new IndexOutOfBoundsException("Session does not container user file mapping.");
       }
+      userFileMap.removeUserFileFromMap(flow, fileId);
+      httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
+      //httpSession.setAttribute(SESSION_USERFILES_KEY, userFileMap);
 
-      httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
+      //userFileMap.remove(fileId);
+      //if (userFileMap.isEmpty()) {
+      //  dzFilesMap.remove(dropZoneInstanceName);
+      // }
+      // httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
 
       return new RedirectView(returnPath);
     } catch (Exception e) {

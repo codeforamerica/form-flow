@@ -271,7 +271,12 @@
       init: function () {
         window[dropzonePrefix + [[${inputName}]]] = this;
         var dzInstance = [[${inputName}]]
-        var documents = userFiles !== null ? userFiles[dzInstance] : [];
+        var flow = [[${flow}]]
+        var documents = userFiles !== null ? JSON.parse(userFiles).userFileMap[flow][dzInstance]
+            : [];
+
+        console.log(
+            "on addedFile: documents are: " + documents.entries().next["originalFilename"]);
 
         if (documents != null && Object.entries(documents).length > this.options.maxFiles) {
           toggleMaxFileMessage('on');
@@ -316,6 +321,10 @@
           prependAddedFile();
           updateUploadBoxLayout();
           showUploadListHeaderOnUpload();
+
+          //console.log("on addedFile: documents are: " + JSON.parse(documents));
+          console.log(
+              "on addedFile: documents are: " + documents.entries().next["originalFilename"]);
         });
 
         this.on("thumbnail", function (file, dataUrl) {
