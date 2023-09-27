@@ -12,6 +12,7 @@ import formflow.library.config.SubflowConfiguration;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.FileValidationService;
 import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,13 +59,14 @@ public class ScreenController extends FormFlowController {
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
+      UserFileRepositoryService userFileRepositoryService,
       SubmissionRepositoryService submissionRepositoryService,
       ValidationService validationService,
       AddressValidationService addressValidationService,
       ConditionManager conditionManager,
       ActionManager actionManager,
       FileValidationService fileValidationService) {
-    super(submissionRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;

@@ -16,22 +16,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.persistence.Index;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -47,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.reactive.function.client.WebClientResponseException.NotAcceptable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
@@ -56,8 +51,6 @@ import org.springframework.web.servlet.view.RedirectView;
 @EnableAutoConfiguration
 @Slf4j
 public class FileController extends FormFlowController {
-
-  private final UserFileRepositoryService userFileRepositoryService;
   private final CloudFileRepository cloudFileRepository;
   private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
@@ -78,8 +71,7 @@ public class FileController extends FormFlowController {
       FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
       @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
-    super(submissionRepositoryService, flowConfigurations);
-    this.userFileRepositoryService = userFileRepositoryService;
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
     this.fileValidationService = fileValidationService;

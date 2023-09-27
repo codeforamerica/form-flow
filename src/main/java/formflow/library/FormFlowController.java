@@ -3,6 +3,7 @@ package formflow.library;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.data.UserFileRepositoryService;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
@@ -19,12 +19,16 @@ public abstract class FormFlowController {
 
   protected final SubmissionRepositoryService submissionRepositoryService;
 
+  protected final UserFileRepositoryService userFileRepositoryService;
+
   protected final List<FlowConfiguration> flowConfigurations;
 
   public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
-  FormFlowController(SubmissionRepositoryService submissionRepositoryService, List<FlowConfiguration> flowConfigurations) {
+  FormFlowController(SubmissionRepositoryService submissionRepositoryService, UserFileRepositoryService userFileRepositoryService,
+      List<FlowConfiguration> flowConfigurations) {
     this.submissionRepositoryService = submissionRepositoryService;
+    this.userFileRepositoryService = userFileRepositoryService;
     this.flowConfigurations = flowConfigurations;
   }
 
