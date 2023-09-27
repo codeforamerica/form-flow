@@ -625,6 +625,7 @@ public class ScreenController extends FormFlowController {
     model.put("inputData", submission.getInputData());
     model.put("errorMessages", httpSession.getAttribute("errorMessages"));
     model.put("fieldData", submission.getInputData());
+    model.put("userFiles", userFileRepositoryService.findAllBySubmission(submission));
     if (subflowName != null) {
       if (uuid != null && !uuid.isBlank()) {
         model.put("fieldData", submission.getSubflowEntryByUuid(subflowName, uuid));
