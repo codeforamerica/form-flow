@@ -45,7 +45,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
    */
   @Override
   public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
-      throws Exception {
+      throws IOException, LandmarkNotSetException {
     String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
     Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
 
