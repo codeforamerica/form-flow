@@ -307,11 +307,11 @@ public class FileController extends FormFlowController {
    * @return ON SUCCESS: ResponseEntity with a response body that includes the file.
    * <p>ON FAILURE: A ResponseEntity returns an HTTP error code</p>
    */
-  @GetMapping("/file-download/{submissionId}/{fileId}")
+  @GetMapping("/file-download/{flow}/{submissionId}/{fileId}")
   public ResponseEntity<StreamingResponseBody> downloadSingleFile(
       @PathVariable String submissionId,
       @PathVariable String fileId,
-      @RequestParam("flow") String flow,
+      @PathVariable String flow,
       HttpSession httpSession,
       HttpServletRequest request
   ) {
@@ -373,10 +373,10 @@ public class FileController extends FormFlowController {
    * @return ON SUCCESS: ResponseEntity with a zip file containing all the files in a submission.
    * <p>ON FAILURE: ResponseEntity with a HTTP error message</p>
    */
-  @GetMapping("/file-download/{submissionId}")
+  @GetMapping("/file-download/{flow}/{submissionId}")
   public ResponseEntity<StreamingResponseBody> downloadAllFiles(
       @PathVariable String submissionId,
-      @RequestParam("flow") String flow,
+      @PathVariable String flow,
       HttpSession httpSession,
       HttpServletRequest request
   ) {
