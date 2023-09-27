@@ -274,10 +274,7 @@
         var flow = [[${flow}]]
         var documents = userFiles !== null ? JSON.parse(userFiles).userFileMap[flow][dzInstance]
             : [];
-
-        console.log(
-            "on addedFile: documents are: " + documents.entries().next["originalFilename"]);
-
+        
         if (documents != null && Object.entries(documents).length > this.options.maxFiles) {
           toggleMaxFileMessage('on');
         }
@@ -321,10 +318,6 @@
           prependAddedFile();
           updateUploadBoxLayout();
           showUploadListHeaderOnUpload();
-
-          //console.log("on addedFile: documents are: " + JSON.parse(documents));
-          console.log(
-              "on addedFile: documents are: " + documents.entries().next["originalFilename"]);
         });
 
         this.on("thumbnail", function (file, dataUrl) {
@@ -352,7 +345,6 @@
         });
 
         this.on('maxfilesexceeded', function () {
-          console.log("maxfilesexceeded was emitted");
           toggleMaxFileMessage('on');
         });
 
