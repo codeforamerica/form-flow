@@ -354,8 +354,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-                  .param("flow", "testFlow")
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
                   .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -375,8 +374,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-                  .param("flow", "testFlow")
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
                   .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -392,8 +390,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{submissionId}", submission.getId().toString())
-                  .param("flow", "testFlow")
+                  .get("/file-download/{flow}/{submissionId}", "testFlow", submission.getId().toString())
                   .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -444,8 +441,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.empty());
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-                  .param("flow", "testFlow")
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
                   .session(session))
           .andExpect(status().is(404));
     }
@@ -473,8 +469,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{submissionId}/{fileId}", submission.getId().toString(), fileId)
-                  .param("flow", "testFlow")
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
                   .session(session))
           .andExpect(MockMvcResultMatchers.request().asyncStarted())
           .andReturn();
@@ -526,8 +521,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{submissionId}", submission.getId().toString())
-                  .param("flow", "testFlow")
+                  .get("/file-download/{flow}/{submissionId}", "testFlow", submission.getId().toString())
                   .session(session))
           .andExpect(MockMvcResultMatchers.request().asyncStarted())
           .andReturn();
