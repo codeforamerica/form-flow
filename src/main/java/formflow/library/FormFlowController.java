@@ -1,5 +1,6 @@
 package formflow.library;
 
+import feign.Response;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
@@ -76,7 +77,13 @@ public abstract class FormFlowController {
    */
 
   public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
-    Submission submission = getSubmissionFromSession(httpSession, flow);
+    Submission submission = null;
+    try {
+      submission = getSubmissionFromSession(httpSession, flow);
+    } catch (ResponseStatusException ignored) {
+      // it's okay if it doesn't exist already
+    }
+
     if (submission == null) {
       log.info("Submission not found in session for flow '{}', creating one.", flow);
       submission = new Submission();
