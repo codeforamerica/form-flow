@@ -309,7 +309,7 @@ Google address.
 public class CheckGmailUser implements Condition {
 
   public boolean run(Submission submission) {
-    return submission.getInputData().get('emailAddress').contains("gmail.com");
+    return submission.getInputData().get("emailAddress").contains("gmail.com");
   }
 } 
 ```
@@ -372,8 +372,8 @@ public class CalculateBeforeSave implements Action {
 
   public void run(Submission submission) {
     float rate = 0.59;
-    int mileage = submission.getInputData().get('mileage');
-    submission.getInputData().put('reimbursement', mileage * rate);
+    int mileage = submission.getInputData().get("mileage");
+    submission.getInputData().put("reimbursement", mileage * rate);
   }
 } 
 ```
