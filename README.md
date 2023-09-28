@@ -65,7 +65,6 @@ Table of Contents
 * [Developer Setup](#developer-setup)
     * [Mac and Linux](#mac-and-linux)
     * [Windows](#windows)
-    * [Scripts](#scripts)
     * [Spring Profiles](#spring-profiles)
         * [DevController](#devcontroller)
         * [IntelliJ Configuration](#intellij-configuration)
@@ -2603,12 +2602,6 @@ After cloning the repository, run `./setup.sh` from the root of the repo's direc
 
 Check the setup script for the most up to date list of dependencies and steps you'll need to install
 manually.
-
-## Scripts
-
-We provide a directory in our starter application that holds helpful scripts.
-Please see the starter application's
-[README](https://github.com/codeforamerica/form-flow-starter-app#scripts) for more information.
 
 ## Spring Profiles
 
