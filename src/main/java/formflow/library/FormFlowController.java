@@ -93,14 +93,12 @@ public abstract class FormFlowController {
    */
   public static UUID getSubmissionIdForFlow(HttpSession session, String flow) {
     if (session == null) {
-      log.error("Unable to retrieve the Submission information for the flow '{}', as session is null.", flow);
-      return null;
+      throwNotFoundError(flow, null, String.format("Session is null, unable to retrieve submission id for flow '%s'.", flow));
     }
 
     Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
     if (submissionMap == null) {
-      log.error("There was no '" + SUBMISSION_MAP_NAME + "' attribute in the session.");
-      return null;
+      throwNotFoundError(flow, null, String.format("There was no submission map present in the session for flow '%s'.", flow));
     }
 
     return submissionMap.get(flow);
@@ -116,14 +114,13 @@ public abstract class FormFlowController {
    */
   protected Submission getSubmissionFromSession(HttpSession session, String flow) {
     if (session == null) {
-      log.error("Unable to retrieve the Submission information for the flow '{}', as session is null.", flow);
+      throwNotFoundError(flow, null, String.format("Session is null, unable to retrieve submission for flow '%s'.", flow));
       return null;
     }
 
     Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
     if (submissionMap == null) {
-      log.error("There was no '" + SUBMISSION_MAP_NAME + "' attribute in the session.");
-      return null;
+      throwNotFoundError(flow, null, String.format("There was no submission map present in the session for flow '%s'.", flow));
     }
     UUID id = submissionMap.get(flow);
     if (id != null) {
@@ -131,11 +128,10 @@ public abstract class FormFlowController {
       if (maybeSubmission.isPresent()) {
         return maybeSubmission.get();
       }
-      log.info("No submission was found in the database with id '{}'", id);
+      throwNotFoundError(flow, null, String.format("No submission was found in the database with id '%s'.", id));
     } else {
-      log.info("No id was found in session map for flow '{}'", flow);
+      throwNotFoundError(flow, null, String.format("No ID was present in the session map for flow '%s'", flow));
     }
-
     return null;
   }
 
@@ -147,6 +143,7 @@ public abstract class FormFlowController {
    * @param flow A string containing the name of the flow to store the Submission data for
    */
   protected void setSubmissionInSession(HttpSession session, Submission submission, String flow) {
+    // TODO what error should be thrown here?
     if (session == null) {
       log.error(
           "Unable to put the submission ID ('{}') into the session for the flow '{}'. Session is null.",

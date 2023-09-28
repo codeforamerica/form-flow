@@ -112,6 +112,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
   @Test
   public void fileUploadEndpointHitsCloudFileRepositoryAndAddsUserFileToSession() throws Exception {
     when(userFileRepositoryService.save(any())).thenReturn(fileId);
+    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     doNothing().when(cloudFileRepository).upload(any(), any());
     // the "name" param has to match what the endpoint expects: "file"
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
@@ -154,6 +155,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         MediaType.IMAGE_JPEG_VALUE,
         "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
     when(clammitVirusScanner.virusDetected(testVirusFile)).thenReturn(true);
+    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testVirusFile)
@@ -175,6 +177,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
     when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
         new WebClientResponseException(500, "Failed!", null, null, null));
+    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
@@ -212,7 +215,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldReturn13IfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
+  void shouldReturn413IfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, new byte[(int) (FileUtils.ONE_MB + 1)]);
 
