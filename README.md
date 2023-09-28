@@ -81,7 +81,7 @@ Table of Contents
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
-A Spring Boot Java library that provide a framework for developing **form flow** based applications.
+A Spring Boot Java library that provides a framework for developing **form flow** based applications.
 The intention is to speed up the creation of web applications that are a series of forms that
 collect input from users.
 
@@ -208,20 +208,20 @@ subflow:
 
 #### Entry Screen
 
-This screen represents the entry point to a subflow, it is usually the point at which a user makes a
+This screen represents the entry point to a subflow. It is usually the point at which a user makes a
 decision to enter the subflow or not. Example: a screen that asks "Would you like to add household
 members?" could be the entry screen for a household based subflow.
 
 The entry screen is not part of the repeating set of pages internal to the subflow and as such does
-not need to be demarked with `subflow: subflowName` in the `flows-config.yaml`.
+not need to be denoted with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Iteration Start Screen
 
-This screen is the first screen in a subflows set of repeating screens. When this screen is
+This screen is the first screen in a subflow's set of repeating screens. When this screen is
 submitted, it creates a new iteration which is then saved to the subflow array within the Submission
 object.
 
-Because this screen is part of the repeating screens within the subfow, it **should** be denoted
+Because this screen is part of the repeating screens within the subflow, it **should** be denoted
 with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Review Screen
@@ -229,19 +229,18 @@ with `subflow: subflowName` in the `flows-config.yaml`.
 This is the last screen in a subflow. This screen lists each iteration completed within a subflow,
 and provides options to edit or delete a single iteration.
 
-This screen does not need to be demarked with `subflow: subflowName` in the `flows-config.yaml`. It
-is not technically part of the repeating screens within a subflow, however, you do visit this screen
+This screen does not need to be denoted with `subflow: subflowName` in the `flows-config.yaml`. It
+is not technically part of the repeating screens within a subflow. However, you do visit this screen
 at the end of each iteration to show iterations completed so far and ask the user if they would like
 to add another.
 
 #### Delete Confirmation Screen
 
-This screen appears when a user selects `delete` on a iteration listed on the review screen. It asks
+This screen appears when a user selects `delete` on an iteration listed on the review screen. It asks
 the user to confirm their deletion before submitting the actual deletion request to the server.
 
-This page is not technically part of the subflow and as such, does not need to be demarked
-with `subflow: subflowName`
-in the `flows-config.yaml`.
+This page is not technically part of the subflow and as such, does not need to be denoted
+with `subflow: subflowName` in the `flows-config.yaml`.
 
 ## Submission Object
 
@@ -293,12 +292,11 @@ have access to it.
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
-form flow configuration file. They are generally used to help determine template or page flow.
+form flow configuration file. They are generally used to determine template or page flow.
 
-Conditions are defined in Java and are objects that implement the `Condition`
+Conditions are Java objects that implement the `Condition`
 [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Condition.java)
-. Conditions have the Submission object available to them, so when creating new conditions, the
-instance variable `inputData` is accessible.
+. As conditions are called with the Submission object, the instance variable `inputData` is available to them.
 
 Here is a simple condition that looks at data in the submission to see if the email provided is a
 Google address.
@@ -340,7 +338,7 @@ Thymeleaf templates. Template code can run conditions via this object, like so:
 Actions provide the ability for an application using this library to inject application specific
 logic at strategic points in the POST and GET processing.
 
-Actions are defined in Java and are objects that implement the
+Actions are Java objects that implement the
 `Action` [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Action.java)
 . Actions have a `Submission` or `FormSubmission` object available to them, depending on the
 type of Action being created.
@@ -351,7 +349,7 @@ value, but rather just update the `Submission` or `FormSubmission` data.
 In the case of the `crossValidationAction`, error messages are returned so that they can be
 displayed on the screen with any other validation error messages.
 
-There are four types of actions available in the Form Flow library:
+There are five types of actions available in the Form Flow library:
 
 | Action Name                | Data Available              | Returns                | Action Definition                                                                                                                                                                                                                                                                                                                                          |
 |----------------------------|-----------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -408,7 +406,7 @@ our [starter application](https://github.com/codeforamerica/form-flow-starter-ap
 Inputs to the application are defined in two places - the template in which they are rendered, and
 in a separate class for validation.
 
-### Input Class
+### Inputs Class
 
 The inputs class's location is defined by the application using this library. The application using
 this library will need a field in its `application.yaml` that shows the location of the input class(
@@ -423,7 +421,7 @@ The library will expect a class that matches the name of the flow there. So if t
 defined in the application's `flows-config.yaml` configuration, is `ubi` we will expect a class by
 the name of `Ubi` to be located at the specified input path.
 
-An example inputs class can be seen below, with example validations. Note that all inputs classses
+An example inputs class can be seen below, with example validations. Note that all inputs classes
 should extend the class `FlowInputs` which provides CSRF functionality for security.
 
 Also note that for single value inputs the type when defining the input is String. However, for
@@ -457,14 +455,12 @@ validations. For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
 
 Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
-`@NotNull` is used. That is to say if a validation annotation such as `@Email` is used, it will not
-actually
-validate the annotated input unless a user actually enters a value for that input. If you use
+`@NotNull` is used. If a validation annotation such as `@Email` is used, it will not
+actually validate the annotated input unless a user actually enters a value for that input. If you use
 `@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
 enter a value,
 validating both that they need to enter a value due to `@NotBlank` and because the blank value needs
-to be
-a validly formatted email address due to `@Email`.
+to be a validly formatted email address due to `@Email`.
 
 ### Custom Annotations
 
@@ -616,7 +612,7 @@ In the example below the following assumptions are applied:
 So the resulting JSON stored in the database has input fields as key values, and for subflow the
 subflow name is the key value.
 
-Note that the subflows are an array of repeating entries - one for each iteration a user did of the
+Note that the subflows are an array of repeating entries - one for each iteration a user made of the
 subflow. Each iteration has a unique UUID associated with it so we can have a way of working with a
 specific iteration's data.
 
@@ -632,7 +628,7 @@ templating.
 
 We use Thymeleaf's concept
 of  [fragments](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#fragments) to store
-complex mark up into simple reusable imports.
+complex mark up in simple reusable imports.
 
 Fragments simplify the process of creating more complex HTML pages. Some places we use fragments
 include input types, forms, page headers and footers, error handlers,
@@ -1136,7 +1132,7 @@ An example select input:
 </th:block>
 ```
 
-Note that we use three seperate fragments here, `select`, `selectOptionPlaceholder`,
+Note that we use three separate fragments here, `select`, `selectOptionPlaceholder`,
 and `selectOption`.
 
 `select` wraps the internal options and provides a label and optional help text for the grouping.
@@ -1158,11 +1154,11 @@ as mentioned above.
 
 ### Date
 
-Date inputs are used to gather dates, such as birthdates, start dates for places of employment,
+Date inputs are used to gather dates, such as birth dates, start dates for places of employment,
 etc.
 They are visually displayed as three separate inputs for Month, Day and Year in MM/DD/YYYY format.
 
-A convenience live template for date's is provided through `cfa:inputDate`.
+A convenience live template for dates is provided through `cfa:inputDate`.
 
 ### Address
 
@@ -1221,7 +1217,7 @@ account you
 can [follow the instructions here to create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
 .
 
-Make sure to note your buckets name and region as well as your AWS access and secret keys as you
+Make sure to note your bucket's name and region as well as your AWS access and secret keys as you
 will need these for configuring file uploads in the library. The bucket and region are configured in
 your `application.yaml`. See the section on
 [application.yaml configuration](#application-configuration).
@@ -1232,7 +1228,7 @@ the [Environment Variables](#environment-variables) section below.
 ### File Naming Conventions
 
 Before a file is uploaded to S3, we give it a normalized filename. It consists of the flow name,
-input field the file was uploaded from, and a UUID. Then we store it in S3, organized by which
+input field the file was uploaded from, and a UUID. We then store it in S3, organized by which
 submission it is a part of, like so:
 
 ```
@@ -1324,7 +1320,7 @@ File uploads made through form flow can be scanned for viruses. We provide a way
 files to a ClamAV server.
 
 Our team maintains a [ClamAV based service](https://github.com/codeforamerica/clamav-server)
-that can be deployed alongside of a form flow application. The form flow library can send files to
+that can be deployed alongside a form flow application. The form flow library can send files to
 this service to be scanned for viruses.
 
 To run the ClamAV server you'll need to deploy it, enable virus scanning in your app, and then
@@ -1334,7 +1330,7 @@ widget will return an error message if a client uploads a file containing a viru
 Configuration for this feature can be found in
 our [configuration section](#virus-scanner-properties).
 
-There is a field `virus_scanned` in the `user_files` table with `Boolean` as it's value.
+There is a field `virus_scanned` in the `user_files` table with `Boolean` as its value.
 
 * `true` if the file was scanned by the service and did not have a virus.
 * `false` if not scanned, either because the service is down or disabled.
