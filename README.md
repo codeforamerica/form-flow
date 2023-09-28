@@ -150,7 +150,7 @@ erDiagram
 
 All screens must have an entry in the flows-config in order to be rendered. Additionally, each
 screen should have its own template defined in a folder respective to the flow that screen is
-contained within. Example `/src/resources/templates/<flowName>/<templateName>`.
+contained within. Example `/src/main/resources/templates/<flowName>/<templateName>`.
 
 We have provided a number of IntelliJ Live templates to make the creation of screens faster and
 easier. [More on Live Templates here](#applying-live-templates-to-your-intellij-ide).
