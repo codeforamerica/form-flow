@@ -164,20 +164,26 @@ example using our [live templates for a form screen](#applying-live-templates-to
 
 ```html
 
-<th:block th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
+<th:block th:replace="~{fragments/icons :: clipboardWithEnvelope}"/>
+<th:block
+    th:replace="~{fragments/cardHeader :: cardHeader(header='Tell us about yourself')}"/>
+<th:block
+    th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
   <th:block th:ref="formContent">
     <div class="form-card__content">
-      <th:block th:replace="'icons :: 'clipboard'"></th:block>
-      <th:block th:replace="'content :: cardHeader(header='Tell us about yourself')"/>
-      <th:block
-          th:replace="'inputs :: textInput(name='firstName', label='What's your first name?')"/>
-      <th:block
-          th:replace="'inputs :: textInput(name='lastName', label='What's your last name?')"/>
-      <th:block
-          th:replace="'inputs :: textInput(name='emailAddress', label='What's your email address?')"/>
-    </div>
-    <div class="form-card__footer">
-      <th:block th:replace="~{fragments/continueButton :: continue}"/>
+      <th:block th:replace="~{fragments/inputs/text ::
+                  text(inputName='firstName',
+                  label='What\'s your first name?')}"/>
+      <th:block th:replace="~{fragments/inputs/text ::
+                  text(inputName='lastName',
+                  label='What\'s your last name?')}"/>
+      <th:block th:replace="~{fragments/inputs/text ::
+                  text(inputName='emailAddress',
+                  label='What\'s your email address?')}"/>
+      <div class="form-card__footer">
+        <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+                  text='Continue')}"/>
+      </div>
     </div>
   </th:block>
 </th:block>
