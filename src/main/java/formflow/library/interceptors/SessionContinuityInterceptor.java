@@ -42,6 +42,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
    * @return Boolean True - allows the request to proceed to the ScreenController, False - stops the request from reaching the
    * Screen Controller.
    * @throws IOException - thrown in the event that an input or output exception occurs when this method does a redirect.
+   * @throws LandmarkNotSetException - thrown in the event that a landmark(s) screen is misconfigured
    */
   @Override
   public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
