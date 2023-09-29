@@ -1180,20 +1180,20 @@ The address fragment has two required parameters, `validate` and `inputName`.
 
 - `validate` is a boolean value that determines whether the address should be validated by Smarty
 - `inputName` is the name that will be associated with all of the above inputs by being used as a
-prefix in their input's name. For example, if the `inputName` is `homeAddress` then the corresponding
-inputs will be `homeAddressStreetAddress1`, `homeAddressStreetAddress2`, `homeAddressCity`, `homeAddressState`,
-and `homeAddressZipCode`.
+  prefix in their input's name. For example, if the `inputName` is `homeAddress` then the
+  corresponding inputs will be `homeAddressStreetAddress1`, `homeAddressStreetAddress2`,
+  `homeAddressCity`, `homeAddressState`, and `homeAddressZipCode`.
 
-The address fragment has five optional
-parameters: `streetAddressHelpText`, `streetAddress2HelpText`, `cityHelpText`, `stateHelpText`
-, and `zipCodeHelpText`.
-These will pass helper text to each specific field.
+The address fragment has five optional parameters: `streetAddressHelpText`, `streetAddress2HelpText`
+, `cityHelpText`, `stateHelpText`, and `zipCodeHelpText`. These will pass helper text to each
+specific field.
 
 Please note that when using the address fragment you will need to create corresponding fields in
 your
 flow inputs class for each of the above-mentioned inputs created by the fragment. For example, if
 your
-address fragments input name is `mailingAddress`, then you will need to create the following fields in
+address fragments input name is `mailingAddress`, then you will need to create the following fields
+in
 your flow inputs class:
 
 ```
@@ -2601,7 +2601,13 @@ file.
 
 ## Mac and Linux
 
-After cloning the repository, run `./setup.sh` from the root of the repo's directory.
+After cloning the repository, run the `setup.sh` script that's located in the `scripts` directory.
+This will install all the necessary dependencies as well as the databases necessary to run.
+
+```bash
+$> cd scripts
+$> ./setup.sh
+```
 
 ## Windows
 
