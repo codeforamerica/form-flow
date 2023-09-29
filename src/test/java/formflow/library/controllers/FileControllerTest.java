@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import formflow.library.FileController;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
@@ -21,6 +22,7 @@ import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.io.DataInput;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Date;
@@ -85,6 +87,15 @@ public class FileControllerTest extends AbstractMockMvcTest {
     submission = Submission.builder().id(submissionUUID).build();
 
     when(clammitVirusScanner.virusDetected(any())).thenReturn(false);
+
+    // Set the file ID on the UserFile since Mockito won't actually set one (it just returns what we tell it to)
+    // It does not call the actual save method which is what sets the ID
+    when(userFileRepositoryService.save(any())).thenAnswer(invocation -> {
+      UserFile userFile = invocation.getArgument(0);
+      userFile.setFileId(fileId);
+      return fileId;
+    });
+    
     session.setAttribute(
         SUBMISSION_MAP_NAME,
         new HashMap<String, Object>(
@@ -111,7 +122,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
   @Test
   public void fileUploadEndpointHitsCloudFileRepositoryAndAddsUserFileToSession() throws Exception {
-    when(userFileRepositoryService.save(any())).thenReturn(fileId);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     doNothing().when(cloudFileRepository).upload(any(), any());
     // the "name" param has to match what the endpoint expects: "file"
@@ -130,17 +140,17 @@ public class FileControllerTest extends AbstractMockMvcTest {
         .andExpect(content().string(fileId.toString()));
 
     verify(cloudFileRepository, times(1)).upload(any(), any());
-
+    
+    ObjectMapper objectMapper = new ObjectMapper();
+    HashMap<String, HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>>> sessionDzInstanceMap = objectMapper.readValue(session.getAttribute("userFiles").toString(), HashMap.class);
+        
+    
     // get the DZ Instance Map from the session and make sure the file info looks okay
-    HashMap<String, HashMap<Long, HashMap<String, String>>> sessionDzInstanceMap =
-        (HashMap<String, HashMap<Long, HashMap<String, String>>>) session.getAttribute("userFiles");
+    assertThat(sessionDzInstanceMap.get("userFileMap").size()).isEqualTo(1);
+    assertThat(sessionDzInstanceMap.get("userFileMap").get("testFlow").size()).isEqualTo(1);
 
-    assertThat(sessionDzInstanceMap.size()).isEqualTo(1);
-    assertThat(sessionDzInstanceMap.get("dropZoneTestInstance").size()).isEqualTo(1);
-
-    UUID theNewFileId = (UUID) sessionDzInstanceMap.get("dropZoneTestInstance").keySet().toArray()[0];
-    Map<String, String> fileData = sessionDzInstanceMap.get("dropZoneTestInstance").get(theNewFileId);
-
+    String theNewFileId = (String) sessionDzInstanceMap.get("userFileMap").get("testFlow").get("dropZoneTestInstance").keySet().toArray()[0];
+    HashMap<String, String> fileData = sessionDzInstanceMap.get("userFileMap").get("testFlow").get("dropZoneTestInstance").get(theNewFileId);
     assertThat(fileData.get("originalFilename")).isEqualTo("someImage.jpg");
     assertThat(fileData.get("filesize")).isEqualTo("4.0");
     assertThat(fileData.get("thumbnailUrl")).isEqualTo("base64string");
@@ -170,7 +180,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
   @Test
   void shouldAllowUploadIfBlockIfUnreachableIsSetToFalse() throws Exception {
-    when(userFileRepositoryService.save(any())).thenReturn(fileId);
     doNothing().when(cloudFileRepository).upload(any(), any());
 
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
@@ -198,7 +207,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
     when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
         new WebClientResponseException(500, "Failed!", null, null, null));
-    when(userFileRepositoryService.save(any())).thenReturn(fileId);
     doNothing().when(cloudFileRepository).upload(any(), any());
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")

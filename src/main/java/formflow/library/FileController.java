@@ -185,30 +185,9 @@ public class FileController extends FormFlowController {
         userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
             UserFileMap.class);
       }
-      //UserFileMap userFileMap = (UserFileMap) httpSession.getAttribute(SESSION_USERFILES_KEY);
 
       userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
       httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
-      // httpSession.setAttribute(SESSION_USERFILES_KEY, userFileMap);
-/*
-      if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
-        // no dropzone data exists at all yet, let's create space for the session map as well
-        // as for the current file being uploaded
-        dzFilesMap = new HashMap<>();
-        userFileMap = new HashMap<>();
-      } else {
-        dzFilesMap = (Map) httpSession.getAttribute(SESSION_USERFILES_KEY);
-        if (dzFilesMap.containsKey(inputName)) {
-          userFileMap = dzFilesMap.get(inputName);
-          // Double check that files in session cookie are in db
-          userFileMap.entrySet().removeIf(e -> userFileRepositoryService.findById(e.getKey()).isEmpty());
-        } else {
-          // a map for this inputName dropzone instance does not exist yet, let's create it so we can add files to it
-          userFileMap = new HashMap<>();
-        }
-      }
-      httpSession.setAttribute(SESSION_USERFILES_KEY, userFileMap);
- */
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
     } catch (Exception e) {
