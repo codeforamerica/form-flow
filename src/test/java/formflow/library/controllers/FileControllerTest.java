@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import formflow.library.FileController;
 import formflow.library.data.Submission;
@@ -22,6 +23,7 @@ import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
+import formflow.library.utils.UserFileMap;
 import java.io.DataInput;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -142,15 +144,15 @@ public class FileControllerTest extends AbstractMockMvcTest {
     verify(cloudFileRepository, times(1)).upload(any(), any());
     
     ObjectMapper objectMapper = new ObjectMapper();
-    HashMap<String, HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>>> sessionDzInstanceMap = objectMapper.readValue(session.getAttribute("userFiles").toString(), HashMap.class);
+    UserFileMap userFileMap = objectMapper.readValue(session.getAttribute("userFiles").toString(), UserFileMap.class);
         
     
     // get the DZ Instance Map from the session and make sure the file info looks okay
-    assertThat(sessionDzInstanceMap.get("userFileMap").size()).isEqualTo(1);
-    assertThat(sessionDzInstanceMap.get("userFileMap").get("testFlow").size()).isEqualTo(1);
+    assertThat(userFileMap.getUserFileMap().size()).isEqualTo(1);
+    assertThat(userFileMap.getUserFileMap().get("testFlow").size()).isEqualTo(1);
 
-    String theNewFileId = (String) sessionDzInstanceMap.get("userFileMap").get("testFlow").get("dropZoneTestInstance").keySet().toArray()[0];
-    HashMap<String, String> fileData = sessionDzInstanceMap.get("userFileMap").get("testFlow").get("dropZoneTestInstance").get(theNewFileId);
+    UUID theNewFileId = (UUID) userFileMap.getUserFileMap().get("testFlow").get("dropZoneTestInstance").keySet().toArray()[0];
+    Map<String, String> fileData = userFileMap.getUserFileMap().get("testFlow").get("dropZoneTestInstance").get(theNewFileId);
     assertThat(fileData.get("originalFilename")).isEqualTo("someImage.jpg");
     assertThat(fileData.get("filesize")).isEqualTo("4.0");
     assertThat(fileData.get("thumbnailUrl")).isEqualTo("base64string");
@@ -259,31 +261,27 @@ public class FileControllerTest extends AbstractMockMvcTest {
   public class Delete {
 
     String dzWidgetInputName = "coolDzWidget";
+    UserFile testUserFile = UserFile.builder()
+        .submission(submission)
+        .createdAt(Date.from(Instant.now()))
+        .originalName("coolFile.jpg")
+        .repositoryPath("pathToS3")
+        .mimeType(".pdf")
+        .filesize(Float.valueOf("10"))
+        .virusScanned(false)
+        .build();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
       UUID submissionUUID_1 = UUID.randomUUID();
       UUID submissionUUID_2 = UUID.randomUUID();
       submission = Submission.builder().id(submissionUUID_1).build();
-      UserFile testUserFile = UserFile.builder().submission(submission).build();
       when(submissionRepositoryService.findById(submissionUUID_1)).thenReturn(Optional.ofNullable(submission));
       when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       doNothing().when(cloudFileRepository).delete(any());
-      HashMap<String, HashMap<UUID, HashMap<String, String>>> dzWidgets = new HashMap<>();
-      HashMap<UUID, HashMap<String, String>> userFiles = new HashMap<>();
-      userFiles.put(fileId, UserFile.createFileInfo(
-          new UserFile(
-              fileId,
-              new Submission(),
-              Date.from(Instant.now()),
-              "coolFile.jpg",
-              "pathToS3",
-              ".pdf",
-              Float.valueOf("10"),
-              false
-          ), "thumbnail"));
-      dzWidgets.put(dzWidgetInputName, userFiles);
+      UserFileMap userFileMap = new UserFileMap();
+      userFileMap.addUserFileToMap("testFlow", dzWidgetInputName, testUserFile, "thumbnail");
       session = new MockHttpSession();
       session.setAttribute(
           SUBMISSION_MAP_NAME,
@@ -291,7 +289,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
               Map.of("testFlow", submission.getId())
           )
       );
-      session.setAttribute("userFiles", dzWidgets);
+      ObjectMapper objectMapper = new ObjectMapper();
+      session.setAttribute("userFiles", objectMapper.writeValueAsString(userFileMap));
     }
 
     @Test
@@ -343,7 +342,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("flow", "testFlow")
               .session(session))
           .andExpect(status().is(HttpStatus.FOUND.value()));
-
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       verify(cloudFileRepository, times(1)).delete(any());
       verify(userFileRepositoryService, times(1)).deleteById(any());
       assertThat(session.getAttribute("userFiles")).isEqualTo(new HashMap<>());
