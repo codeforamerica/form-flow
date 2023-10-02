@@ -49,7 +49,7 @@ if ! brew services list | grep postgresql@14 | grep started; then
 fi
 
 # Create form-flow-test databases and users in postgres, if they don't exist
-if ! psql -lqt | cut -d \| -f 1 | grep -qw form-flow-test; then
+if ! psql -lqt | cut -d \| -f 1 | tr -d ' ' | grep -qx form-flow-test; then
   createdb form-flow-test
   createuser -s form-flow-test
 fi
