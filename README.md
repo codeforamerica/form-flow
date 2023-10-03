@@ -2580,6 +2580,22 @@ There are spots in the templates where the `T` operator is used.
 
 #### Coming Soon!
 
+### Logging
+
+Form Flow adds the following attributes to the [Mapped Diagnostic Context](https://logback.qos.ch/manual/mdc.html):
+
+| Attribute     | Description                                                                                                                |
+|---------------|----------------------------------------------------------------------------------------------------------------------------|
+| requestMethod | The HTTP request method - GET, POST, etc                                                                                   |
+| requestURI    | The HTTP request URI - see https://docs.oracle.com/javaee/7/api/javax/servlet/http/HttpServletRequest.html#getRequestURI-- |
+| sessionId     | The ID of the HTTP Session - see https://docs.oracle.com/javaee/7/api/javax/servlet/http/HttpSession.html#getId--          |
+| submissionId  | The ID of the Submission object - see https://github.com/codeforamerica/form-flow#submission-object                        |
+| xForwardedFor | The X-Forwarded-For request header - see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For         |
+
+These attributes can be displayed in the logs by configuring the log format as described in the above document. For an example,
+see https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/logback-spring.xml.
+
+
 ### Library Details
 
 ### Publishing
