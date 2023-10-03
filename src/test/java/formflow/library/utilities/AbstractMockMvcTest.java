@@ -42,7 +42,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -71,7 +70,6 @@ public abstract class AbstractMockMvcTest {
 
   @Autowired
   protected MockMvc mockMvc;
-
 
   protected MockHttpSession session = new MockHttpSession();
 

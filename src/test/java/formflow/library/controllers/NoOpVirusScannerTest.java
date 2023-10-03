@@ -1,5 +1,6 @@
 package formflow.library.controllers;
 
+import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -8,8 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import formflow.library.FileController;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,8 +50,26 @@ public class NoOpVirusScannerTest extends AbstractMockMvcTest {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     Submission submission = Submission.builder().id(submissionUUID).build();
-    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
-    when(userFileRepositoryService.save(any())).thenReturn(fileUuid);
+
+    session.setAttribute(
+        SUBMISSION_MAP_NAME,
+        new HashMap<String, Object>(
+            Map.of("testFlow", submission.getId())
+        )
+    );
+
+    UserFile userFile = UserFile.builder()
+        .submission(submission)
+        .fileId(fileUuid)
+        .virusScanned(false)
+        .originalName("testFile.jpg")
+        .filesize(Float.valueOf("10.0"))
+        .mimeType(MediaType.IMAGE_JPEG_VALUE)
+        .repositoryPath("/foo")
+        .build();
+
+    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(userFileRepositoryService.save(any())).thenReturn(userFile);
     super.setUp();
   }
 

@@ -27,8 +27,8 @@ public class UserFileRepositoryService {
    * @param userFile the uploadedFile to save, not null
    * @return UUID of the file
    */
-  public UUID save(UserFile userFile) {
-    return repository.save(userFile).getFileId();
+  public UserFile save(UserFile userFile) {
+    return repository.save(userFile);
   }
 
   /**

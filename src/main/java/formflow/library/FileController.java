@@ -51,6 +51,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @EnableAutoConfiguration
 @Slf4j
 public class FileController extends FormFlowController {
+
   private final CloudFileRepository cloudFileRepository;
   private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
@@ -175,8 +176,8 @@ public class FileController extends FormFlowController {
           .virusScanned(wasScannedForVirus)
           .build();
 
-      UUID newFileId = userFileRepositoryService.save(uploadedFile);
-      log.info("Created new file with id: " + newFileId);
+      uploadedFile = userFileRepositoryService.save(uploadedFile);
+      log.info("Created new file with id: " + uploadedFile.getFileId());
 
       UserFileMap userFileMap = null;
       if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
@@ -189,7 +190,7 @@ public class FileController extends FormFlowController {
       userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
       httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
 
-      return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(newFileId.toString());
+      return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(uploadedFile.getFileId().toString());
     } catch (Exception e) {
       if (e instanceof ResponseStatusException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

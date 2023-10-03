@@ -1,5 +1,6 @@
 package formflow.library.framework;
 
+import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -36,12 +37,20 @@ public class CrossValidationTest extends AbstractMockMvcTest {
   private final String NO_EMAIL_ERROR_MESSAGE = "You indicated you would like to be contacted by email. Please make sure to provide an email address.";
   private final String INVALID_EMAIL_ERROR_MESSAGE = "Please enter a valid email address.";
   private String NO_PHONE_ERROR_MESSAGE = "You indicated you would like to be contacted by phone. Please make sure to provide a phone number.";
+  private Map<String, Object> sessionAttributes = new HashMap<>();
 
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
+
+    sessionAttributes = Map.of(
+        SUBMISSION_MAP_NAME,
+        new HashMap<String, Object>(
+            Map.of("testFlow", submission.getId())
+        )
+    );
 
     super.setUp();
     ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
@@ -53,13 +62,17 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     postExpectingSuccess("contactInfoPreference",
         Map.of(
             "email", List.of("foo@bar.com"),
-            "howToContactYou[]", List.of("email")));
+            "howToContactYou[]", List.of("email")),
+        sessionAttributes
+    );
   }
 
   @Test
   void shouldAlsoDisplayFieldValidationMessages() throws Exception {
     postExpectingFailure("contactInfoPreference",
-        Map.of("email", List.of("malformed.com"), "howToContactYou[]", List.of("email")));
+        Map.of("email", List.of("malformed.com"), "howToContactYou[]", List.of("email")),
+        sessionAttributes
+    );
     assertPageHasInputError("contactInfoPreference", "email", INVALID_EMAIL_ERROR_MESSAGE);
   }
 
@@ -68,7 +81,9 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     postExpectingSuccess("contactInfoPreference",
         Map.of(
             "phoneNumber", List.of("223-456-7891"),
-            "howToContactYou", List.of("phone")));
+            "howToContactYou", List.of("phone")),
+        sessionAttributes
+    );
   }
 
   @Test
@@ -76,7 +91,9 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     postExpectingFailure("contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("", "phone"),
-            "phoneNumber", List.of("")));
+            "phoneNumber", List.of("")),
+        sessionAttributes
+    );
 
     assertPageHasInputError("contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
   }
@@ -86,7 +103,9 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     postExpectingFailure("contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("", "email"),
-            "email", List.of("")));
+            "email", List.of("")),
+        sessionAttributes
+    );
 
     assertPageHasInputError("contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
   }
@@ -97,7 +116,9 @@ public class CrossValidationTest extends AbstractMockMvcTest {
         Map.of(
             "howToContactYou[]", List.of("email", "phone"),
             "email", List.of(""),
-            "phoneNumber", List.of("")));
+            "phoneNumber", List.of("")),
+        sessionAttributes
+    );
 
     assertPageHasInputError("contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
     assertPageHasInputError("contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);

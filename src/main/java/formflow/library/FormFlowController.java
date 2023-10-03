@@ -1,6 +1,5 @@
 package formflow.library;
 
-import feign.Response;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
@@ -75,7 +74,6 @@ public abstract class FormFlowController {
    * @param flow        The name of the flow to retrieve data about
    * @return Submission A Submission object from the database or a new one if one was not found
    */
-
   public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
     Submission submission = null;
     try {
@@ -122,13 +120,13 @@ public abstract class FormFlowController {
   protected Submission getSubmissionFromSession(HttpSession session, String flow) {
     if (session == null) {
       throwNotFoundError(flow, null, String.format("Session is null, unable to retrieve submission for flow '%s'.", flow));
-      return null;
     }
 
     Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
     if (submissionMap == null) {
       throwNotFoundError(flow, null, String.format("There was no submission map present in the session for flow '%s'.", flow));
     }
+
     UUID id = submissionMap.get(flow);
     if (id != null) {
       Optional<Submission> maybeSubmission = submissionRepositoryService.findById(id);
@@ -136,9 +134,9 @@ public abstract class FormFlowController {
         return maybeSubmission.get();
       }
       throwNotFoundError(flow, null, String.format("No submission was found in the database with id '%s'.", id));
-    } else {
-      throwNotFoundError(flow, null, String.format("No ID was present in the session map for flow '%s'", flow));
     }
+
+    throwNotFoundError(flow, null, String.format("No ID was present in the session map for flow '%s'", flow));
     return null;
   }
 

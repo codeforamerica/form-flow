@@ -1,5 +1,6 @@
 package formflow.library.controllers;
 
+import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -17,7 +18,9 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.pdf.PdfService;
 import formflow.library.utilities.AbstractMockMvcTest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,25 +40,35 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
-  
+
   @MockBean
   private UserFileRepositoryService userFileRepositoryService;
   private byte[] filledPdfByteArray;
 
+  private final String flow = "testFlow";
+
   @Override
   @BeforeEach
   public void setUp() throws Exception {
-    String flow = "ubi";
     FlowConfiguration flowConfiguration = new FlowConfiguration();
     flowConfiguration.setName(flow);
     List<FlowConfiguration> flowConfigurations = List.of(flowConfiguration);
-    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService, userFileRepositoryService, flowConfigurations);
+    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService,
+        userFileRepositoryService, flowConfigurations);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
     submission = Submission.builder()
         .id(UUID.randomUUID())
         .flow(flow)
         .build();
     filledPdfByteArray = new byte[20];
+
+    session.setAttribute(
+        SUBMISSION_MAP_NAME,
+        new HashMap<String, Object>(
+            Map.of(flow, submission.getId())
+        )
+    );
+
     when(pdfService.getFilledOutPDF(submission)).thenReturn(filledPdfByteArray);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     super.setUp();
@@ -63,18 +76,28 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
   @Test
   void shouldReturn404WhenFlowDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/download/{flow}/{submissionId}", "flowThatDoesNotExist", "submissionId"))
+    mockMvc.perform(
+            MockMvcRequestBuilders
+                .get(
+                    "/download/{flow}/{submissionId}",
+                    "flowThatDoesNotExist",
+                    "submissionId"))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void getDownloadGeneratesAndReturnsFilledFlattenedPdf() throws Exception {
     session.setAttribute("id", submission.getId());
-    MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
-        .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=%s".formatted(pdfService.generatePdfName(submission))))
-        .andExpect(status().is2xxSuccessful())
-        .andReturn();
+    MvcResult result =
+        mockMvc.perform(
+                get(
+                    "/download/" + flow + "/" + submission.getId())
+                    .session(session)
+            )
+            .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=%s".formatted(pdfService.generatePdfName(submission))))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
     assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(filledPdfByteArray);
 
     verify(pdfService, times(1)).getFilledOutPDF(submission);
@@ -87,9 +110,17 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
         .andExpect(status().is4xxClientError());
 
-    session.setAttribute("id", submission.getId());
+    // now test with legitimate id
+    session.setAttribute(
+        SUBMISSION_MAP_NAME,
+        new HashMap<String, Object>(
+            Map.of(flow, submission.getId())
+        )
+    );
 
-    mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
+    mockMvc.perform(
+            get("/download/" + flow + "/" + submission.getId()).session(session)
+        )
         .andExpect(status().is2xxSuccessful());
   }
 }

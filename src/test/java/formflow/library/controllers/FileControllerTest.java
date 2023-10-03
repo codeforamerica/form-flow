@@ -24,7 +24,6 @@ import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utils.UserFileMap;
-import java.io.DataInput;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Date;
@@ -95,9 +94,9 @@ public class FileControllerTest extends AbstractMockMvcTest {
     when(userFileRepositoryService.save(any())).thenAnswer(invocation -> {
       UserFile userFile = invocation.getArgument(0);
       userFile.setFileId(fileId);
-      return fileId;
+      return userFile;
     });
-    
+
     session.setAttribute(
         SUBMISSION_MAP_NAME,
         new HashMap<String, Object>(
@@ -142,11 +141,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
         .andExpect(content().string(fileId.toString()));
 
     verify(cloudFileRepository, times(1)).upload(any(), any());
-    
+
     ObjectMapper objectMapper = new ObjectMapper();
     UserFileMap userFileMap = objectMapper.readValue(session.getAttribute("userFiles").toString(), UserFileMap.class);
-        
-    
+
     // get the DZ Instance Map from the session and make sure the file info looks okay
     assertThat(userFileMap.getUserFileMap().size()).isEqualTo(1);
     assertThat(userFileMap.getUserFileMap().get("testFlow").size()).isEqualTo(1);
@@ -262,6 +260,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     String dzWidgetInputName = "coolDzWidget";
     UserFile testUserFile = UserFile.builder()
+        .fileId(fileId)
         .submission(submission)
         .createdAt(Date.from(Instant.now()))
         .originalName("coolFile.jpg")
@@ -273,11 +272,12 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
-      UUID submissionUUID_1 = UUID.randomUUID();
-      UUID submissionUUID_2 = UUID.randomUUID();
-      submission = Submission.builder().id(submissionUUID_1).build();
-      when(submissionRepositoryService.findById(submissionUUID_1)).thenReturn(Optional.ofNullable(submission));
-      when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
+      //UUID submissionUUID_1 = UUID.randomUUID();
+      //UUID submissionUUID_2 = UUID.randomUUID();
+      submission = Submission.builder().id(UUID.randomUUID()).build();
+      testUserFile.setSubmission(submission);
+      when(submissionRepositoryService.findById(any())).thenReturn(Optional.ofNullable(submission));
+      //when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       doNothing().when(cloudFileRepository).delete(any());
       UserFileMap userFileMap = new UserFileMap();
@@ -318,6 +318,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     void endpointErrorsWhenIdOnRequestDoesntMatchIdInDb() throws Exception {
       UUID submissionUUID = UUID.randomUUID();
       submission = Submission.builder().id(submissionUUID).build();
+      when(submissionRepositoryService.findById(submissionUUID)).thenReturn(Optional.ofNullable(submission));
       session.setAttribute(
           SUBMISSION_MAP_NAME,
           new HashMap<String, Object>(
@@ -335,6 +336,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void endpointDeletesFromCloudRepositoryDbAndSession() throws Exception {
+      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
@@ -342,10 +344,11 @@ public class FileControllerTest extends AbstractMockMvcTest {
               .param("flow", "testFlow")
               .session(session))
           .andExpect(status().is(HttpStatus.FOUND.value()));
-      when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       verify(cloudFileRepository, times(1)).delete(any());
       verify(userFileRepositoryService, times(1)).deleteById(any());
-      assertThat(session.getAttribute("userFiles")).isEqualTo(new HashMap<>());
+      ObjectMapper objectMapper = new ObjectMapper();
+      UserFileMap userFileMap = objectMapper.readValue(session.getAttribute("userFiles").toString(), UserFileMap.class);
+      assertThat(userFileMap.getUserFileMap().size()).isEqualTo(0);
     }
   }
 

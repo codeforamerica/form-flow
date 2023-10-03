@@ -1,6 +1,5 @@
 package formflow.library.data;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
