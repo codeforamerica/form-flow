@@ -20,7 +20,7 @@ Table of Contents
         * [Using conditions in templates](#using-conditions-in-templates)
     * [Actions](#actions)
     * [Defining Inputs](#defining-inputs)
-        * [Input Class](#input-class)
+        * [Inputs Class](#inputs-class)
         * [Custom Annotations](#custom-annotations)
         * [Input Data JSON Structure](#input-data-json-structure)
 * [General Information](#general-information)
