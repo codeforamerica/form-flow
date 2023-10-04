@@ -61,6 +61,7 @@ Table of Contents
         * [Defining Subflows](#defining-subflows)
         * [Thymeleaf Model Data](#thymeleaf-model-data)
         * [Conditions / Actions](#conditions--actions)
+        * [Logging](#logging)
         * [Library Details](#library-details)
 * [Developer Setup](#developer-setup)
     * [Mac and Linux](#mac-and-linux)
@@ -1573,7 +1574,7 @@ flow: ubi
 #### pdf
 
 The path to the pdf template file the FFB library should use when generating your PDF.
-The path should begin with a forward flash. For example `/pdfs/Example-PDF-File.pdf`.
+The path should begin with a forward slash. For example `/pdfs/Example-PDF-File.pdf`.
 
 For example:
 
@@ -2592,7 +2593,7 @@ Form Flow adds the following attributes to the [Mapped Diagnostic Context](https
 | submissionId  | The ID of the Submission object - see https://github.com/codeforamerica/form-flow#submission-object                        |
 | xForwardedFor | The X-Forwarded-For request header - see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For         |
 
-These attributes can be displayed in the logs by configuring the log format as described in the above document. For an example,
+These attributes can be displayed in the logs by configuring the log format as described in the above document. For an example that exposes the entire Mapped Diagnostic Context (MDC) in JSON-formatted logs,
 see https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/logback-spring.xml.
 
 
