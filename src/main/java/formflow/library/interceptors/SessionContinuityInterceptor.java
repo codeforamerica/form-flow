@@ -42,7 +42,8 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
    * @param handler  chosen handler to execute, for type and/or instance evaluation
    * @return Boolean True - allows the request to proceed to the ScreenController, False - stops the request from reaching the
    * Screen Controller.
-   * @throws IOException - thrown in the event that an input or output exception occurs when this method does a redirect.
+   * @throws IOException             - thrown in the event that an input or output exception occurs when this method does a
+   *                                 redirect.
    * @throws LandmarkNotSetException - thrown in the event that a landmark(s) screen is misconfigured
    */
   @Override
@@ -92,7 +93,6 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       return false;
     }
 
-    //if (session.getAttribute("id") == null) {
     if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null) {
       log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());

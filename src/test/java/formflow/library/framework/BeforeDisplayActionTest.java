@@ -43,6 +43,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     );
     super.setUp();
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(submissionRepositoryService.save(any())).thenReturn(submission);
   }
 
   @Test

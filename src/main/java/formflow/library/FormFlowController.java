@@ -32,15 +32,16 @@ public abstract class FormFlowController {
     this.flowConfigurations = flowConfigurations;
   }
 
-  protected void saveToRepository(Submission submission) {
-    submissionRepositoryService.removeFlowCSRF(submission);
-    submissionRepositoryService.save(submission);
+  protected Submission saveToRepository(Submission submission) {
+    return saveToRepository(submission, null);
   }
 
-  protected void saveToRepository(Submission submission, String subflowName) {
+  protected Submission saveToRepository(Submission submission, String subflowName) {
     submissionRepositoryService.removeFlowCSRF(submission);
-    submissionRepositoryService.removeSubflowCSRF(submission, subflowName);
-    submissionRepositoryService.save(submission);
+    if (subflowName != null && !subflowName.isBlank()) {
+      submissionRepositoryService.removeSubflowCSRF(submission, subflowName);
+    }
+    return submissionRepositoryService.save(submission);
   }
 
   protected FlowConfiguration getFlowConfigurationByName(String flow) {

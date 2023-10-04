@@ -53,8 +53,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     );
 
     super.setUp();
-    ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(submissionRepositoryService.save(any())).thenReturn(submission);
   }
 
   @Test

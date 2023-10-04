@@ -88,7 +88,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     submission = Submission.builder().id(submissionUUID).build();
 
     when(clammitVirusScanner.virusDetected(any())).thenReturn(false);
-
+    when(submissionRepositoryService.save(any())).thenReturn(submission);
     // Set the file ID on the UserFile since Mockito won't actually set one (it just returns what we tell it to)
     // It does not call the actual save method which is what sets the ID
     when(userFileRepositoryService.save(any())).thenAnswer(invocation -> {
@@ -128,7 +128,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
     // the "name" param has to match what the endpoint expects: "file"
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-    session = new MockHttpSession();
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)

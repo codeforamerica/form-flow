@@ -51,12 +51,8 @@ public class OnPostActionTest extends AbstractMockMvcTest {
     );
 
     super.setUp();
-    //when(session.getAttribute(screenController.SUBMISSION_MAP_NAME)).thenReturn(
-    //   Map.of("testFlow", submissionUUID));
-    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
-    //doReturn(submission).when(screenController).findOrCreateSubmission(any(), "testFlow)");
-    //when(screenController.findOrCreateSubmission(session, "testFlow")).thenReturn(submission);
+    when(submissionRepositoryService.save(any())).thenReturn(submission);
   }
 
 

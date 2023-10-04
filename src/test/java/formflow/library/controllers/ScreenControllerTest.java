@@ -50,8 +50,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
-    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(submissionRepositoryService.save(any())).thenReturn(submission);
 
     sessionAttributes = Map.of(
         SUBMISSION_MAP_NAME,

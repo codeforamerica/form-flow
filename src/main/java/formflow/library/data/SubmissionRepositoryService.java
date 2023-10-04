@@ -32,14 +32,14 @@ public class SubmissionRepositoryService {
    * @param submission the submission to save, not null
    * @return UUID of the saved submission
    */
-  public UUID save(Submission submission) {
+  public Submission save(Submission submission) {
     var newRecord = submission.getId() == null;
-    UUID id = repository.save(encryptionService.encrypt(submission)).getId();
+    Submission savedSubmission = repository.save(encryptionService.encrypt(submission));
     if (newRecord) {
-      log.info("created submission id: " + id);
+      log.info("created submission id: " + savedSubmission.getId());
     }
-    submission.setId(id);
-    return id;
+    // straight from the db will be encrypted, so decrypt first.
+    return encryptionService.decrypt(savedSubmission);
   }
 
   /**

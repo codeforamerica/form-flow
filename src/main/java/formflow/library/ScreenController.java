@@ -105,7 +105,7 @@ public class ScreenController extends FormFlowController {
     }
 
     submission.setFlow(flow);
-    saveToRepository(submission);
+    submission = saveToRepository(submission);
     setSubmissionInSession(httpSession, submission, flow);
 
     if (uuid != null) {
@@ -190,7 +190,7 @@ public class ScreenController extends FormFlowController {
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
-    saveToRepository(submission);
+    submission = saveToRepository(submission);
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission);
 
@@ -352,7 +352,7 @@ public class ScreenController extends FormFlowController {
     }
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
 
-    saveToRepository(submission, subflowName);
+    submission = saveToRepository(submission, subflowName);
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
     String nextScreen = getNextScreenName(submission, currentScreen, iterationUuid);
@@ -441,11 +441,11 @@ public class ScreenController extends FormFlowController {
       if (!subflowArr.isEmpty()) {
         existingInputData.put(subflow, subflowArr);
         submission.setInputData(existingInputData);
-        saveToRepository(submission, subflow);
+        submission = saveToRepository(submission, subflow);
       } else {
         existingInputData.remove(subflow);
         submission.setInputData(existingInputData);
-        saveToRepository(submission, subflow);
+        submission = saveToRepository(submission, subflow);
         return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
       }
     } else {
@@ -473,7 +473,8 @@ public class ScreenController extends FormFlowController {
       HttpServletRequest request
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
-    log.info("Current submission ID is :" + httpSession.getAttribute("id") + " and current Session ID is :" + httpSession.getId());
+    log.info(
+        "Current submission ID is :" + httpSession.getAttribute("id") + " and current Session ID is :" + httpSession.getId());
     // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     // TODO this change mirrors existing code, which doesn't account for putting a potentially new submission back into session... hmmm...

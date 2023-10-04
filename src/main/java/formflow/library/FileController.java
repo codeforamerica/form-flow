@@ -114,7 +114,7 @@ public class FileController extends FormFlowController {
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
         submission.setFlow(flow);
-        saveToRepository(submission);
+        submission = saveToRepository(submission);
         setSubmissionInSession(httpSession, submission, flow);
       }
 
