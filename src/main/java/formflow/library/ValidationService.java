@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * Flow inputs come from screen POST submissions to the server.
  * </p>
  * <p>
- * Input definitions are located in <code>formflowstarter/app/inputs/<flow-name></code>.
+ * Input definitions are located in {@code formflowstarter/app/inputs/<flow-name>}.
  * </p>
  */
 @Service
