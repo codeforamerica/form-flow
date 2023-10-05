@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * This implementation of <code>CloudFileRepository</code> does nothing useful at all.
+ * It logs the methods being called.
+ */
 @Service
 @Profile("test")
 @Slf4j

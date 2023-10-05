@@ -23,6 +23,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * This is an implementation of the <code>CloudFileRepository</code> that uses Amazon S3
+ */
 @Service
 @Profile("!test")
 @Slf4j
