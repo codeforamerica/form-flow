@@ -93,7 +93,8 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       return false;
     }
 
-    if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null) {
+    if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&
+        !parsedUrl.get("screen").equals(firstScreen)) {
       log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());
       response.sendRedirect(REDIRECT_URL);

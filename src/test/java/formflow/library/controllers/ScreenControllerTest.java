@@ -164,6 +164,23 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     }
   }
 
+  @Nested
+  public class MultiFlowTests {
+    // tests that related to testing out changing flows in the middle of a flow to ensure
+    // that no data is lost
+
+    @Test
+    public void multipleFlowsResultInMultipleSubmissionsNoDataLost() {
+
+    }
+
+    @Test
+    public void multipleFlowsInSubflowsNoDataLost() {
+
+    }
+  }
+
+
   @Test
   public void fieldsStillHaveValuesWhenFieldValidationFailsInSubflowNewIteration() throws Exception {
     var params = new HashMap<String, List<String>>();

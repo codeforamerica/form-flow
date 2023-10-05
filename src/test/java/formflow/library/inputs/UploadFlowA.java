@@ -4,7 +4,7 @@ import formflow.library.data.FlowInputs;
 import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
-public class UploadFlow extends FlowInputs {
+public class UploadFlowA extends FlowInputs {
 
   String uploadTest;
 }
