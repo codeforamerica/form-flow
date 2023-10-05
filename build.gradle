@@ -154,11 +154,6 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = 'bencalegari'
-                        name = 'Ben Calegari'
-                        email = 'bcalegari@codeforamerica.org'
-                    }
-                    developer {
                         id = 'cy-cfa'
                         name = 'Cypress Borg'
                         email = 'cborg@codeforamerica.org'
@@ -187,6 +182,16 @@ publishing {
                         id = 'bethany'
                         name = 'Bethany Seeger'
                         email = 'bseeger@codeforamerica.org'
+                    }
+                     developer {
+                        id = 'vrajmohan'
+                        name = 'Vraj Mohan'
+                        email = 'vraj@codeforamerica.org'
+                    }
+                     developer {
+                        id = 'marthapidcock'
+                        name = 'Martha Pidcock'
+                        email = 'mpidcock@codeforamerica.org'
                     }
                 }
                 scm {
