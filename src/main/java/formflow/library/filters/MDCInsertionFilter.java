@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.UUID;
 
+/**
+ * Inserts useful attributes into the Mapped Diagnostic Context (MDC) for logging by clients.
+ */
 @Component
 public class MDCInsertionFilter implements Filter {
     @Override

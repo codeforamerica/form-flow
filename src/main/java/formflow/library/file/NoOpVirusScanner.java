@@ -5,6 +5,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * This implementation of <code>FileVirusScanner</code> does nothing useful at all.
+ * It logs the methods being called.
+ */
 @Service
 @ConditionalOnProperty(name = "form-flow.uploads.virus-scanning.enabled", havingValue = "false", matchIfMissing = true)
 @Slf4j
