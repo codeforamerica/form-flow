@@ -56,7 +56,7 @@ public class SubmissionEncryptionService {
    * <br>Given:
    * <code>{secret: "this is a secret"}</code>
    * <br>Result:
-   * <code>{secret_encrypted: "some-encrypted-chars"}</code
+   * <code>{secret_encrypted: "some-encrypted-chars"}</code>
    * </p>
    *
    * @param submission submission to be encrypted
@@ -78,7 +78,7 @@ public class SubmissionEncryptionService {
    * <br>Given:
    * <code>{secret_encrypted: "some-encrypted-chars"}</code>
    * <br>Result:
-   * <code>{secret: "this is a secret"}</code
+   * <code>{secret: "this is a secret"}</code>
    * </p>
    *
    * @param submission submission to be decrypted
