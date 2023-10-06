@@ -12,7 +12,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
+/**
+ * This implementation of <code>EmailClient</code> sends email through Mailgun.
+ */
 @Component
 @Slf4j
 public class MailgunEmailClient implements EmailClient<MessageResponse> {
@@ -22,6 +24,12 @@ public class MailgunEmailClient implements EmailClient<MessageResponse> {
   private MailgunMessagesApi mailgunMessagesApi;
   private Boolean requireTls = true;
 
+  /**
+   *
+   * @param senderEmail Email account that messages will be sent from
+   * @param mailgunDomain Domain name that messages will be sent from
+   * @param mailgunKey Mailgun API key
+   */
   public MailgunEmailClient(@Value("${form-flow.email-client.mailgun.sender-email:}") String senderEmail,
       @Value("${form-flow.email-client.mailgun.domain:}") String mailgunDomain,
       @Value("${form-flow.email-client.mailgun.key:}") String mailgunKey

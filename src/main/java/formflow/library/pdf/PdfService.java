@@ -21,7 +21,7 @@ public class PdfService {
   /**
    * Uses pdfGenerator to generate a pdf for a flow using a UUID.
    *
-   * @param submission
+   * @param submission the submission for which the PDF should be generated
    * @return a pdf byte array
    */
   public byte[] getFilledOutPDF(Submission submission) throws IOException {

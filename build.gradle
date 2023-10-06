@@ -125,7 +125,7 @@ jacocoTestReport {
 
 java {
     // we need to fix javadoc work before this will run successfully
-    //withJavadocJar()
+    withJavadocJar()
     withSourcesJar()
 }
 
@@ -226,8 +226,6 @@ nexusPublishing {
     }
 }
 
-// javadoc {
-//    if (JavaVersion.current().isJava9Compatible()) {
-//         options.addBooleanOption('html5', true)
-//     }
-// }
+ javadoc {
+     options.addStringOption('Xmaxwarns', '1000')
+ }
