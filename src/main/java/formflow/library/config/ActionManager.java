@@ -11,12 +11,21 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * Manages methods for handling actions.  Action Manager methods allow for application logic to be run at specific points during
+ * GET and POST processing.
+ */
 @Slf4j
 @Component
 public class ActionManager {
 
   private final HashMap<String, Action> actions = new HashMap<>();
 
+  /**
+   * Class Constructor generating a hashmap of action names and their corresponding action objects.
+   *
+   * @param actionsList - a list of action objects.
+   */
   public ActionManager(List<Action> actionsList) {
     actionsList.forEach(action -> this.actions.put(action.getClass().getSimpleName(), action));
   }
