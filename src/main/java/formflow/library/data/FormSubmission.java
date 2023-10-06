@@ -28,7 +28,7 @@ public class FormSubmission {
   private Map<String, Object> removeEmptyValuesAndFlatten(MultiValueMap<String, String> formData) {
     return formData.entrySet().stream().peek(entry -> {
           // An empty checkbox/checkboxSet has a hidden value of "" which needs to be removed
-          if (entry.getKey().contains("[]") && entry.getValue().size() == 1) {
+          if (entry.getKey().contains("[]") && entry.getValue().size() == 1 && entry.getValue().get(0).equals("")) {
             entry.setValue(new ArrayList<>());
           }
           if (entry.getValue().size() > 1 && entry.getValue().get(0).equals("")) {
