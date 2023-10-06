@@ -125,7 +125,7 @@ jacocoTestReport {
 
 java {
     // we need to fix javadoc work before this will run successfully
-    //withJavadocJar()
+    withJavadocJar()
     withSourcesJar()
 }
 
