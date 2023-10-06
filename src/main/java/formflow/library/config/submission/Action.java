@@ -56,6 +56,7 @@ public interface Action {
    *
    * @param formSubmission form submission object the action is associated with, not null
    * @deprecated use `runValidation(final FormSubmission formSubmission, Submission submission)` instead.
+   * @return a hashmap of a String to List of Strings that represents errors and their corresponding error messages.
    */
   @Deprecated
   default Map<String, List<String>> runValidation(final FormSubmission formSubmission) {
@@ -68,6 +69,7 @@ public interface Action {
    *
    * @param formSubmission form submission object the action is associated with, not null
    * @param submission     submission object the action is associated with, not null
+   * @return a hashmap of a String to List of Strings that represents errors and their corresponding error messages.
    */
   default Map<String, List<String>> runValidation(final FormSubmission formSubmission, Submission submission) {
     throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
