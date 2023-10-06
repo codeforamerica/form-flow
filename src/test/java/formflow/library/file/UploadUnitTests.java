@@ -17,7 +17,7 @@ public class UploadUnitTests extends AbstractBasePageTest {
   @Override
   @BeforeEach
   public void setUp() throws IOException {
-    startingPage = "flow/uploadFlow/docUploadUnit";
+    startingPage = "flow/uploadFlowA/docUploadUnit";
     super.setUp();
   }
 
