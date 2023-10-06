@@ -70,8 +70,9 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("0 files added");
 
     // Test max number of files that can be uploaded
-    uploadJpgFile(dzWidgetName);
+    uploadJpgFile(dzWidgetName); // 1
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("1 file added");
+    uploadJpgFile(dzWidgetName); // 2
     uploadJpgFile(dzWidgetName); // 3
     uploadJpgFile(dzWidgetName); // 4
     uploadJpgFile(dzWidgetName); // 5
