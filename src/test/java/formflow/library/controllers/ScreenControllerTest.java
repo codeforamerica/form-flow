@@ -1,6 +1,7 @@
 package formflow.library.controllers;
 
 import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,7 +31,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 public class ScreenControllerTest extends AbstractMockMvcTest {
@@ -38,7 +41,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   @MockBean
   private AddressValidationService addressValidationService;
 
-  @MockBean
+  @SpyBean
   private SubmissionRepositoryService submissionRepositoryService;
 
   public final String uuidPatternString = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
@@ -50,9 +53,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
-    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
-    when(submissionRepositoryService.save(any())).thenReturn(submission);
-
     sessionAttributes = Map.of(
         SUBMISSION_MAP_NAME,
         new HashMap<String, Object>(
@@ -94,6 +94,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
+      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       Map<String, String> queryParams = new HashMap<>();
       queryParams.put("lang", "en");
       getWithQueryParam("test", "lang", "en", sessionAttributes);
@@ -106,6 +107,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void modelIncludesCurrentSubflowItem() throws Exception {
+      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       HashMap<String, String> subflowItem = new HashMap<>();
       subflowItem.put("uuid", "aaa-bbb-ccc");
       subflowItem.put("firstNameSubflow", "foo bar baz");
@@ -168,10 +170,44 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   public class MultiFlowTests {
     // tests that related to testing out changing flows in the middle of a flow to ensure
     // that no data is lost
+//    @Override
+//    @BeforeEach
+//    void setup() {
+//      super.setup();
+//    }
 
     @Test
-    public void multipleFlowsResultInMultipleSubmissionsNoDataLost() {
+    public void multipleFlowsResultInMultipleSubmissionsNoDataLost() throws Exception {
+      mockMvc.perform(post("/flow/testFlow/inputs")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("firstFlowTextInputValue"),
+              "numberInput", List.of("10"))))
+      );
+      
+      mockMvc.perform(post("/flow/otherTestFlow/inputs")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("secondFlowTextInputValue"),
+              "numberInput", List.of("20"),
+              "phoneInput", List.of("(555) 123-1234"))))
+      );
 
+      Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+      
+      assertThat(submissionMap.containsKey("testFlow")).isTrue();
+      assertThat(submissionMap.containsKey("otherTestFlow")).isTrue();
+      UUID testFlowSubmissionID = submissionMap.get("testFlow");
+      UUID otherTestFlowSubmissionID = submissionMap.get("otherTestFlow");
+      Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(testFlowSubmissionID);
+      Optional<Submission> otherTestFlowSubmission = submissionRepositoryService.findById(otherTestFlowSubmissionID);
+      assertThat(testFlowSubmission.isPresent()).isTrue();
+      assertThat(otherTestFlowSubmission.isPresent()).isTrue();
+      assertThat(testFlowSubmission.get().getInputData().get("textInput")).isEqualTo("firstFlowTextInputValue");
+      assertThat(testFlowSubmission.get().getInputData().get("numberInput")).isEqualTo("10"); 
+      assertThat(otherTestFlowSubmission.get().getInputData().get("textInput")).isEqualTo("secondFlowTextInputValue");
+      assertThat(otherTestFlowSubmission.get().getInputData().get("numberInput")).isEqualTo("20");
+      assertThat(otherTestFlowSubmission.get().getInputData().get("phoneInput")).isEqualTo("(555) 123-1234");
     }
 
     @Test
