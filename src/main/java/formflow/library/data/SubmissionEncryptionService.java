@@ -19,9 +19,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+/**
+ * Service providing encryption and decryption of designated fields in a <code>Submission</code> using Google's
+ * Tink Cryptographic Library
+ */
 @Service
 public class SubmissionEncryptionService {
 
+  /**
+   * Suffix added to the field name for encrypted fields
+   */
   public final String ENCRYPT_SUFFIX = "_encrypted";
   private final Aead encDec;
   private final String inputConfigPath;
@@ -31,6 +38,11 @@ public class SubmissionEncryptionService {
     DECRYPT
   }
 
+  /**
+   * Constructs an instance of the <code>SubmissionEncryptionService</code>
+   * @param key the key used to encrypt the fields
+   * @param inputConfigPath the package path where inputs classes are located
+   */
   public SubmissionEncryptionService(
       @Value("${form-flow.encryption-key:#{null}}") String key,
       @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
