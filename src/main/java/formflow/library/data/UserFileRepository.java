@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for the SubmissionRepository.
+ * Repository interface for UserFile objects
  */
 @Repository
 public interface UserFileRepository extends JpaRepository<UserFile, UUID> {

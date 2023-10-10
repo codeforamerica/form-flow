@@ -76,6 +76,9 @@ public class Submission {
   @Column(name = "submitted_at")
   private Date submittedAt;
 
+  /**
+   * Creates a new <code>Submission</code> with empty content
+   */
   public Submission() {
     inputData = new HashMap<>();
     urlParams = new HashMap<>();
@@ -120,8 +123,13 @@ public class Submission {
     inputData = formSubmission.getFormData();
   }
 
-  public void mergeUrlParamsWithData(Map<String, String> passedParams) {
-    urlParams.putAll(passedParams);
+  /**
+   * Merges the passed in query parameters into the Submission's urlParams Map
+   *
+   * @param queryParams the Map of query parameters to merge in
+   */
+  public void mergeUrlParamsWithData(Map<String, String> queryParams) {
+    urlParams.putAll(queryParams);
   }
 
   /**
