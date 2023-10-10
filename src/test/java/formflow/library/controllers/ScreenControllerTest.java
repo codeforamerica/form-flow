@@ -63,7 +63,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     super.setUp();
   }
 
-
   @ParameterizedTest
   @CsvSource({
       "GET, /flow/{flow}/{screen}, flowThatDoesNotExist, screen",
@@ -170,21 +169,18 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   public class MultiFlowTests {
     // tests that related to testing out changing flows in the middle of a flow to ensure
     // that no data is lost
-//    @Override
-//    @BeforeEach
-//    void setup() {
-//      super.setup();
-//    }
 
     @Test
     public void multipleFlowsResultInMultipleSubmissionsNoDataLost() throws Exception {
+      // session does not have to know about the flows yet, as the flows will be
+      // added once the post occurs
       mockMvc.perform(post("/flow/testFlow/inputs")
           .session(session)
           .params(new LinkedMultiValueMap<>(Map.of(
               "textInput", List.of("firstFlowTextInputValue"),
               "numberInput", List.of("10"))))
       );
-      
+
       mockMvc.perform(post("/flow/otherTestFlow/inputs")
           .session(session)
           .params(new LinkedMultiValueMap<>(Map.of(
@@ -194,28 +190,73 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       );
 
       Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
-      
+
       assertThat(submissionMap.containsKey("testFlow")).isTrue();
       assertThat(submissionMap.containsKey("otherTestFlow")).isTrue();
-      UUID testFlowSubmissionID = submissionMap.get("testFlow");
-      UUID otherTestFlowSubmissionID = submissionMap.get("otherTestFlow");
-      Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(testFlowSubmissionID);
-      Optional<Submission> otherTestFlowSubmission = submissionRepositoryService.findById(otherTestFlowSubmissionID);
+      assertThat(submissionMap.size()).isEqualTo(2);
+
+      Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+      Optional<Submission> otherTestFlowSubmission = submissionRepositoryService.findById(submissionMap.get("otherTestFlow"));
       assertThat(testFlowSubmission.isPresent()).isTrue();
       assertThat(otherTestFlowSubmission.isPresent()).isTrue();
+      assertThat(testFlowSubmission.get().getInputData().size()).isEqualTo(2);
+      assertThat(otherTestFlowSubmission.get().getInputData().size()).isEqualTo(3);
+
       assertThat(testFlowSubmission.get().getInputData().get("textInput")).isEqualTo("firstFlowTextInputValue");
-      assertThat(testFlowSubmission.get().getInputData().get("numberInput")).isEqualTo("10"); 
+      assertThat(testFlowSubmission.get().getInputData().get("numberInput")).isEqualTo("10");
+      assertThat(testFlowSubmission.get().getInputData().get("phoneInput")).isEqualTo(null);
       assertThat(otherTestFlowSubmission.get().getInputData().get("textInput")).isEqualTo("secondFlowTextInputValue");
       assertThat(otherTestFlowSubmission.get().getInputData().get("numberInput")).isEqualTo("20");
       assertThat(otherTestFlowSubmission.get().getInputData().get("phoneInput")).isEqualTo("(555) 123-1234");
     }
 
     @Test
-    public void multipleFlowsInSubflowsNoDataLost() {
+    public void multipleFlowsInSubflowsNoDataLost() throws Exception {
+      // session doesn't have to know about the two different flows yet
+      // as they will get put in session during the posts
+      mockMvc.perform(post("/flow/testFlow/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "firstNameSubflow", List.of("Subflow testFlow Name"),
+              "textInputSubflow", List.of("Subflow testFlow Text Input"))))
+      );
 
+      mockMvc.perform(post("/flow/otherTestFlow/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "numberInputSubflow", List.of("23"),
+              "moneyInputSubflow", List.of("10.00"),
+              "phoneInputSubflow", List.of("(413) 123-4567"))))
+      );
+
+      Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+
+      assertThat(submissionMap.containsKey("testFlow")).isTrue();
+      assertThat(submissionMap.containsKey("otherTestFlow")).isTrue();
+      assertThat(submissionMap.size()).isEqualTo(2);
+
+      Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+      Optional<Submission> otherTestFlowSubmission = submissionRepositoryService.findById(submissionMap.get("otherTestFlow"));
+      assertThat(testFlowSubmission.isPresent()).isTrue();
+      assertThat(otherTestFlowSubmission.isPresent()).isTrue();
+
+      List<Object> testFlowInputData = (List<Object>) (testFlowSubmission.get().getInputData()).get("testSubflow");
+      List<Object> otherTestFlowInputData = (List<Object>) (otherTestFlowSubmission.get().getInputData()).get("testSubflow");
+      Map<String, Object> testFlowIteration = (Map<String, Object>) testFlowInputData.get(0);
+      Map<String, Object> otherTestFlowIteration = (Map<String, Object>) otherTestFlowInputData.get(0);
+
+      assertThat(testFlowInputData.size()).isEqualTo(1);
+      assertThat(otherTestFlowInputData.size()).isEqualTo(1);
+      assertThat(testFlowIteration.size()).isEqualTo(3);
+      assertThat(otherTestFlowIteration.size()).isEqualTo(4);
+
+      assertThat(testFlowIteration.get("firstNameSubflow")).isEqualTo("Subflow testFlow Name");
+      assertThat(testFlowIteration.get("textInputSubflow")).isEqualTo("Subflow testFlow Text Input");
+      assertThat(otherTestFlowIteration.get("numberInputSubflow")).isEqualTo("23");
+      assertThat(otherTestFlowIteration.get("moneyInputSubflow")).isEqualTo("10.00");
+      assertThat(otherTestFlowIteration.get("phoneInputSubflow")).isEqualTo("(413) 123-4567");
     }
   }
-
 
   @Test
   public void fieldsStillHaveValuesWhenFieldValidationFailsInSubflowNewIteration() throws Exception {

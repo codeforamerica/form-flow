@@ -54,8 +54,6 @@ public class PdfController extends FormFlowController {
     if (!doesFlowExist(flow)) {
       throwNotFoundError(flow, null, String.format("Could not find flow %s in your application's flow configuration.", flow));
     }
-    
-    UUID sessionSubmissionId = getSubmissionIdForFlow(httpSession, flow);
 
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
     if (getSubmissionIdForFlow(httpSession, flow).toString().equals(submissionId) && maybeSubmission.isPresent()) {

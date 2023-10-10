@@ -263,13 +263,6 @@ public class FileController extends FormFlowController {
       }
       userFileMap.removeUserFileFromMap(flow, fileId);
       httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
-      //httpSession.setAttribute(SESSION_USERFILES_KEY, userFileMap);
-
-      //userFileMap.remove(fileId);
-      //if (userFileMap.isEmpty()) {
-      //  dzFilesMap.remove(dropZoneInstanceName);
-      // }
-      // httpSession.setAttribute(SESSION_USERFILES_KEY, dzFilesMap);
 
       return new RedirectView(returnPath);
     } catch (Exception e) {

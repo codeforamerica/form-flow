@@ -1,6 +1,5 @@
 package formflow.library.controllers;
 
-import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -30,7 +29,6 @@ import java.sql.Date;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,13 +95,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       return userFile;
     });
 
-    session.setAttribute(
-        SUBMISSION_MAP_NAME,
-        new HashMap<String, Object>(
-            Map.of("testFlow", submission.getId())
-        )
-    );
-
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     super.setUp();
   }
 
@@ -271,23 +263,18 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
-      //UUID submissionUUID_1 = UUID.randomUUID();
-      //UUID submissionUUID_2 = UUID.randomUUID();
       submission = Submission.builder().id(UUID.randomUUID()).build();
       testUserFile.setSubmission(submission);
+
       when(submissionRepositoryService.findById(any())).thenReturn(Optional.ofNullable(submission));
-      //when(submissionRepositoryService.findById(submissionUUID_2)).thenReturn(Optional.ofNullable(submission));
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(testUserFile));
       doNothing().when(cloudFileRepository).delete(any());
+
+      session = new MockHttpSession();
+      setFlowInfoInSession(session, "testFlow", submission.getId());
+
       UserFileMap userFileMap = new UserFileMap();
       userFileMap.addUserFileToMap("testFlow", dzWidgetInputName, testUserFile, "thumbnail");
-      session = new MockHttpSession();
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
       ObjectMapper objectMapper = new ObjectMapper();
       session.setAttribute("userFiles", objectMapper.writeValueAsString(userFileMap));
     }
@@ -318,12 +305,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       UUID submissionUUID = UUID.randomUUID();
       submission = Submission.builder().id(submissionUUID).build();
       when(submissionRepositoryService.findById(submissionUUID)).thenReturn(Optional.ofNullable(submission));
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", submission.getId());
       mockMvc.perform(MockMvcRequestBuilders.multipart("/file-delete")
               .param("returnPath", "foo")
               .param("inputName", dzWidgetInputName)
@@ -356,12 +338,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForSingleFileEndpoint() throws Exception {
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", UUID.randomUUID())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", UUID.randomUUID());
       UserFile userFile = UserFile.builder().submission(submission).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(
@@ -374,12 +351,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnForbiddenIfAFilesSubmissionIdDoesNotMatchSubmissionIdOnTheUserFile() throws Exception {
       Submission differentSubmissionIdFromUserFile = Submission.builder().id(UUID.randomUUID()).build();
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", submission.getId());
+
       UserFile userFile = UserFile.builder().submission(differentSubmissionIdFromUserFile)
           .fileId(fileId).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
@@ -393,13 +366,9 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForMultiFileEndpoint() throws Exception {
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", UUID.randomUUID())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", UUID.randomUUID());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
+
       mockMvc.perform(
               MockMvcRequestBuilders
                   .get("/file-download/{flow}/{submissionId}", "testFlow", submission.getId().toString())
@@ -410,12 +379,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnNotFoundIfSubmissionCanNotBeFoundForMultiFileEndpoint() throws Exception {
       UUID differentSubmissionId = UUID.randomUUID();
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", differentSubmissionId)
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", differentSubmissionId);
+
       mockMvc.perform(
               MockMvcRequestBuilders
                   .get("/file-download/{submissionId}", differentSubmissionId.toString())
@@ -426,14 +391,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     void shouldReturnNotFoundIfSubmissionDoesNotContainAnyFiles() throws Exception {
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", submission.getId());
       when(userFileRepositoryService.findAllBySubmission(submission)).thenReturn(Collections.emptyList());
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.ofNullable(submission));
+
       mockMvc.perform(
               MockMvcRequestBuilders
                   .get("/file-download/{submissionId}", submission.getId().toString())
@@ -444,12 +405,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     void singleFileEndpointShouldReturnNotFoundIfNoUserFileIsFoundForAGivenFileId() throws Exception {
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", submission.getId());
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.empty());
       mockMvc.perform(
               MockMvcRequestBuilders
@@ -460,12 +416,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     void singleFileEndpointShouldReturnTheSameFileBytesAsTheCloudFileRepository() throws Exception {
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", submission.getId());
       byte[] testFileBytes = "foo".getBytes();
       long fileSize = testFileBytes.length;
       CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes);
@@ -496,12 +447,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     @Test
     void multiFileEndpointShouldReturnZipOfUserFilesReturnedByTheCloudFileRepository() throws Exception {
-      session.setAttribute(
-          SUBMISSION_MAP_NAME,
-          new HashMap<String, Object>(
-              Map.of("testFlow", submission.getId())
-          )
-      );
+      setFlowInfoInSession(session, "testFlow", submission.getId());
       byte[] firstTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test.png"));
       byte[] secondTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test-platypus.gif"));
       long firstTestFileSize = firstTestFileBytes.length;

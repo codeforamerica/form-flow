@@ -1,5 +1,6 @@
 package formflow.library.utilities;
 
+import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static formflow.library.utilities.TestUtils.resetSubmission;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,10 +26,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -36,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.openqa.selenium.InvalidArgumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -87,6 +92,25 @@ public abstract class AbstractMockMvcTest {
   @AfterEach
   void cleanup() {
     resetSubmission();
+  }
+
+  protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
+
+    if (flowInfo.length % 2 != 0) {
+      throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
+    }
+
+    Iterator<Object> iterator = Arrays.stream(flowInfo).iterator();
+
+    Map<String, Object> flowMap = new HashMap<>();
+
+    while (iterator.hasNext()) {
+      String flowName = (String) iterator.next();
+      UUID submissionId = (UUID) iterator.next();
+      flowMap.put(flowName, submissionId);
+    }
+
+    mockHttpSession.setAttribute(SUBMISSION_MAP_NAME, flowMap);
   }
 
   protected void postWithQueryParam(String pageName, String queryParam, String value)

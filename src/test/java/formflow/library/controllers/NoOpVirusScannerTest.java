@@ -51,12 +51,7 @@ public class NoOpVirusScannerTest extends AbstractMockMvcTest {
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
     Submission submission = Submission.builder().id(submissionUUID).build();
 
-    session.setAttribute(
-        SUBMISSION_MAP_NAME,
-        new HashMap<String, Object>(
-            Map.of("testFlow", submission.getId())
-        )
-    );
+    setFlowInfoInSession(session, "testFlow", submission.getId());
 
     UserFile userFile = UserFile.builder()
         .submission(submission)
