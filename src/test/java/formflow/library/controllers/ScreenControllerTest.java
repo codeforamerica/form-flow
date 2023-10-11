@@ -48,7 +48,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
   private Map<String, Object> sessionAttributes;
 
-  @Override
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();

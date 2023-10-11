@@ -610,7 +610,7 @@ public abstract class AbstractMockMvcTest {
     var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
-      nextPage = mockMvc.perform(get(nextPage))
+      nextPage = mockMvc.perform(get(nextPage).session(session))
           .andExpect(status().is3xxRedirection()).andReturn()
           .getResponse()
           .getRedirectedUrl();
@@ -622,7 +622,7 @@ public abstract class AbstractMockMvcTest {
     var nextPage = currentPageUrl;
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
-      nextPage = mockMvc.perform(get(nextPage))
+      nextPage = mockMvc.perform(get(nextPage).session(session))
           .andExpect(status().is3xxRedirection()).andReturn()
           .getResponse()
           .getRedirectedUrl();

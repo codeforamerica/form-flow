@@ -149,7 +149,6 @@ public abstract class FormFlowController {
    * @param flow A string containing the name of the flow to store the Submission data for
    */
   protected void setSubmissionInSession(HttpSession session, Submission submission, String flow) {
-    // TODO what error should be thrown here?
     if (session == null) {
       log.error(
           "Unable to put the submission ID ('{}') into the session for the flow '{}'. Session is null.",

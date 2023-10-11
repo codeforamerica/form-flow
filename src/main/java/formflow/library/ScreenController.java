@@ -302,7 +302,6 @@ public class ScreenController extends FormFlowController {
     handleAddressValidation(submission, formSubmission);
 
     if (submission.getId() != null) {
-      //if (httpSession.getAttribute("id") != null) {
       // if we are not working with a new submission, make sure to update any existing data
       // have we submitted any data to the subflow yet?
       if (!submission.getInputData().containsKey(subflowName)) {
@@ -477,9 +476,12 @@ public class ScreenController extends FormFlowController {
         "Current submission ID is :" + httpSession.getAttribute("id") + " and current Session ID is :" + httpSession.getId());
     // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
-    // TODO this change mirrors existing code, which doesn't account for putting a potentially new submission back into session... hmmm...
-    // this should probably fail in some way if Submission isn't already set, no? Can we get here with out an existing submission?
-    String nextScreen = getNextScreenName(findOrCreateSubmission(httpSession, flow), currentScreen, null);
+    Submission submission = getSubmissionFromSession(httpSession, flow);
+    if (submission == null) {
+      throwNotFoundError(flow, screen,
+          String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
+    }
+    String nextScreen = getNextScreenName(submission, currentScreen, null);
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));

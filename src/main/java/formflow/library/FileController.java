@@ -250,13 +250,8 @@ public class FileController extends FormFlowController {
       cloudFileRepository.delete(file.getRepositoryPath());
       userFileRepositoryService.deleteById(file.getFileId());
 
-      //HashMap<String, HashMap<UUID, HashMap<String, String>>> dzFilesMap =
-      //   (HashMap<String, HashMap<UUID, HashMap<String, String>>>) httpSession.getAttribute(SESSION_USERFILES_KEY);
-      //HashMap<UUID, HashMap<String, String>> userFileMap = dzFilesMap.get(dropZoneInstanceName);
-
       UserFileMap userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
           UserFileMap.class);
-      //UserFileMap userFileMap = (UserFileMap) httpSession.getAttribute(SESSION_USERFILES_KEY);
       if (userFileMap == null) {
         log.error("User file map not set in session. Unable to update file information");
         throw new IndexOutOfBoundsException("Session does not container user file mapping.");
