@@ -312,17 +312,15 @@ public class ScreenController extends FormFlowController {
         formSubmission.getFormData().put("uuid", iterationUuid);
         subflow.add(formSubmission.getFormData());
 
-        // setIterationIsComplete() ends up calling conditions, so we should update the subflow information _before_ we call this
+        // updateIterationIsCompleteMarker() ends up calling conditions, so we should update the subflow information _before_ we call this
         // to make sure anything conditions check have the complete data.
-        setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
+        updateIterationIsCompleteMarker(flow, iterationUuid, submission, currentScreen);
       } else {
         var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
         if (iterationToEdit != null) {
           submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
 
-          setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
-
-          submission.removeIncompleteIterations(subflowName, iterationUuid);
+          updateIterationIsCompleteMarker(flow, iterationUuid, submission, currentScreen);
         }
       }
     } else {
@@ -361,10 +359,14 @@ public class ScreenController extends FormFlowController {
     return new ModelAndView(viewString);
   }
 
-  private void setIterationIsComplete(String flow, String iterationUuid, FormSubmission formSubmission, Submission submission,
+  private void updateIterationIsCompleteMarker(String flow, String iterationUuid, Submission submission,
       ScreenNavigationConfiguration currentScreen) {
-    Boolean iterationIsComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
-    formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
+
+    // Note that we only set the marker to true, we never unset it or set it to false. This is intentional.
+    // If they make it through the flow once, it is considered complete, even if they go back to edit parts of it.
+    if (!isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid)) {
+      submission.markIterationAsComplete(flow, iterationUuid);
+    }
   }
 
   /**
@@ -472,6 +474,8 @@ public class ScreenController extends FormFlowController {
       HttpServletRequest request
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
+    log.info(
+        "Current submission ID is :" + httpSession.getAttribute("id") + " and current Session ID is :" + httpSession.getId());
     // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = getSubmissionFromSession(httpSession, flow);

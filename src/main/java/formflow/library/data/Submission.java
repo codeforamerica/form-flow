@@ -23,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
@@ -36,7 +37,7 @@ import org.springframework.stereotype.Component;
  * This class also provides a few static functions to work with Submissions.
  * </p>
  */
-
+@Slf4j
 @Entity
 @Table(name = "submissions")
 @Getter
@@ -104,7 +105,9 @@ public class Submission {
   public Map<String, Object> getSubflowEntryByUuid(String subflowName, String uuid) {
     if (inputData.containsKey(subflowName)) {
       List<Map<String, Object>> subflow = (List<Map<String, Object>>) inputData.get(subflowName);
-      return subflow.stream().filter(entry -> entry.get("uuid").equals(uuid)).toList().get(0);
+      return subflow.stream()
+          .filter(entry -> entry.get("uuid").equals(uuid))
+          .toList().get(0);
     }
     return null;
   }
@@ -150,21 +153,18 @@ public class Submission {
   }
 
   /**
-   * Removes any data in an interation that has "iterationIsComplete" set to "false" and has a {@code uuid} not equal to the
-   * {@code currentUuid} provided.
+   * Marks indicated subflow iteration as completed.
    *
-   * @param subflowName subflow that we are checking the iteration data for, not null
-   * @param currentUuid The current uuid being worked on, not null. The data associated with this uuid will not be deleted.
+   * @param subflow       the subflow the iteration is a part of
+   * @param iterationUuid the uuid that identifies the iteration to update
    */
-  public void removeIncompleteIterations(String subflowName, String currentUuid) {
-    List<Map<String, Object>> toRemove = new ArrayList<>();
-    List<Map<String, Object>> subflow = (List<Map<String, Object>>) inputData.get(subflowName);
-    subflow.forEach(iteration -> {
-      if (iteration.get("iterationIsComplete").equals(false) && !iteration.get("uuid").equals(currentUuid)) {
-        toRemove.add(iteration);
-      }
-    });
-    subflow.removeAll(toRemove);
+  public void markIterationAsComplete(String subflow, String iterationUuid) {
+    Map<String, Object> iterationData = getSubflowEntryByUuid(subflow, iterationUuid);
+    if (iterationData == null) {
+      log.warn("No iteration data found for subflow '{}' with UUID '{}'", subflow, iterationUuid);
+      return;
+    }
+    iterationData.put("iterationIsComplete", true);
   }
 
   /**
