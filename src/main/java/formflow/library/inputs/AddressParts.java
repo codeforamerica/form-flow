@@ -17,7 +17,7 @@ public enum AddressParts {
    */
   CITY("City"),
   /**
-   * The State value stored as the state code, a two character String, i.e. "IL", "CA", etc.
+   * The State value stored as the state code, a two character String, for example, "IL", "CA", etc.
    */
   STATE("State"),
   /**
