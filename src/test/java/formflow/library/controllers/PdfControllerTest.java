@@ -64,7 +64,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void getDownloadGeneratesAndReturnsFilledFlattenedPdf() throws Exception {
+  void getDownloadGeneratesAndReturnsFilledFlattenedPdf() throws Exception {
     session.setAttribute("id", submission.getId());
     MvcResult result = mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
         .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
@@ -77,7 +77,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void shouldNotAllowDownloadingAPdfWithADifferentSubmissionIdThanTheActiveSession() throws Exception {
+  void shouldNotAllowDownloadingAPdfWithADifferentSubmissionIdThanTheActiveSession() throws Exception {
     session.setAttribute("id", UUID.randomUUID());
 
     mockMvc.perform(get("/download/ubi/" + submission.getId()).session(session))
