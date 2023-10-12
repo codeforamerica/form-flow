@@ -1182,9 +1182,11 @@ The address fragment has two required parameters, `validate` and `inputName`.
 
 - `validate` is a boolean value that determines whether the address should be validated by Smarty
 - `inputName` is the name that will be associated with all of the above inputs by being used as a
-prefix in their input's name. For example, if the `inputName` is `homeAddress` then the corresponding
-inputs will be `homeAddressStreetAddress1`, `homeAddressStreetAddress2`, `homeAddressCity`, `homeAddressState`,
-and `homeAddressZipCode`.
+  prefix in their input's name. For example, if the `inputName` is `homeAddress` then the
+  corresponding
+  inputs will
+  be `homeAddressStreetAddress1`, `homeAddressStreetAddress2`, `homeAddressCity`, `homeAddressState`,
+  and `homeAddressZipCode`.
 
 The address fragment has five optional
 parameters: `streetAddressHelpText`, `streetAddress2HelpText`, `cityHelpText`, `stateHelpText`
@@ -1195,7 +1197,8 @@ Please note that when using the address fragment you will need to create corresp
 your
 flow inputs class for each of the above-mentioned inputs created by the fragment. For example, if
 your
-address fragments input name is `mailingAddress`, then you will need to create the following fields in
+address fragments input name is `mailingAddress`, then you will need to create the following fields
+in
 your flow inputs class:
 
 ```
@@ -2346,6 +2349,24 @@ your `application.yaml` like such:
 form-flow:
   path: 'name-of-file.yaml'
 ```
+
+#### Design System
+
+We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
+the [US Web Design System (USWDS)](https://designsystem.digital.gov/). Enabling this
+property will set template resolution to use USWDS styling in place of Honeycrisp. The USWDS 
+template location will become the default for your application, pulling USWDS styles, templates and fragments
+in place of Honeycrisp ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can 
+override templates and fragments in this path by placing a file with the same name and path in your
+application. For example, placing a file at `/resources/cfa-uswds-templates/fragments/example.html` 
+would override the fragment with the same name in the USWDS fragments folder.
+
+You can view all the USWDS templates and fragments in the [USWDS templates folder](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/cfa-uswds-templates).
+
+| Property                       | Default | Description                                                                                                                             |
+|--------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used.     |
+|
 
 #### File upload properties
 
