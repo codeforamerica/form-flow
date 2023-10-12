@@ -78,7 +78,7 @@ public class Submission {
   private Date submittedAt;
 
   /**
-   * String that is the key for a key-value pair in an iteration's data that represents an iteration's completion status.
+   * The key name for the field in an iteration's data that holds the status of completion for the iteration.
    */
   public static final String ITERATION_IS_COMPLETE_KEY = "iterationIsComplete";
 
