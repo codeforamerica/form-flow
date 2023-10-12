@@ -107,7 +107,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
       getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
     }
-
   }
 
   @Nested
@@ -345,6 +344,4 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     assertEquals("Radio B", page2.getRadioValue("radioInputSubflowPage2"));
     assertEquals("Select C", page2.getSelectValue("selectInputSubflowPage2"));
   }
-
-
 }
