@@ -50,42 +50,42 @@ class SubflowFieldPreparersTest {
     iteration1.put("foo", "the foo 1");
     iteration1.put("bar", "the bar 1");
     iteration1.put("uuid", "uuid1");
-    iteration1.put("iterationIsComplete", true);
+    iteration1.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "the foo 2");
     iteration2.put("bar", "the bar 2");
     iteration2.put("uuid", "uuid2");
-    iteration2.put("iterationIsComplete", true);
+    iteration2.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration3 = new HashMap<>();
     iteration3.put("foo", "the foo 3");
     iteration3.put("bar", "the bar 3");
     iteration3.put("uuid", "uuid3");
-    iteration3.put("iterationIsComplete", true);
+    iteration3.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration4 = new HashMap<>();
     iteration4.put("foo", "the foo 4");
     iteration4.put("bar", "the bar 4");
     iteration4.put("uuid", "uuid4");
-    iteration4.put("iterationIsComplete", true);
+    iteration4.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration5 = new HashMap<>();
     iteration5.put("foo", "the foo 5");
     iteration5.put("bar", "the bar 5");
     iteration5.put("uuid", "uuid5");
-    iteration5.put("iterationIsComplete", true);
+    iteration5.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration6 = new HashMap<>();
     iteration6.put("foo", "the foo 6");
     iteration6.put("bar", "the bar 6");
     iteration6.put("uuid", "uuid6");
-    iteration6.put("iterationIsComplete", true);
+    iteration6.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration7 = new HashMap<>();
     iteration7.put("foo", "the foo 7");
     iteration7.put("bar", "the bar 7");
     iteration7.put("uuid", "uuid7");
-    iteration7.put("iterationIsComplete", true);
+    iteration7.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration8 = new HashMap<>();
     iteration8.put("foo", "the foo 8");
     iteration8.put("bar", "the bar 8");
     iteration8.put("uuid", "uuid8");
-    iteration8.put("iterationIsComplete", true);
+    iteration8.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     submission = Submission.builder().flow("flow1")
         .inputData(
             Map.of(
@@ -130,17 +130,17 @@ class SubflowFieldPreparersTest {
     iteration1.put("foo", "the foo 1");
     iteration1.put("bar", "the bar 1");
     iteration1.put("uuid", "uuid1");
-    iteration1.put("iterationIsComplete", true);
+    iteration1.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "the foo 2");
     iteration2.put("bar", "the bar 2");
     iteration2.put("uuid", "uuid2");
-    iteration2.put("iterationIsComplete", true);
+    iteration2.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration3 = new HashMap<>();
     iteration3.put("foo", "the foo 3");
     iteration3.put("bar", "the bar 3");
     iteration3.put("uuid", "uuid3");
-    iteration3.put("iterationIsComplete", true);
+    iteration3.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
 
     submission = Submission.builder().flow("flow1")
         .inputData(
@@ -177,13 +177,13 @@ class SubflowFieldPreparersTest {
     iteration1.put("bar", "the bar 1");
     iteration1.put("checkboxInput[]", List.of("item1", "item2", "item3"));
     iteration1.put("uuid", "uuid1");
-    iteration1.put("iterationIsComplete", true);
+    iteration1.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
     Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "the foo 2");
     iteration2.put("bar", "the bar 2");
     iteration2.put("checkboxInput[]", List.of("item1", "item2", "item3"));
     iteration2.put("uuid", "uuid2");
-    iteration2.put("iterationIsComplete", true);
+    iteration2.put(Submission.ITERATION_IS_COMPLETE_KEY, "true");
 
     submission = Submission.builder().flow("flow1")
         .inputData(
@@ -241,24 +241,24 @@ class SubflowFieldPreparersTest {
         pdfMapConfiguration.getPdfMap("flow1"))
     ).doesNotThrowAnyException();
   }
-  
+
   @Test
   void shouldNotCreateFieldsForIncompleteSubflowIterations() {
     Map<String, Object> iteration1 = new HashMap<>();
     iteration1.put("foo", "foo from first iteration will not be removed because iteration is complete");
     iteration1.put("bar", "bar from first iteration will not be removed because iteration is complete");
     iteration1.put("uuid", "uuid1");
-    iteration1.put("iterationIsComplete", true);
+    iteration1.put(Submission.ITERATION_IS_COMPLETE_KEY, true);
     Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "foo from second iteration will be removed because iteration is not complete");
     iteration2.put("bar", "bar from second iteration will be removed because iteration is not complete");
     iteration2.put("uuid", "uuid2");
-    iteration2.put("iterationIsComplete", false);
+    iteration2.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
     Map<String, Object> iteration3 = new HashMap<>();
     iteration3.put("foo", "foo from third iteration will not be removed because iteration is complete");
     iteration3.put("bar", "bar from third iteration will not be removed because iteration is complete");
     iteration3.put("uuid", "uuid3");
-    iteration3.put("iterationIsComplete", true);
+    iteration3.put(Submission.ITERATION_IS_COMPLETE_KEY, true);
 
     submission = Submission.builder().flow("flow1")
         .inputData(
@@ -280,20 +280,19 @@ class SubflowFieldPreparersTest {
         )
     )).isTrue();
   }
-  
+
   @Test
   void shouldNotPrepareIgnoredSubflowFields() {
     Map<String, Object> iteration1 = new HashMap<>();
     iteration1.put("foo", "foo 1");
     iteration1.put("bar", "bar 1");
     iteration1.put("uuid", "uuid1");
-    iteration1.put("iterationIsComplete", true);
+    iteration1.put(Submission.ITERATION_IS_COMPLETE_KEY, true);
     Map<String, Object> iteration2 = new HashMap<>();
     iteration2.put("foo", "foo 2");
     iteration2.put("bar", "bar 2");
     iteration2.put("uuid", "uuid2");
-    iteration2.put("iterationIsComplete", true);
-
+    iteration2.put(Submission.ITERATION_IS_COMPLETE_KEY, true);
 
     submission = Submission.builder().flow("flow1")
         .inputData(
@@ -304,8 +303,7 @@ class SubflowFieldPreparersTest {
 
     Map<String, SubmissionField> resultMap = subflowFieldPreparer.prepareSubmissionFields(submission,
         pdfMapConfiguration.getPdfMap("flow1"));
-    
-    
+
     // Result does not include UUID or iterationIsComplete which should be ignored
     assertThat(resultMap.equals(
         Map.of(

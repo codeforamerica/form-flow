@@ -63,10 +63,10 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     subflowList.add(Map.of("uuid", subflowUuid));
     subflowList.add(Map.of("uuid", UUID.randomUUID().toString(),
         "ssnInput", "111-11-1111",
-        "iterationIsComplete", true));
+        Submission.ITERATION_IS_COMPLETE_KEY, true));
     subflowList.add(Map.of("uuid", UUID.randomUUID().toString(),
         "ssnInput", "222-22-2222",
-        "iterationIsComplete", true));
+        Submission.ITERATION_IS_COMPLETE_KEY, true));
 
     submission.getInputData().put("householdMembers", subflowList);
 

@@ -362,10 +362,12 @@ public class ScreenController extends FormFlowController {
   private void updateIterationIsCompleteMarker(String flow, String iterationUuid, Submission submission,
       ScreenNavigationConfiguration currentScreen) {
 
-    // Note that we only set the marker to true, we never unset it or set it to false. This is intentional.
-    // If they make it through the flow once, it is considered complete, even if they go back to edit parts of it.
-    if (!isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid)) {
-      submission.markIterationAsComplete(flow, iterationUuid);
+    boolean isIterationComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
+
+    Boolean currentStatus = submission.getIterationIsCompleteStatus(currentScreen.getSubflow(), iterationUuid);
+    // if it is already true, leave it alone, otherwise set it
+    if (currentStatus == null || !currentStatus) {
+      submission.setIterationIsCompleteStatus(currentScreen.getSubflow(), iterationUuid, isIterationComplete);
     }
   }
 

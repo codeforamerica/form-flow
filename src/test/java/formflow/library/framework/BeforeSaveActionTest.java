@@ -62,10 +62,10 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
     subflowList.add(Map.of("uuid", subflowUuid));
     subflowList.add(Map.of("uuid", UUID.randomUUID().toString(),
         "textInput", "2200",
-        "iterationIsComplete", true));
+        Submission.ITERATION_IS_COMPLETE_KEY, true));
     subflowList.add(Map.of("uuid", UUID.randomUUID().toString(),
         "textInput", "3330",
-        "iterationIsComplete", true));
+        Submission.ITERATION_IS_COMPLETE_KEY, true));
 
     submission.getInputData().put("income", subflowList);
 
