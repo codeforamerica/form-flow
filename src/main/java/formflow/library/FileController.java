@@ -254,7 +254,7 @@ public class FileController extends FormFlowController {
           UserFileMap.class);
       if (userFileMap == null) {
         log.error("User file map not set in session. Unable to update file information");
-        throw new IndexOutOfBoundsException("Session does not container user file mapping.");
+        throw new IndexOutOfBoundsException("Session does not contain user file mapping.");
       }
       userFileMap.removeUserFileFromMap(flow, fileId);
       httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
@@ -287,7 +287,8 @@ public class FileController extends FormFlowController {
         fileId);
 
     if (!submissionId.equals(getSubmissionIdForFlow(httpSession, flow).toString())) {
-      log.error("Submission ID handed in doesn't match the one associated with the file.");
+      log.error("There was an attempt to download a file with submission ID '{}', " +
+          "which does not match the submission of the file being downloaded.", submissionId);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
