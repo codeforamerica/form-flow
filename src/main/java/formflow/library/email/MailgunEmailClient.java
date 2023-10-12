@@ -19,9 +19,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MailgunEmailClient implements EmailClient<MessageResponse> {
 
+  /**
+   * String required for sending email
+   */
   private String senderEmail;
+  /**
+   * String storing the Mailgun domain
+   */
   private final String mailgunDomain;
+  /**
+   * Mailgun messages api object
+   */
   private MailgunMessagesApi mailgunMessagesApi;
+  /**
+   * Boolean variable sets requireTLS to true.
+   */
   private Boolean requireTls = true;
 
   /**
