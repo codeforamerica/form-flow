@@ -2353,12 +2353,19 @@ form-flow:
 #### Design System
 
 We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
-the [US Web Design System(USWDS)](https://designsystem.digital.gov/). Enabling this
-property will add another template location in Thymeleaf for USWDS templates to be consumed.
+the [US Web Design System (USWDS)](https://designsystem.digital.gov/). Enabling this
+property will set template resolution to use USWDS styling in place of Honeycrisp. The USWDS 
+template location will become the default for your application, pulling USWDS styles, templates and fragments
+in place of Honeycrisp ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can 
+override templates and fragments in this path by placing a file with the same name and path in your
+application. For example, placing a file at `/resources/cfa-uswds-templates/fragments/example.html` 
+would override the fragment with the same name in the USWDS fragments folder.
+
+You can view all the USWDS templates and fragments in the [USWDS templates folder](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/cfa-uswds-templates).
 
 | Property                       | Default | Description                                                                                                                             |
 |--------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the new CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used. |
+| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used.     |
 |
 
 #### File upload properties
