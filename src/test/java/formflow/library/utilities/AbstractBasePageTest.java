@@ -74,7 +74,6 @@ public abstract class AbstractBasePageTest {
   }
 
   protected void uploadFile(String filepath, String dzName) {
-    //testPage.clickElementById("drag-and-drop-box-" + dzName); // is this needed?
     WebElement upload = driver.findElement(By.className("dz-hidden-input"));
     upload.sendKeys(TestUtils.getAbsoluteFilepathString(filepath));
     await().until(

@@ -1,6 +1,5 @@
 package formflow.library.framework;
 
-import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -28,19 +27,11 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
 
-  private Map<String, Object> sessionAttributes;
-
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
-
-    sessionAttributes = Map.of(
-        SUBMISSION_MAP_NAME,
-        new HashMap<String, Object>(
-            Map.of("testFlow", submission.getId())
-        )
-    );
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     super.setUp();
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     when(submissionRepositoryService.save(any())).thenReturn(submission);
@@ -51,12 +42,12 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     // beforeSave
     String ssnInput = "111-00-1234";
     postExpectingSuccess("inputs",
-        Map.of("ssnInput", List.of(ssnInput)), sessionAttributes);
+        Map.of("ssnInput", List.of(ssnInput)));
     assertThat(submission.getInputData().get("ssnInputEncrypted")).isEqualTo("BBB-AA-BCDE");
     assertThat(submission.getInputData().get("ssnInput")).isNull();
 
     // beforeDisplay
-    MvcResult result = getPageExpectingSuccess("inputs", sessionAttributes).andReturn();
+    MvcResult result = getPageExpectingSuccess("inputs").andReturn();
     Map<String, String> inputData = (Map<String, String>) result.getModelAndView().getModel().get("inputData");
     assertThat(inputData.get("ssnInput")).isEqualTo(ssnInput);
     assertThat(inputData.get("ssnInputEncrypted")).isNull();
@@ -82,7 +73,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     // beforeSave
     String ssnInput = "333-33-3333";
     postToUrlExpectingSuccess("/flow/testFlow/pageWithSSNInput", "/flow/testFlow/subflowReview",
-        Map.of("ssnInput", List.of(ssnInput)), subflowUuid, sessionAttributes);
+        Map.of("ssnInput", List.of(ssnInput)), subflowUuid);
 
     Map<String, Object> subflowEntry = submission.getSubflowEntryByUuid("householdMembers",
         subflowUuid);
@@ -90,7 +81,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     assertThat(subflowEntry.get("ssnInput")).isNull();
 
     // beforeDisplay
-    MvcResult result = getPageExpectingSuccess("pageWithSSNInput/" + subflowUuid + "/edit", sessionAttributes).andReturn();
+    MvcResult result = getPageExpectingSuccess("pageWithSSNInput/" + subflowUuid + "/edit").andReturn();
     Map<String, String> subflowItem = (Map<String, String>) result.getModelAndView().getModel().get("currentSubflowItem");
     assertThat(subflowItem.get("ssnInput")).isEqualTo(ssnInput);
     assertThat(subflowItem.get("ssnInputEncrypted")).isNull();

@@ -32,19 +32,12 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
   @Autowired
   private ScreenController screenController;
 
-  private Map<String, Object> sessionAttributes;
-
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
-    sessionAttributes = Map.of(
-        screenController.SUBMISSION_MAP_NAME,
-        new HashMap<String, Object>(
-            Map.of("testFlow", submission.getId())
-        )
-    );
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     super.setUp();
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
   }
@@ -55,8 +48,8 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
         Map.of(
             "dateMonth", List.of("1"),
             "dateDay", List.of("2"),
-            "dateYear", List.of("1934")),
-        sessionAttributes);
+            "dateYear", List.of("1934"))
+    );
 
     assertThat(submission.getInputData().get("formattedDate")).isEqualTo("1/2/1934");
   }
@@ -77,7 +70,7 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
     submission.getInputData().put("income", subflowList);
 
     postToUrlExpectingSuccess("/flow/testFlow/next", "/flow/testFlow/subflowReview",
-        Map.of("textInput", List.of("1000")), subflowUuid, sessionAttributes);
+        Map.of("textInput", List.of("1000")), subflowUuid);
 
     assertThat(submission.getInputData().get("totalIncome")).isEqualTo(6530.0);
   }

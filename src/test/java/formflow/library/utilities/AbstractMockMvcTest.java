@@ -40,7 +40,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.openqa.selenium.InvalidArgumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -120,14 +119,13 @@ public abstract class AbstractMockMvcTest {
         .andExpect(redirectedUrl("/pages/" + pageName + "/navigation"));
   }
 
-  protected ResultActions getWithQueryParam(String pageName, String queryParam, String value,
-      Map<String, Object> sessionAttributes)
+  protected ResultActions getWithQueryParam(String pageName, String queryParam, String value)
       throws Exception {
     String getUrl = getUrlForPageName(pageName);
     return mockMvc.perform(
             get(getUrl)
                 .queryParam(queryParam, value)
-                .sessionAttrs(sessionAttributes))
+                .session(session))
         .andExpect(status().isOk());
   }
 
@@ -225,56 +223,43 @@ public abstract class AbstractMockMvcTest {
   }
 
   // Post to a page with an arbitrary number of multi-value inputs
-  protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params)
-      throws Exception {
+  protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params) throws Exception {
     String postUrl = getUrlForPageName(pageName);
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params, null);
-  }
-
-  protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params,
-      Map<String, Object> sessionAttrs)
-      throws Exception {
-    String postUrl = getUrlForPageName(pageName);
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params, sessionAttrs);
+    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
   }
 
   // Post to a page with a single input that only accepts a single value
-  protected ResultActions postExpectingSuccess(String pageName, String inputName, String value)
-      throws Exception {
+  protected ResultActions postExpectingSuccess(String pageName, String inputName, String value) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     var params = Map.of(inputName, List.of(value));
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params, null);
+    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
   }
 
   // Post to a page with a single input that accepts multiple values
-  protected ResultActions postExpectingSuccess(String pageName, String inputName,
-      List<String> values) throws Exception {
+  protected ResultActions postExpectingSuccess(String pageName, String inputName, List<String> values) throws Exception {
     String postUrl = getUrlForPageName(pageName);
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, values), null);
+    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, values));
   }
 
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params, Map<String, Object> sessionAttrs) throws
+      Map<String, List<String>> params) throws
       Exception {
 
     MockHttpServletRequestBuilder post = post(postUrl)
         .with(csrf())
+        .session(session)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         .params(new LinkedMultiValueMap<>(params));
-
-    if (sessionAttrs != null) {
-      post.sessionAttrs(sessionAttrs);
-    }
 
     return mockMvc.perform(post).andExpect(redirectedUrl(redirectUrl));
   }
 
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params, String id, Map<String, Object> sessionAttrs) throws
+      Map<String, List<String>> params, String id) throws
       Exception {
     return mockMvc.perform(
         post(postUrl + '/' + id)
-            .sessionAttrs(sessionAttrs)
+            .session(session)
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
@@ -282,12 +267,12 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
-      Map<String, List<String>> params, Map<String, Object> sessionAttributes)
+      Map<String, List<String>> params)
       throws Exception {
     return mockMvc.perform(
         post(postUrl)
             .with(csrf())
-            .sessionAttrs(sessionAttributes)
+            .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrlPattern(redirectUrlPattern));
@@ -303,13 +288,13 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected void assertPageHasElementWithId(String pageName, String elementId) throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertThat(page.getElementById(elementId)).isNotNull();
   }
 
   protected void assertPageDoesNotHaveElementWithId(String pageName, String elementId)
       throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertThat(page.getElementById(elementId)).isNull();
   }
 
@@ -385,6 +370,7 @@ public abstract class AbstractMockMvcTest {
     String postUrl = getUrlForPageName(pageName);
     return mockMvc.perform(
         post(postUrl)
+            .session(session)
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .param(inputName, value)
@@ -397,27 +383,18 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params) throws Exception {
-    return postExpectingFailure(pageName, params, pageName, null);
+    return postExpectingFailure(pageName, params, pageName);
   }
 
   protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params,
-      Map<String, Object> sessionAttrs) throws Exception {
-    return postExpectingFailure(pageName, params, pageName, sessionAttrs);
-  }
-
-  protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params,
-      String redirectUrl, Map<String, Object> sessionAttrs)
-      throws Exception {
+      String redirectUrl) throws Exception {
 
     String postUrl = getUrlForPageName(pageName);
     MockHttpServletRequestBuilder post = post(postUrl)
+        .session(session)
         .with(csrf())
         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         .params(new LinkedMultiValueMap<>(params));
-
-    if (sessionAttrs != null) {
-      post.sessionAttrs(sessionAttrs);
-    }
 
     return mockMvc.perform(post).andExpect(redirectedUrl(getUrlForPageName(redirectUrl)));
   }
@@ -532,25 +509,25 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected void assertPageHasInputError(String pageName, String inputName) throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertTrue(page.hasInputError(inputName));
   }
 
   protected void assertPageHasInputError(String pageName, String inputName, String errorMessage)
       throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertEquals(errorMessage, page.getInputError(inputName).text());
   }
 
   protected void assertInputHasErrors(String pageName, String inputName, Integer numOfErrors)
       throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertEquals(numOfErrors, page.getInputErrors(inputName).size());
   }
 
   protected void assertInputHasErrors(String pageName, String inputName, List<String> errorMessages)
       throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     // make sure there are errors returned
     assertFalse(page.getInputErrors(inputName).isEmpty(), "Expected errors on page, but there were none");
     // assert equal amount
@@ -562,35 +539,32 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected void assertPageHasDateInputError(String pageName, String inputName) throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertTrue(page.hasDateInputError());
   }
 
   protected void assertPageDoesNotHaveInputError(String pageName, String inputName)
       throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertFalse(page.hasInputError(inputName));
   }
 
   protected void assertPageHasWarningMessage(String pageName, String warningMessage)
       throws Exception {
-    var page = new FormScreen(getPage(pageName, null));
+    var page = new FormScreen(getPage(pageName));
     assertEquals(page.getWarningMessage(), warningMessage);
   }
 
   @NotNull
-  protected ResultActions getPage(String pageName, Map<String, Object> sessionAttributes) throws Exception {
+  protected ResultActions getPage(String pageName) throws Exception {
     // TODO - remove assumption that flow is named testFlow - may not always be
-    MockHttpServletRequestBuilder get = get("/flow/testFlow/" + pageName);
-    if (sessionAttributes != null) {
-      get.sessionAttrs(sessionAttributes);
-    }
+    MockHttpServletRequestBuilder get = get("/flow/testFlow/" + pageName).session(session);
     return mockMvc.perform(get);
   }
 
   @NotNull
-  protected ResultActions getPageExpectingSuccess(String pageName, Map<String, Object> sessionAttributes) throws Exception {
-    return getPage(pageName, sessionAttributes).andExpect(status().isOk());
+  protected ResultActions getPageExpectingSuccess(String pageName) throws Exception {
+    return getPage(pageName).andExpect(status().isOk());
   }
 
   /**
@@ -658,21 +632,21 @@ public abstract class AbstractMockMvcTest {
 
   protected void getPageAndExpectRedirect(String getPageName, String redirectPageName)
       throws Exception {
-    getPage(getPageName, null).andExpect(redirectedUrl("/pages/" + redirectPageName));
+    getPage(getPageName).andExpect(redirectedUrl("/pages/" + redirectPageName));
   }
 
   protected FormScreen goBackTo(String getPageName)
       throws Exception {
-    return new FormScreen(getPage(getPageName, null));
+    return new FormScreen(getPage(getPageName));
   }
 
   protected void assertCorrectPageTitle(String pageName, String pageTitle) throws Exception {
-    assertThat(new FormScreen(getPage(pageName, null)).getTitle()).isEqualTo(pageTitle);
+    assertThat(new FormScreen(getPage(pageName)).getTitle()).isEqualTo(pageTitle);
   }
 
   protected void clickContinueOnInfoPage(String pageName, String continueButtonText,
       String expectedNextPageName) throws Exception {
-    FormScreen page = new FormScreen(getPage(pageName, null));
+    FormScreen page = new FormScreen(getPage(pageName));
     page.assertLinkWithTextHasCorrectUrl(continueButtonText,
         "/pages/%s/navigation?option=0".formatted(pageName));
     assertNavigationRedirectsToCorrectNextPage(pageName, expectedNextPageName);

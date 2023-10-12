@@ -245,13 +245,13 @@ public class InputsTest extends AbstractMockMvcTest {
 
     @Test
     void shouldHaveDefaultClasses() throws Exception {
-      var page = new FormScreen(getPage("pageWithDefaultSubmitButton", null));
+      var page = new FormScreen(getPage("pageWithDefaultSubmitButton"));
       assertThat(page.getElementById("form-submit-button").classNames()).isEqualTo(Set.of("button", "button--primary"));
     }
 
     @Test
     void shouldHaveCustomClasses() throws Exception {
-      var page = new FormScreen(getPage("pageWithCustomSubmitButton", null));
+      var page = new FormScreen(getPage("pageWithCustomSubmitButton"));
       assertThat(page.getElementById("form-submit-button").classNames()).isEqualTo(Set.of("custom"));
     }
   }

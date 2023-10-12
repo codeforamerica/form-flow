@@ -129,8 +129,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   private MvcResult getPdfFile(Submission testSubmission, String testFlow, ResultMatcher resultMatcher, boolean expectsFile)
       throws Exception {
     ResultActions resultActions = mockMvc.perform(
-            get(
-                "/download/" + testFlow + "/" + testSubmission.getId())
+            get("/download/" + testFlow + "/" + testSubmission.getId())
                 .session(session)
         )
         .andExpect(resultMatcher);

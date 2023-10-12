@@ -46,18 +46,12 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
   public final String uuidPatternString = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
 
-  private Map<String, Object> sessionAttributes;
-
   @BeforeEach
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
-    sessionAttributes = Map.of(
-        SUBMISSION_MAP_NAME,
-        new HashMap<String, Object>(
-            Map.of("testFlow", submission.getId())
-        )
-    );
+    // this setups flow info in the session to get passed along later on.
+    setFlowInfoInSession(session, "testFlow", submission.getId());
 
     super.setUp();
   }
@@ -95,7 +89,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       Map<String, String> queryParams = new HashMap<>();
       queryParams.put("lang", "en");
-      getWithQueryParam("test", "lang", "en", sessionAttributes);
+      getWithQueryParam("test", "lang", "en");
       assert (submission.getUrlParams().equals(queryParams));
     }
   }
@@ -111,7 +105,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       subflowItem.put("firstNameSubflow", "foo bar baz");
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
-      getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc", sessionAttributes);
+      getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
     }
   }
 
@@ -276,8 +270,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     // skipping date, which should cause an error
 
     String pageName = "subflowAddItem/new";
-    postExpectingFailure(pageName, params, "subflowAddItem", sessionAttributes);
-    var page = new FormScreen(getPage("subflowAddItem", sessionAttributes));
+    postExpectingFailure(pageName, params, "subflowAddItem");
+    var page = new FormScreen(getPage("subflowAddItem"));
 
     assertTrue(page.hasDateInputError());
     assertTrue(page.hasInputError("numberInputSubflow"));
@@ -315,7 +309,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     String pageName = "/flow/testFlow/subflowAddItem/new";
     ResultActions resultActions = postToUrlExpectingSuccessRedirectPattern(pageName,
         "/flow/testFlow/subflowAddItemPage2/" + uuidPatternString,
-        paramsPage1, sessionAttributes);
+        paramsPage1);
 
     var paramsPage2 = new HashMap<String, List<String>>();
     paramsPage2.put("firstNameSubflowPage2", List.of("tester"));
@@ -335,9 +329,9 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     String redirectedUrl = resultActions.andReturn().getResponse().getRedirectedUrl();
     int lastSlash = redirectedUrl.lastIndexOf('/');
     String pageNamePage2 = "subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1);
-    postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2, sessionAttributes);
+    postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
 
-    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash), sessionAttributes));
+    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash)));
     assertTrue(page2.hasDateInputError());
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));
