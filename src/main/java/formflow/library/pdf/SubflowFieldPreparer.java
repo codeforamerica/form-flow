@@ -82,6 +82,7 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
     Map<String, SubmissionField> preppedFields = new HashMap<>();
     List<Map<String, Object>> subflowDataList = new ArrayList<>();
     Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
+    final List<String> IGNORED_FIELDS = List.of("uuid", "iterationIsComplete");
 
     if (subflowMap == null) {
       return Collections.emptyMap();
@@ -92,7 +93,7 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
         subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
       }
 
-      if (subflowDataList.size() > 0) {
+      if (!subflowDataList.isEmpty()) {
 
         AtomicInteger atomInteger = new AtomicInteger(1);
         subflowDataList.forEach(iteration -> {
@@ -101,12 +102,16 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
           if (atomInteger.get() > pdfSubflow.getTotalIterations()) {
             return;
           }
-
-          // remove unnecessary fields
-          iteration.remove("uuid");
-          iteration.remove("iterationIsComplete");
+          
+          if (iteration.get("iterationIsComplete") != null && iteration.get("iterationIsComplete").equals(false)) {
+            return;
+          }
+          
           iteration.forEach((key, value) -> {
-
+            if (IGNORED_FIELDS.contains(key)) {
+              return;
+            }
+            
             String newKey = getNewKey(key, atomInteger.get());
 
             if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {
