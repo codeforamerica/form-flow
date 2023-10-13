@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Requires sendEmail methods for any class implementing EmailClient.
+ * An interface that can be implemented by objects to send email.
  * @param <T> A Generic that can be set as the return type for the sendEmail method
  */
 public interface EmailClient<T> {
