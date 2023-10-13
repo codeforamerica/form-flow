@@ -54,8 +54,6 @@ Table of Contents
     * [Configuration Details](#configuration-details)
         * [Environment Variables](#environment-variables)
         * [Application Configuration](#application-configuration)
-            * [Actuator Endpoints](#actuator-endpoints)
-        * [flows-config.yaml file](#flows-configyaml-file)
         * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
         * [Screens](#screens)
         * [Defining Subflows](#defining-subflows)
@@ -2421,7 +2419,7 @@ Spring Boot provides a module,
 called [`spring-boot-starter-actuator`](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints),
 that will expose endpoints that will allow you to monitor and interact with your application.
 
-**While these are very powerful, they can also reveal sensitive information about your
+**⚠️ While these are very powerful, they can also reveal sensitive information about your
 application. They are a huge security concern.**
 
 It's best to disable them in production and demo environments, or just leave the `health` and
@@ -2531,7 +2529,8 @@ one flow to another, we will keep the data for both flows. We do this by creatin
 `Submission` for each flow the user has visited. Regardless of whether the user completed
 any one flow, the `Submission` for each flow will be stored in the database.
 
-**If your screen flow has users crossing flows, you need to ensure that you provide a reentry point
+**⚠️ If your screen flow has users crossing flows, you need to ensure that you provide a reentry
+point
 to go back to the other flow. Otherwise, the flows may not get completed properly.**
 
 ### Screens
