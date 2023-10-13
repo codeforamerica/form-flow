@@ -81,9 +81,9 @@ Table of Contents
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
-A Spring Boot Java library that provides a framework for developing **form flow** based applications.
-The intention is to speed up the creation of web applications that are a series of forms that
-collect input from users.
+A Spring Boot Java library that provides a framework for developing **form flow** based
+applications. The intention is to speed up the creation of web applications that are a series of
+forms that collect input from users.
 
 The library includes tooling for:
 
@@ -242,8 +242,8 @@ to add another.
 
 #### Delete Confirmation Screen
 
-This screen appears when a user selects `delete` on an iteration listed on the review screen. It asks
-the user to confirm their deletion before submitting the actual deletion request to the server.
+This screen appears when a user selects `delete` on an iteration listed on the review screen. It
+asks the user to confirm their deletion before submitting the actual deletion request to the server.
 
 This page is not technically part of the subflow and as such, does not need to be denoted
 with `subflow: subflowName` in the `flows-config.yaml`.
@@ -302,7 +302,8 @@ form flow configuration file. They are generally used to determine template or p
 
 Conditions are Java objects that implement the `Condition`
 [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Condition.java)
-. As conditions are called with the Submission object, the instance variable `inputData` is available to them.
+. As conditions are called with the Submission object, the instance variable `inputData` is
+available to them.
 
 Here is a simple condition that looks at data in the submission to see if the email provided is a
 Google address.
@@ -462,11 +463,10 @@ see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validat
 
 Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
 `@NotNull` is used. If a validation annotation such as `@Email` is used, it will not
-actually validate the annotated input unless a user actually enters a value for that input. If you use
-`@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
-enter a value,
-validating both that they need to enter a value due to `@NotBlank` and because the blank value needs
-to be a validly formatted email address due to `@Email`.
+actually validate the annotated input unless a user actually enters a value for that input. If you
+use `@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
+enter a value, validating both that they need to enter a value due to `@NotBlank` and because the
+blank value needs to be a validly formatted email address due to `@Email`.
 
 ### Custom Annotations
 
@@ -1183,8 +1183,7 @@ The address fragment has two required parameters, `validate` and `inputName`.
 - `validate` is a boolean value that determines whether the address should be validated by Smarty
 - `inputName` is the name that will be associated with all of the above inputs by being used as a
   prefix in their input's name. For example, if the `inputName` is `homeAddress` then the
-  corresponding
-  inputs will
+  corresponding inputs will
   be `homeAddressStreetAddress1`, `homeAddressStreetAddress2`, `homeAddressCity`, `homeAddressState`,
   and `homeAddressZipCode`.
 
@@ -1194,12 +1193,9 @@ parameters: `streetAddressHelpText`, `streetAddress2HelpText`, `cityHelpText`, `
 These will pass helper text to each specific field.
 
 Please note that when using the address fragment you will need to create corresponding fields in
-your
-flow inputs class for each of the above-mentioned inputs created by the fragment. For example, if
-your
-address fragments input name is `mailingAddress`, then you will need to create the following fields
-in
-your flow inputs class:
+your flow inputs class for each of the above-mentioned inputs created by the fragment. For example,
+if your address fragments input name is `mailingAddress`, then you will need to create the following
+fields in your flow inputs class:
 
 ```
     String mailingAddressStreetAddress1;
@@ -2204,8 +2200,7 @@ starting a
 session. If no HttpSession has been established or a session lacks an appropriate Submission id,
 a client will be returned to the index page of an application.
 
-⚠️ __It is set to be the last interceptor run by any
-application using Form Flow Library.__
+⚠️ __It is set to be the last interceptor run by any application using Form Flow library.__
 
 #### Configuration
 
@@ -2328,7 +2323,7 @@ the [Spring.io documentation](https://docs.spring.io/spring-boot/docs/current/re
 It is expected that this file will be located within the application that is using this form flow
 library.
 
-There are a few properties that the Form Flow Library will look for in the `application.yaml`
+There are a few properties that the Form Flow library will look for in the `application.yaml`
 file.
 
 ```yaml
@@ -2354,18 +2349,20 @@ form-flow:
 
 We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
 the [US Web Design System (USWDS)](https://designsystem.digital.gov/). Enabling this
-property will set template resolution to use USWDS styling in place of Honeycrisp. The USWDS 
-template location will become the default for your application, pulling USWDS styles, templates and fragments
-in place of Honeycrisp ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can 
+property will set template resolution to use USWDS styling in place of Honeycrisp. The USWDS
+template location will become the default for your application, pulling USWDS styles, templates and
+fragments
+in place of Honeycrisp ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can
 override templates and fragments in this path by placing a file with the same name and path in your
-application. For example, placing a file at `/resources/cfa-uswds-templates/fragments/example.html` 
+application. For example, placing a file at `/resources/cfa-uswds-templates/fragments/example.html`
 would override the fragment with the same name in the USWDS fragments folder.
 
-You can view all the USWDS templates and fragments in the [USWDS templates folder](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/cfa-uswds-templates).
+You can view all the USWDS templates and fragments in
+the [USWDS templates folder](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/cfa-uswds-templates).
 
-| Property                       | Default | Description                                                                                                                             |
-|--------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used.     |
+| Property                       | Default | Description                                                                                                                         |
+|--------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used. |
 |
 
 #### File upload properties
@@ -2452,27 +2449,39 @@ actuator endpoints.
 * [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints)
 * [Actuator API](https://docs.spring.io/spring-boot/docs/3.1.2/actuator-api/htmlsingle)
 
-### flows-config.yaml file
-
 ### Flow and Subflow Configuration
 
-Flows are defined in a file specified in the `application.yaml` file. The library will look for
-the `form-flow.path` property. If that property is not set, the default file it will look for is
-named `flows-config.yaml`.
+#### flows-config.yaml file
 
-To configure a flow, create a `flow-config.yaml` in your app at `src/main/resources`.
+The `flows-config.yaml` file contains the core flow through screens of the application.
+It will contain a list of screens in your application as well as any conditions or actions
+relating to them. It will also detail out subflow information as well as landmark pages.
+
+The system will, by default, look for a file with the name `flows-config.yaml`
+in `src/main/resources`. You can have the library load a file with a different name by including
+the property `form-flow.path` in the `application.yaml` file. The library will then load the
+specified file instead and pull the flow configuration from there.
+
+#### flows-config.yaml basic configuration
+
+To configure a flow, create a `flows-config.yaml` in your app at `src/main/resources`.
 
 You can define multiple flows by
 [separating them with `---`](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-external-config.html#boot-features-external-config-multi-profile-yaml)
 .
 
-At it's base a flow as defined in yaml has a name, a flow object, and a collection of screens, their
-next screens, any conditions for navigation between those screens, and optionally one or more
-subflows.
+In the yaml file, every flow described will have:
 
-#### form-flow.yaml basic configuration
+* a `name`
+* a `flow`, which is essentially the set of screens in the application. Each screen could
+  have:
+    * next screens
+    * [conditions](#conditions) to apply to next screen flow
+    * [actions](#actions) to apply to data
+* a `subflows` section, if any of the screens are part of a subflow
+* a [`landmarks`](#landmarks) section
 
-A basic flow configuration could look like this:
+A basic form flow configuration file might look like this:
 
 ```yaml
 name: exampleFlow
@@ -2481,6 +2490,7 @@ flow:
     nextScreens:
       - name: secondScreen
   secondScreen:
+    beforeSaveAction: cleanData
     nextScreens:
       - name: thirdScreen
       - name: otherScreen
@@ -2493,14 +2503,36 @@ flow:
       - name: success
   success:
     nextScreens: null
+landmarks:
+  firstScreen: firstScreen
   ___
 name: someOtherFlow
 flow:
   otherFlowScreen:
 ```
 
-You can have autocomplete and validation for flows-config by connecting your IntelliJ to the
-flows-config-schema.json [as described here](#connect-flows-config-schema).
+You can have IntelliJ do autocomplete and validation for fields in the `flows-config.yaml` file by
+configuring IntelliJ to use
+the `flows-config-schema.json`, [as described here](#connect-flows-config-schema).
+
+#### Multiple Flows
+
+The Form Flow library is able to accommodate multiple form flows in one application. For example,
+one could create a signup form in one flow and use a separate flow for collecting documentation from
+a user at a later time.
+The [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) has two
+separate flows.
+
+It's not recommended to allow users to work through more than one flow at once. The design of the
+Form Flow library is that a user would complete one flow before working with a separate flow.
+
+However, it is not always possible to keep the flows separate and in cases where users do cross from
+one flow to another, we will keep the data for both flows. We do this by creating a
+`Submission` for each flow the user has visited. Regardless of whether the user completed
+any one flow, the `Submission` for each flow will be stored in the database.
+
+**If your screen flow has users crossing flows, you need to ensure that you provide a reentry point
+to go back to the other flow. Otherwise, the flows may not get completed properly.**
 
 ### Screens
 
@@ -2531,7 +2563,7 @@ What do you need to do to create a subflow?
   (e.g. Ubi.java in the starter app)
 - Define `screen` templates in `resources/templates/<flow-name>`
 
-Example `flow-config.yaml` with a docs subflow
+Example `flows-config.yaml` with a docs subflow
 
 ```yaml
 name: docFlow
@@ -2604,7 +2636,8 @@ There are spots in the templates where the `T` operator is used.
 
 ### Logging
 
-Form Flow adds the following attributes to the [Mapped Diagnostic Context](https://logback.qos.ch/manual/mdc.html):
+Form Flow adds the following attributes to
+the [Mapped Diagnostic Context](https://logback.qos.ch/manual/mdc.html):
 
 | Attribute     | Description                                                                                                                |
 |---------------|----------------------------------------------------------------------------------------------------------------------------|
@@ -2614,9 +2647,10 @@ Form Flow adds the following attributes to the [Mapped Diagnostic Context](https
 | submissionId  | The ID of the Submission object - see https://github.com/codeforamerica/form-flow#submission-object                        |
 | xForwardedFor | The X-Forwarded-For request header - see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For         |
 
-These attributes can be displayed in the logs by configuring the log format as described in the above document. For an example that exposes the entire Mapped Diagnostic Context (MDC) in JSON-formatted logs,
+These attributes can be displayed in the logs by configuring the log format as described in the
+above document. For an example that exposes the entire Mapped Diagnostic Context (MDC) in
+JSON-formatted logs,
 see https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/logback-spring.xml.
-
 
 ### Library Details
 
