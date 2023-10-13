@@ -31,10 +31,10 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
-
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     super.setUp();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(submissionRepositoryService.save(any())).thenReturn(submission);
   }
 
   @Test
@@ -58,7 +58,6 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   @Test
   void shouldSaveEncryptedSSNInSubflow() throws Exception {
     String subflowUuid = UUID.randomUUID().toString();
-    Map<String, Object> sessionAttrs = new HashMap<>();
     List<Map<String, Object>> subflowList = new ArrayList<>();
 
     subflowList.add(Map.of("uuid", subflowUuid));
@@ -70,12 +69,11 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
         "iterationIsComplete", true));
 
     submission.getInputData().put("householdMembers", subflowList);
-    sessionAttrs.put("id", submission.getId());
 
     // beforeSave
     String ssnInput = "333-33-3333";
     postToUrlExpectingSuccess("/flow/testFlow/pageWithSSNInput", "/flow/testFlow/subflowReview",
-        Map.of("ssnInput", List.of(ssnInput)), subflowUuid, sessionAttrs);
+        Map.of("ssnInput", List.of(ssnInput)), subflowUuid);
 
     Map<String, Object> subflowEntry = submission.getSubflowEntryByUuid("householdMembers",
         subflowUuid);

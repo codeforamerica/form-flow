@@ -5,6 +5,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import formflow.library.utilities.AbstractBasePageTest;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +20,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 }, webEnvironment = RANDOM_PORT)
 public class UploadJourneyTests extends AbstractBasePageTest {
 
+  private final String dzWidgetName = "uploadTest";
+
   @Override
   @BeforeEach
   public void setUp() throws IOException {
-    startingPage = "flow/uploadFlow/docUploadJourney";
+    startingPage = "flow/uploadFlowA/docUploadJourney";
     super.setUp();
   }
 
@@ -31,27 +34,27 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     assertThat(testPage.getTitle()).isEqualTo("Upload Documents");
     // Test accepted file types
     // Extension list comes from application.yaml -- form-flow.uploads.accepted-file-types
-    uploadFile("test-platypus.gif", "uploadTest");
+    uploadFile("test-platypus.gif", dzWidgetName);
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource
             .getMessage("upload-documents.error-invalid-file-type", null, Locale.ENGLISH)
             + " .jpeg, .pdf");
     testPage.clickLink("remove");
-    assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("0 files added");
 
     // Upload a file that is too big and assert the correct error shows - max file size in test is 1MB
     long largeFilesize = 21000000L;
     driver.executeScript(
-        "$('#document-upload-uploadTest').get(0).dropzone.addFile({name: 'testFile.pdf', size: "
+        "$('#document-upload-" + dzWidgetName + "').get(0).dropzone.addFile({name: 'testFile.pdf', size: "
             + largeFilesize + ", type: 'not-an-image'})");
     int maxFileSize = 17;
     assertThat(driver.findElement(By.className("text--error")).getText()).contains(messageSource
         .getMessage("upload-documents.this-file-is-too-large", new Object[]{maxFileSize}, Locale.ENGLISH));
     testPage.clickLink("remove");
-    assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("0 files added");
 
     // Upload a password-protected file and assert the correct error shows
-    uploadPasswordProtectedPdf("uploadTest");
+    uploadPasswordProtectedPdf(dzWidgetName);
 
     //Race condition caused by uploadPasswordProtectedPdf waits until upload file has file details added instead
     //of waiting until file upload is complete.
@@ -64,21 +67,21 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource.getMessage("upload-documents.error-password-protected", null, Locale.ENGLISH));
     testPage.clickLink("remove");
-    assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("0 files added");
 
     // Test max number of files that can be uploaded
-    uploadJpgFile("uploadTest");
+    uploadJpgFile(dzWidgetName); // 1
     assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("1 file added");
-    uploadJpgFile("uploadTest"); // 2
-    uploadJpgFile("uploadTest"); // 3
-    uploadJpgFile("uploadTest"); // 4
-    uploadJpgFile("uploadTest"); // 5
-    uploadJpgFile("uploadTest"); // Can't upload the 6th
+    uploadJpgFile(dzWidgetName); // 2
+    uploadJpgFile(dzWidgetName); // 3
+    uploadJpgFile(dzWidgetName); // 4
+    uploadJpgFile(dzWidgetName); // 5
+    uploadJpgFile(dzWidgetName); // Can't upload the 6th
     assertThat(testPage.findElementsByClass("text--error").get(0).getText())
         .isEqualTo(messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, Locale.ENGLISH));
     testPage.clickLink("remove");
     // Assert there are no longer any error after removing the errored item
-    assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("5 files added");
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("5 files added");
     assertThat(
         testPage.findElementsByClass("text--error").stream().map(WebElement::getText).collect(Collectors.toList()))
         .allMatch(String::isEmpty);
@@ -88,6 +91,68 @@ public class UploadJourneyTests extends AbstractBasePageTest {
       driver.switchTo().alert().accept();
     }
     assertThat(testPage.findElementsByClass("dz-remove").size()).isEqualTo(0);
-    assertThat(testPage.findElementTextById("number-of-uploaded-files-uploadTest")).isEqualTo("0 files added");
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("0 files added");
+  }
+
+  @Test
+  void documentUploadFlowMultiFlow() {
+    assertThat(testPage.getTitle()).isEqualTo("Upload Documents");
+
+    for (int i = 0; i < 5; i++) {
+      uploadFile("testA.jpeg", dzWidgetName);
+    }
+
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("5 files added");
+    assertThat(testPage.findElementsByClass("text--error").stream()
+        .map(WebElement::getText)
+        .collect(Collectors.toList()))
+        .allMatch(String::isEmpty);
+
+    List<WebElement> elementsA = testPage.findElementsByClass("filename-text-name");
+    assertThat(elementsA.size()).isEqualTo(5);
+    elementsA.forEach(
+        element -> assertThat(element.getText()).isEqualTo("testA")
+    );
+
+    // switch flow from A to B and upload some files.  Ensure you only see Flow B files.
+    baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/uploadFlowB/docUploadJourney");
+    driver.navigate().to(baseUrl);
+
+    for (int i = 0; i < 5; i++) {
+      uploadFile("testB.jpeg", dzWidgetName);
+    }
+
+    assertThat(testPage.findElementTextById("number-of-uploaded-files-" + dzWidgetName)).isEqualTo("5 files added");
+    assertThat(testPage.findElementsByClass("text--error").stream()
+        .map(WebElement::getText)
+        .collect(Collectors.toList()))
+        .allMatch(String::isEmpty);
+
+    List<WebElement> elementsB = testPage.findElementsByClass("filename-text-name");
+    elementsB.forEach(
+        element -> assertThat(element.getText()).isEqualTo("testB")
+    );
+
+    // go forward and back and ensure you only see flow B files
+    testPage.clickContinue();
+    testPage.goBack();
+
+    elementsB = testPage.findElementsByClass("filename-text-name");
+    assertThat(elementsB.size()).isEqualTo(5);
+    elementsB.forEach(
+        element -> {
+          assertThat(element.getText()).isEqualTo("testB");
+        });
+
+    // switch back to A and ensure no B flow files are present
+    baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/uploadFlowA/docUploadJourney");
+    driver.navigate().to(baseUrl);
+
+    elementsA = testPage.findElementsByClass("filename-text-name");
+    assertThat(elementsA.size()).isEqualTo(5);
+    elementsA.forEach(
+        element -> {
+          assertThat(element.getText()).isEqualTo("testA");
+        });
   }
 }

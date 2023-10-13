@@ -1,6 +1,5 @@
 package formflow.library.data;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
@@ -33,14 +32,14 @@ public class SubmissionRepositoryService {
    * @param submission the submission to save, not null
    * @return UUID of the saved submission
    */
-  public UUID save(Submission submission) {
+  public Submission save(Submission submission) {
     var newRecord = submission.getId() == null;
-    UUID id = repository.save(encryptionService.encrypt(submission)).getId();
+    Submission savedSubmission = repository.save(encryptionService.encrypt(submission));
     if (newRecord) {
-      log.info("created submission id: " + id);
+      log.info("created submission id: " + savedSubmission.getId());
     }
-    submission.setId(id);
-    return id;
+    // straight from the db will be encrypted, so decrypt first.
+    return encryptionService.decrypt(savedSubmission);
   }
 
   /**
@@ -79,31 +78,6 @@ public class SubmissionRepositoryService {
       for (var entry : subflowArr) {
         entry.remove("_csrf");
       }
-    }
-  }
-
-  /**
-   * If the submission exists in the session, find it in the db. If not or can't be found, create a new one.
-   *
-   * @param httpSession submission
-   * @return Submission
-   */
-  public Submission findOrCreate(HttpSession httpSession) {
-    var id = (UUID) httpSession.getAttribute("id");
-    if (id != null) {
-      Optional<Submission> submissionOptional = findById(id);
-      if (submissionOptional.isEmpty()) {
-        log.error("findOrCreate could not find submission: " + id);
-        Submission newSubmission = new Submission();
-        log.info("findOrCreate created new submission: " + newSubmission.getId());
-        return newSubmission;
-      } else {
-        return submissionOptional.get();
-      }
-    } else {
-      Submission newSubmission = new Submission();
-      log.info("findOrCreate got no submission id from session, so created new submission: " + newSubmission.getId());
-      return newSubmission;
     }
   }
 }

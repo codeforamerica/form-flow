@@ -49,3 +49,26 @@ subflows:
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
+---
+name: otherTestFlow
+flow:
+  inputs:
+    nextScreens:
+      - name: test
+  subflowAddItem:
+    subflow: testSubflow
+    nextScreens:
+      - name: subflowAddItemPage2
+  subflowAddItemPage2:
+    subflow: testSubflow
+    nextScreens:
+      - name: test
+  test:
+    nextScreens:
+      - name: success
+subflows:
+  testSubflow:
+    entryScreen: testEntryScreen
+    iterationStartScreen: subflowAddItem
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen

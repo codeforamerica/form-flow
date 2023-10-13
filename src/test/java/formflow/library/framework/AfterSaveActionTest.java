@@ -50,7 +50,7 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     mailgunEmailClient.setMailgunMessagesApi(mailgunMessagesApi);
 
     super.setUp();
-    when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+    ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
   }
 

@@ -36,7 +36,7 @@ class SubmissionRepositoryServiceTest {
     Submission firstSubmission = new Submission();
     firstSubmission.setFlow("testFlow");
 
-    submissionRepositoryService.save(firstSubmission);
+    firstSubmission = submissionRepositoryService.save(firstSubmission);
 
     assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
   }
@@ -55,9 +55,9 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-    UUID submissionId = submissionRepositoryService.save(submission);
+    UUID subId = submissionRepositoryService.save(submission).getId();
 
-    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(submissionId);
+    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(subId);
     Submission savedSubmission = savedSubmissionOptional.orElseThrow();
     assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
     assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
@@ -77,7 +77,7 @@ class SubmissionRepositoryServiceTest {
         .flow("testFlow")
         .submittedAt(Date.from(timeNow))
         .build();
-    submissionRepositoryService.save(submission);
+    submission = submissionRepositoryService.save(submission);
 
     var newInputData = Map.of(
         "newKey", "this is a new value",
@@ -145,7 +145,7 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-    UUID subId = submissionRepositoryService.save(submission);
+    UUID subId = submissionRepositoryService.save(submission).getId();
 
     Submission dbSubmission = (submissionRepositoryService.findById(subId)).get();
     assertThat(dbSubmission.getInputData().containsKey("ssnInput")).isTrue();
@@ -173,7 +173,7 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-    UUID subId = submissionRepositoryService.save(submission);
+    UUID subId = submissionRepositoryService.save(submission).getId();
 
     var query = entityManager.createQuery("SELECT s FROM Submission s WHERE s.id = :id");
     query.setParameter("id", subId);
@@ -208,7 +208,7 @@ class SubmissionRepositoryServiceTest {
         .flow("testFlow")
         .build();
 
-    UUID id = submissionRepositoryService.save(submission);
+    UUID id = submissionRepositoryService.save(submission).getId();
     Submission savedSubmission = submissionRepositoryService.findById(id).get();
 
     assertThat(savedSubmission.getCreatedAt()).isInThePast();

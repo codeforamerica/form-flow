@@ -3,6 +3,7 @@ package formflow.library;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import formflow.library.data.UserFileRepositoryService;
 import formflow.library.pdf.PdfService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -34,8 +35,9 @@ public class PdfController extends FormFlowController {
 
   public PdfController(MessageSource messageSource, PdfService pdfService,
       SubmissionRepositoryService submissionRepositoryService,
+      UserFileRepositoryService userFileRepositoryService,
       List<FlowConfiguration> flowConfigurations) {
-    super(submissionRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
     this.messageSource = messageSource;
     this.pdfService = pdfService;
   }
@@ -54,7 +56,7 @@ public class PdfController extends FormFlowController {
     }
 
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
-    if (httpSession.getAttribute("id").toString().equals(submissionId) && maybeSubmission.isPresent()) {
+    if (getSubmissionIdForFlow(httpSession, flow).toString().equals(submissionId) && maybeSubmission.isPresent()) {
       log.info("Downloading PDF with submission_id: " + submissionId);
       Submission submission = maybeSubmission.get();
       HttpHeaders headers = new HttpHeaders();

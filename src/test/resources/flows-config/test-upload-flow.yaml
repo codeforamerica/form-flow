@@ -1,4 +1,11 @@
-name: uploadFlow
+name: uploadFlowA
+flow:
+  docUploadUnit:
+    nextScreens: null
+  docUploadJourney:
+    nextScreens: null
+---
+name: uploadFlowB
 flow:
   docUploadUnit:
     nextScreens: null

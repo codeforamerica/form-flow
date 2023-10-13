@@ -1,5 +1,6 @@
 package formflow.library.utilities;
 
+import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static formflow.library.utilities.TestUtils.resetSubmission;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,10 +26,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -47,6 +51,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -70,7 +75,6 @@ public abstract class AbstractMockMvcTest {
   @Autowired
   protected MockMvc mockMvc;
 
-
   protected MockHttpSession session = new MockHttpSession();
 
   @Autowired
@@ -89,6 +93,25 @@ public abstract class AbstractMockMvcTest {
     resetSubmission();
   }
 
+  protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
+
+    if (flowInfo.length % 2 != 0) {
+      throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
+    }
+
+    Iterator<Object> iterator = Arrays.stream(flowInfo).iterator();
+
+    Map<String, Object> flowMap = new HashMap<>();
+
+    while (iterator.hasNext()) {
+      String flowName = (String) iterator.next();
+      UUID submissionId = (UUID) iterator.next();
+      flowMap.put(flowName, submissionId);
+    }
+
+    mockHttpSession.setAttribute(SUBMISSION_MAP_NAME, flowMap);
+  }
+
   protected void postWithQueryParam(String pageName, String queryParam, String value)
       throws Exception {
     mockMvc.perform(
@@ -99,7 +122,10 @@ public abstract class AbstractMockMvcTest {
   protected ResultActions getWithQueryParam(String pageName, String queryParam, String value)
       throws Exception {
     String getUrl = getUrlForPageName(pageName);
-    return mockMvc.perform(get(getUrl).queryParam(queryParam, value))
+    return mockMvc.perform(
+            get(getUrl)
+                .queryParam(queryParam, value)
+                .session(session))
         .andExpect(status().isOk());
   }
 
@@ -197,23 +223,20 @@ public abstract class AbstractMockMvcTest {
   }
 
   // Post to a page with an arbitrary number of multi-value inputs
-  protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params)
-      throws Exception {
+  protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
   }
 
   // Post to a page with a single input that only accepts a single value
-  protected ResultActions postExpectingSuccess(String pageName, String inputName, String value)
-      throws Exception {
+  protected ResultActions postExpectingSuccess(String pageName, String inputName, String value) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     var params = Map.of(inputName, List.of(value));
     return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
   }
 
   // Post to a page with a single input that accepts multiple values
-  protected ResultActions postExpectingSuccess(String pageName, String inputName,
-      List<String> values) throws Exception {
+  protected ResultActions postExpectingSuccess(String pageName, String inputName, List<String> values) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, values));
   }
@@ -222,20 +245,21 @@ public abstract class AbstractMockMvcTest {
       Map<String, List<String>> params) throws
       Exception {
 
-    return mockMvc.perform(
-        post(postUrl)
-            .with(csrf())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(params))
-    ).andExpect(redirectedUrl(redirectUrl));
+    MockHttpServletRequestBuilder post = post(postUrl)
+        .with(csrf())
+        .session(session)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        .params(new LinkedMultiValueMap<>(params));
+
+    return mockMvc.perform(post).andExpect(redirectedUrl(redirectUrl));
   }
 
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params, String id, Map<String, Object> sessionAttrs) throws
+      Map<String, List<String>> params, String id) throws
       Exception {
     return mockMvc.perform(
         post(postUrl + '/' + id)
-            .sessionAttrs(sessionAttrs)
+            .session(session)
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
@@ -248,6 +272,7 @@ public abstract class AbstractMockMvcTest {
     return mockMvc.perform(
         post(postUrl)
             .with(csrf())
+            .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrlPattern(redirectUrlPattern));
@@ -345,6 +370,7 @@ public abstract class AbstractMockMvcTest {
     String postUrl = getUrlForPageName(pageName);
     return mockMvc.perform(
         post(postUrl)
+            .session(session)
             .with(csrf())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .param(inputName, value)
@@ -360,20 +386,17 @@ public abstract class AbstractMockMvcTest {
     return postExpectingFailure(pageName, params, pageName);
   }
 
-  // we may not always go back to the page we started with.
-  // With subflows, we start with a post to 'someSubflowPage/new', but go back to the page without the '/new' in the case of
-  // validation errors
   protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params,
-      String redirectUrl)
-      throws Exception {
+      String redirectUrl) throws Exception {
 
     String postUrl = getUrlForPageName(pageName);
-    return mockMvc.perform(
-        post(postUrl)
-            .with(csrf())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(params))
-    ).andExpect(redirectedUrl(getUrlForPageName(redirectUrl)));
+    MockHttpServletRequestBuilder post = post(postUrl)
+        .session(session)
+        .with(csrf())
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        .params(new LinkedMultiValueMap<>(params));
+
+    return mockMvc.perform(post).andExpect(redirectedUrl(getUrlForPageName(redirectUrl)));
   }
 
   protected ResultActions postExpectingFailures(String pageName, Map<String, String> params)
@@ -535,7 +558,8 @@ public abstract class AbstractMockMvcTest {
   @NotNull
   protected ResultActions getPage(String pageName) throws Exception {
     // TODO - remove assumption that flow is named testFlow - may not always be
-    return mockMvc.perform(get("/flow/testFlow/" + pageName));
+    MockHttpServletRequestBuilder get = get("/flow/testFlow/" + pageName).session(session);
+    return mockMvc.perform(get);
   }
 
   @NotNull
@@ -560,7 +584,7 @@ public abstract class AbstractMockMvcTest {
     var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
-      nextPage = mockMvc.perform(get(nextPage))
+      nextPage = mockMvc.perform(get(nextPage).session(session))
           .andExpect(status().is3xxRedirection()).andReturn()
           .getResponse()
           .getRedirectedUrl();
@@ -572,7 +596,7 @@ public abstract class AbstractMockMvcTest {
     var nextPage = currentPageUrl;
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
-      nextPage = mockMvc.perform(get(nextPage))
+      nextPage = mockMvc.perform(get(nextPage).session(session))
           .andExpect(status().is3xxRedirection()).andReturn()
           .getResponse()
           .getRedirectedUrl();
