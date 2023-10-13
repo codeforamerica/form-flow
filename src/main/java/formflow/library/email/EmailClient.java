@@ -3,8 +3,15 @@ package formflow.library.email;
 import java.io.File;
 import java.util.List;
 
+/**
+ * An interface that can be implemented by objects to send email.
+ * @param <T> A Generic that can be set as the return type for the sendEmail method
+ */
 public interface EmailClient<T> {
 
+  /**
+   * A boolean variable required for any EmailClient
+   */
   Boolean requireTls = true;
 
   /**
@@ -57,5 +64,9 @@ public interface EmailClient<T> {
       List<File> attachments
   );
 
+  /**
+   * Requires any EmailClient to include the setRequireTls method.
+   * @param requireTls A Boolean that can be used to set requireTLS
+   */
   void setRequireTls(Boolean requireTls);
 }
