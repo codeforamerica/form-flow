@@ -104,6 +104,10 @@ public class ScreenController extends FormFlowController {
       submission.setUrlParams(query_params);
     }
 
+    if (uuid != null) {
+      updateIterationIsCompleteMarker(flow, uuid, submission, currentScreen);
+    }
+
     submission.setFlow(flow);
     submission = saveToRepository(submission);
     setSubmissionInSession(httpSession, submission, flow);
