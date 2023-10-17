@@ -93,6 +93,8 @@ flow:
       - name: testReviewScreen
       - name: exampleOtherScreenThatIsInSubflow
         condition: someCondition
+  testReviewScreen:
+    nextScreens: null
 subflows:
   subflowWithGetAtEnd:
     entryScreen: testEntryScreen

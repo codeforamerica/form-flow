@@ -234,7 +234,11 @@ public class ScreenController extends FormFlowController {
 
     if (uuid != null) {
       updateIterationIsCompleteMarker(flow, uuid, submission, currentScreen);
+      submission = saveToRepository(submission);
     }
+//    if (iterationCompleted) {
+//      UUID completedIteration = uuid;
+//    }
 
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
@@ -477,11 +481,12 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      @RequestParam UUID iterationThatHasBeenCompleted
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     log.info(
-        "Current submission ID is :" + httpSession.getAttribute("id") + " and current Session ID is :" + httpSession.getId());
+        "Current submission ID is: " + httpSession.getAttribute("id") + " and current Session ID is: " + httpSession.getId());
     // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = getSubmissionFromSession(httpSession, flow);

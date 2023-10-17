@@ -169,7 +169,6 @@ public class Submission {
    *
    * @param subflow       the subflow the iteration is a part of
    * @param iterationUuid the uuid that identifies the iteration to update
-   * @param newStatus     value of new complete status [true/false]
    */
   public void setIterationIsCompleteToTrue(String subflow, String iterationUuid) {
     Map<String, Object> iterationData = getSubflowEntryByUuid(subflow, iterationUuid);
