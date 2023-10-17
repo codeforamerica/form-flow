@@ -862,32 +862,33 @@ A convenience live template for text area inputs is provided through `cfa:inputT
 ### Number
 
 Number inputs are used to gather numbers from users. The number input makes use
-of `inputmode="numeric"`
-which
-will cause mobile devices to display the number pad when entering values into the input. The number
-input
-is useful for gathering numbers that don't already have a specific input type, such as the phone,
-money,
-date or SSN inputs.
+of `inputmode="numeric"` which will cause mobile devices to display the number pad when entering
+values into the input. The number input is useful for gathering numbers that don't already have a
+specific input type, such as the phone, money, date or SSN inputs.
 
 Number inputs have an optional `title` parameter, which when passed will set the `title` attribute
-on the input
-The text given for the title will be displayed as a tooltip when the user hovers over the input as
-well as in
-client-side HTML based validation errors. The default title if one is not passed will
+on the input The text given for the title will be displayed as a tooltip when the user hovers over
+the input as well as in client-side HTML based validation errors. The default title if one is not
+passed will
 be `Please make sure you are entering a positive, whole number or decimal value with 2 decimal places.`
 
 Number inputs also have an optional `pattern` parameter which represents a regex pattern that must
-be met for the input to be valid.
-The default regex pattern is `^\d*(\.\d{0,2})?$` which allows for any positive number with up to 2
-decimal places.
+be met for the input to be valid. The default regex pattern is `^\d*(\.\d{0,2})?$` which allows for
+any positive number with up to 2 decimal places.
 A different pattern can be passed if you wish to change this default behavior. If you change
-the `pattern`
-make sure you also change the `title` to represent your new pattern.
+the `pattern` make sure you also change the `title` to represent your new pattern.
 
 Number inputs have an optional `placeholder` parameter.
 
-A convenience live template for numbers is provided through `cfa:inputNumber`.
+Number inputs have an optional `postfix` parameter. When set, this will put the passed in string at
+the end of the number input, like so:
+
+<img src="readme-assets/number-input-with-postfix.png"  width=40% height=40% alt="image of number input with postfix message">
+
+In this `postfix` example, the string passed in was "hrs". The string will not get submitted with
+the input data and is only shown in the user interface.
+
+A live template for numbers is provided through `cfa:inputNumber`.
 
 ### Social Security Number
 
@@ -937,10 +938,18 @@ Money inputs are used to gather monetary values. Visually, they are displayed as
 a dollar sign `$` prefixed in front of the input. Money inputs have an optional `placeholder`
 parameter.
 
-We also provide a convenience validator for money inputs, `@Money`
-which validates that entered values are valid monetary values.
+Money inputs have an optional `postfix` parameter. When set, this will put the passed in string at
+the end of the money input, like so:
 
-A convenience live template for money inputs is provided through `cfa:inputMoney`.
+<img src="readme-assets/money-input-with-postfix.png"  width=40% height=40% alt="image of money input with postfix message">
+
+In this `postfix` example, the string passed in was "/hr". The string will not get submitted with
+the input data and is only shown in the user interface.
+
+We also provide a validator for money inputs, `@Money`, which validates that entered
+values are valid monetary values.
+
+A live template for money inputs is provided through `cfa:inputMoney`.
 
 ### Phone
 
