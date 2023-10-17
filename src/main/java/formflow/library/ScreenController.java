@@ -102,9 +102,7 @@ public class ScreenController extends FormFlowController {
       submission.mergeUrlParamsWithData(query_params);
     } else {
       submission.setUrlParams(query_params);
-    }
-
-    if (uuid != null) {
+    } if (uuid != null) {
       updateIterationIsCompleteMarker(flow, uuid, submission, currentScreen);
     }
 
@@ -234,6 +232,10 @@ public class ScreenController extends FormFlowController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
+    if (uuid != null) {
+      updateIterationIsCompleteMarker(flow, uuid, submission, currentScreen);
+    }
+
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
@@ -314,6 +316,7 @@ public class ScreenController extends FormFlowController {
       if (isNewIteration) {
         ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
+        formSubmission.getFormData().put(Submission.ITERATION_IS_COMPLETE_KEY, false);
         subflow.add(formSubmission.getFormData());
 
         // updateIterationIsCompleteMarker() ends up calling conditions, so we should update the subflow information _before_ we call this
@@ -365,13 +368,10 @@ public class ScreenController extends FormFlowController {
 
   private void updateIterationIsCompleteMarker(String flow, String iterationUuid, Submission submission,
       ScreenNavigationConfiguration currentScreen) {
-
+    // Set iterationIsComplete to true if the next screen is not in the subflow
     boolean isIterationComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
-
-    Boolean currentStatus = submission.getIterationIsCompleteStatus(currentScreen.getSubflow(), iterationUuid);
-    // if it is already true, leave it alone, otherwise set it
-    if (currentStatus == null || !currentStatus) {
-      submission.setIterationIsCompleteStatus(currentScreen.getSubflow(), iterationUuid, isIterationComplete);
+    if (isIterationComplete) {
+      submission.setIterationIsCompleteToTrue(currentScreen.getSubflow(), iterationUuid);
     }
   }
 

@@ -22,7 +22,7 @@ public class SubmissionTests {
     Map<String, Object> subflowMap = new HashMap<>();
     subflowMap.put("_csrf", "a1fd9167-9d6d-4298-b9x4-2fc6c75ff3ab");
     subflowMap.put("firstName", "Rosie");
-    subflowMap.put("uuid", iterationUuid.toString());
+    subflowMap.put("uuid", iterationUuid);
 
     subflowArr.add(subflowMap);
     inputData.put("household", subflowArr);
@@ -34,18 +34,9 @@ public class SubmissionTests {
 
   @Test
   public void shouldMarkSubmissionIterationComplete() {
-    submission.setIterationIsCompleteStatus("household", iterationUuid.toString(), true);
-    Map<String, Object> subflowData = submission.getSubflowEntryByUuid("household", iterationUuid.toString());
+    submission.setIterationIsCompleteToTrue("household", iterationUuid);
+    Map<String, Object> subflowData = submission.getSubflowEntryByUuid("household", iterationUuid);
     assertThat(subflowData.containsKey(Submission.ITERATION_IS_COMPLETE_KEY)).isTrue();
     assertThat(subflowData.get(Submission.ITERATION_IS_COMPLETE_KEY)).isEqualTo(true);
-  }
-
-  @Test
-  public void shouldRetrieveIterationIsCompleteStatusCorrectly() {
-    assertThat(submission.getIterationIsCompleteStatus("household", iterationUuid.toString())).isNull();
-    submission.setIterationIsCompleteStatus("household", iterationUuid.toString(), false);
-    assertThat(submission.getIterationIsCompleteStatus("household", iterationUuid.toString())).isFalse();
-    submission.setIterationIsCompleteStatus("household", iterationUuid.toString(), true);
-    assertThat(submission.getIterationIsCompleteStatus("household", iterationUuid.toString())).isTrue();
   }
 }

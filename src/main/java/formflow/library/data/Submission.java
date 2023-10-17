@@ -171,13 +171,13 @@ public class Submission {
    * @param iterationUuid the uuid that identifies the iteration to update
    * @param newStatus     value of new complete status [true/false]
    */
-  public void setIterationIsCompleteStatus(String subflow, String iterationUuid, boolean newStatus) {
+  public void setIterationIsCompleteToTrue(String subflow, String iterationUuid) {
     Map<String, Object> iterationData = getSubflowEntryByUuid(subflow, iterationUuid);
     if (iterationData == null) {
       log.warn("No iteration data found for subflow '{}' with UUID '{}'", subflow, iterationUuid);
       return;
     }
-    iterationData.put(ITERATION_IS_COMPLETE_KEY, newStatus);
+    iterationData.put(ITERATION_IS_COMPLETE_KEY, true);
   }
 
   /**

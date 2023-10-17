@@ -1,0 +1,14 @@
+<th:block
+  th:replace="~{fragments/screens/screenWithYesAndNoButtons ::
+  screenWithYesAndNoButtons(
+    title='Test Subflow Entry Screen',
+    header='Do you want to enter the test subflow?',
+    formAction=${formAction},
+    inputName=${inputName},
+    inputContent=~{::inputContent})}">
+  <th:block th:ref="inputContent">
+    <th:block th:replace="~{fragments/inputs/yesOrNo :: yesOrNo(
+      inputName='doYouWantToEnterTheTestSubflow',
+      ariaLabel='header')}"/>
+  </th:block>
+</th:block>

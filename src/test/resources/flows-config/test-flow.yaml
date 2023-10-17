@@ -42,9 +42,14 @@ flow:
     nextScreens:
       - name: success
   success:
-    nextScreens:
+    nextScreens: null
 subflows:
   testSubflow:
+    entryScreen: testEntryScreen
+    iterationStartScreen: subflowAddItem
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen
+  subflowWithGetAsLastScreen:
     entryScreen: testEntryScreen
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
@@ -72,3 +77,30 @@ subflows:
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
+---
+name: testSubflowLogic
+flow:
+  testEntryScreen:
+    nextScreens:
+      - name: subflowAddItem
+  subflowAddItem:
+    subflow: subflowWithGetAtEnd
+    nextScreens:
+      - name: getScreen
+  getScreen:
+    subflow: subflowWithGetAtEnd
+    nextScreens:
+      - name: testReviewScreen
+      - name: exampleOtherScreenThatIsInSubflow
+        condition: someCondition
+subflows:
+  subflowWithGetAtEnd:
+    entryScreen: testEntryScreen
+    iterationStartScreen: subflowAddItem
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen
+#  subflowWithPostAtEnd:
+#    entryScreen: testEntryScreen
+#    iterationStartScreen: subflowAddItem
+#    reviewScreen: testReviewScreen
+#    deleteConfirmationScreen: testDeleteConfirmationScreen
