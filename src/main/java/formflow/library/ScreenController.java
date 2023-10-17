@@ -232,14 +232,6 @@ public class ScreenController extends FormFlowController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    if (uuid != null) {
-      updateIterationIsCompleteMarker(flow, uuid, submission, currentScreen);
-      submission = saveToRepository(submission);
-    }
-//    if (iterationCompleted) {
-//      UUID completedIteration = uuid;
-//    }
-
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
     Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
@@ -482,7 +474,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       HttpSession httpSession,
       HttpServletRequest request,
-      @RequestParam UUID iterationThatHasBeenCompleted
+      @RequestParam(required = false) String uuid
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     log.info(
@@ -494,10 +486,18 @@ public class ScreenController extends FormFlowController {
       throwNotFoundError(flow, screen,
           String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
     }
-    String nextScreen = getNextScreenName(submission, currentScreen, null);
-
+    String nextScreen = getNextScreenName(submission, currentScreen, uuid);
+    boolean isNextScreenInSubflow = getScreenConfig(flow, nextScreen).getSubflow() != null;
+    
+    if (uuid != null && !isNextScreenInSubflow) {
+      updateIterationIsCompleteMarker(flow, uuid, submission, currentScreen);
+      submission = saveToRepository(submission);
+    }
+    
+    String redirectString = isNextScreenInSubflow ? String.format("/flow/%s/%s/%s", flow, nextScreen, uuid)
+        : String.format("/flow/%s/%s", flow, nextScreen);
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
-    return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
+    return new ModelAndView(new RedirectView(redirectString));
   }
 
   private String getNextScreenName(Submission submission,
