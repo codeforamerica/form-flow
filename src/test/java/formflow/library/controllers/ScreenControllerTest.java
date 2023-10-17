@@ -127,7 +127,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       String UUID = (String) iterationsBeforeSubflowIsCompleted.get(0).get("uuid");
       mockMvc.perform(get("/flow/testSubflowLogic/getScreen/" + UUID).session(session))
           .andExpect(status().isOk());
-      mockMvc.perform(get("/flow/testSubflowLogic/getScreen/navigation").session(session))
+      mockMvc.perform(get("/flow/testSubflowLogic/getScreen/navigation?uuid=" + UUID).session(session))
           .andExpect(status().is3xxRedirection());
 
       Submission submissionAfterSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
