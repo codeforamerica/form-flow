@@ -246,6 +246,39 @@ asks the user to confirm their deletion before submitting the actual deletion re
 This page is not technically part of the subflow and as such, does not need to be denoted
 with `subflow: subflowName` in the `flows-config.yaml`.
 
+### Subflows Data
+Subflow information will be saved in your applications database within the larger JSON `inputData` as an array of subflow iterations
+like this example of a household subflow with two iterations:
+```JSON
+  "household": [
+    {
+      "uuid": "e2c18dfe-98e9-430f-9a4f-3511966d3128",
+      "iterationIsComplete": true,
+      "householdMemberLastName": "Example",
+      "householdMemberFirstName": "Person",
+      "householdMemberRelationship": "Spouse",
+      "householdMemberRecentlyMovedToUS": "No"
+    },
+    {
+      "uuid": "3fafdb80-f7e7-4fdc-aefd-461e0b6c1cdf",
+      "iterationIsComplete": false,
+      "householdMemberLastName": "Other Example",
+      "householdMemberFirstName": "Person",
+      "householdMemberRelationship": "Child",
+      "householdMemberRecentlyMovedToUS": "No"
+    }
+  ],
+```
+Note that all information submitted for a single loop (iteration) through your subflow will show up within a single array index.
+The index includes a `uuid` field, which is a unique identifier for that iteration within the subflow. 
+
+#### Completed iterations
+The `iterationIsComplete` field will indicate if an iteration was completed, meaning the person
+filling out the subflow made it all the way through all screens within the subflow and clicked submit/continue on the 
+final screen. If that person backs out of the subflow before completing it, then `iterationIsComplete` will remain false.
+Incomplete iterations will not be included in the generated PDF of the submission, but are still accessible in the 
+database for error resolution and debugging.
+
 ## Submission Object
 
 Submission data is stored in the `Submission` object, persisted to PostgreSQL via the Hibernate ORM.
@@ -1726,6 +1759,7 @@ These preparers are:
 - `SubflowFieldPreparer`
     - Handles the mapping of subflow fields from your application's subflows and their inputs to the
       correct fields in your PDF template file.
+    - **Note that subflow iterations which have not been marked with `iterationIsComplete: true` will not be mapped to the generated PDF**
 
 All of these preparers will run by default against the `inputFields` you have indicated in your
 `pdf-map.yaml` file. Should you want to customize or inject fields you can do so
