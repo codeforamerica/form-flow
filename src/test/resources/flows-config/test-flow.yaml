@@ -49,11 +49,6 @@ subflows:
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
-  subflowWithGetAsLastScreen:
-    entryScreen: testEntryScreen
-    iterationStartScreen: subflowAddItem
-    reviewScreen: testReviewScreen
-    deleteConfirmationScreen: testDeleteConfirmationScreen
 ---
 name: otherTestFlow
 flow:

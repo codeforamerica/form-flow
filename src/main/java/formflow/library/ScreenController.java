@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -279,16 +282,6 @@ public class ScreenController extends FormFlowController {
     String subflowName = currentScreen.getSubflow();
     Submission submission = findOrCreateSubmission(httpSession, flow);
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
-    
-    if (isNewIteration) {
-      // handle start iteration page, if new flow
-      HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
-      subflowName = subflows.entrySet().stream()
-          .filter(subflow -> subflow.getValue().getIterationStartScreen().equals(screen))
-          .map(Entry::getKey)
-          .findFirst()
-          .orElse(null);
-    }
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
     handleErrors(httpSession, errorMessages, formSubmission);

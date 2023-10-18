@@ -334,7 +334,9 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
       Optional<Submission> otherTestFlowSubmission = submissionRepositoryService.findById(submissionMap.get("otherTestFlow"));
       assertThat(testFlowSubmission.isPresent()).isTrue();
+      assertThat(testFlowSubmission.get().getInputData().containsKey("testSubflow")).isTrue();
       assertThat(otherTestFlowSubmission.isPresent()).isTrue();
+      assertThat(otherTestFlowSubmission.get().getInputData().containsKey("testSubflow")).isTrue();
 
       List<Object> testFlowInputData = (List<Object>) (testFlowSubmission.get().getInputData()).get("testSubflow");
       List<Object> otherTestFlowInputData = (List<Object>) (otherTestFlowSubmission.get().getInputData()).get("testSubflow");
@@ -343,8 +345,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
       assertThat(testFlowInputData.size()).isEqualTo(1);
       assertThat(otherTestFlowInputData.size()).isEqualTo(1);
-      assertThat(testFlowIteration.size()).isEqualTo(3);
-      assertThat(otherTestFlowIteration.size()).isEqualTo(4);
+      assertThat(testFlowIteration.size()).isEqualTo(4);
+      assertThat(otherTestFlowIteration.size()).isEqualTo(5);
 
       assertThat(testFlowIteration.get("firstNameSubflow")).isEqualTo("Subflow testFlow Name");
       assertThat(testFlowIteration.get("textInputSubflow")).isEqualTo("Subflow testFlow Text Input");
@@ -434,7 +436,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     String pageNamePage2 = "subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1);
     postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
 
-    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash)));
+    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1)));
     assertTrue(page2.hasDateInputError());
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));
