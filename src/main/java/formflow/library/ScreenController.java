@@ -48,9 +48,11 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 @EnableAutoConfiguration
 @Slf4j
-@RequestMapping("/flow")
+@RequestMapping(ScreenController.FLOW)
 public class ScreenController extends FormFlowController {
 
+  public static final String FLOW = "/flow";
+  public static final String FLOW_SCREEN_PATH = "{flow}/{screen}";
   private final ValidationService validationService;
   private final AddressValidationService addressValidationService;
   private final ConditionManager conditionManager;
@@ -84,7 +86,7 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The current httpSession, not null
    * @return the screen template with model data
    */
-  @GetMapping("{flow}/{screen}")
+  @GetMapping(FLOW_SCREEN_PATH)
   ModelAndView getScreen(
       @PathVariable String flow,
       @PathVariable String screen,
@@ -144,7 +146,7 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The HTTP session if it exists, can be null
    * @return a redirect to endpoint that gets the next screen in the flow
    */
-  @PostMapping({"{flow}/{screen}", "{flow}/{screen}/submit"})
+  @PostMapping({FLOW_SCREEN_PATH, FLOW_SCREEN_PATH + "/submit"})
   ModelAndView postScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
@@ -206,7 +208,7 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The current httpSession, not null
    * @return the screen template with model data
    */
-  @GetMapping({"{flow}/{screen}/{uuid}", "{flow}/{screen}/{uuid}/edit"})
+  @GetMapping({FLOW_SCREEN_PATH + "/{uuid}", FLOW_SCREEN_PATH + "/{uuid}/edit"})
   ModelAndView getSubflowScreen(
       @PathVariable String flow,
       @PathVariable String screen,
@@ -254,7 +256,7 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The HTTP session if it exists, not null
    * @return a redirect to next screen
    */
-  @PostMapping({"{flow}/{screen}/{uuid}", "{flow}/{screen}/{uuid}/edit"})
+  @PostMapping({FLOW_SCREEN_PATH + "/{uuid}", FLOW_SCREEN_PATH + "/{uuid}/edit"})
   ModelAndView updateOrCreateIteration(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
@@ -464,7 +466,7 @@ public class ScreenController extends FormFlowController {
    * @param httpSession The current httpSession, not null
    * @return the screen template with model data, returns error page on error
    */
-  @GetMapping("{flow}/{screen}/navigation")
+  @GetMapping(FLOW_SCREEN_PATH + "/navigation")
   ModelAndView navigation(
       @PathVariable String flow,
       @PathVariable String screen,

@@ -1,5 +1,6 @@
 package formflow.library.config;
 
+import formflow.library.ScreenController;
 import formflow.library.interceptors.SessionContinuityInterceptor;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class SessionContinuityInterceptorConfiguration implements WebMvcConfigur
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(new SessionContinuityInterceptor(flowConfigurations))
-        .addPathPatterns(List.of(SessionContinuityInterceptor.FLOW_PATH_FORMAT, SessionContinuityInterceptor.NAVIGATION_FLOW_PATH_FORMAT));
+        .addPathPatterns(List.of(ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH, 
+            ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH + "/navigation"));
   }
 }
