@@ -278,9 +278,8 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     String subflowName = currentScreen.getSubflow();
     Submission submission = findOrCreateSubmission(httpSession, flow);
-
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
-
+    
     if (isNewIteration) {
       // handle start iteration page, if new flow
       HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
@@ -312,7 +311,7 @@ public class ScreenController extends FormFlowController {
       if (isNewIteration) {
         ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
-        formSubmission.getFormData().put(Submission.ITERATION_IS_COMPLETE_KEY, false);
+        formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         subflow.add(formSubmission.getFormData());
 
         // updateIterationIsCompleteMarker() ends up calling conditions, so we should update the subflow information _before_ we call this
@@ -330,7 +329,7 @@ public class ScreenController extends FormFlowController {
       if (isNewIteration) {
         Map<String, Object> inputData = new HashMap<>();
         ArrayList<Map<String, Object>> subflow = new ArrayList<>();
-
+        formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         formSubmission.getFormData().put("uuid", iterationUuid);
         subflow.add(formSubmission.getFormData());
         inputData.put(subflowName, subflow);

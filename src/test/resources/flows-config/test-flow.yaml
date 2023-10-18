@@ -90,9 +90,11 @@ flow:
   getScreen:
     subflow: subflowWithGetAtEnd
     nextScreens:
+      - name: otherGetScreen
+  otherGetScreen:
+    subflow: subflowWithGetAtEnd
+    nextScreens:
       - name: testReviewScreen
-      - name: exampleOtherScreenThatIsInSubflow
-        condition: someCondition
   testReviewScreen:
     nextScreens: null
 subflows:
@@ -101,8 +103,29 @@ subflows:
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
-#  subflowWithPostAtEnd:
-#    entryScreen: testEntryScreen
-#    iterationStartScreen: subflowAddItem
-#    reviewScreen: testReviewScreen
-#    deleteConfirmationScreen: testDeleteConfirmationScreen
+---
+name: yetAnotherTestFlow
+flow:
+  testEntryScreen:
+    nextScreens:
+      - name: subflowAddItem
+  subflowAddItem:
+    subflow: subflowWithAGetAndThenAPost
+    nextScreens:
+      - name: getScreen
+  getScreen:
+    subflow: subflowWithAGetAndThenAPost
+    nextScreens:
+      - name: subflowAddItemPage2
+  subflowAddItemPage2:
+    subflow: subflowWithAGetAndThenAPost
+    nextScreens:
+      - name: testReviewScreen
+  testReviewScreen:
+    nextScreens: null
+subflows:
+  subflowWithAGetAndThenAPost:
+    entryScreen: testEntryScreen
+    iterationStartScreen: subflowAddItem
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen
