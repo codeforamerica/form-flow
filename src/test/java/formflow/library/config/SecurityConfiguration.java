@@ -7,20 +7,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-
-    @Bean
-    public DefaultCookieSerializer setDefaultSecurityCookie(){
-        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setUseSecureCookie(true);
-        serializer.setUseHttpOnlyCookie(true);
-        return serializer;
-    }
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.formLogin(AbstractHttpConfigurer::disable);
