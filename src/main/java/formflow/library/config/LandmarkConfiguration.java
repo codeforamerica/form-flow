@@ -8,5 +8,4 @@ import lombok.Data;
 @Data
 public class LandmarkConfiguration {
   String firstScreen;
-  String disabledFlowRedirect;
 }

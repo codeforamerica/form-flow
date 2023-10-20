@@ -1,16 +1,15 @@
 package formflow.library.config;
 
-import formflow.library.config.submission.Action;
-import formflow.library.config.submission.Condition;
 import java.util.HashMap;
 
-import java.util.List;
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * Represents the configuration for a certain flow.
  */
 @Data
+@Getter
 public class FlowConfiguration {
 
   private String name;
