@@ -61,4 +61,8 @@ public class UserFileMap {
       userFileMap.remove(flow);
     }
   }
+
+  public Map<UUID, Map<String, String>> getFiles(String flow, String inputName) {
+    return userFileMap.get(flow).get(inputName);
+  }
 }
