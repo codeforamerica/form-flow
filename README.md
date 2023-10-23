@@ -15,6 +15,7 @@ Table of Contents
     * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
+        * [Subflows Data](#subflows-data)
     * [Submission Object](#submission-object)
     * [Conditions](#conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
@@ -230,8 +231,8 @@ with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Review Screen
 
-This is the last screen in a subflow. This screen lists each iteration completed within a subflow,
-and provides options to edit or delete a single iteration.
+This screen summarizes all the completed iterations of a subflow and is shown after each iteration is completed.
+It lists the data from each iteration and provides options to edit or delete them individually.
 
 This screen does not need to be denoted with `subflow: subflowName` in the `flows-config.yaml`. It
 is not technically part of the repeating screens within a subflow. However, you do visit this screen
@@ -274,8 +275,8 @@ The index includes a `uuid` field, which is a unique identifier for that iterati
 
 #### Completed iterations
 The `iterationIsComplete` field will indicate if an iteration was completed, meaning the person
-filling out the subflow made it all the way through all screens within the subflow and clicked submit/continue on the 
-final screen. If that person backs out of the subflow before completing it, then `iterationIsComplete` will remain false.
+filling out the subflow made it all the way through all screens within the subflow and clicked submit(POST)/continue(GET) on the 
+final screen of the iteration (heading to the review page). If that person backs out of the subflow before completing it, then `iterationIsComplete` will remain false.
 Incomplete iterations will not be included in the generated PDF of the submission, but are still accessible in the 
 database for error resolution and debugging.
 
@@ -2075,7 +2076,7 @@ It’s recommended that developers pass a list of strings representing email add
 and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
 
 ```java
-  @Value("${form-flow.flow.ubi.email.confirmation.cc:}")
+@Value("${form-flow.flow.ubi.email.confirmation.cc:}")
 private List<String> emailToCc;
 
 @Value("${form-flow.flow.ubi.email.confirmation.bcc:}")
