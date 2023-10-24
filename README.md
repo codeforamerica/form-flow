@@ -15,6 +15,7 @@ Table of Contents
     * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
+        * [Subflows Data](#subflows-data)
     * [Submission Object](#submission-object)
     * [Conditions](#conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
@@ -230,8 +231,8 @@ with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Review Screen
 
-This is the last screen in a subflow. This screen lists each iteration completed within a subflow,
-and provides options to edit or delete a single iteration.
+This screen summarizes all the completed iterations of a subflow and is shown after each iteration is completed.
+It lists the data from each iteration and provides options to edit or delete them individually.
 
 This screen does not need to be denoted with `subflow: subflowName` in the `flows-config.yaml`. It
 is not technically part of the repeating screens within a subflow. However, you do visit this screen
@@ -245,6 +246,39 @@ asks the user to confirm their deletion before submitting the actual deletion re
 
 This page is not technically part of the subflow and as such, does not need to be denoted
 with `subflow: subflowName` in the `flows-config.yaml`.
+
+### Subflows Data
+Subflow information will be saved in your applications database within the larger JSON `inputData` as an array of subflow iterations
+like this example of a household subflow with two iterations:
+```JSON
+  "household": [
+    {
+      "uuid": "e2c18dfe-98e9-430f-9a4f-3511966d3128",
+      "iterationIsComplete": true,
+      "householdMemberLastName": "Example",
+      "householdMemberFirstName": "Person",
+      "householdMemberRelationship": "Spouse",
+      "householdMemberRecentlyMovedToUS": "No"
+    },
+    {
+      "uuid": "3fafdb80-f7e7-4fdc-aefd-461e0b6c1cdf",
+      "iterationIsComplete": false,
+      "householdMemberLastName": "Other Example",
+      "householdMemberFirstName": "Person",
+      "householdMemberRelationship": "Child",
+      "householdMemberRecentlyMovedToUS": "No"
+    }
+  ],
+```
+Note that all information submitted for a single loop (iteration) through your subflow will show up within a single array index.
+The index includes a `uuid` field, which is a unique identifier for that iteration within the subflow. 
+
+#### Completed iterations
+The `iterationIsComplete` field will indicate if an iteration was completed, meaning the person
+filling out the subflow made it all the way through all screens within the subflow and clicked submit(POST)/continue(GET) on the 
+final screen of the iteration (heading to the review page). If that person backs out of the subflow before completing it, then `iterationIsComplete` will remain false.
+Incomplete iterations will not be included in the generated PDF of the submission, but are still accessible in the 
+database for error resolution and debugging.
 
 ## Submission Object
 
@@ -1735,6 +1769,7 @@ These preparers are:
 - `SubflowFieldPreparer`
     - Handles the mapping of subflow fields from your application's subflows and their inputs to the
       correct fields in your PDF template file.
+    - **Note that subflow iterations which have not been marked with `iterationIsComplete: true` will not be mapped to the generated PDF**
 
 All of these preparers will run by default against the `inputFields` you have indicated in your
 `pdf-map.yaml` file. Should you want to customize or inject fields you can do so
@@ -2041,7 +2076,7 @@ It’s recommended that developers pass a list of strings representing email add
 and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
 
 ```java
-  @Value("${form-flow.flow.ubi.email.confirmation.cc:}")
+@Value("${form-flow.flow.ubi.email.confirmation.cc:}")
 private List<String> emailToCc;
 
 @Value("${form-flow.flow.ubi.email.confirmation.bcc:}")

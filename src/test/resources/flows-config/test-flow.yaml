@@ -42,7 +42,7 @@ flow:
     nextScreens:
       - name: success
   success:
-    nextScreens:
+    nextScreens: null
 subflows:
   testSubflow:
     entryScreen: testEntryScreen
@@ -68,6 +68,58 @@ flow:
       - name: success
 subflows:
   testSubflow:
+    entryScreen: testEntryScreen
+    iterationStartScreen: subflowAddItem
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen
+---
+name: testSubflowLogic
+flow:
+  testEntryScreen:
+    nextScreens:
+      - name: subflowAddItem
+  subflowAddItem:
+    subflow: subflowWithGetAtEnd
+    nextScreens:
+      - name: getScreen
+  getScreen:
+    subflow: subflowWithGetAtEnd
+    nextScreens:
+      - name: otherGetScreen
+  otherGetScreen:
+    subflow: subflowWithGetAtEnd
+    nextScreens:
+      - name: testReviewScreen
+  testReviewScreen:
+    nextScreens: null
+subflows:
+  subflowWithGetAtEnd:
+    entryScreen: testEntryScreen
+    iterationStartScreen: subflowAddItem
+    reviewScreen: testReviewScreen
+    deleteConfirmationScreen: testDeleteConfirmationScreen
+---
+name: yetAnotherTestFlow
+flow:
+  testEntryScreen:
+    nextScreens:
+      - name: subflowAddItem
+  subflowAddItem:
+    subflow: subflowWithAGetAndThenAPost
+    nextScreens:
+      - name: getScreen
+  getScreen:
+    subflow: subflowWithAGetAndThenAPost
+    nextScreens:
+      - name: subflowAddItemPage2
+  subflowAddItemPage2:
+    subflow: subflowWithAGetAndThenAPost
+    nextScreens:
+      - name: testReviewScreen
+  testReviewScreen:
+    nextScreens: null
+subflows:
+  subflowWithAGetAndThenAPost:
     entryScreen: testEntryScreen
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
