@@ -102,16 +102,17 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
           if (atomInteger.get() > pdfSubflow.getTotalIterations()) {
             return;
           }
-          
-          if (iteration.get("iterationIsComplete") != null && iteration.get("iterationIsComplete").equals(false)) {
+
+          if (iteration.get(Submission.ITERATION_IS_COMPLETE_KEY) != null && iteration.get(Submission.ITERATION_IS_COMPLETE_KEY)
+              .equals(false)) {
             return;
           }
-          
+
           iteration.forEach((key, value) -> {
             if (IGNORED_FIELDS.contains(key)) {
               return;
             }
-            
+
             String newKey = getNewKey(key, atomInteger.get());
 
             if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {

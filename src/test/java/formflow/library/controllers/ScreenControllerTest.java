@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.data.Submission;
-import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -41,10 +40,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   @MockBean
   private AddressValidationService addressValidationService;
 
-  @SpyBean
-  private SubmissionRepositoryService submissionRepositoryService;
-
-  public final String uuidPatternString = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
+  public static final String UUID_PATTERN_STRING = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -87,15 +83,14 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
-      Map<String, String> queryParams = new HashMap<>();
-      queryParams.put("lang", "en");
-      getWithQueryParam("test", "lang", "en");
-      assert (submission.getUrlParams().equals(queryParams));
+      mockMvc.perform(get(getUrlForPageName("test")).queryParam("lang", "en").session(session))
+              .andExpect(status().isOk());
+      assert (submission.getUrlParams().equals(Map.of("lang", "en")));
     }
   }
 
   @Nested
-  public class SubflowParameters {
+  public class SubflowTests {
 
     @Test
     public void modelIncludesCurrentSubflowItem() throws Exception {
@@ -106,6 +101,112 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
       getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
+    }
+    
+    @Test
+    public void shouldUpdateIterationIsCompleteOnSubflowsWhereLastScreenIsAGetRequest() throws Exception {
+      setFlowInfoInSession(session, "testSubflowLogic", submission.getId());
+      mockMvc.perform(post("/flow/testSubflowLogic/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("textInputValue"),
+              "numberInput", List.of("10"))))
+      );
+      UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testSubflowLogic");
+
+      Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> iterationsBeforeSubflowIsCompleted = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData().get("subflowWithGetAtEnd");
+      String uuidString = (String) iterationsBeforeSubflowIsCompleted.get(0).get("uuid");
+      mockMvc.perform(get("/flow/testSubflowLogic/otherGetScreen/" + uuidString).session(session))
+          .andExpect(status().isOk());
+      mockMvc.perform(get("/flow/testSubflowLogic/otherGetScreen/navigation?uuid=" + uuidString).session(session))
+          .andExpect(status().is3xxRedirection());
+
+      Submission submissionAfterSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> subflowIterationsAfterSubflowIsCompleted = (List<Map<String, Object>>) submissionAfterSubflowIsCompleted.getInputData().get("subflowWithGetAtEnd");
+      assertTrue((Boolean) subflowIterationsAfterSubflowIsCompleted.get(0).get("iterationIsComplete"));
+    }
+
+    @Test
+    public void shouldNotUpdateIterationIsCompleteBeforeSubflowHasFinished() throws Exception {
+      setFlowInfoInSession(session, "testSubflowLogic", submission.getId());
+      mockMvc.perform(post("/flow/testSubflowLogic/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("textInputValue"),
+              "numberInput", List.of("10"))))
+      );
+      UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testSubflowLogic");
+      Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> iterationsBeforeSubfowIsCompleted = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData().get("subflowWithGetAtEnd");
+      String uuidString = (String) iterationsBeforeSubfowIsCompleted.get(0).get("uuid");
+      mockMvc.perform(get("/flow/testSubflowLogic/getScreen/" + uuidString).session(session))
+          .andExpect(status().isOk());
+      mockMvc.perform(get("/flow/testSubflowLogic/getScreen/navigation?uuid=" + uuidString).session(session))
+          .andExpect(status().is3xxRedirection());
+
+      Submission submissionBetweenGetScreens = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> subflowIterationsBetweenGetScreens = (List<Map<String, Object>>) submissionBetweenGetScreens.getInputData().get("subflowWithGetAtEnd");
+      assertThat((Boolean) subflowIterationsBetweenGetScreens.get(0).get("iterationIsComplete")).isFalse();
+      
+      mockMvc.perform(get("/flow/testSubflowLogic/otherGetScreen/" + uuidString).session(session))
+          .andExpect(status().isOk());
+      mockMvc.perform(get("/flow/testSubflowLogic/otherGetScreen/navigation?uuid=" + uuidString).session(session))
+          .andExpect(status().is3xxRedirection());
+      Submission submissionAfterSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> subflowIterationsAfterSubflowIsCompleted = (List<Map<String, Object>>) submissionAfterSubflowIsCompleted.getInputData().get("subflowWithGetAtEnd");
+      assertThat((Boolean) subflowIterationsAfterSubflowIsCompleted.get(0).get("iterationIsComplete")).isTrue();
+    }
+    
+    @Test
+    public void shouldSetIterationIsCompleteWhenLastScreenInSubflowIsAPost() throws Exception {
+      setFlowInfoInSession(session, "otherTestFlow", submission.getId());
+      mockMvc.perform(post("/flow/otherTestFlow/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("textInputValue"),
+              "numberInput", List.of("10"))))
+      );
+      Map<String, Object> iterationAfterFirstSubflowScreeen = getMostRecentlyCreatedIterationData(session, "otherTestFlow", "testSubflow");
+
+      String iterationUuid = (String) iterationAfterFirstSubflowScreeen.get("uuid");
+      assertThat((Boolean) iterationAfterFirstSubflowScreeen.get("iterationIsComplete")).isFalse();
+
+      String navigationUrl = "/flow/otherTestFlow/subflowAddItemPage2/navigation?uuid=" + iterationUuid;
+      postToUrlExpectingSuccess("/flow/otherTestFlow/subflowAddItemPage2", navigationUrl, new HashMap<>(), iterationUuid);
+      assertThat(followRedirectsForUrl(navigationUrl)).isEqualTo("/flow/otherTestFlow/test");
+
+      Map<String, Object> iterationAfterSecondSubflowScreeen = getMostRecentlyCreatedIterationData(session, "otherTestFlow", "testSubflow");
+      assertThat((Boolean) iterationAfterSecondSubflowScreeen.get("iterationIsComplete")).isTrue();
+    }
+
+    private record Result(UUID testSubflowLogicUUID, List<Map<String, Object>> iterationsAfterFirstPost, String uuidString) {
+    }
+
+    @Test
+    public void shouldHandleSubflowsWithAGetAndThenAPost() throws Exception {
+      setFlowInfoInSession(session, "yetAnotherTestFlow", submission.getId());
+      mockMvc.perform(post("/flow/yetAnotherTestFlow/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("textInputValue"),
+              "numberInput", List.of("10"))))
+      );
+      UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("yetAnotherTestFlow");
+      Submission submissionAfterFirstPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submissionAfterFirstPost.getInputData().get("subflowWithAGetAndThenAPost");
+      String uuidString = (String) iterationsAfterFirstPost.get(0).get("uuid");
+
+      mockMvc.perform(get("/flow/yetAnotherTestFlow/getScreen/navigation?uuid=" + uuidString).session(session))
+          .andExpect(status().is3xxRedirection());
+
+      String navigationUrl = "/flow/yetAnotherTestFlow/subflowAddItemPage2/navigation?uuid=" + uuidString;
+      postToUrlExpectingSuccess("/flow/yetAnotherTestFlow/subflowAddItemPage2", navigationUrl,
+              Map.of(), uuidString);
+      assertThat(followRedirectsForUrl(navigationUrl)).isEqualTo("/flow/yetAnotherTestFlow/testReviewScreen");
+      Submission submissionAfterSecondPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> iterationsAfterSecondPost = (List<Map<String, Object>>) submissionAfterSecondPost.getInputData().get("subflowWithAGetAndThenAPost");
+      assertThat((Boolean) iterationsAfterSecondPost.get(0).get("iterationIsComplete")).isTrue();
     }
   }
 
@@ -231,7 +332,9 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
       Optional<Submission> otherTestFlowSubmission = submissionRepositoryService.findById(submissionMap.get("otherTestFlow"));
       assertThat(testFlowSubmission.isPresent()).isTrue();
+      assertThat(testFlowSubmission.get().getInputData().containsKey("testSubflow")).isTrue();
       assertThat(otherTestFlowSubmission.isPresent()).isTrue();
+      assertThat(otherTestFlowSubmission.get().getInputData().containsKey("testSubflow")).isTrue();
 
       List<Object> testFlowInputData = (List<Object>) (testFlowSubmission.get().getInputData()).get("testSubflow");
       List<Object> otherTestFlowInputData = (List<Object>) (otherTestFlowSubmission.get().getInputData()).get("testSubflow");
@@ -240,8 +343,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
       assertThat(testFlowInputData.size()).isEqualTo(1);
       assertThat(otherTestFlowInputData.size()).isEqualTo(1);
-      assertThat(testFlowIteration.size()).isEqualTo(3);
-      assertThat(otherTestFlowIteration.size()).isEqualTo(4);
+      assertThat(testFlowIteration.size()).isEqualTo(4);
+      assertThat(otherTestFlowIteration.size()).isEqualTo(5);
 
       assertThat(testFlowIteration.get("firstNameSubflow")).isEqualTo("Subflow testFlow Name");
       assertThat(testFlowIteration.get("textInputSubflow")).isEqualTo("Subflow testFlow Text Input");
@@ -306,10 +409,14 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     paramsPage1.put("dateSubflowMonth", List.of("12"));
     paramsPage1.put("dateSubflowYear", List.of("2012"));
 
-    String pageName = "/flow/testFlow/subflowAddItem/new";
-    ResultActions resultActions = postToUrlExpectingSuccessRedirectPattern(pageName,
-        "/flow/testFlow/subflowAddItemPage2/" + uuidPatternString,
-        paramsPage1);
+    ResultActions resultActions = postToUrlExpectingSuccessRedirectPattern(
+            "/flow/testFlow/subflowAddItem/new",
+            "/flow/testFlow/subflowAddItem/navigation?uuid=" + UUID_PATTERN_STRING,
+            paramsPage1);
+    String redirectedUrl = resultActions.andReturn().getResponse().getRedirectedUrl();
+    String iterationUuid = redirectedUrl.substring(redirectedUrl.lastIndexOf('=') + 1);
+    assertThat(followRedirectsForUrl("/flow/testFlow/subflowAddItem/navigation?uuid=" + iterationUuid))
+            .isEqualTo("/flow/testFlow/subflowAddItemPage2/" + iterationUuid);
 
     var paramsPage2 = new HashMap<String, List<String>>();
     paramsPage2.put("firstNameSubflowPage2", List.of("tester"));
@@ -326,12 +433,10 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     paramsPage2.put("dateSubflowPage2Month", List.of("12"));
     paramsPage2.put("dateSubflowPage2Year", List.of("2012"));
 
-    String redirectedUrl = resultActions.andReturn().getResponse().getRedirectedUrl();
-    int lastSlash = redirectedUrl.lastIndexOf('/');
-    String pageNamePage2 = "subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1);
+    String pageNamePage2 = "subflowAddItemPage2/" + iterationUuid;
     postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
 
-    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash)));
+    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid));
     assertTrue(page2.hasDateInputError());
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));
