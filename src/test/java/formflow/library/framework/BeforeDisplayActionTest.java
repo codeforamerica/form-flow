@@ -41,8 +41,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   void shouldSaveEncryptedSSN() throws Exception {
     // beforeSave
     String ssnInput = "111-00-1234";
-    postExpectingSuccess("inputs",
-        Map.of("ssnInput", List.of(ssnInput)));
+    postExpectingSuccess("inputs", Map.of("ssnInput", List.of(ssnInput)));
     assertThat(submission.getInputData().get("ssnInputEncrypted")).isEqualTo("BBB-AA-BCDE");
     assertThat(submission.getInputData().get("ssnInput")).isNull();
 
@@ -72,8 +71,10 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
 
     // beforeSave
     String ssnInput = "333-33-3333";
-    postToUrlExpectingSuccess("/flow/testFlow/pageWithSSNInput", "/flow/testFlow/subflowReview",
+    String navigationUrl = "/flow/testFlow/pageWithSSNInput/navigation?uuid=" + subflowUuid;
+    postToUrlExpectingSuccess("/flow/testFlow/pageWithSSNInput", navigationUrl,
         Map.of("ssnInput", List.of(ssnInput)), subflowUuid);
+    assertThat(followRedirectsForUrl(navigationUrl)).isEqualTo("/flow/testFlow/subflowReview");
 
     Map<String, Object> subflowEntry = submission.getSubflowEntryByUuid("householdMembers",
         subflowUuid);

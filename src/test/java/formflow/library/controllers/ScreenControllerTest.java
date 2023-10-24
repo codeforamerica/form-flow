@@ -16,8 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.data.Submission;
-import formflow.library.data.SubmissionRepositoryService;
-import formflow.library.data.validators.PhoneValidator;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
@@ -26,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,7 +31,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -44,10 +40,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
   @MockBean
   private AddressValidationService addressValidationService;
 
-  @SpyBean
-  private SubmissionRepositoryService submissionRepositoryService;
-
-  public final String uuidPatternString = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
+  public static final String UUID_PATTERN_STRING = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -90,10 +83,9 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
-      Map<String, String> queryParams = new HashMap<>();
-      queryParams.put("lang", "en");
-      getWithQueryParam("test", "lang", "en");
-      assert (submission.getUrlParams().equals(queryParams));
+      mockMvc.perform(get(getUrlForPageName("test")).queryParam("lang", "en").session(session))
+              .andExpect(status().isOk());
+      assert (submission.getUrlParams().equals(Map.of("lang", "en")));
     }
   }
 
@@ -175,18 +167,22 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
               "textInput", List.of("textInputValue"),
               "numberInput", List.of("10"))))
       );
-      UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("otherTestFlow");
-      Submission submissionAfterFirstPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-      List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submissionAfterFirstPost.getInputData().get("testSubflow");
-      String uuidString = (String) iterationsAfterFirstPost.get(0).get("uuid");
-      assertThat((Boolean) iterationsAfterFirstPost.get(0).get("iterationIsComplete")).isFalse();
-      mockMvc.perform(post("/flow/otherTestFlow/subflowAddItemPage2/" + uuidString).session(session))
-          .andExpect(status().is3xxRedirection());
-      Submission submissionAfterSecondPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-      List<Map<String, Object>> iterationsAfterSecondPost = (List<Map<String, Object>>) submissionAfterSecondPost.getInputData().get("testSubflow");
-      assertThat((Boolean) iterationsAfterSecondPost.get(0).get("iterationIsComplete")).isTrue();
+      Map<String, Object> iterationAfterFirstSubflowScreeen = getMostRecentlyCreatedIterationData(session, "otherTestFlow", "testSubflow");
+
+      String iterationUuid = (String) iterationAfterFirstSubflowScreeen.get("uuid");
+      assertThat((Boolean) iterationAfterFirstSubflowScreeen.get("iterationIsComplete")).isFalse();
+
+      String navigationUrl = "/flow/otherTestFlow/subflowAddItemPage2/navigation?uuid=" + iterationUuid;
+      postToUrlExpectingSuccess("/flow/otherTestFlow/subflowAddItemPage2", navigationUrl, new HashMap<>(), iterationUuid);
+      assertThat(followRedirectsForUrl(navigationUrl)).isEqualTo("/flow/otherTestFlow/test");
+
+      Map<String, Object> iterationAfterSecondSubflowScreeen = getMostRecentlyCreatedIterationData(session, "otherTestFlow", "testSubflow");
+      assertThat((Boolean) iterationAfterSecondSubflowScreeen.get("iterationIsComplete")).isTrue();
     }
-    
+
+    private record Result(UUID testSubflowLogicUUID, List<Map<String, Object>> iterationsAfterFirstPost, String uuidString) {
+    }
+
     @Test
     public void shouldHandleSubflowsWithAGetAndThenAPost() throws Exception {
       setFlowInfoInSession(session, "yetAnotherTestFlow", submission.getId());
@@ -200,12 +196,14 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       Submission submissionAfterFirstPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
       List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submissionAfterFirstPost.getInputData().get("subflowWithAGetAndThenAPost");
       String uuidString = (String) iterationsAfterFirstPost.get(0).get("uuid");
-      
+
       mockMvc.perform(get("/flow/yetAnotherTestFlow/getScreen/navigation?uuid=" + uuidString).session(session))
           .andExpect(status().is3xxRedirection());
-      
-      mockMvc.perform(post("/flow/yetAnotherTestFlow/subflowAddItemPage2/" + uuidString).session(session))
-          .andExpect(status().is3xxRedirection());
+
+      String navigationUrl = "/flow/yetAnotherTestFlow/subflowAddItemPage2/navigation?uuid=" + uuidString;
+      postToUrlExpectingSuccess("/flow/yetAnotherTestFlow/subflowAddItemPage2", navigationUrl,
+              Map.of(), uuidString);
+      assertThat(followRedirectsForUrl(navigationUrl)).isEqualTo("/flow/yetAnotherTestFlow/testReviewScreen");
       Submission submissionAfterSecondPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
       List<Map<String, Object>> iterationsAfterSecondPost = (List<Map<String, Object>>) submissionAfterSecondPost.getInputData().get("subflowWithAGetAndThenAPost");
       assertThat((Boolean) iterationsAfterSecondPost.get(0).get("iterationIsComplete")).isTrue();
@@ -411,10 +409,14 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     paramsPage1.put("dateSubflowMonth", List.of("12"));
     paramsPage1.put("dateSubflowYear", List.of("2012"));
 
-    String pageName = "/flow/testFlow/subflowAddItem/new";
-    ResultActions resultActions = postToUrlExpectingSuccessRedirectPattern(pageName,
-        "/flow/testFlow/subflowAddItemPage2/" + uuidPatternString,
-        paramsPage1);
+    ResultActions resultActions = postToUrlExpectingSuccessRedirectPattern(
+            "/flow/testFlow/subflowAddItem/new",
+            "/flow/testFlow/subflowAddItem/navigation?uuid=" + UUID_PATTERN_STRING,
+            paramsPage1);
+    String redirectedUrl = resultActions.andReturn().getResponse().getRedirectedUrl();
+    String iterationUuid = redirectedUrl.substring(redirectedUrl.lastIndexOf('=') + 1);
+    assertThat(followRedirectsForUrl("/flow/testFlow/subflowAddItem/navigation?uuid=" + iterationUuid))
+            .isEqualTo("/flow/testFlow/subflowAddItemPage2/" + iterationUuid);
 
     var paramsPage2 = new HashMap<String, List<String>>();
     paramsPage2.put("firstNameSubflowPage2", List.of("tester"));
@@ -431,12 +433,10 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     paramsPage2.put("dateSubflowPage2Month", List.of("12"));
     paramsPage2.put("dateSubflowPage2Year", List.of("2012"));
 
-    String redirectedUrl = resultActions.andReturn().getResponse().getRedirectedUrl();
-    int lastSlash = redirectedUrl.lastIndexOf('/');
-    String pageNamePage2 = "subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1);
+    String pageNamePage2 = "subflowAddItemPage2/" + iterationUuid;
     postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
 
-    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + redirectedUrl.substring(lastSlash + 1)));
+    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid));
     assertTrue(page2.hasDateInputError());
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));
