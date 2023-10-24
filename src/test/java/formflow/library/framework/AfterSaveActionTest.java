@@ -1,11 +1,14 @@
 package formflow.library.framework;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.mailgun.api.v3.MailgunMessagesApi;
 import com.mailgun.model.message.Message;
@@ -24,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-after-save-action.yaml"})
@@ -62,7 +66,7 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     String expectedRecipient = "test@example.com";
     String expectedBody = "This is a test email";
 
-    postExpectingSuccess("inputs");
+    postWithoutData("inputs").andExpect(redirectedUrl(getUrlForPageName("inputs") + "/navigation"));
 
     verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
 
@@ -81,7 +85,13 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     String expectedRecipient = "test@example.com";
     String expectedBody = "This is a test email";
 
-    postSubflowExpectingSuccess("subflowIterationStart/new", "next");
+    ResultActions test = postWithoutData("subflowIterationStart/new");
+    String url = test.andExpect(status().is3xxRedirection())
+            .andReturn()
+            .getResponse()
+            .getRedirectedUrl();
+    assertThat(url).isNotNull();
+    assertThat(url.contains("next"));
 
     verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
 
