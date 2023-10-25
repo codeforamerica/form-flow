@@ -9,8 +9,8 @@
       <main id="content" role="main" class="form-card spacing-above-35">
         <th:block
             th:replace="~{fragments/cardHeader :: cardHeader(header='Subflow Page', subtext='This is a page within a subflow')}"/>
-        <!-- Test that the currentSubflowItem is passed in by the controller: -->
-        <div th:text="${currentSubflowItem.firstNameSubflow}"></div>
+<!--         Test that the currentSubflowItem is passed in by the controller: -->
+        <div th:text="${currentSubflowItem}"></div>
         <div>
           <th:block
               th:replace="~{fragments/inputs/text ::

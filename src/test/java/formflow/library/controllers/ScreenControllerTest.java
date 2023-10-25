@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.address_validation.AddressValidationService;
@@ -21,6 +22,7 @@ import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -180,9 +182,6 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       assertThat((Boolean) iterationAfterSecondSubflowScreeen.get("iterationIsComplete")).isTrue();
     }
 
-    private record Result(UUID testSubflowLogicUUID, List<Map<String, Object>> iterationsAfterFirstPost, String uuidString) {
-    }
-
     @Test
     public void shouldHandleSubflowsWithAGetAndThenAPost() throws Exception {
       setFlowInfoInSession(session, "yetAnotherTestFlow", submission.getId());
@@ -207,6 +206,30 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       Submission submissionAfterSecondPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
       List<Map<String, Object>> iterationsAfterSecondPost = (List<Map<String, Object>>) submissionAfterSecondPost.getInputData().get("subflowWithAGetAndThenAPost");
       assertThat((Boolean) iterationsAfterSecondPost.get(0).get("iterationIsComplete")).isTrue();
+    }
+    
+    @Test
+    public void shouldHandleGoingFromANonSubflowPostScreenIntoASubflow() throws Exception {
+      setFlowInfoInSession(session, "testSubflowLogic", submission.getId());
+
+      ResultActions result = mockMvc.perform(post("/flow/testSubflowLogic/testEntryScreen")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "doYouWantToEnterTheTestSubflow", List.of("true"))))
+      );
+      String nextScreenUrl = "/flow/testSubflowLogic/testEntryScreen/navigation";
+      result.andExpect(redirectedUrl(nextScreenUrl));
+      
+      while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
+        // follow redirects
+        nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
+            .andExpect(status().is3xxRedirection()).andReturn()
+            .getResponse()
+            .getRedirectedUrl();
+      }
+      assertThat(nextScreenUrl).isEqualTo("/flow/testSubflowLogic/subflowAddItem");
+      FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
+      assertThat(nextScreen.getTitle()).isEqualTo("Subflow Page");
     }
   }
 
