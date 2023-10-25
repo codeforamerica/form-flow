@@ -69,6 +69,9 @@ public class UserFile {
   @Column(name = "virus_scanned")
   private boolean virusScanned;
 
+  @Column(name="doc_type_label")
+  private String docTypeLabel;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
