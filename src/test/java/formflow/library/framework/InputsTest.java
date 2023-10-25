@@ -46,7 +46,7 @@ public class InputsTest extends AbstractMockMvcTest {
     String ssnInput = "333-22-4444";
     String stateInput = messageSource.getMessage("state.nh", null, Locale.ENGLISH).substring(0, 2);
 
-    postExpectingNextPageTitle("inputs",
+    FormScreen nextPage = postAndFollowRedirect("inputs",
         Map.ofEntries(
             Map.entry("textInput", List.of(textInput)),
             Map.entry("areaInput", List.of(areaInput)),
@@ -63,10 +63,11 @@ public class InputsTest extends AbstractMockMvcTest {
             Map.entry("moneyInput", List.of(moneyInput)),
             Map.entry("phoneInput", List.of(phoneInput)),
             Map.entry("ssnInput", List.of(ssnInput)),
-            Map.entry("stateInput", List.of(stateInput))),
-        "Test");
+            Map.entry("stateInput", List.of(stateInput)))
+        );
+    assertThat(nextPage.getTitle()).isEqualTo("Test");
 
-    var inputsScreen = goBackTo("inputs");
+    var inputsScreen = new FormScreen(getPage("inputs"));
 
     // Remove hidden value (our Screen Controller does this automatically)
     List<String> removedHiddenCheckboxSet = checkboxSet.stream().filter(e -> !e.isEmpty()).toList();

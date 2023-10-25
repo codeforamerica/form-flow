@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -255,7 +256,7 @@ public class ScreenController extends FormFlowController {
    * @return a redirect to next screen
    */
   @PostMapping({"{flow}/{screen}/{uuid}", "{flow}/{screen}/{uuid}/edit"})
-  ModelAndView updateOrCreateIteration(
+  RedirectView postSubflowScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
       @PathVariable String screen,
@@ -276,26 +277,15 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     String subflowName = currentScreen.getSubflow();
     Submission submission = findOrCreateSubmission(httpSession, flow);
-
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
-
-    if (isNewIteration) {
-      // handle start iteration page, if new flow
-      HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
-      subflowName = subflows.entrySet().stream()
-          .filter(subflow -> subflow.getValue().getIterationStartScreen().equals(screen))
-          .map(Entry::getKey)
-          .findFirst()
-          .orElse(null);
-    }
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
     handleErrors(httpSession, errorMessages, formSubmission);
     if (!errorMessages.isEmpty()) {
       if (isNewIteration) {
-        return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, screen));
+        return new RedirectView(String.format("/flow/%s/%s", flow, screen));
       } else {
-        return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, screen, iterationUuid));
+        return new RedirectView(String.format("/flow/%s/%s/%s", flow, screen, iterationUuid));
       }
     }
 
@@ -310,26 +300,19 @@ public class ScreenController extends FormFlowController {
       if (isNewIteration) {
         ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
+        formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         subflow.add(formSubmission.getFormData());
-
-        // setIterationIsComplete() ends up calling conditions, so we should update the subflow information _before_ we call this
-        // to make sure anything conditions check have the complete data.
-        setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
       } else {
         var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
         if (iterationToEdit != null) {
           submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
-
-          setIterationIsComplete(flow, iterationUuid, formSubmission, submission, currentScreen);
-
-          submission.removeIncompleteIterations(subflowName, iterationUuid);
         }
       }
     } else {
       if (isNewIteration) {
         Map<String, Object> inputData = new HashMap<>();
         ArrayList<Map<String, Object>> subflow = new ArrayList<>();
-
+        formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         formSubmission.getFormData().put("uuid", iterationUuid);
         subflow.add(formSubmission.getFormData());
         inputData.put(subflowName, subflow);
@@ -349,22 +332,13 @@ public class ScreenController extends FormFlowController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
       }
     }
-    actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
 
+    actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
     submission = saveToRepository(submission, subflowName);
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
-    String nextScreen = getNextScreenName(submission, currentScreen, iterationUuid);
-    String viewString = isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid) ?
-        String.format("redirect:/flow/%s/%s/%s", flow, nextScreen, iterationUuid)
-        : String.format("redirect:/flow/%s/%s", flow, nextScreen);
-    return new ModelAndView(viewString);
-  }
 
-  private void setIterationIsComplete(String flow, String iterationUuid, FormSubmission formSubmission, Submission submission,
-      ScreenNavigationConfiguration currentScreen) {
-    Boolean iterationIsComplete = !isNextScreenInSubflow(flow, submission, currentScreen, iterationUuid);
-    formSubmission.getFormData().put("iterationIsComplete", iterationIsComplete);
+    return new RedirectView(String.format("/flow/%s/%s/navigation?uuid=%s", flow, screen, iterationUuid));
   }
 
   /**
@@ -469,9 +443,12 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      @RequestParam(required = false) String uuid
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
+    log.info(
+        "Current submission ID is: " + httpSession.getAttribute("id") + " and current Session ID is: " + httpSession.getId());
     // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = getSubmissionFromSession(httpSession, flow);
@@ -479,10 +456,19 @@ public class ScreenController extends FormFlowController {
       throwNotFoundError(flow, screen,
           String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
     }
-    String nextScreen = getNextScreenName(submission, currentScreen, null);
+    String nextScreen = getNextScreenName(submission, currentScreen, uuid);
 
+    boolean isCurrentScreenLastInSubflow = getScreenConfig(flow, nextScreen).getSubflow() == null;
+    String redirectString;
+    if (uuid != null && isCurrentScreenLastInSubflow) {
+      submission.setIterationIsCompleteToTrue(currentScreen.getSubflow(), uuid);
+      submission = saveToRepository(submission);
+      redirectString = String.format("/flow/%s/%s", flow, nextScreen);
+    } else {
+      redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
+    }
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
-    return new ModelAndView(new RedirectView("/flow/%s/%s".formatted(flow, nextScreen)));
+    return new ModelAndView(new RedirectView(redirectString));
   }
 
   private String getNextScreenName(Submission submission,
@@ -558,12 +544,6 @@ public class ScreenController extends FormFlowController {
     }
     return subflows.entrySet().stream().anyMatch(subflowConfig ->
         subflowConfig.getValue().getIterationStartScreen().equals(screen));
-  }
-
-  private Boolean isNextScreenInSubflow(String flow, Submission submission, ScreenNavigationConfiguration currentScreen,
-      String subflowUuid) {
-    String nextScreenName = getNextScreenName(submission, currentScreen, subflowUuid);
-    return getScreenConfig(flow, nextScreenName).getSubflow() != null;
   }
 
   private String createFormActionString(String flow, String screen) {

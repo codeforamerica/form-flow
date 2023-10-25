@@ -2,6 +2,7 @@ package formflow.library.utilities;
 
 import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static formflow.library.utilities.TestUtils.resetSubmission;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,17 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
+import formflow.library.controllers.ScreenControllerTest;
 import formflow.library.data.Submission;
-import java.io.BufferedOutputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,9 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import formflow.library.data.SubmissionRepositoryService;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.AfterEach;
@@ -44,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -69,6 +68,9 @@ public abstract class AbstractMockMvcTest {
   @MockBean
   protected Submission submission;
 
+  @SpyBean
+  protected SubmissionRepositoryService submissionRepositoryService;
+
   @Autowired
   private WebApplicationContext webApplicationContext;
 
@@ -93,90 +95,19 @@ public abstract class AbstractMockMvcTest {
     resetSubmission();
   }
 
+  // TODO: Replace varargs parameters with `new HashMap<>(Map.of(key1, value1, ...));`
   protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
-
     if (flowInfo.length % 2 != 0) {
       throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
     }
-
     Iterator<Object> iterator = Arrays.stream(flowInfo).iterator();
-
     Map<String, Object> flowMap = new HashMap<>();
-
     while (iterator.hasNext()) {
       String flowName = (String) iterator.next();
       UUID submissionId = (UUID) iterator.next();
       flowMap.put(flowName, submissionId);
     }
-
     mockHttpSession.setAttribute(SUBMISSION_MAP_NAME, flowMap);
-  }
-
-  protected void postWithQueryParam(String pageName, String queryParam, String value)
-      throws Exception {
-    mockMvc.perform(
-            post("/pages/" + pageName).with(csrf()).queryParam(queryParam, value))
-        .andExpect(redirectedUrl("/pages/" + pageName + "/navigation"));
-  }
-
-  protected ResultActions getWithQueryParam(String pageName, String queryParam, String value)
-      throws Exception {
-    String getUrl = getUrlForPageName(pageName);
-    return mockMvc.perform(
-            get(getUrl)
-                .queryParam(queryParam, value)
-                .session(session))
-        .andExpect(status().isOk());
-  }
-
-  protected ResultActions getWithQueryParamAndExpectRedirect(String pageName, String queryParam,
-      String value,
-      String expectedRedirectPageName) throws Exception {
-    return mockMvc.perform(get("/pages/" + pageName).queryParam(queryParam, value))
-        .andExpect(redirectedUrl("/pages/" + expectedRedirectPageName));
-  }
-
-  protected void getNavigationPageWithQueryParamAndExpectRedirect(String pageName,
-      String queryParam, String value,
-      String expectedPageName) throws Exception {
-    var request = get("/pages/" + pageName + "/navigation")
-        .queryParam(queryParam, value);
-    var navigationPageUrl = mockMvc.perform(request)
-        .andExpect(status().is3xxRedirection())
-        .andReturn()
-        .getResponse()
-        .getRedirectedUrl();
-    String nextPage = followRedirectsForUrl(navigationPageUrl);
-    assertThat(nextPage).isEqualTo("/pages/" + expectedPageName);
-  }
-
-  protected List<File> unzip(ZipInputStream zipStream) {
-    List<File> fileList = new ArrayList<>();
-    try {
-      ZipEntry zEntry;
-      Path destination = Files.createTempDirectory("");
-      while ((zEntry = zipStream.getNextEntry()) != null) {
-        if (!zEntry.isDirectory()) {
-          File files = new File(String.valueOf(destination), zEntry.getName());
-          FileOutputStream fout = new FileOutputStream(files);
-          BufferedOutputStream bufout = new BufferedOutputStream(fout);
-          byte[] buffer = new byte[1024];
-          int read;
-          while ((read = zipStream.read(buffer)) != -1) {
-            bufout.write(buffer, 0, read);
-          }
-          zipStream.closeEntry();//This will delete zip folder after extraction
-          bufout.close();
-          fout.close();
-          fileList.add(files);
-        }
-      }
-      zipStream.close();//This will delete zip folder after extraction
-    } catch (Exception e) {
-      System.out.println("Unzipping failed");
-      e.printStackTrace();
-    }
-    return fileList;
   }
 
   protected Map<String, byte[]> getZipContentsMap(byte[] zipBytes) throws IOException {
@@ -202,75 +133,32 @@ public abstract class AbstractMockMvcTest {
     return contents;
   }
 
-  protected ResultActions postExpectingSuccess(String pageName) throws Exception {
-    return postWithoutData(pageName)
-        .andExpect(redirectedUrl(getUrlForPageName(pageName) + "/navigation"));
-  }
-
-  protected void postSubflowExpectingSuccess(String pageName, String nextPage) throws Exception {
-    ResultActions test = postWithoutData(pageName);
-    String url = test.andExpect(status().is3xxRedirection())
-        .andReturn()
-        .getResponse()
-        .getRedirectedUrl();
-    assertThat(url).isNotNull();
-    assertThat(url.contains(nextPage));
-  }
-
-  protected ResultActions postStartSubflowExpectingSuccess(String pageName) throws Exception {
-    String postUrl = getUrlForPageName(pageName, "new");
-    return postWithoutData(postUrl).andExpect(redirectedUrl(postUrl + "/navigation"));
-  }
-
-  // Post to a page with an arbitrary number of multi-value inputs
+  @Deprecated // assumes `pageName` is within `testFlow` config
   protected ResultActions postExpectingSuccess(String pageName, Map<String, List<String>> params) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
   }
 
-  // Post to a page with a single input that only accepts a single value
-  protected ResultActions postExpectingSuccess(String pageName, String inputName, String value) throws Exception {
-    String postUrl = getUrlForPageName(pageName);
-    var params = Map.of(inputName, List.of(value));
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
-  }
-
-  // Post to a page with a single input that accepts multiple values
-  protected ResultActions postExpectingSuccess(String pageName, String inputName, List<String> values) throws Exception {
-    String postUrl = getUrlForPageName(pageName);
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, values));
+  // Appends the id to the post URL
+  protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
+      Map<String, List<String>> params, String uuid) throws Exception {
+    return postToUrlExpectingSuccess(postUrl + "/" + uuid, redirectUrl, params);
   }
 
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params) throws
-      Exception {
-
-    MockHttpServletRequestBuilder post = post(postUrl)
-        .with(csrf())
-        .session(session)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-        .params(new LinkedMultiValueMap<>(params));
-
-    return mockMvc.perform(post).andExpect(redirectedUrl(redirectUrl));
-  }
-
-  protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params, String id) throws
-      Exception {
-    return mockMvc.perform(
-        post(postUrl + '/' + id)
-            .session(session)
+      Map<String, List<String>> params) throws Exception {
+    return mockMvc.perform(post(postUrl)
             .with(csrf())
+            .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrl(redirectUrl));
   }
 
+  // Same as postToUrlExpectingSuccess, but expecting a pattern instead of an exact match
   protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
-      Map<String, List<String>> params)
-      throws Exception {
-    return mockMvc.perform(
-        post(postUrl)
+      Map<String, List<String>> params) throws Exception {
+    return mockMvc.perform(post(postUrl)
             .with(csrf())
             .session(session)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -278,91 +166,20 @@ public abstract class AbstractMockMvcTest {
     ).andExpect(redirectedUrlPattern(redirectUrlPattern));
   }
 
-  protected void postExpectingNextPageElementText(String pageName,
-      String inputName,
-      String value,
-      String elementId,
-      String expectedText) throws Exception {
-    var nextPage = postAndFollowRedirect(pageName, inputName, value);
-    assertThat(nextPage.getElementTextById(elementId)).isEqualTo(expectedText);
-  }
-
-  protected void assertPageHasElementWithId(String pageName, String elementId) throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertThat(page.getElementById(elementId)).isNotNull();
-  }
-
-  protected void assertPageDoesNotHaveElementWithId(String pageName, String elementId)
-      throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertThat(page.getElementById(elementId)).isNull();
-  }
-
   protected void postExpectingNextPageTitle(String pageName,
       String inputName,
       String value,
       String nextPageTitle) throws Exception {
-    var nextPage = postAndFollowRedirect(pageName, inputName, value);
-    assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
-  }
-
-  protected void postExpectingNextPageTitle(String pageName,
-      String inputName,
-      List<String> values,
-      String nextPageTitle) throws Exception {
-    var nextPage = postAndFollowRedirect(pageName, inputName, values);
-    assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
-  }
-
-  protected void postExpectingNextPageTitle(String pageName,
-      Map<String, List<String>> params,
-      String nextPageTitle) throws Exception {
-    var nextPage = postAndFollowRedirect(pageName, params);
+    String postUrl = getUrlForPageName(pageName);
+    postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, List.of(value)));
+    FormScreen nextPage = followRedirectsForPageName(pageName);
     assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
   }
 
   protected void continueExpectingNextPageTitle(String currentPageName, String nextPageTitle)
       throws Exception {
-    var nextPage = getNextPageAsFormPage(currentPageName);
+    var nextPage = followRedirectsForPageName(currentPageName);
     assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
-  }
-
-  protected void postExpectingRedirect(String pageName, String inputName,
-      String value, String expectedNextPageName) throws Exception {
-    postExpectingSuccess(pageName, inputName, value);
-    assertNavigationRedirectsToCorrectNextPage(pageName, expectedNextPageName);
-  }
-
-  protected void postExpectingRedirect(String pageName, String inputName, List<String> values,
-      String expectedNextPageName) throws Exception {
-    postExpectingSuccess(pageName, inputName, values);
-    assertNavigationRedirectsToCorrectNextPage(pageName, expectedNextPageName);
-  }
-
-  protected void postExpectingRedirect(String pageName, String expectedNextPageName)
-      throws Exception {
-    postExpectingSuccess(pageName);
-    assertNavigationRedirectsToCorrectNextPage(pageName, expectedNextPageName);
-  }
-
-  protected void postExpectingRedirect(String pageName, Map<String, List<String>> params,
-      String expectedNextPageName) throws Exception {
-    postExpectingSuccess(pageName, params);
-    assertNavigationRedirectsToCorrectNextPage(pageName, expectedNextPageName);
-  }
-
-  protected void assertNavigationRedirectsToCorrectNextPage(String pageName,
-      String expectedNextPageName) throws Exception {
-    String nextPage = followRedirectsForPageName(pageName);
-    assertThat(nextPage).isEqualTo("/pages/" + expectedNextPageName);
-  }
-
-  protected void assertNavigationRedirectsToCorrectNextPageWithOption(String pageName,
-      String option,
-      String expectedNextPageName) throws Exception {
-    String nextPage = followRedirectsForPageNameWithOption(pageName,
-        option.equals("false") ? "1" : "0");
-    assertThat(nextPage).isEqualTo("/pages/" + expectedNextPageName);
   }
 
   protected ResultActions postExpectingFailure(String pageName, String inputName, String value)
@@ -375,11 +192,6 @@ public abstract class AbstractMockMvcTest {
             .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .param(inputName, value)
     ).andExpect(redirectedUrl(postUrl));
-  }
-
-  protected ResultActions postExpectingFailure(String pageName, String inputName,
-      List<String> values) throws Exception {
-    return postExpectingFailure(pageName, fixInputNamesForParams(Map.of(inputName, values)));
   }
 
   protected ResultActions postExpectingFailure(String pageName, Map<String, List<String>> params) throws Exception {
@@ -415,22 +227,7 @@ public abstract class AbstractMockMvcTest {
 
   protected void postExpectingFailureAndAssertErrorDisplaysForThatInput(String pageName,
       String inputName,
-      String value) throws Exception {
-    postExpectingFailure(pageName, inputName, value);
-    assertPageHasInputError(pageName, inputName);
-  }
-
-
-  protected void postExpectingFailureAndAssertErrorDisplaysForThatInput(String pageName,
-      String inputName,
       String value, String errorMessage) throws Exception {
-    postExpectingFailure(pageName, inputName, value);
-    assertPageHasInputError(pageName, inputName, errorMessage);
-  }
-
-  protected void postExpectingFailureAndAssertErrorDisplaysForThatInput(String pageName,
-      String inputName,
-      List<String> value, String errorMessage) throws Exception {
     postExpectingFailure(pageName, inputName, value);
     assertPageHasInputError(pageName, inputName, errorMessage);
   }
@@ -439,7 +236,7 @@ public abstract class AbstractMockMvcTest {
       String inputName,
       String value, Integer numOfErrors) throws Exception {
     postExpectingFailure(pageName, inputName, value);
-    assertInputHasErrors(pageName, inputName, numOfErrors);
+    assertEquals(numOfErrors, new FormScreen(getPage(pageName)).getInputErrors(inputName).size());
   }
 
   protected void postExpectingFailureAndAssertErrorsDisplayForThatInput(String pageName,
@@ -458,37 +255,6 @@ public abstract class AbstractMockMvcTest {
     }
   }
 
-  protected void postExpectingFailureAndAssertErrorDisplaysForThatDateInput(String pageName,
-      String inputName,
-      List<String> values) throws Exception {
-    postExpectingFailure(pageName, inputName, values);
-    assertPageHasDateInputError(pageName, inputName);
-  }
-
-
-  protected void postExpectingFailureAndAssertErrorDisplaysOnDifferentInput(String pageName,
-      String inputName,
-      String value,
-      String inputNameWithError) throws Exception {
-    postExpectingFailure(pageName, inputName, value);
-    assertPageHasInputError(pageName, inputNameWithError);
-  }
-
-  protected void postExpectingFailureAndAssertErrorDisplaysOnDifferentInput(String pageName,
-      String inputName,
-      List<String> values,
-      String inputNameWithError) throws Exception {
-    postExpectingFailure(pageName, inputName, values);
-    assertPageHasInputError(pageName, inputNameWithError);
-  }
-
-  @NotNull
-  //TODO Get rid of this maybe?
-  private Map<String, List<String>> fixInputNamesForParams(Map<String, List<String>> params) {
-    return params.entrySet().stream()
-        .collect(Collectors.toMap(e -> e.getKey() + "[]", Map.Entry::getValue));
-  }
-
   protected ResultActions postWithoutData(String pageName) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     return mockMvc.perform(
@@ -498,31 +264,15 @@ public abstract class AbstractMockMvcTest {
     );
   }
 
-  protected String getUrlForPageName(String pageName, String subflow) {
-    // TODO - remove assumption that flow is named testFlow - may not always be
-    return "/flow/testFlow/" + pageName + "/" + subflow;
-  }
-
   protected String getUrlForPageName(String pageName) {
     // TODO - remove assumption that flow is named testFlow - may not always be
     return "/flow/testFlow/" + pageName;
-  }
-
-  protected void assertPageHasInputError(String pageName, String inputName) throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertTrue(page.hasInputError(inputName));
   }
 
   protected void assertPageHasInputError(String pageName, String inputName, String errorMessage)
       throws Exception {
     var page = new FormScreen(getPage(pageName));
     assertEquals(errorMessage, page.getInputError(inputName).text());
-  }
-
-  protected void assertInputHasErrors(String pageName, String inputName, Integer numOfErrors)
-      throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertEquals(numOfErrors, page.getInputErrors(inputName).size());
   }
 
   protected void assertInputHasErrors(String pageName, String inputName, List<String> errorMessages)
@@ -536,23 +286,6 @@ public abstract class AbstractMockMvcTest {
     // now check if they match the expected ones.
     assertTrue(errorMessages.containsAll(page.getInputErrors(inputName).stream().map(Element::ownText).toList()),
         "The error messages expected do match what was returned");
-  }
-
-  protected void assertPageHasDateInputError(String pageName, String inputName) throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertTrue(page.hasDateInputError());
-  }
-
-  protected void assertPageDoesNotHaveInputError(String pageName, String inputName)
-      throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertFalse(page.hasInputError(inputName));
-  }
-
-  protected void assertPageHasWarningMessage(String pageName, String warningMessage)
-      throws Exception {
-    var page = new FormScreen(getPage(pageName));
-    assertEquals(page.getWarningMessage(), warningMessage);
   }
 
   @NotNull
@@ -573,26 +306,20 @@ public abstract class AbstractMockMvcTest {
    * @param currentPageName the page
    * @return a form page that can be asserted against
    */
-  protected FormScreen getNextPageAsFormPage(String currentPageName) throws Exception {
-    String nextPage = followRedirectsForPageName(currentPageName);
-    return new FormScreen(mockMvc.perform(get(nextPage)));
-  }
-
-  @NotNull
-  private String followRedirectsForPageName(String currentPageName) throws Exception {
+  protected FormScreen followRedirectsForPageName(String currentPageName) throws Exception {
     // TODO - remove assumption that flow is named testFlow - may not always be
     var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
       nextPage = mockMvc.perform(get(nextPage).session(session))
-          .andExpect(status().is3xxRedirection()).andReturn()
-          .getResponse()
-          .getRedirectedUrl();
+              .andExpect(status().is3xxRedirection()).andReturn()
+              .getResponse()
+              .getRedirectedUrl();
     }
-    return nextPage;
+    return new FormScreen(mockMvc.perform(get(nextPage)));
   }
 
-  private String followRedirectsForUrl(String currentPageUrl) throws Exception {
+  protected String followRedirectsForUrl(String currentPageUrl) throws Exception {
     var nextPage = currentPageUrl;
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
@@ -604,65 +331,15 @@ public abstract class AbstractMockMvcTest {
     return nextPage;
   }
 
-  protected FormScreen postAndFollowRedirect(String pageName, String inputName, String value) throws
-      Exception {
-    postExpectingSuccess(pageName, inputName, value);
-    return getNextPageAsFormPage(pageName);
-  }
-
-  protected FormScreen postAndFollowRedirect(String pageName, Map<String, List<String>> params)
-      throws
-      Exception {
+  protected FormScreen postAndFollowRedirect(String pageName, Map<String, List<String>> params) throws Exception {
     postExpectingSuccess(pageName, params);
-    return getNextPageAsFormPage(pageName);
+    return followRedirectsForPageName(pageName);
   }
 
-  protected FormScreen postAndFollowRedirect(String pageName) throws
-      Exception {
-    postExpectingSuccess(pageName);
-    return getNextPageAsFormPage(pageName);
-  }
-
-  protected FormScreen postAndFollowRedirect(String pageName, String inputName,
-      List<String> values) throws
-      Exception {
-    postExpectingSuccess(pageName, inputName, values);
-    return getNextPageAsFormPage(pageName);
-  }
-
-  protected void getPageAndExpectRedirect(String getPageName, String redirectPageName)
-      throws Exception {
-    getPage(getPageName).andExpect(redirectedUrl("/pages/" + redirectPageName));
-  }
-
-  protected FormScreen goBackTo(String getPageName)
-      throws Exception {
-    return new FormScreen(getPage(getPageName));
-  }
-
-  protected void assertCorrectPageTitle(String pageName, String pageTitle) throws Exception {
-    assertThat(new FormScreen(getPage(pageName)).getTitle()).isEqualTo(pageTitle);
-  }
-
-  protected void clickContinueOnInfoPage(String pageName, String continueButtonText,
-      String expectedNextPageName) throws Exception {
-    FormScreen page = new FormScreen(getPage(pageName));
-    page.assertLinkWithTextHasCorrectUrl(continueButtonText,
-        "/pages/%s/navigation?option=0".formatted(pageName));
-    assertNavigationRedirectsToCorrectNextPage(pageName, expectedNextPageName);
-  }
-
-  @NotNull
-  private String followRedirectsForPageNameWithOption(String currentPageName, String option)
-      throws Exception {
-    var nextPage = "/pages/" + currentPageName + "/navigation?option=" + option;
-    while (Objects.requireNonNull(nextPage).contains("/navigation")) {
-      // follow redirects
-      nextPage = mockMvc.perform(get(nextPage))
-          .andExpect(status().is3xxRedirection()).andReturn()
-          .getResponse()
-          .getRedirectedUrl();
-    }
-    return nextPage;
+  protected Map<String, Object> getMostRecentlyCreatedIterationData(MockHttpSession session, String flow, String subflow) {
+    UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get(flow);
+    Submission submission = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+    List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submission.getInputData().get(subflow);
+    return iterationsAfterFirstPost.get(iterationsAfterFirstPost.size() - 1);
   }
 }
