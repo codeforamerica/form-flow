@@ -5,6 +5,8 @@ import static formflow.library.interceptors.DisabledFlowInterceptor.PATH_FORMAT;
 
 import formflow.library.interceptors.DisabledFlowInterceptor;
 import java.util.List;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -13,7 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * Adds DisabledFlowInterceptorConfiguration to the Interceptor registry.
  */
 @Configuration
-//@ConditionalOnProperty(name = "form-flow.disabled-flows")
+@ConditionalOnProperty(name = "form-flow.disabled-flows")
 public class DisabledFlowInterceptorConfiguration implements WebMvcConfigurer {
 
   DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;

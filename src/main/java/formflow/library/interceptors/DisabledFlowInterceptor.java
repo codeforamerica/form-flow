@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -18,7 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * This interceptor redirects users to the configured screen if a flow is marked as disabled.
  */
 @Component
-//@ConditionalOnProperty(name = "form-flow.disabled-flows")
+@ConditionalOnProperty(name = "form-flow.disabled-flows")
 public class DisabledFlowInterceptor implements HandlerInterceptor, Ordered {
   public static final String PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
 
