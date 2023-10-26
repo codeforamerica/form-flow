@@ -12,12 +12,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-//@ConditionalOnProperty(name = "form-flow.disabled-flows", havingValue = "*", matchIfMissing = false)
+//@ConditionalOnProperty(name = "form-flow.disabled-flows")
 @ConfigurationProperties(prefix = "form-flow")
 @Getter
 @Setter
 public class DisabledFlowPropertyConfiguration {
-  private List<Map<String, String>> disabledFlows;
+  private List<Map<String, String>> disabledFlows = new ArrayList<>();
 
   public boolean isFlowDisabled(String flowName) {
     return this.disabledFlows.stream().anyMatch(flow -> flow.get("flow").equals(flowName));

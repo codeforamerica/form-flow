@@ -19,7 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * This interceptor redirects users to the configured screen if a flow is marked as disabled.
  */
 @Component
-//@ConditionalOnProperty(name = "form-flow.disabled-flows", havingValue = "*", matchIfMissing = false)
+//@ConditionalOnProperty(name = "form-flow.disabled-flows")
 public class DisabledFlowInterceptor implements HandlerInterceptor, Ordered {
   public static final String PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
 

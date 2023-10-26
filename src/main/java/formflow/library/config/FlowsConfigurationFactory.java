@@ -33,8 +33,8 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
     this.disabledFlowPropertyConfiguration = null;
   }
 
-  FlowsConfigurationFactory(Optional<DisabledFlowPropertyConfiguration> disabledFlowPropertyConfiguration) {
-    this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration.orElse(null);
+  FlowsConfigurationFactory(DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration) {
+    this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration;
   }
 
   @Override

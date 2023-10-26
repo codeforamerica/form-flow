@@ -53,6 +53,7 @@ public class DisabledFlowInterceptorTest extends AbstractMockMvcTest {
 
   @Test
   public void shouldRedirectToConfiguredScreenWhenDisabledFlowInterceptionIsEnabled() throws Exception {
+    // TODO Update this to be equals not contains
     mockMvc.perform(get("/flow/testFlow/inputs"))
         .andExpect(status().is3xxRedirection())
         .andExpect(result -> assertTrue(Objects.requireNonNull(result.getResponse().getRedirectedUrl()).contains("/")));

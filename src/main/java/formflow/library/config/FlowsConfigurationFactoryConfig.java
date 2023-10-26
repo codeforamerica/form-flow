@@ -17,7 +17,7 @@ import java.util.Optional;
 public class FlowsConfigurationFactoryConfig {
 
 //  @Bean
-//  @ConditionalOnProperty(name = "form-flow.disabled-flows", havingValue = "*", matchIfMissing = false)
+//  @ConditionalOnProperty(name = "form-flow.disabled-flows")
 //  public DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration() {
 //    return new DisabledFlowPropertyConfiguration();
 //  }
@@ -36,7 +36,7 @@ public class FlowsConfigurationFactoryConfig {
     if (this.disabledFlowPropertyConfiguration == null) {
       return new FlowsConfigurationFactory();
     }
-    return new FlowsConfigurationFactory(Optional.of(disabledFlowPropertyConfiguration));
+    return new FlowsConfigurationFactory(disabledFlowPropertyConfiguration);
   }
 
   /**
