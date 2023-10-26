@@ -2,7 +2,6 @@ package formflow.library.data;
 
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
-import formflow.library.data.builders.UserFileBuilder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,9 +22,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.integration.annotation.Default;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,8 +41,6 @@ public class UserFile {
 
   @Id
   @GeneratedValue
-  //@Type(type = "org.hibernate.type.UUIDCharType")
-  //@Type(type = "pg-uuid")
   private UUID fileId;
 
   @ManyToOne
@@ -69,26 +63,12 @@ public class UserFile {
 
   @Column
   private Float filesize;
-  
+
   @Column(name = "virus_scanned")
   private boolean virusScanned;
 
-  @Value("${spring.flyway.placeholders.user_file_doc_type_default}")
-  public static String docTypeDefault;
-
-  @Column(name="doc_type_label")
-  @Builder.Default
-  private String docTypeLabel = "test";
-
-//  public UserFile(UserFileBuilder userFileBuilder) {
-//    this.originalName = userFileBuilder.originalName;
-//    this.docTypeLabel = userFileBuilder.docTypeLabel;
-//
-//  }
-
-  public UserFile(UserFileBuilder userFileBuilder) {
-  }
-
+  @Column(name = "doc_type_label")
+  private String docTypeLabel;
 
   @Override
   public boolean equals(Object o) {
