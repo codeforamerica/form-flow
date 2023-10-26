@@ -53,10 +53,10 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
       Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
       appConfigsIterable.forEach(appConfig -> {
         FlowConfiguration flowConfig = (FlowConfiguration) appConfig;
-        if (disabledFlowPropertyConfiguration != null && !disabledFlowPropertyConfiguration.isFlowDisabled(flowConfig.getName())) {
+        if (disabledFlowPropertyConfiguration == null || !disabledFlowPropertyConfiguration.isFlowDisabled(flowConfig.getName())) {
           appConfigs.add(flowConfig);
         }
-          
+        
       });
     } catch (IOException e) {
       log.error("Can't find the flow configuration file: " + configPath, e);

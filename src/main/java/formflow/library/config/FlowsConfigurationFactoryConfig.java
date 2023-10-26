@@ -16,13 +16,13 @@ import java.util.Optional;
 @Configuration
 public class FlowsConfigurationFactoryConfig {
 
-  @Bean
-  @ConditionalOnProperty(name = "form-flow.disabled-flows")
-  public DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration() {
-    return new DisabledFlowPropertyConfiguration();
-  }
+//  @Bean
+//  @ConditionalOnProperty(name = "form-flow.disabled-flows", havingValue = "*", matchIfMissing = false)
+//  public DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration() {
+//    return new DisabledFlowPropertyConfiguration();
+//  }
 
-//  @Autowired
+  @Autowired(required = false)
   DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
 
 
