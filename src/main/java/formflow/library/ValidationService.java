@@ -8,6 +8,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +19,10 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+//import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -102,6 +107,13 @@ public class ValidationService {
         key = key.replace("[]", "");
       }
 
+      String originalKey = key;
+
+      if (key.contains("_wildcard")){
+        key = StringUtils.substringBefore(key, "_wildcard");
+
+      }
+
       try {
         annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
             .map(annotation -> annotation.annotationType().getName()).toList();
@@ -118,7 +130,8 @@ public class ValidationService {
           .forEach(violation -> messages.add(violation.getMessage()));
 
       if (!messages.isEmpty()) {
-        validationMessages.put(key, messages);
+        // uses original key to accommodate dynamic input names
+        validationMessages.put(originalKey, messages);
       }
     });
 
