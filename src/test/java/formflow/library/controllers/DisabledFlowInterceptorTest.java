@@ -38,7 +38,9 @@ import org.springframework.util.LinkedMultiValueMap;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 @TestPropertySource(properties = {
     "form-flow.disabled-flows[0].flow=testFlow",
-    "form-flow.disabled-flows[0].staticRedirectScreen=/"
+    "form-flow.disabled-flows[0].staticRedirectScreen=/",
+    "form-flow.disabled-flows[1].flow=otherTestFlow",
+    "form-flow.disabled-flows[1].staticRedirectScreen=/disabledFeature",
 })
 public class DisabledFlowInterceptorTest extends AbstractMockMvcTest {
 
@@ -53,9 +55,11 @@ public class DisabledFlowInterceptorTest extends AbstractMockMvcTest {
 
   @Test
   public void shouldRedirectToConfiguredScreenWhenDisabledFlowInterceptionIsEnabled() throws Exception {
-    // TODO Update this to be equals not contains
     mockMvc.perform(get("/flow/testFlow/inputs"))
         .andExpect(status().is3xxRedirection())
-        .andExpect(result -> assertTrue(Objects.requireNonNull(result.getResponse().getRedirectedUrl()).contains("/")));
+        .andExpect(result -> assertEquals("/", Objects.requireNonNull(result.getResponse().getRedirectedUrl())));
+    mockMvc.perform(get("/flow/otherTestFlow/inputs"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(result -> assertEquals("/disabledFeature", Objects.requireNonNull(result.getResponse().getRedirectedUrl())));
   }
 }

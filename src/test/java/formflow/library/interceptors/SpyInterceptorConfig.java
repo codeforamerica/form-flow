@@ -42,7 +42,7 @@ public class SpyInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());
-//        registry.addInterceptor(dataRequiredInterceptor());
+        registry.addInterceptor(dataRequiredInterceptor());
         registry.addInterceptor(disabledFlowInterceptor());
     }
 }

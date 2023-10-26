@@ -11,10 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-landmark-flow.yaml"}, webEnvironment = RANDOM_PORT)
-@TestPropertySource(properties = {"form-flow.session-continuity-interceptor.enabled=true",
-    "form-flow.disabled-flows[0].flow=testLandmarkFlow",
-    "form-flow.disabled-flows[0].staticRedirectScreen=/"
-})
+@TestPropertySource(properties = {"form-flow.session-continuity-interceptor.enabled=true"})
 public class DataInterceptorJourneyTest extends AbstractBasePageTest {
   @Test
   void interceptorShouldRedirectToLandingPageIfSessionIsNull() {
