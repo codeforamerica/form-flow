@@ -462,13 +462,18 @@ public class ScreenController extends FormFlowController {
 
     boolean isCurrentScreenLastInSubflow = getScreenConfig(flow, nextScreen).getSubflow() == null;
     String redirectString;
-    if (uuid != null && isCurrentScreenLastInSubflow) {
-      submission.setIterationIsCompleteToTrue(currentScreen.getSubflow(), uuid);
-      submission = saveToRepository(submission);
-      redirectString = String.format("/flow/%s/%s", flow, nextScreen);
+    if (uuid != null) {
+      if (isCurrentScreenLastInSubflow) {
+        submission.setIterationIsCompleteToTrue(currentScreen.getSubflow(), uuid);
+        submission = saveToRepository(submission);
+        redirectString = String.format("/flow/%s/%s", flow, nextScreen);
+      } else {
+        redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
+      }
     } else {
-      redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
+      redirectString = String.format("/flow/%s/%s", flow, nextScreen);
     }
+
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView(redirectString));
   }

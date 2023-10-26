@@ -135,7 +135,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
     ObjectMapper objectMapper = new ObjectMapper();
     UserFileMap userFileMap = objectMapper.readValue(session.getAttribute("userFiles").toString(), UserFileMap.class);
-
     // get the DZ Instance Map from the session and make sure the file info looks okay
     assertThat(userFileMap.getUserFileMap().size()).isEqualTo(1);
     assertThat(userFileMap.getUserFileMap().get("testFlow").size()).isEqualTo(1);
@@ -146,6 +145,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
     assertThat(fileData.get("filesize")).isEqualTo("4.0");
     assertThat(fileData.get("thumbnailUrl")).isEqualTo("base64string");
     assertThat(fileData.get("type")).isEqualTo(MediaType.IMAGE_JPEG_VALUE);
+
+    // also test using the UserFileMap.getFiles() method to ensure it works okay here too.
+    Map<UUID, Map<String, String>> filesDirect = userFileMap.getFiles("testFlow", "dropZoneTestInstance");
+    assertThat(filesDirect.get(theNewFileId)).isEqualTo(fileData);
   }
 
   @Test
