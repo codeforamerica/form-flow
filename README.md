@@ -2335,6 +2335,14 @@ to see if a user is on, in the event that they don't have a Session or Submissio
 It is a page in the flow that a user can enter without having an active Session; it is marking
 that this page is an entry point into a flow.
 
+### Disabled Flow Interceptor
+
+The `DisabledFlowInterceptor` is an interceptor that prevents users from accessing a flow that has
+been disabled through configuration. This interceptor will redirect users to a configured static screen
+when they attempt to access a screen within a disabled flow. 
+
+For more information on disabling a flow, please see the [Disabling a Flow](#disabling-a-flow) section.
+
 # How to use
 
 ## Configuration Details
@@ -2385,6 +2393,24 @@ your `application.yaml` like such:
 ```yaml
 form-flow:
   path: 'name-of-file.yaml'
+```
+
+#### Disabling a Flow
+
+The form flow library provides a configuration mechanism to disable a flow. This will prevent users
+from being able to access a given flow, and will redirect the user to a configured screen if they
+attempt to reach a page within a disabled flow.
+
+Here are two examples of disabled flows, the first goes to the home page and the second goes to a 
+unique static page. The default is the home page if no `staticRedirectPage` is configured.
+
+```yaml
+form-flow:
+  disabled-flows:
+    - flow: ubi
+      staticRedirectPage: '/'
+    - flow: docUpload
+      staticRedirectPage: '/disabledFeature'
 ```
 
 #### Design System
@@ -2576,6 +2602,10 @@ any one flow, the `Submission` for each flow will be stored in the database.
 **⚠️ If your screen flow has users crossing flows, you need to ensure that you provide a reentry
 point
 to go back to the other flow. Otherwise, the flows may not get completed properly.**
+
+The form flow library provides a configuration mechanism to disable a flow. This is useful if you are
+still developing a flow, or if a flow has reached its end of life. For more information on 
+disabling flows see: [Disabling a Flow](#disabling-a-flow)
 
 ### Screens
 

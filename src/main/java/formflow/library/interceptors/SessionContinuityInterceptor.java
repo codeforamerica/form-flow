@@ -1,6 +1,7 @@
 package formflow.library.interceptors;
 
 import formflow.library.FormFlowController;
+import formflow.library.ScreenController;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.exceptions.LandmarkNotSetException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +26,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
 public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered {
 
-  public static final String FLOW_PATH_FORMAT = "/flow/{flow}/{screen}";
-  public static final String NAVIGATION_FLOW_PATH_FORMAT = "/flow/{flow}/{screen}/navigation";
+  public static final String FLOW_PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
+  public static final String NAVIGATION_FLOW_PATH_FORMAT = FLOW_PATH_FORMAT + "/navigation";
 
   private static final String REDIRECT_URL = "/";
 

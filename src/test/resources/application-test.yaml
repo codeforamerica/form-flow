@@ -1,4 +1,5 @@
 form-flow:
+#  disabled-flows:
   path: 'test-flow.yaml'
   inputs: 'formflow.library.inputs.'
   uploads:

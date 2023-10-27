@@ -3,8 +3,11 @@ package formflow.library.config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Flow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
@@ -21,7 +24,26 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
 
   @Value("${form-flow.path:flows-config.yaml}")
   String configPath;
+  
+  DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
 
+
+  FlowsConfigurationFactory() {
+    this.disabledFlowPropertyConfiguration = null;
+  }
+
+  FlowsConfigurationFactory(DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration) {
+    this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration;
+  }
+
+  /**
+   * Takes in the flow configuration yaml file from the given form-flow.path application properties and parses it into a list of 
+   * FlowConfiguration objects.
+   * 
+   * Disabled flows will be excluded, detected using the form-flow.disabled-flows application property.
+   * @return list of FlowConfiguration objects.
+   * @throws IOException if the flow configuration file can't be found.
+   */
   @Override
   public List<FlowConfiguration> getObject() throws IOException {
     ClassPathResource classPathResource = new ClassPathResource(configPath);
@@ -36,7 +58,13 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
     List<FlowConfiguration> appConfigs = new ArrayList<>();
     try {
       Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
-      appConfigsIterable.forEach(appConfig -> appConfigs.add((FlowConfiguration) appConfig));
+      appConfigsIterable.forEach(appConfig -> {
+        FlowConfiguration flowConfig = (FlowConfiguration) appConfig;
+        if (disabledFlowPropertyConfiguration == null || !disabledFlowPropertyConfiguration.isFlowDisabled(flowConfig.getName())) {
+          appConfigs.add(flowConfig);
+        }
+        
+      });
     } catch (IOException e) {
       log.error("Can't find the flow configuration file: " + configPath, e);
       throw e;

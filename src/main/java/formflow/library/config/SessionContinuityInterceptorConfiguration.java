@@ -17,10 +17,16 @@ public class SessionContinuityInterceptorConfiguration implements WebMvcConfigur
 
   @Autowired
   List<FlowConfiguration> flowConfigurations;
-
+  
+  
+  /**
+   * Adds the SessionContinuityInterceptor to the Interceptor registry.
+   * @param registry the Interceptor registry.
+   */
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(new SessionContinuityInterceptor(flowConfigurations))
-        .addPathPatterns(List.of(SessionContinuityInterceptor.FLOW_PATH_FORMAT, SessionContinuityInterceptor.NAVIGATION_FLOW_PATH_FORMAT));
+        .addPathPatterns(List.of(SessionContinuityInterceptor.FLOW_PATH_FORMAT,
+            SessionContinuityInterceptor.NAVIGATION_FLOW_PATH_FORMAT));
   }
 }
