@@ -19,10 +19,21 @@ import org.springframework.context.annotation.Configuration;
 public class DisabledFlowPropertyConfiguration {
   private List<Map<String, String>> disabledFlows = new ArrayList<>();
 
+
+  /**
+   * Checks if the flow with flowName is disabled.
+   * @param flowName the name of the flow to check.
+   * @return true if the flow is disabled, false otherwise.
+   */
   public boolean isFlowDisabled(String flowName) {
     return this.disabledFlows.stream().anyMatch(flow -> flow.get("flow").equals(flowName));
   }
   
+  /**
+   * Gets the static redirect screen for a disabled flow.
+   * @param flowName the name of the flow to check.
+   * @return the static redirect screen for the flow if disabled flows are configured and the flow is disabled.
+   */
   public String getDisabledFlowRedirect(String flowName) {
     if (disabledFlows == null) {
       return null;

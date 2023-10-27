@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * Adds DisabledFlowInterceptorConfiguration to the Interceptor registry.
  */
 @Configuration
-//@ConditionalOnProperty(name = "form-flow.disabled-flows")
 public class DisabledFlowInterceptorConfiguration implements WebMvcConfigurer {
   
   DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
@@ -24,7 +23,11 @@ public class DisabledFlowInterceptorConfiguration implements WebMvcConfigurer {
   public DisabledFlowInterceptorConfiguration(DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration) {
     this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration;
   }
-
+  
+  /**
+   * Adds the DisabledFlowInterceptor to the Interceptor registry.
+   * @param registry The Interceptor registry.
+   */
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(new DisabledFlowInterceptor(disabledFlowPropertyConfiguration))

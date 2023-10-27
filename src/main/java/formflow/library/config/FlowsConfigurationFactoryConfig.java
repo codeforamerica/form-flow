@@ -16,12 +16,6 @@ import java.util.Optional;
 @Configuration
 public class FlowsConfigurationFactoryConfig {
 
-//  @Bean
-//  @ConditionalOnProperty(name = "form-flow.disabled-flows")
-//  public DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration() {
-//    return new DisabledFlowPropertyConfiguration();
-//  }
-
   @Autowired(required = false)
   DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
 
