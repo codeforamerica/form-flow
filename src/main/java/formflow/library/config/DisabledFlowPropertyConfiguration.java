@@ -30,15 +30,15 @@ public class DisabledFlowPropertyConfiguration {
   }
   
   /**
-   * Gets the static redirect screen for a disabled flow.
+   * Gets the static redirect page for a disabled flow.
    * @param flowName the name of the flow to check.
-   * @return the static redirect screen for the flow if disabled flows are configured and the flow is disabled.
+   * @return the static redirect page for the flow if disabled flows are configured and the flow is disabled.
    */
   public String getDisabledFlowRedirect(String flowName) {
-    if (disabledFlows == null) {
-      return null;
-    }
-    Optional<Map<String, String>> disabledFlow = disabledFlows.stream().filter(flow -> flow.get("flow").equals(flowName)).findFirst();
-    return disabledFlow.isPresent() ? disabledFlow.get().get("staticRedirectScreen") : null;
+    return disabledFlows.stream()
+        .filter(flow -> flow.get("flow").equals(flowName))
+        .map(flow -> flow.getOrDefault("staticRedirectPage", ""))
+        .findFirst()
+        .orElse(null);
   }
 }

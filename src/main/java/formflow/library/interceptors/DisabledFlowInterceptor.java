@@ -36,30 +36,26 @@ public class DisabledFlowInterceptor implements HandlerInterceptor, Ordered {
    * @param request current HTTP request
    * @param response current HTTP response
    * @param handler chosen handler to execute, for type and/or instance evaluation
-   * @return
-   * @throws LandmarkNotSetException
+   * @return true if the flow is enabled, which will pass the request to the next registered interceptor. False if the flow is disabled, 
+   * which will redirect the user to the configured staticRedirectPage, and stop the interceptor chain.
    */
 
   @Override
   public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
-    List<Map<String, String>> disabledFlows = disabledFlowPropertyConfiguration .getDisabledFlows();
-    System.out.println("Disabled flows is equal to: " + disabledFlows.toString());
-
     Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(PATH_FORMAT, request.getRequestURI());
     String requestedFlow = parsedUrl.get("flow");
     if (disabledFlowPropertyConfiguration.isFlowDisabled(requestedFlow)) {
-      String staticRedirectScreen = disabledFlowPropertyConfiguration.getDisabledFlowRedirect(requestedFlow);
-      log.info("Flow %s is disabled. Redirecting to %s.".formatted(requestedFlow, staticRedirectScreen));
+      String staticRedirectPage = disabledFlowPropertyConfiguration.getDisabledFlowRedirect(requestedFlow);
+      if (staticRedirectPage == null || staticRedirectPage.isEmpty()) {
+        log.warn("Flow %s is disabled but no static redirect page is configured. Going home instead.".formatted(requestedFlow));
+        staticRedirectPage = "/";
+      }
+      log.info("Flow %s is disabled. Redirecting to %s.".formatted(requestedFlow, staticRedirectPage));
 
       try {
-        response.sendRedirect(staticRedirectScreen);
-      } catch (IOException e1) {
-        log.error("Error redirecting to %s, going home instead".formatted(staticRedirectScreen));
-        try {
-          response.sendRedirect("/");
-        } catch (IOException e2) {
-          throw new RuntimeException(e1);
-        }
+        response.sendRedirect(staticRedirectPage);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
       return false;
     }

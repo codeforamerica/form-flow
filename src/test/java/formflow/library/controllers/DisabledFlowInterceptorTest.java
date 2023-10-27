@@ -38,9 +38,9 @@ import org.springframework.util.LinkedMultiValueMap;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 @TestPropertySource(properties = {
     "form-flow.disabled-flows[0].flow=testFlow",
-    "form-flow.disabled-flows[0].staticRedirectScreen=/",
+    "form-flow.disabled-flows[0].staticRedirectPage=/",
     "form-flow.disabled-flows[1].flow=otherTestFlow",
-    "form-flow.disabled-flows[1].staticRedirectScreen=/disabledFeature",
+    "form-flow.disabled-flows[1].staticRedirectPage=/disabledFeature",
 })
 public class DisabledFlowInterceptorTest extends AbstractMockMvcTest {
 
