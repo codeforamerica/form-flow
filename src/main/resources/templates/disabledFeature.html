@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(title=#{disabled-feature.header})}"></head>
+<body>
+<div class="page-wrapper">
+  <div th:replace="~{fragments/toolbar :: toolbar}"></div>
+  <section class="slab">
+    <div class="grid">
+      <main id="content" role="main" class="form-card spacing-above-35">
+        <th:block th:replace="~{fragments/icons :: error}"></th:block>
+        <th:block th:replace="~{fragments/cardHeader :: cardHeader(header=#{disabled-feature.header})}"/>
+        <p th:text="#{disabled-feature.subtext}"></p>
+        <a href="/" th:text="#{disabled-feature.return}" class="button--primary button"></a>
+      </main>
+    </div>
+  </section>
+</div>
+<th:block th:replace="~{fragments/footer :: footer}"/>
+</body>
+</html>
