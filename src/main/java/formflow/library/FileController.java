@@ -60,7 +60,7 @@ public class FileController extends FormFlowController {
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
 
-  @Value("${spring.flyway.placeholders.user_file_doc_type_default:#{null}}")
+  @Value("${form-flow.uploads.default-doc-type:#{null}}")
   private String defaultDocType;
 
   @Value("${form-flow.uploads.virus-scanning.enabled:false}")

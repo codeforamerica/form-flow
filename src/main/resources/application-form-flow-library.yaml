@@ -2,7 +2,7 @@ spring:
   flyway:
     placeholders:
       uuid_function: "gen_random_uuid"
-      user_file_doc_type_default: "NotSet"
+      user_file_doc_type_default: ${form-flow.uploads.default-doc-type:#{null}}
   messages:
     encoding: ISO-8859-1
     basename: messages, messages-form-flow

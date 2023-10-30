@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,10 +18,8 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-//import org.springframework.util.StringUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -50,8 +47,8 @@ public class ValidationService {
   /**
    * Autoconfigured constructor.
    *
-   * @param validator Validator from Jakarta package.
-   * @param actionManager the <code>ActionManager</code> that manages the logic to be run at specific points
+   * @param validator       Validator from Jakarta package.
+   * @param actionManager   the <code>ActionManager</code> that manages the logic to be run at specific points
    * @param inputConfigPath the package path where inputs classes are located
    */
   public ValidationService(Validator validator, ActionManager actionManager,
@@ -109,7 +106,7 @@ public class ValidationService {
 
       String originalKey = key;
 
-      if (key.contains("_wildcard")){
+      if (key.contains("_wildcard")) {
         key = StringUtils.substringBefore(key, "_wildcard");
 
       }
