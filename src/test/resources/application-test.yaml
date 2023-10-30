@@ -1,5 +1,4 @@
 form-flow:
-#  disabled-flows:
   path: 'test-flow.yaml'
   inputs: 'formflow.library.inputs.'
   uploads:
@@ -40,7 +39,7 @@ spring:
     clean-on-validation-error: true
     placeholders:
       uuid_function: "gen_random_uuid"
-      user_file_doc_type_default: "NotSet"
+      user_file_doc_type_default_label: ${form-flow.uploads.default-doc-type-label:#{null}}
     clean-disabled: false
   messages:
     encoding: ISO-8859-1
