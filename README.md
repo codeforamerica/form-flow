@@ -231,7 +231,8 @@ with `subflow: subflowName` in the `flows-config.yaml`.
 
 #### Review Screen
 
-This screen summarizes all the completed iterations of a subflow and is shown after each iteration is completed.
+This screen summarizes all the completed iterations of a subflow and is shown after each iteration
+is completed.
 It lists the data from each iteration and provides options to edit or delete them individually.
 
 This screen does not need to be denoted with `subflow: subflowName` in the `flows-config.yaml`. It
@@ -248,9 +249,13 @@ This page is not technically part of the subflow and as such, does not need to b
 with `subflow: subflowName` in the `flows-config.yaml`.
 
 ### Subflows Data
-Subflow information will be saved in your applications database within the larger JSON `inputData` as an array of subflow iterations
+
+Subflow information will be saved in your applications database within the larger JSON `inputData`
+as an array of subflow iterations
 like this example of a household subflow with two iterations:
+
 ```JSON
+{
   "household": [
     {
       "uuid": "e2c18dfe-98e9-430f-9a4f-3511966d3128",
@@ -268,16 +273,24 @@ like this example of a household subflow with two iterations:
       "householdMemberRelationship": "Child",
       "householdMemberRecentlyMovedToUS": "No"
     }
-  ],
+  ]
+}
 ```
-Note that all information submitted for a single loop (iteration) through your subflow will show up within a single array index.
-The index includes a `uuid` field, which is a unique identifier for that iteration within the subflow. 
+
+Note that all information submitted for a single loop (iteration) through your subflow will show up
+within a single array index.
+The index includes a `uuid` field, which is a unique identifier for that iteration within the
+subflow.
 
 #### Completed iterations
+
 The `iterationIsComplete` field will indicate if an iteration was completed, meaning the person
-filling out the subflow made it all the way through all screens within the subflow and clicked submit(POST)/continue(GET) on the 
-final screen of the iteration (heading to the review page). If that person backs out of the subflow before completing it, then `iterationIsComplete` will remain false.
-Incomplete iterations will not be included in the generated PDF of the submission, but are still accessible in the 
+filling out the subflow made it all the way through all screens within the subflow and clicked
+submit(POST)/continue(GET) on the
+final screen of the iteration (heading to the review page). If that person backs out of the subflow
+before completing it, then `iterationIsComplete` will remain false.
+Incomplete iterations will not be included in the generated PDF of the submission, but are still
+accessible in the
 database for error resolution and debugging.
 
 ## Submission Object
@@ -1315,7 +1328,7 @@ once the upload is complete it will become a delete link.
 If the file has an extension of .jpg, .png, .bmp or .gif, DropZone will create a thumbnail for that
 image and display it on the screen.
 
-For files with extensions other than the ones listed (like tif files and various document formats),
+For files with extensions other than the ones listed (like .tif files and various document formats),
 we will display a default image for those thumbnails.
 
 We do not store the thumbnails on the server side at all.
@@ -1327,24 +1340,55 @@ The resulting file information will be stored in the database in two places:
 1. the `submissions` table
 2. the `user_files` table
 
-The saved JSON is store in the `submissions` table with the field name being the key.
+The `submissions` table is where the file is associated with a submission as part of the
+JSON data. It is stored in the `input_data` JSON and the key name is the input field name that the
+Dropzone instance was associated with.
 
 Example JSON:
 
 ```JSON
 {
   /* other content */
-  "license_upload": "[34,47]"
+  "uploadDocuments": "[\"36ecebb5-c74b-430c-abd7-86b9c211aa71\",\"d2fb9fb6-510a-4cf6-bf2f-04e81daf6a13\",\"c578bf3b-af04-4c8e-9dc0-3afa6946ceb6\"]"
   /* other content */
 }
 ```
 
-This indicates that there were two files uploaded via the `license_upload` widget. Their file ids
-are `34` and `47`, and can be looked up in the `user_files` table (detailed below) using those ids.
+This indicates that there were three files uploaded via the `uploadDocuments` widget. Their file ids
+are `36ecebb5-c74b-430c-abd7-86b9c211aa71`, `d2fb9fb6-510a-4cf6-bf2f-04e81daf6a13`,
+and `c578bf3b-af04-4c8e-9dc0-3afa6946ceb6`. These files can be looked up in the `user_files` table
+using those ids.
 
-The `user_files` table holds information about a submission's uploaded user files, which includes:
-`file_id`, the corresponding submission's `submission_id`, a `created_at` time, the `original_name`
-of the file, and the S3 `repository_path`.
+The `user_files` table holds information about files a user uploaded as part of their submission.
+The table includes:
+
+* `file_id` - the ID of the file (UUID)
+* `filesize` - size of file, in bytes
+* `submission_id` - ID of the submission the file relates to
+* `created_at` - time file was uploaded
+* `original_name` - original name of the file at the time of upload
+* `doc_type_use` - the document type use label for the file
+* `repository_path` - the location of the file in cloud storage
+* `virus_scanned` - boolean field indicating if the file was scanned for viruses. `false` means the
+  file was not scanned when it was uploaded.  `true` means it was scanned and free of viruses.
+
+#### Document Use Type
+
+The `user_files` table has a column which leaves space for an application to store a document type
+label. The Form Flow library doesn't use this field, but provides it so applications have a place
+to store this information.
+
+The `doc_type_label` column will be set to `NULL`, by default, when a new record is added without
+the field being set. To override this default add the following field to an application's
+`application.yaml` file, like so:
+
+```yaml
+form-flow:
+  uploads:
+    default-doc-type-label: "NotSet"
+```
+
+Now when a new record is added without a value for `doc_type_label` it will now be set to `NotSet`.
 
 ### Deleting Uploaded Files
 
@@ -1381,7 +1425,8 @@ There is a field `virus_scanned` in the `user_files` table with `Boolean` as its
 * `true` if the file was scanned by the service and did not have a virus.
 * `false` if not scanned, either because the service is down or disabled.
 
-> ⚠️ If a file has a virus, it is rejected and not saved in our systems.
+> ⚠️ If virus scanning is enabled and a virus is detected in a file, it is rejected and not saved in
+> our systems.
 
 ## Document Download
 
@@ -1391,8 +1436,7 @@ Form flow library allows users to either:
 2. Download a zipped archive with all the files associated with a submission.
 
 In order to download from these endpoints, the HTTP session must have an attribute of "id" that
-matches
-the submission's UUID.
+matches the submission's UUID.
 
 ### Downloading individual files
 
@@ -1406,9 +1450,8 @@ the `user_files` table in order for the file to be retrieved.
 In order to download all the files associated with a submission a user needs to use the download-all
 endpoint:  `/file-download/{submissionId}`. The download-all endpoint requires that the `id`
 attribute for the HTTP session matches the `submissionId` for the group of files in the submission
-that
-you would like to download. When you use the download-all endpoint, every file in the `user_files`
-table associated with a submission are zipped together and downloaded.
+that you would like to download. When you use the download-all endpoint, every file in
+the `user_files` table associated with a submission are zipped together and downloaded.
 
 ## Address Validation
 
@@ -1769,7 +1812,8 @@ These preparers are:
 - `SubflowFieldPreparer`
     - Handles the mapping of subflow fields from your application's subflows and their inputs to the
       correct fields in your PDF template file.
-    - **Note that subflow iterations which have not been marked with `iterationIsComplete: true` will not be mapped to the generated PDF**
+    - **Note that subflow iterations which have not been marked with `iterationIsComplete: true`
+      will not be mapped to the generated PDF**
 
 All of these preparers will run by default against the `inputFields` you have indicated in your
 `pdf-map.yaml` file. Should you want to customize or inject fields you can do so
@@ -2338,10 +2382,12 @@ that this page is an entry point into a flow.
 ### Disabled Flow Interceptor
 
 The `DisabledFlowInterceptor` is an interceptor that prevents users from accessing a flow that has
-been disabled through configuration. This interceptor will redirect users to a configured static screen
-when they attempt to access a screen within a disabled flow. 
+been disabled through configuration. This interceptor will redirect users to a configured static
+screen
+when they attempt to access a screen within a disabled flow.
 
-For more information on disabling a flow, please see the [Disabling a Flow](#disabling-a-flow) section.
+For more information on disabling a flow, please see the [Disabling a Flow](#disabling-a-flow)
+section.
 
 # How to use
 
@@ -2401,14 +2447,17 @@ The form flow library provides a configuration mechanism to disable a flow. This
 from being able to access a given flow, and will redirect the user to a configured screen if they
 attempt to reach a page within a disabled flow.
 
-Here are two examples of disabled flows, the first goes to the home page and the second goes to a 
+Here are two examples of disabled flows, the first goes to the home page and the second goes to a
 unique static page. If no `staticRedirectScreen` is configured the library will default to the
 [disabled feature](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/disabledFeature.html)
-template. This template provides a basic message stating the feature being accessed is currently unavailable
-and to try again later if the user believes they have reached this page by mistake. 
+template. This template provides a basic message stating the feature being accessed is currently
+unavailable
+and to try again later if the user believes they have reached this page by mistake.
 
-When disabling a flow, we recommend creating your own page with proper messaging about the disabled flow
-to present to clients when they attempt to access the disabled flow. The configured `staticRedirectScreen`
+When disabling a flow, we recommend creating your own page with proper messaging about the disabled
+flow
+to present to clients when they attempt to access the disabled flow. The
+configured `staticRedirectScreen`
 will be used when provided and the default disabled feature template is only meant as a fallback.
 
 ```yaml
@@ -2610,8 +2659,9 @@ any one flow, the `Submission` for each flow will be stored in the database.
 point
 to go back to the other flow. Otherwise, the flows may not get completed properly.**
 
-The form flow library provides a configuration mechanism to disable a flow. This is useful if you are
-still developing a flow, or if a flow has reached its end of life. For more information on 
+The form flow library provides a configuration mechanism to disable a flow. This is useful if you
+are
+still developing a flow, or if a flow has reached its end of life. For more information on
 disabling flows see: [Disabling a Flow](#disabling-a-flow)
 
 ### Screens
