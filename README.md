@@ -2402,7 +2402,14 @@ from being able to access a given flow, and will redirect the user to a configur
 attempt to reach a page within a disabled flow.
 
 Here are two examples of disabled flows, the first goes to the home page and the second goes to a 
-unique static page. The default is the home page if no `staticRedirectPage` is configured.
+unique static page. If no `staticRedirectScreen` is configured the library will default to the
+[disabled feature](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/disabledFeature.html)
+template. This template provides a basic message stating the feature being accessed is currently unavailable
+and to try again later if the user believes they have reached this page by mistake. 
+
+When disabling a flow, we recommend creating your own page with proper messaging about the disabled flow
+to present to clients when they attempt to access the disabled flow. The configured `staticRedirectScreen`
+will be used when provided and the default disabled feature template is only meant as a fallback.
 
 ```yaml
 form-flow:
@@ -2410,7 +2417,7 @@ form-flow:
     - flow: ubi
       staticRedirectPage: '/'
     - flow: docUpload
-      staticRedirectPage: '/disabledFeature'
+      staticRedirectPage: '/docUploadDisabled'
 ```
 
 #### Design System

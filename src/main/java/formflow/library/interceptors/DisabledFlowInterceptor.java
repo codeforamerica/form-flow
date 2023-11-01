@@ -48,14 +48,14 @@ public class DisabledFlowInterceptor implements HandlerInterceptor, Ordered {
       String staticRedirectPage = disabledFlowPropertyConfiguration.getDisabledFlowRedirect(requestedFlow);
       if (staticRedirectPage == null || staticRedirectPage.isEmpty()) {
         log.warn("Flow %s is disabled but no static redirect page is configured. Going home instead.".formatted(requestedFlow));
-        staticRedirectPage = "/";
+        staticRedirectPage = "/disabledFeature";
       }
       log.info("Flow %s is disabled. Redirecting to %s.".formatted(requestedFlow, staticRedirectPage));
 
       try {
         response.sendRedirect(staticRedirectPage);
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeException(e);  
       }
       return false;
     }
