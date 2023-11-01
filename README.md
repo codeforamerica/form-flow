@@ -22,6 +22,7 @@ Table of Contents
     * [Actions](#actions)
     * [Defining Inputs](#defining-inputs)
         * [Inputs Class](#inputs-class)
+        * [Dynamic Input Fields](#dynamic-input-fields)
         * [Custom Annotations](#custom-annotations)
         * [Input Data JSON Structure](#input-data-json-structure)
 * [General Information](#general-information)
@@ -500,25 +501,105 @@ class ApplicationInformation extends FlowInputs {
 }
 ```
 
+### Dynamic Input Fields
+
+A field is dynamic if it is unknown exactly how many of them will be form submitted in a page.
+
+For example, if a user uploads a number of files on one screen, and you need to attach data to
+each file on another screen, the exact number of files is unknown to the template generating
+the follow-up page. These input fields will need to be dynamic fields.
+
+The way the Form Flow library accommodates this scenario is by having an annotation, `@DynamicField`
+to mark this field as dynamic.
+
+To create a dynamic field you need to do two things:
+
+1. create the field in the inputs file and apply the `@DynamicField` annotation to it, as well as
+   any other annotations that apply to the field.
+2. create the input fields in the thymeleaf template and make sure they are named appropriately, as
+   described below.
+
+Here is an example of how to set up a dynamic field.
+
+In this example, the `docTypeLabel` is a dynamic field. On page a user has uploaded any number of
+document files. On the next page the user needs to pick a document type for each file to indicate
+what type of document it is (license, birth certificate, etc.).
+
+```java
+class ApplicationInformation extends FlowInputs {
+
+  MultipartFile documents;
+
+  @NotBlank
+  @DynamicField
+  String docTypeLabel;
+
+  @NotBlank(message = "{personal-info.provide-first-name}")
+  String someOtherField;
+}
+```
+
+The `@DynamicField` annotation tells the library that this field will
+have multiple field submissions in one form.  `docTypeLabel` ends up being considered as a prefix
+for the field name, and the system will expect multiple fields with the `docTypeLabel` as the
+beginning part of their names.
+
+To submit a dynamic field, the template must do the following in naming the input fields:
+(for reference, this template code might be in a foreach where the `fileId` changes on each loop,
+resulting in multiple input fields being rendered with slightly different names.)
+
+```html
+
+<th:block th:with
+          fieldName=${'docTypeLabel' +
+          T(formflow.library.inputs.FieldDesignation.DYNAMIC_FIELD_MARKER) + fileId}>
+```
+
+The resulting form submission to the library would look like this `HashMap`
+
+```text
+  Map<String, Object> formSubmissionData =  
+  
+    "someOtherField"->"Test Field Value",
+    "docTypeLabel_wildcard_123-4"->"License",
+    "docTypeLabel_wildcard_123-0"->"Birth Certificate",
+    "docTypeLabel_wildcard_123-2"->"Divorce Decree",
+    "docTypeLabel_wildcard_123-1"->"Pay Stub",
+    "docTypeLabel_wildcard_123-3"->"Other"
+```
+
+When the library does validation on this set of fields, it will look for the `DYNAMIC_FIELD_MARKER`
+in a field's name. If it exists, then the logic will grab the prefix (`docTypeLabel`) and use the
+annotations applied to that field on all the fields submitted with the proper prefix.
+
+The suffix value (`123-4`, `123-0`, etc.) must be unique. It has no semantic meaning to the library,
+but the application should use it to help align data, either via an action or via post-processing.
+In the example case, it would be the `fileId` which would help correlate the doc type to the
+document stored in the `user_files` table.
+
+Note that if a field happens to have the `DYNAMIC_FIELD_MARKER` (`_wildcard_`) in its name, but
+the field doesn't have the `@DynamicField` annotation, the system will not treat that field as a
+dynamic field and will throw an exception.
+
 ### Validating Inputs
 
-Validations for inputs use the Java Bean Validation, more specifically, Hibernate
-validations. For a list of validation decorators,
-see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+Validations for inputs use the Java Bean Validation,more specifically,Hibernate
+validations.For a list of validation decorators,
+see[Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
 
-Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
-`@NotNull` is used. If a validation annotation such as `@Email` is used, it will not
-actually validate the annotated input unless a user actually enters a value for that input. If you
-use `@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
-enter a value, validating both that they need to enter a value due to `@NotBlank` and because the
+Note that our implementation does not make a field required,unless `@NotEmpty`, `@NotBlank`,or
+`@NotNull` is used.If a validation annotation such as `@Email` is used,it will not
+actually validate the annotated input unless a user actually enters a value for that input.If you
+use `@Email` and `@NotBlank` together,that causes both validations to run even if the user did not
+enter a value,validating both that they need to enter a value due to `@NotBlank` and because the
 blank value needs to be a validly formatted email address due to `@Email`.
 
 ### Custom Annotations
 
 #### Marker Annotations
 
-Marker annotations are used to mark a field for certain functionality. These annotations may or may
-not have any validation associated with them; they may simply mark the field for some usage.
+Marker annotations are used to mark a field for certain functionality.These annotations may or may
+not have any validation associated with them;they may simply mark the field for some usage.
 
 ##### @Encrypted
 
@@ -1367,7 +1448,7 @@ The table includes:
 * `submission_id` - ID of the submission the file relates to
 * `created_at` - time file was uploaded
 * `original_name` - original name of the file at the time of upload
-* `doc_type_use` - the document type use label for the file
+* `doc_type_label` - the document type label for the file
 * `repository_path` - the location of the file in cloud storage
 * `virus_scanned` - boolean field indicating if the file was scanned for viruses. `false` means the
   file was not scanned when it was uploaded.  `true` means it was scanned and free of viruses.

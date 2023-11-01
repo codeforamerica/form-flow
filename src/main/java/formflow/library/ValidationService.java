@@ -4,6 +4,7 @@ import formflow.library.config.ActionManager;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
+import formflow.library.data.annotations.DynamicField;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 
+import static formflow.library.inputs.FieldDesignation.DYNAMIC_FIELD_MARKER;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -97,6 +99,7 @@ public class ValidationService {
     }
 
     formSubmission.getFormData().forEach((key, value) -> {
+      boolean dynamicField = false;
       var messages = new ArrayList<String>();
       List<String> annotationNames = null;
 
@@ -106,16 +109,38 @@ public class ValidationService {
 
       String originalKey = key;
 
-      if (key.contains("_wildcard")) {
-        key = StringUtils.substringBefore(key, "_wildcard");
-
+      if (key.contains(DYNAMIC_FIELD_MARKER)) {
+        dynamicField = true;
+        key = StringUtils.substringBefore(key, DYNAMIC_FIELD_MARKER);
       }
 
       try {
         annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
             .map(annotation -> annotation.annotationType().getName()).toList();
       } catch (NoSuchFieldException e) {
-        throw new RuntimeException(e);
+        if (dynamicField) {
+          throw new RuntimeException(
+              String.format(
+                  "Input field '%s' has dynamic field marker '%s' in its name, but we are unable to " +
+                      "find the field in the input file. Is it a dynamic field?",
+                  originalKey, DYNAMIC_FIELD_MARKER
+              )
+          );
+        } else {
+          throw new RuntimeException(e);
+        }
+      }
+
+      // if it's acting like a dynamic field, then ensure that it is marked as one
+      if (dynamicField) {
+        if (!annotationNames.contains("formflow.library.data.annotations.DynamicField")) {
+          throw new RuntimeException(
+              String.format(
+                  "Field name '%s' (field: '%s') acts like it's a dynamic field, but the field does not contain the @DynamicField annotation",
+                  key, originalKey
+              )
+          );
+        }
       }
 
       if (Collections.disjoint(annotationNames, requiredAnnotationsList) && value.equals("")) {
