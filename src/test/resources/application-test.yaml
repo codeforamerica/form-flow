@@ -2,6 +2,7 @@ form-flow:
   path: 'test-flow.yaml'
   inputs: 'formflow.library.inputs.'
   uploads:
+    default-doc-type-label: "NotSet"
     accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
     max-files: '5'
     max-file-size: '17'
