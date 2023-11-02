@@ -2402,7 +2402,6 @@ from being able to access a given flow, and will redirect the user to a configur
 attempt to reach a page within a disabled flow.
 
 Here are two examples of disabled flows, the first goes to the home page and the second goes to a 
-
 unique static page. If no `staticRedirectScreen` is configured the library will default to the
 [disabled feature](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/disabledFeature.html)
 template. This template provides a basic message stating the feature being accessed is currently unavailable
