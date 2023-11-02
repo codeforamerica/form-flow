@@ -11,7 +11,11 @@ import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
 /**
- * Security Configuration
+ * Security Configuration - leverages spring security features 
+ * Includes:
+ *   - secure & httpOnly headers on cookies
+ *   - no basicAuth 
+ *   - utilize X-Forwarded features
  */
 
 @Configuration
