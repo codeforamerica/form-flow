@@ -1,7 +1,6 @@
 package formflow.library.data;
 
 import formflow.library.address_validation.ValidatedAddress;
-import formflow.library.inputs.UnvalidatedField;
 import formflow.library.inputs.AddressParts;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +10,18 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import org.springframework.util.MultiValueMap;
 
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_CSRF;
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
+
 @Data
 public class FormSubmission {
 
   public Map<String, Object> formData;
-  private List<String> unvalidatedFields = List.of(UnvalidatedField.CSRF, UnvalidatedField.VALIDATE_ADDRESS);
+  private List<String> unvalidatedFields = List.of(
+      UNVALIDATED_FIELD_MARKER_CSRF,
+      UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS
+  );
 
   public FormSubmission(MultiValueMap<String, String> formData) {
     this.formData = removeEmptyValuesAndFlatten(formData);
@@ -54,7 +60,7 @@ public class FormSubmission {
    */
   public List<String> getAddressValidationFields() {
     return formData.entrySet().stream()
-        .filter(entry -> entry.getKey().startsWith(UnvalidatedField.VALIDATE_ADDRESS))
+        .filter(entry -> entry.getKey().startsWith(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS))
         .filter(entry -> entry.getValue().toString().equalsIgnoreCase("true"))
         .map(Entry::getKey).toList();
   }
@@ -62,11 +68,11 @@ public class FormSubmission {
   public void setValidatedAddress(Map<String, ValidatedAddress> validatedAddresses) {
     validatedAddresses.forEach((key, value) -> {
       if (value != null) {
-        formData.put(key + AddressParts.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED, value.getStreetAddress());
-        formData.put(key + AddressParts.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED, value.getApartmentNumber());
-        formData.put(key + AddressParts.CITY + UnvalidatedField.VALIDATED, value.getCity());
-        formData.put(key + AddressParts.STATE + UnvalidatedField.VALIDATED, value.getState());
-        formData.put(key + AddressParts.ZIPCODE + UnvalidatedField.VALIDATED, value.getZipCode());
+        formData.put(key + AddressParts.STREET_ADDRESS_1 + UNVALIDATED_FIELD_MARKER_VALIDATED, value.getStreetAddress());
+        formData.put(key + AddressParts.STREET_ADDRESS_2 + UNVALIDATED_FIELD_MARKER_VALIDATED, value.getApartmentNumber());
+        formData.put(key + AddressParts.CITY + UNVALIDATED_FIELD_MARKER_VALIDATED, value.getCity());
+        formData.put(key + AddressParts.STATE + UNVALIDATED_FIELD_MARKER_VALIDATED, value.getState());
+        formData.put(key + AddressParts.ZIPCODE + UNVALIDATED_FIELD_MARKER_VALIDATED, value.getZipCode());
       }
     });
   }

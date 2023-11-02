@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static formflow.library.inputs.FieldDesignation.DYNAMIC_FIELD_MARKER;
+import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
 
 class ValidationServiceTest {
 

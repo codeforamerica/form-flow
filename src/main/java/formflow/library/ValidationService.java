@@ -4,7 +4,6 @@ import formflow.library.config.ActionManager;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
-import formflow.library.data.annotations.DynamicField;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -21,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 
-import static formflow.library.inputs.FieldDesignation.DYNAMIC_FIELD_MARKER;
+import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
 
 /**
  * A service that validates flow inputs based on input definition.

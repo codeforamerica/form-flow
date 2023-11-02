@@ -552,7 +552,7 @@ resulting in multiple input fields being rendered with slightly different names.
 
 <th:block th:with
           fieldName=${'docTypeLabel' +
-          T(formflow.library.inputs.FieldDesignation.DYNAMIC_FIELD_MARKER) + fileId}>
+          T(formflow.library.inputs.FieldNameMarkers).DYNAMIC_FIELD_MARKER + fileId}">
 ```
 
 The resulting form submission to the library would look like this `HashMap`
