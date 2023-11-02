@@ -1,11 +1,9 @@
 package formflow.library.inputs;
 
 import formflow.library.data.FlowInputs;
-import formflow.library.data.validators.Money;
-import formflow.library.data.validators.Phone;
+import formflow.library.data.annotations.Money;
+import formflow.library.data.annotations.Phone;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -15,7 +13,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 @TestConfiguration
 @SuppressWarnings("unused")
 public class YetAnotherTestFlow extends FlowInputs {
-  
+
   String firstName;
 
   String textInput;
