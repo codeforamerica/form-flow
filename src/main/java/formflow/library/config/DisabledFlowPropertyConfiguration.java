@@ -12,7 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-//@ConditionalOnProperty(name = "form-flow.disabled-flows")
 @ConfigurationProperties(prefix = "form-flow")
 @Getter
 @Setter
