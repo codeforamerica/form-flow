@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
-import formflow.library.inputs.UnvalidatedField;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
@@ -20,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
+
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 @DirtiesContext()
@@ -64,7 +65,7 @@ public class InputsTest extends AbstractMockMvcTest {
             Map.entry("phoneInput", List.of(phoneInput)),
             Map.entry("ssnInput", List.of(ssnInput)),
             Map.entry("stateInput", List.of(stateInput)))
-        );
+    );
     assertThat(nextPage.getTitle()).isEqualTo("Test");
 
     var inputsScreen = new FormScreen(getPage("inputs"));
@@ -140,7 +141,7 @@ public class InputsTest extends AbstractMockMvcTest {
                 Map.entry(inputName + "City", List.of(city)),
                 Map.entry(inputName + "State", List.of(state)),
                 Map.entry(inputName + "ZipCode", List.of(zipCode)),
-                Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
+                Map.entry(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS + inputName, List.of("true"))
             ));
       }
 
@@ -176,7 +177,7 @@ public class InputsTest extends AbstractMockMvcTest {
                 Map.entry(inputName + "City", List.of("Fake")),
                 Map.entry(inputName + "State", List.of(state)),
                 Map.entry(inputName + "ZipCode", List.of(zipCode)),
-                Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
+                Map.entry(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS + inputName, List.of("true"))
             ));
 
         assertThat(nextScreen.getTitle()).isEqualTo("testAddressValidationNotFound");
@@ -208,7 +209,7 @@ public class InputsTest extends AbstractMockMvcTest {
                 Map.entry(inputName + "City", List.of("Other City")),
                 Map.entry(inputName + "State", List.of("OZ")),
                 Map.entry(inputName + "ZipCode", List.of("12345")),
-                Map.entry(UnvalidatedField.VALIDATE_ADDRESS + inputName, List.of("true"))
+                Map.entry(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS + inputName, List.of("true"))
             ));
 
         assertThat(nextScreen.getTitle()).isEqualTo("Validation Is On");

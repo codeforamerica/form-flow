@@ -1,12 +1,12 @@
 package formflow.library.address_validation;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import com.smartystreets.api.us_street.Batch;
 import formflow.library.data.FormSubmission;
-import formflow.library.inputs.UnvalidatedField;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class ValidationRequestFactoryTest {
 
@@ -36,8 +36,8 @@ class ValidationRequestFactoryTest {
         Map.entry("otherAddressCity", secondCity),
         Map.entry("otherAddressState", secondState),
         Map.entry("otherAddressZipCode", secondZipcode),
-        Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "testAddress", "true"),
-        Map.entry(UnvalidatedField.VALIDATE_ADDRESS + "otherAddress", "true")
+        Map.entry(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS + "testAddress", "true"),
+        Map.entry(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS + "otherAddress", "true")
     ));
 
     Batch batch = validationRequestFactory.create(formSubmission);
