@@ -13,11 +13,10 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 /**
  * Security Configuration - leverages spring security features 
  * Includes:
- *   - secure & httpOnly headers on cookies
+ *   - secure and httpOnly headers on cookies
  *   - no basicAuth 
  *   - utilize X-Forwarded features
  */
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -37,7 +36,7 @@ public class SecurityConfiguration {
      * Disables basic auth while retaining other security features
      * @param httpSecurity HttpSecurity object
      * @return HttpSecurity configuration with authentication disabled
-     * @throws Exception
+     * @throws Exception Internal configuration error
      */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
