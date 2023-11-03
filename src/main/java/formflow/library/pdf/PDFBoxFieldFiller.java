@@ -2,6 +2,8 @@ package formflow.library.pdf;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
@@ -19,6 +21,8 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class PDFBoxFieldFiller {
+
+//  PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
 
   public PdfFile fill(String pathToPdfResource, Collection<PdfField> fields) {
     PdfFile tempFile = PdfFile.copyToTempFile(pathToPdfResource);
@@ -39,7 +43,7 @@ public class PDFBoxFieldFiller {
     try {
       PDDocument loadedDoc = Loader.loadPDF(pdfResource.getContentAsByteArray());
       PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
-      acroForm.setNeedAppearances(true);
+      acroForm.setNeedAppearances(false);
       fillAcroForm(fields, acroForm);
       return loadedDoc;
     } catch (IOException e) {
@@ -50,29 +54,19 @@ public class PDFBoxFieldFiller {
   private void fillAcroForm(Collection<PdfField> fields, PDAcroForm acroForm) {
     fields.forEach(field ->
         Optional.ofNullable(acroForm.getField(field.name())).ifPresent(pdField -> {
+          String fieldValue = field.value();
           try {
-            String fieldValue = field.value();
             if (pdField instanceof PDCheckBox && field.value().equals("No")) {
               fieldValue = "Off";
             }
-            setPdfField(fieldValue, pdField);
+            if (pdField instanceof PDTextField textField) {
+              textField.setActions(null);
+            }
+            pdField.setValue(fieldValue);
           } catch (Exception e) {
-            throw new RuntimeException("Error setting field: " + field.name(), e);
+            log.error("Error setting value '%s' for field %s"
+                    .formatted(fieldValue, pdField.getFullyQualifiedName()));
           }
         }));
-  }
-
-  private void setPdfField(String field, PDField pdField)
-      throws IOException {
-    try {
-      if (pdField instanceof PDTextField textField) {
-        textField.setActions(null);
-      }
-      pdField.setValue(field);
-    } catch (IllegalArgumentException e) {
-      log.error(
-          "Error setting value '%s' for field %s".formatted(field,
-              pdField.getFullyQualifiedName()));
-    }
   }
 }
