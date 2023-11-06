@@ -8,6 +8,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +18,9 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -45,8 +48,8 @@ public class ValidationService {
   /**
    * Autoconfigured constructor.
    *
-   * @param validator Validator from Jakarta package.
-   * @param actionManager the <code>ActionManager</code> that manages the logic to be run at specific points
+   * @param validator       Validator from Jakarta package.
+   * @param actionManager   the <code>ActionManager</code> that manages the logic to be run at specific points
    * @param inputConfigPath the package path where inputs classes are located
    */
   public ValidationService(Validator validator, ActionManager actionManager,
@@ -95,6 +98,7 @@ public class ValidationService {
     }
 
     formSubmission.getFormData().forEach((key, value) -> {
+      boolean dynamicField = false;
       var messages = new ArrayList<String>();
       List<String> annotationNames = null;
 
@@ -102,11 +106,40 @@ public class ValidationService {
         key = key.replace("[]", "");
       }
 
+      String originalKey = key;
+
+      if (key.contains(DYNAMIC_FIELD_MARKER)) {
+        dynamicField = true;
+        key = StringUtils.substringBefore(key, DYNAMIC_FIELD_MARKER);
+      }
+
       try {
         annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
             .map(annotation -> annotation.annotationType().getName()).toList();
       } catch (NoSuchFieldException e) {
-        throw new RuntimeException(e);
+        if (dynamicField) {
+          throw new RuntimeException(
+              String.format(
+                  "Input field '%s' has dynamic field marker '%s' in its name, but we are unable to " +
+                      "find the field in the input file. Is it a dynamic field?",
+                  originalKey, DYNAMIC_FIELD_MARKER
+              )
+          );
+        } else {
+          throw new RuntimeException(e);
+        }
+      }
+
+      // if it's acting like a dynamic field, then ensure that it is marked as one
+      if (dynamicField) {
+        if (!annotationNames.contains("formflow.library.data.annotations.DynamicField")) {
+          throw new RuntimeException(
+              String.format(
+                  "Field name '%s' (field: '%s') acts like it's a dynamic field, but the field does not contain the @DynamicField annotation",
+                  key, originalKey
+              )
+          );
+        }
       }
 
       if (Collections.disjoint(annotationNames, requiredAnnotationsList) && value.equals("")) {
@@ -118,7 +151,8 @@ public class ValidationService {
           .forEach(violation -> messages.add(violation.getMessage()));
 
       if (!messages.isEmpty()) {
-        validationMessages.put(key, messages);
+        // uses original key to accommodate dynamic input names
+        validationMessages.put(originalKey, messages);
       }
     });
 

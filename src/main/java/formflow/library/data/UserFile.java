@@ -41,8 +41,6 @@ public class UserFile {
 
   @Id
   @GeneratedValue
-  //@Type(type = "org.hibernate.type.UUIDCharType")
-  //@Type(type = "pg-uuid")
   private UUID fileId;
 
   @ManyToOne
@@ -65,9 +63,12 @@ public class UserFile {
 
   @Column
   private Float filesize;
-  
+
   @Column(name = "virus_scanned")
   private boolean virusScanned;
+
+  @Column(name = "doc_type_label")
+  private String docTypeLabel;
 
   @Override
   public boolean equals(Object o) {
@@ -102,6 +103,7 @@ public class UserFile {
     fileInfo.put("filesize", userFile.getFilesize().toString());
     fileInfo.put("thumbnailUrl", thumbBase64String);
     fileInfo.put("type", userFile.getMimeType());
+    fileInfo.put("docTypeLabel", userFile.getDocTypeLabel());
     return fileInfo;
   }
 }

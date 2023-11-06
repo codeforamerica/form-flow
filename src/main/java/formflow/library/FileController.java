@@ -60,6 +60,12 @@ public class FileController extends FormFlowController {
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
 
+  @Value("${form-flow.uploads.default-doc-type-label:#{null}}")
+  private String defaultDocType;
+
+  @Value("${form-flow.uploads.virus-scanning.enabled:false}")
+  private boolean isVirusScanningEnabled;
+
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public FileController(
@@ -123,19 +129,22 @@ public class FileController extends FormFlowController {
         return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
       }
 
-      boolean wasScannedForVirus = true;
-      try {
-        if (fileVirusScanner.virusDetected(file)) {
-          String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
-          return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+      boolean wasScannedForVirus = false;
+      if (isVirusScanningEnabled) {
+        try {
+          if (fileVirusScanner.virusDetected(file)) {
+            String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
+            return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+          }
+          wasScannedForVirus = true;
+        } catch (WebClientResponseException | TimeoutException e) {
+          wasScannedForVirus = false;
+          if (blockIfClammitUnreachable) {
+            log.error("The virus scan service could not be reached. Blocking upload.");
+            String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
+            return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
+          }
         }
-      } catch (WebClientResponseException | TimeoutException e) {
-        if (blockIfClammitUnreachable) {
-          log.error("The virus scan service could not be reached. Blocking upload.");
-          String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null, locale);
-          return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
-        }
-        wasScannedForVirus = false;
       }
 
       if (fileValidationService.isTooLarge(file)) {
@@ -174,6 +183,7 @@ public class FileController extends FormFlowController {
           .filesize((float) file.getSize())
           .mimeType(file.getContentType())
           .virusScanned(wasScannedForVirus)
+          .docTypeLabel(defaultDocType)
           .build();
 
       uploadedFile = userFileRepositoryService.save(uploadedFile);

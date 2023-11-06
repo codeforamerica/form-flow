@@ -1,9 +1,9 @@
 package formflow.library.data;
 
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 import formflow.library.inputs.AddressParts;
-import formflow.library.inputs.UnvalidatedField;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -203,11 +203,11 @@ public class Submission {
    */
   public void clearAddressFields(String inputName) {
     // we want to clear out
-    inputData.remove(inputName + AddressParts.STREET_ADDRESS_1 + UnvalidatedField.VALIDATED);
-    inputData.remove(inputName + AddressParts.STREET_ADDRESS_2 + UnvalidatedField.VALIDATED);
-    inputData.remove(inputName + AddressParts.CITY + UnvalidatedField.VALIDATED);
-    inputData.remove(inputName + AddressParts.STATE + UnvalidatedField.VALIDATED);
-    inputData.remove(inputName + AddressParts.ZIPCODE + UnvalidatedField.VALIDATED);
+    inputData.remove(inputName + AddressParts.STREET_ADDRESS_1 + UNVALIDATED_FIELD_MARKER_VALIDATED);
+    inputData.remove(inputName + AddressParts.STREET_ADDRESS_2 + UNVALIDATED_FIELD_MARKER_VALIDATED);
+    inputData.remove(inputName + AddressParts.CITY + UNVALIDATED_FIELD_MARKER_VALIDATED);
+    inputData.remove(inputName + AddressParts.STATE + UNVALIDATED_FIELD_MARKER_VALIDATED);
+    inputData.remove(inputName + AddressParts.ZIPCODE + UNVALIDATED_FIELD_MARKER_VALIDATED);
   }
 
   /**
