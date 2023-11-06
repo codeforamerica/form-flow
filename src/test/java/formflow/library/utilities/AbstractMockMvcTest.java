@@ -142,7 +142,8 @@ public abstract class AbstractMockMvcTest {
   // Appends the id to the post URL
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
       Map<String, List<String>> params, String uuid) throws Exception {
-    return postToUrlExpectingSuccess(postUrl + "/" + uuid, redirectUrl, params);
+    String uuidString = uuid == null ? "" : '/' + uuid;
+    return postToUrlExpectingSuccess(postUrl + uuidString, redirectUrl, params);
   }
 
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
