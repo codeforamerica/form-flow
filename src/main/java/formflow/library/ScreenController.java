@@ -14,7 +14,6 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.FileValidationService;
-import formflow.library.inputs.UnvalidatedField;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
@@ -42,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
 /**
  * A controller to render any screen in flows, including subflows.
@@ -686,7 +687,7 @@ public class ScreenController extends FormFlowController {
       formSubmission.setValidatedAddress(validatedAddresses);
       // clear lingering address(es) from the submission stored in the database.
       formSubmission.getAddressValidationFields().forEach(item -> {
-        String inputName = item.replace(UnvalidatedField.VALIDATE_ADDRESS, "");
+        String inputName = item.replace(UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS, "");
         submission.clearAddressFields(inputName);
       });
     }

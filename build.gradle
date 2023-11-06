@@ -20,7 +20,7 @@ targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
 group = "org.codeforamerica.platform"
-version = "0.0.15-SNAPSHOT"
+version = "0.0.16-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -94,7 +94,7 @@ dependencies {
 
     // Use JUnit test framework.
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.jsoup:jsoup:1.16.2'
@@ -104,7 +104,7 @@ dependencies {
     // we should take a look at this dependency and see if it's really testing things correctly and
     // monitor the dependencies.
     testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.6.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.6.1'
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'

@@ -1,14 +1,16 @@
 package formflow.library.inputs;
 
 import formflow.library.data.FlowInputs;
-import formflow.library.data.validators.Money;
-import formflow.library.data.validators.Phone;
 import jakarta.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.web.multipart.MultipartFile;
+
+import formflow.library.data.annotations.Money;
+import formflow.library.data.annotations.Phone;
+import formflow.library.data.annotations.DynamicField;
 
 @TestConfiguration
 @SuppressWarnings("unused")
@@ -152,6 +154,14 @@ public class TestFlow extends FlowInputs {
   @NotBlank
   @Phone
   String phoneInputSubflowPage2;
-  
+
   String doYouWantToEnterTheTestSubflow;
+
+  @DynamicField
+  @NotBlank
+  String dynamicField;
+
+  String dynamicFieldNoAnnotation;
+
+  String notDynamicField_wildcard_;
 }

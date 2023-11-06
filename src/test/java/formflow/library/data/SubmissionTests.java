@@ -39,4 +39,5 @@ public class SubmissionTests {
     assertThat(subflowData.containsKey(Submission.ITERATION_IS_COMPLETE_KEY)).isTrue();
     assertThat(subflowData.get(Submission.ITERATION_IS_COMPLETE_KEY)).isEqualTo(true);
   }
+
 }
