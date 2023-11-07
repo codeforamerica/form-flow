@@ -1,7 +1,10 @@
 package formflow.library.pdf;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
@@ -44,6 +47,11 @@ public class PDFBoxFieldFiller {
       PDDocument loadedDoc = Loader.loadPDF(pdfResource.getContentAsByteArray());
       PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
       acroForm.setNeedAppearances(false);
+
+      PDResources defaultResources = acroForm.getDefaultResources();
+      defaultResources.put(COSName.getPDFName("Font"), new PDType1Font(Standard14Fonts.FontName.COURIER));
+      acroForm.refreshAppearances();
+
       fillAcroForm(fields, acroForm);
       return loadedDoc;
     } catch (IOException e) {
@@ -51,22 +59,34 @@ public class PDFBoxFieldFiller {
     }
   }
 
-  private void fillAcroForm(Collection<PdfField> fields, PDAcroForm acroForm) {
-    fields.forEach(field ->
-        Optional.ofNullable(acroForm.getField(field.name())).ifPresent(pdField -> {
-          String fieldValue = field.value();
-          try {
-            if (pdField instanceof PDCheckBox && field.value().equals("No")) {
-              fieldValue = "Off";
-            }
-            if (pdField instanceof PDTextField textField) {
-              textField.setActions(null);
-            }
-            pdField.setValue(fieldValue);
-          } catch (Exception e) {
-            log.error("Error setting value '%s' for field %s"
-                    .formatted(fieldValue, pdField.getFullyQualifiedName()));
-          }
-        }));
+    private void fillAcroForm(Collection<PdfField> fields, PDAcroForm acroForm) {
+        fields.forEach(field ->
+                Optional.ofNullable(acroForm.getField(field.name())).ifPresent(pdField -> {
+                    try {
+                        String fieldValue = field.value();
+                        if (pdField instanceof PDCheckBox && field.value().equals("No")) {
+                            fieldValue = "Off";
+                        }
+                        setPdfField(fieldValue, pdField);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error setting field: " + field.name(), e);
+                    }
+                }));
+    }
+
+  private void setPdfField(String field, PDField pdField)
+      throws IOException {
+    try {
+      if (pdField instanceof PDTextField textField) {
+        textField.setActions(null);
+        // TODO: try setting font and encoding for every field
+//        textField.setDefaultAppearance("TODO");
+      }
+      pdField.setValue(field);
+    } catch (IllegalArgumentException e) {
+      log.error(
+          "Error setting value '%s' for field %s".formatted(field,
+              pdField.getFullyQualifiedName()));
+    }
   }
 }
