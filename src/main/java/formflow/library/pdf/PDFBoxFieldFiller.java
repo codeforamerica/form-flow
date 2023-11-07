@@ -7,6 +7,7 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
@@ -17,6 +18,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
@@ -24,8 +26,6 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class PDFBoxFieldFiller {
-
-//  PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
 
   public PdfFile fill(String pathToPdfResource, Collection<PdfField> fields) {
     PdfFile tempFile = PdfFile.copyToTempFile(pathToPdfResource);
@@ -47,10 +47,24 @@ public class PDFBoxFieldFiller {
       PDDocument loadedDoc = Loader.loadPDF(pdfResource.getContentAsByteArray());
       PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
       acroForm.setNeedAppearances(false);
+      PDType0Font notoSans = PDType0Font.load(loadedDoc, new File("Noto_Sans_Kawi/NotoSansKawi-VariableFont_wght.ttf"));
 
-      PDResources defaultResources = acroForm.getDefaultResources();
-      defaultResources.put(COSName.getPDFName("Font"), new PDType1Font(Standard14Fonts.FontName.COURIER));
-      acroForm.refreshAppearances();
+      // Get or create the AcroForm
+      if (acroForm == null) {
+        acroForm = new PDAcroForm(loadedDoc);
+        loadedDoc.getDocumentCatalog().setAcroForm(acroForm);
+      }
+
+      // Set the default resource font to NotoSans
+      PDResources acroFormResources = new PDResources();
+      acroFormResources.put(COSName.getPDFName("NotoSansKawi"), notoSans);
+      acroForm.setDefaultResources(acroFormResources);
+
+//      PDResources defaultResources = acroForm.getDefaultResources();
+//      defaultResources.put(COSName.getPDFName("Font"), new PDType1Font(Standard14Fonts.FontName.COURIER));
+//      loadedDoc.getDocumentCatalog().set
+//      acroForm.refreshAppearances();
+
 
       fillAcroForm(fields, acroForm);
       return loadedDoc;
@@ -80,7 +94,7 @@ public class PDFBoxFieldFiller {
       if (pdField instanceof PDTextField textField) {
         textField.setActions(null);
         // TODO: try setting font and encoding for every field
-//        textField.setDefaultAppearance("TODO");
+        textField.setDefaultAppearance("/NotoSansKawi 12 Tf 0 g");
       }
       pdField.setValue(field);
     } catch (IllegalArgumentException e) {
