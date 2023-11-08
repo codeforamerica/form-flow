@@ -1,6 +1,7 @@
 package formflow.library;
 
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
@@ -36,8 +37,9 @@ public class PdfController extends FormFlowController {
   public PdfController(MessageSource messageSource, PdfService pdfService,
       SubmissionRepositoryService submissionRepositoryService,
       UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
+      List<FlowConfiguration> flowConfigurations,
+      FormFlowConfigurationProperties formFlowConfigurationProperties) {
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
     this.messageSource = messageSource;
     this.pdfService = pdfService;
   }

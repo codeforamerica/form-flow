@@ -1,6 +1,7 @@
 package formflow.library;
 
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
@@ -22,14 +23,17 @@ public abstract class FormFlowController {
   protected final UserFileRepositoryService userFileRepositoryService;
 
   protected final List<FlowConfiguration> flowConfigurations;
+  
+  protected final FormFlowConfigurationProperties formFlowConfigurationProperties;
 
   public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
   FormFlowController(SubmissionRepositoryService submissionRepositoryService, UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations) {
+      List<FlowConfiguration> flowConfigurations, FormFlowConfigurationProperties formFlowConfigurationProperties) {
     this.submissionRepositoryService = submissionRepositoryService;
     this.userFileRepositoryService = userFileRepositoryService;
     this.flowConfigurations = flowConfigurations;
+    this.formFlowConfigurationProperties = formFlowConfigurationProperties;
   }
 
   protected Submission saveToRepository(Submission submission) {
@@ -166,5 +170,16 @@ public abstract class FormFlowController {
 
     submissionMap.put(flow, id);
     session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
+  }
+
+  /**
+   * Checks if the Submission for the flow with flowName should be locked, preventing further updates after it has been submitted.
+   * @param flowName the name of the flow to check.
+   * @param submission the Submission to check.
+   * @return true if the Submission is configured to be locked for a given flow and the Submission's submittedAt value is not null,
+   * false otherwise.
+   */
+  public boolean shouldRedirectDueToLockedSubmission(String flowName, Submission submission) {
+    return this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
   }
 }

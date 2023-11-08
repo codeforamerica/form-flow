@@ -3,6 +3,7 @@ package formflow.library;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -74,11 +75,12 @@ public class FileController extends FormFlowController {
       FileVirusScanner fileVirusScanner,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations,
+      FormFlowConfigurationProperties formFlowConfigurationProperties,
       MessageSource messageSource,
       FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
       @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
     this.cloudFileRepository = cloudFileRepository;
     this.messageSource = messageSource;
     this.fileValidationService = fileValidationService;

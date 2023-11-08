@@ -16,6 +16,7 @@ import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.pdf.PdfService;
 import formflow.library.utilities.AbstractMockMvcTest;
+import formflow.library.config.FormFlowConfigurationProperties;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +41,10 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
   @MockBean
   private UserFileRepositoryService userFileRepositoryService;
+  
+  @MockBean
+  private FormFlowConfigurationProperties formFlowConfigurationProperties;
+  
   private byte[] filledPdfByteArray;
 
   private final String flowName = "testFlow";
@@ -59,7 +64,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     );
 
     PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService,
-        userFileRepositoryService, flowConfigurations);
+        userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
 
     submission = Submission.builder()

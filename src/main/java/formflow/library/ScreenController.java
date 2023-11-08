@@ -6,6 +6,7 @@ import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.config.ActionManager;
 import formflow.library.config.ConditionManager;
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
@@ -67,10 +68,11 @@ public class ScreenController extends FormFlowController {
       SubmissionRepositoryService submissionRepositoryService,
       ValidationService validationService,
       AddressValidationService addressValidationService,
+      FormFlowConfigurationProperties formFlowConfigurationProperties,
       ConditionManager conditionManager,
       ActionManager actionManager,
       FileValidationService fileValidationService) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;
