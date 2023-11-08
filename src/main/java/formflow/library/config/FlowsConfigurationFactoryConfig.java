@@ -3,12 +3,10 @@ package formflow.library.config;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Factory for FlowsConfiguration configuration.
@@ -17,7 +15,7 @@ import java.util.Optional;
 public class FlowsConfigurationFactoryConfig {
 
   @Autowired(required = false)
-  DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
+  FormFlowConfigurationProperties formFlowConfigurationProperties;
 
 
   /**
@@ -27,10 +25,10 @@ public class FlowsConfigurationFactoryConfig {
    */
   @Bean
   public FlowsConfigurationFactory flowsConfigurationFactory() {
-    if (this.disabledFlowPropertyConfiguration == null) {
+    if (this.formFlowConfigurationProperties == null) {
       return new FlowsConfigurationFactory();
     }
-    return new FlowsConfigurationFactory(disabledFlowPropertyConfiguration);
+    return new FlowsConfigurationFactory(formFlowConfigurationProperties);
   }
 
   /**

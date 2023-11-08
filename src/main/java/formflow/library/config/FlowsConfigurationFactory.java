@@ -3,11 +3,8 @@ package formflow.library.config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Flow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.DumperOptions;
@@ -25,15 +22,15 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
   @Value("${form-flow.path:flows-config.yaml}")
   String configPath;
   
-  DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
+  FormFlowConfigurationProperties formFlowConfigurationProperties;
 
 
   FlowsConfigurationFactory() {
-    this.disabledFlowPropertyConfiguration = null;
+    this.formFlowConfigurationProperties = null;
   }
 
-  FlowsConfigurationFactory(DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration) {
-    this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration;
+  FlowsConfigurationFactory(FormFlowConfigurationProperties formFlowConfigurationProperties) {
+    this.formFlowConfigurationProperties = formFlowConfigurationProperties;
   }
 
   /**
@@ -60,7 +57,7 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
       Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
       appConfigsIterable.forEach(appConfig -> {
         FlowConfiguration flowConfig = (FlowConfiguration) appConfig;
-        if (disabledFlowPropertyConfiguration == null || !disabledFlowPropertyConfiguration.isFlowDisabled(flowConfig.getName())) {
+        if (formFlowConfigurationProperties == null || !formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName())) {
           appConfigs.add(flowConfig);
         }
         
