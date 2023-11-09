@@ -1,5 +1,6 @@
 package formflow.library.pdf;
 
+import java.io.InputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -47,8 +48,12 @@ public class PDFBoxFieldFiller {
       PDDocument loadedDoc = Loader.loadPDF(pdfResource.getContentAsByteArray());
       PDAcroForm acroForm = loadedDoc.getDocumentCatalog().getAcroForm();
       acroForm.setNeedAppearances(false);
-      PDType0Font notoSans = PDType0Font.load(loadedDoc, new File("Noto_Sans_Kawi/NotoSansKawi-VariableFont_wght.ttf"));
+//      PDType0Font notoSans = PDType0Font.load(loadedDoc, new File("Noto_Sans_Kawi/NotoSansKawi-VariableFont_wght.ttf"));
+//      PDType0Font notoSans = PDType0Font.load(loadedDoc, new File("Noto_Sans_Kawi/NotoSansKawi-VariableFont_wght.ttf"));
 
+      InputStream notoSansStream = PDFBoxFieldFiller.class.getClassLoader().getResourceAsStream("Noto_Sans_Kawi/NotoSansKawi-VariableFont_wght.ttf");
+
+      PDType0Font notoSans = PDType0Font.load(loadedDoc, notoSansStream);
       // Get or create the AcroForm
       if (acroForm == null) {
         acroForm = new PDAcroForm(loadedDoc);
