@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/download")
 public class PdfController extends FormFlowController {
 
-  private final MessageSource messageSource;
   private final PdfService pdfService;
 
   public PdfController(MessageSource messageSource, PdfService pdfService,
@@ -39,8 +38,8 @@ public class PdfController extends FormFlowController {
       UserFileRepositoryService userFileRepositoryService,
       List<FlowConfiguration> flowConfigurations,
       FormFlowConfigurationProperties formFlowConfigurationProperties) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
-    this.messageSource = messageSource;
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
+        messageSource);
     this.pdfService = pdfService;
   }
 

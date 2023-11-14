@@ -28,8 +28,6 @@ import org.springframework.util.LinkedMultiValueMap;
 @TestPropertySource(properties = {
     "form-flow.lock-after-submitted[0].flow=testFlow",
     "form-flow.lock-after-submitted[0].submissionLockedRedirectPage=success"
-//    "form-flow.disabled-flows[1].flow=otherTestFlow",
-//    "form-flow.disabled-flows[1].staticRedirectPage=/disabledFeature",
 })
 public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
 
@@ -43,7 +41,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
   }
 
   @Test
-  public void shouldRedirectToConfiguredScreenWhenDisabledFlowInterceptionIsEnabled() throws Exception {
+  public void shouldRedirectToConfiguredScreenWhenAFlowsSubmissionIsConfiguredToLockAfterSubmitted() throws Exception {
     // Make an initial post to create the submission and give it some data
     mockMvc.perform(post("/flow/testFlow/inputs")
         .session(session)
@@ -85,4 +83,63 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
   }
+  
+  @Test
+  void shouldRedirectToConfiguredScreenWhenPostingDataToAFlowThatHasBeenConfiguredToLockAfterBeingSubmittedWithoutUpdatingSubmissionObject()
+      throws Exception {
+    // Make an initial post to create the submission and give it some data
+    mockMvc.perform(post("/flow/testFlow/inputs")
+        .session(session)
+        .params(new LinkedMultiValueMap<>(Map.of(
+            "textInput", List.of("firstFlowTextInputValue"),
+            "numberInput", List.of("10"))))
+    );
+
+    // Assert that the submissions submittedAt value is null before submitting
+    Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+    Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmission.isPresent()).isTrue();
+    assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
+
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
+        .session(session));
+    String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
+    result.andExpect(redirectedUrl(nextScreenUrl));
+
+    while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
+      // follow redirects
+      nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
+          .andExpect(status().is3xxRedirection()).andReturn()
+          .getResponse()
+          .getRedirectedUrl();
+    }
+    assertThat(nextScreenUrl).isEqualTo("/flow/testFlow/success");
+    FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
+    assertThat(nextScreen.getTitle()).isEqualTo("Success");
+
+    // Assert that the submissions submittedAt value is not null after submitting
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
+    assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
+    
+    // Post again and assert that the submission is not updated
+    mockMvc.perform(post("/flow/testFlow/inputs")
+        .session(session)
+        .params(new LinkedMultiValueMap<>(Map.of(
+            "textInput", List.of("newValue"),
+            "numberInput", List.of("333"),
+            "moneyInput", List.of("444"))))
+    );
+
+    Optional<Submission> testFlowSubmissionAfterAttemptingToPostAfterSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.isPresent()).isTrue();
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getSubmittedAt()).isNotNull();
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("textInput")).isEqualTo("firstFlowTextInputValue");
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("numberInput")).isEqualTo("10");
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("moneyInput")).isNull();
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().equals(testFlowSubmissionAfterBeingSubmitted.get().getInputData())).isTrue();
+  }
+  
+  // TODO create tests for GET and POST in subflows
+  
 }

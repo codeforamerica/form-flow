@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -41,6 +43,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.RedirectView;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
@@ -71,8 +75,9 @@ public class ScreenController extends FormFlowController {
       FormFlowConfigurationProperties formFlowConfigurationProperties,
       ConditionManager conditionManager,
       ActionManager actionManager,
-      FileValidationService fileValidationService) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
+      FileValidationService fileValidationService,
+      MessageSource messageSource) {
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties, messageSource);
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;
@@ -96,13 +101,22 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String uuid,
+      RedirectAttributes redirectAttributes,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      Locale locale
   ) {
     log.info("GET getScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     // this will ensure that the screen and flow actually exist
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     Submission submission = findOrCreateSubmission(httpSession, flow);
+    
+    if (shouldRedirectDueToLockedSubmission(flow, screen, submission)) {
+      String lockedSubmissionRedirectPage = formFlowConfigurationProperties.getLockedSubmissionRedirect(flow);
+      log.info("The Submission for flow {} is locked. Redirecting to locked submission redirect page: {}", flow, lockedSubmissionRedirectPage);
+      redirectAttributes.addFlashAttribute("lockedSubmissionMessage", messageSource.getMessage("general.locked-submission", null, locale));
+      return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, lockedSubmissionRedirectPage));
+    }
 
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
       submission.mergeUrlParamsWithData(query_params);
@@ -120,7 +134,7 @@ public class ScreenController extends FormFlowController {
       actionManager.handleBeforeDisplayAction(currentScreen, submission);
     }
 
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission, null);
+    Map<String, Object> model = createModel(flow, screen, httpSession, submission, null, request);
 
     String formAction = createFormActionString(flow, screen);
     model.put("formAction", formAction);
@@ -156,12 +170,22 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      RedirectAttributes redirectAttributes,
+      Locale locale
   ) throws SmartyException, IOException, InterruptedException {
     log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     // Checks if screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = findOrCreateSubmission(httpSession, flow);
+
+    if (shouldRedirectDueToLockedSubmission(flow, screen, submission)) {
+      String lockedSubmissionRedirectPage = formFlowConfigurationProperties.getLockedSubmissionRedirect(flow);
+      log.info("The Submission for flow {} is locked. Redirecting to locked submission redirect page: {}", flow, lockedSubmissionRedirectPage);
+      redirectAttributes.addFlashAttribute("lockedSubmissionMessage", messageSource.getMessage("general.locked-submission", null, locale));
+      return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, lockedSubmissionRedirectPage));
+    }
+    
     FormSubmission formSubmission = new FormSubmission(formData);
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission);
 
@@ -237,7 +261,7 @@ public class ScreenController extends FormFlowController {
     }
 
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid);
+    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid, request);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
@@ -562,7 +586,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
-      String uuid) {
+      String uuid, HttpServletRequest request) {
     Map<String, Object> model = new HashMap<>();
     FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
     String subflowName = flowConfig.getFlow().get(screen).getSubflow();
@@ -626,6 +650,10 @@ public class ScreenController extends FormFlowController {
       }
       // We keep "currentSubflowItem" for backwards compatability at this point
       model.put("currentSubflowItem", model.get("fieldData"));
+    }
+    
+    if (RequestContextUtils.getInputFlashMap(request) != null) {
+      model.put("lockedSubmissionMessage", RequestContextUtils.getInputFlashMap(request).get("lockedSubmissionMessage"));
     }
 
     return model;

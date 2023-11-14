@@ -56,7 +56,6 @@ public class FileController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
-  private final MessageSource messageSource;
   private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
@@ -80,9 +79,9 @@ public class FileController extends FormFlowController {
       FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
       @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
+        messageSource);
     this.cloudFileRepository = cloudFileRepository;
-    this.messageSource = messageSource;
     this.fileValidationService = fileValidationService;
     this.maxFiles = maxFiles;
     this.fileVirusScanner = fileVirusScanner;

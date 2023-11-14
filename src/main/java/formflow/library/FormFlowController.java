@@ -6,12 +6,14 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,14 +28,18 @@ public abstract class FormFlowController {
   
   protected final FormFlowConfigurationProperties formFlowConfigurationProperties;
 
+  protected final MessageSource messageSource;
+
   public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
   FormFlowController(SubmissionRepositoryService submissionRepositoryService, UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations, FormFlowConfigurationProperties formFlowConfigurationProperties) {
+      List<FlowConfiguration> flowConfigurations, FormFlowConfigurationProperties formFlowConfigurationProperties,
+      MessageSource messageSource) {
     this.submissionRepositoryService = submissionRepositoryService;
     this.userFileRepositoryService = userFileRepositoryService;
     this.flowConfigurations = flowConfigurations;
     this.formFlowConfigurationProperties = formFlowConfigurationProperties;
+    this.messageSource = messageSource;
   }
 
   protected Submission saveToRepository(Submission submission) {
@@ -179,7 +185,12 @@ public abstract class FormFlowController {
    * @return true if the Submission is configured to be locked for a given flow and the Submission's submittedAt value is not null,
    * false otherwise.
    */
-  public boolean shouldRedirectDueToLockedSubmission(String flowName, Submission submission) {
-    return this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
+  public boolean shouldRedirectDueToLockedSubmission(String flowName, String screen, Submission submission) {
+    // TODO what if this is null?
+    ArrayList<String> afterSubmitPages = getFlowConfigurationByName(flowName).getLandmarks().getAfterSubmitPages();
+    
+    return this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName) && 
+        submission.getSubmittedAt() != null &&
+        !afterSubmitPages.contains(screen);
   }
 }

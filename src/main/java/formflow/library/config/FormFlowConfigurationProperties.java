@@ -53,10 +53,10 @@ public class FormFlowConfigurationProperties {
    * @param flowName the name of the flow to check.
    * @return the screen to redirect to if the submission is locked for the given flow.
    */
-  public String getRedirectForFlowWithLockedSubmission(String flowName) {
+  public String getLockedSubmissionRedirect(String flowName) {
     return lockAfterSubmitted.stream()
         .filter(flow -> flow.get("flow").equals(flowName))
-        .map(flow -> flow.getOrDefault("submissionLockedRedirect", ""))
+        .map(flow -> flow.getOrDefault("submissionLockedRedirectPage", ""))
         .findFirst()
         .orElse(null);
   }
