@@ -63,7 +63,6 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
     if (flowConfiguration == null) {
       return true;
     }
-
     if (flowConfiguration.getLandmarks() == null) {
       throw new LandmarkNotSetException(
           "The SessionContinuityInterceptor is enabled, but no 'landmarks' section has been created in the application's form " +
