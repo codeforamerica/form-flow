@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class FormFlowConfigurationProperties {
   private List<Map<String, String>> disabledFlows = new ArrayList<>();
-  private List<Map<String, String>  > lockAfterSubmitted = new ArrayList<>();
+  private List<Map<String, String>> lockAfterSubmitted = new ArrayList<>();
 
 
   /**
@@ -56,7 +56,7 @@ public class FormFlowConfigurationProperties {
   public String getLockedSubmissionRedirect(String flowName) {
     return lockAfterSubmitted.stream()
         .filter(flow -> flow.get("flow").equals(flowName))
-        .map(flow -> flow.getOrDefault("submissionLockedRedirectPage", ""))
+        .map(flow -> flow.getOrDefault("redirect", ""))
         .findFirst()
         .orElse(null);
   }

@@ -242,7 +242,9 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      RedirectAttributes redirectAttributes,
+      Locale locale
   ) throws ResponseStatusException {
     log.info(
         "GET getSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
@@ -253,6 +255,13 @@ public class ScreenController extends FormFlowController {
     // Checks if screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = getSubmissionFromSession(httpSession, flow);
+
+    if (shouldRedirectDueToLockedSubmission(flow, screen, submission)) {
+      String lockedSubmissionRedirectPage = formFlowConfigurationProperties.getLockedSubmissionRedirect(flow);
+      log.info("The Submission for flow {} is locked. Redirecting to locked submission redirect page: {}", flow, lockedSubmissionRedirectPage);
+      redirectAttributes.addFlashAttribute("lockedSubmissionMessage", messageSource.getMessage("general.locked-submission", null, locale));
+      return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, lockedSubmissionRedirectPage));
+    }
 
     if (submission == null) {
       // we have issues! We should not get here, really.
@@ -291,7 +300,9 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       @PathVariable String uuid,
       HttpSession httpSession,
-      HttpServletRequest request
+      HttpServletRequest request,
+      RedirectAttributes redirectAttributes,
+      Locale locale
   ) throws ResponseStatusException, SmartyException, IOException, InterruptedException {
     log.info(
         "POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}",
@@ -299,6 +310,7 @@ public class ScreenController extends FormFlowController {
         flow,
         screen,
         uuid);
+    
     // Checks to see if flow and screen exist
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
@@ -306,6 +318,14 @@ public class ScreenController extends FormFlowController {
     FormSubmission formSubmission = new FormSubmission(formData);
     String subflowName = currentScreen.getSubflow();
     Submission submission = findOrCreateSubmission(httpSession, flow);
+
+    if (shouldRedirectDueToLockedSubmission(flow, screen, submission)) {
+      String lockedSubmissionRedirectPage = formFlowConfigurationProperties.getLockedSubmissionRedirect(flow);
+      log.info("The Submission for flow {} is locked. Redirecting to locked submission redirect page: {}", flow, lockedSubmissionRedirectPage);
+      redirectAttributes.addFlashAttribute("lockedSubmissionMessage", messageSource.getMessage("general.locked-submission", null, locale));
+      return new RedirectView(String.format("/flow/%s/%s", flow, lockedSubmissionRedirectPage));
+    }
+    
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
