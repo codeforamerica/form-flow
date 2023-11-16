@@ -45,9 +45,6 @@ spring:
   messages:
     encoding: ISO-8859-1
     basename: messages, messages-form-flow
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
   session:
     store-type: jdbc
     timeout: 72h
