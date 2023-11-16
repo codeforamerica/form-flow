@@ -43,7 +43,30 @@ class PDFBoxFieldFillerTest {
 
     pdDocument.close();
   }
+  @Test
+  void shouldSubstituteUnsupportedCharactersForQuestionsWhenFillingPdfFields() throws IOException {
+    String unsupportedValue = "テスト";
+    String unsupportedPdfField = "APPLICANT_LEGAL_NAME_FIRST";
+    String supportedValue = "Jones";
+    String supportedPdfField = "TEXT_FIELD";
+    PdfField unsupportedPdfFieldObject = new PdfField(supportedPdfField, supportedValue);
 
+    Collection<PdfField> fields = List.of(
+        unsupportedPdfFieldObject,
+        new PdfField(unsupportedPdfField, unsupportedValue)
+    );
+    String ubiPdf =  "/pdfs/Multipage-UBI-Form.pdf";
+    PdfFile pdfFile = pdfBoxFieldFiller.fill(ubiPdf, fields);
+//    assertThatCode(() -> pdfBoxFieldFiller.setPdfField(unsupportedValue, unsupportedPdfField))
+//        .doesNotThrowAnyException();
+    PDDocument pdDocument = Loader.loadPDF(pdfFile.fileBytes());
+    PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
+
+    assertThat(acroForm.getField(supportedPdfField).getValueAsString()).isEqualTo(supportedValue);
+    assertThat(acroForm.getField(unsupportedPdfField).getValueAsString()).isEqualTo(unsupportedValue);
+    pdDocument.close();
+
+  }
   @Test
   void shouldSetNullTextFieldsAsEmptyString() throws IOException {
     Collection<PdfField> fields = List.of(
