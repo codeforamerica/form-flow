@@ -6,13 +6,11 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +22,6 @@ import org.springframework.util.MimeTypeUtils;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 public class UserFileRepositoryServiceTests {
 
-  /*
-  Note: These tests are disabled because the test db doesn't work like
-  expected. Many of the fields are not getting their defaults set properly and so the
-  default value for the field tested below is not getting populated. Until it is
-  populated these tests will not function. Committing this code so we don't lose it.
-  */
   @Autowired
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
@@ -55,7 +47,6 @@ public class UserFileRepositoryServiceTests {
   }
 
   @Test
-  @Disabled
   void shouldUseProperDefaultForDocTypeLabel() {
     UserFile testFile = UserFile.builder()
         .submission(submission)
@@ -66,12 +57,11 @@ public class UserFileRepositoryServiceTests {
         .virusScanned(true)
         .build();
 
-    UserFile savedFile = userFileRepositoryService.save(testFile);
+    UserFile savedFile = saveAndReload(testFile);
     assertThat(savedFile.getDocTypeLabel()).isEqualTo(docTypeDefaultValue);
   }
 
   @Test
-  @Disabled
   void shouldUserDocTypeSetInUserFileBuilderCall() {
     UserFile testFile = UserFile.builder()
         .submission(submission)
@@ -83,7 +73,12 @@ public class UserFileRepositoryServiceTests {
         .docTypeLabel("BirthCertificate")
         .build();
 
-    UserFile savedFile = userFileRepositoryService.save(testFile);
+    UserFile savedFile = saveAndReload(testFile);
     assertThat(savedFile.getDocTypeLabel()).isEqualTo("BirthCertificate");
+  }
+
+  private UserFile saveAndReload(UserFile testFile) {
+    UserFile savedFile = userFileRepositoryService.save(testFile);
+    return userFileRepositoryService.findById(savedFile.getFileId()).get();
   }
 }
