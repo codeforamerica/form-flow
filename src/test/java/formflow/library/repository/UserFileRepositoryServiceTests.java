@@ -79,6 +79,6 @@ public class UserFileRepositoryServiceTests {
 
   private UserFile saveAndReload(UserFile testFile) {
     UserFile savedFile = userFileRepositoryService.save(testFile);
-    return userFileRepositoryService.findById(savedFile.getFileId()).get();
+    return userFileRepositoryService.findById(savedFile.getFileId()).orElseThrow();
   }
 }
