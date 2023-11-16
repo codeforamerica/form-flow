@@ -1,5 +1,8 @@
 package formflow.library.config;
 
+import formflow.library.exceptions.ConfigurationException;
+import formflow.library.exceptions.LandmarkNotSetException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,10 +60,24 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
       Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
       appConfigsIterable.forEach(appConfig -> {
         FlowConfiguration flowConfig = (FlowConfiguration) appConfig;
+        
         if (formFlowConfigurationProperties == null || !formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName())) {
           appConfigs.add(flowConfig);
         }
         
+        if (formFlowConfigurationProperties != null && formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName())) {
+          if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getFirstScreen() == null) {
+            log.error("You have disabled flow {} but you did not add a landmarks first screen section to it's flow configuration file.", flowConfig.getName());
+            throw new ConfigurationException(String.format("You have disabled flow %s but you did not add a landmarks after submit pages section to it's flow configuration file.", flowConfig.getName()));
+          }
+        }
+        
+        if (formFlowConfigurationProperties != null && formFlowConfigurationProperties.isSubmissionLockedForFlow(flowConfig.getName())) {
+          if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
+            log.error("You have configured submission locking for flow {} but you did not add a landmarks after submit pages section to it's flow configuration file.", flowConfig.getName());
+            throw new ConfigurationException(String.format("You have configured submission locking for flow %s but you did not add a landmarks after submit pages section to it's flow configuration file.", flowConfig.getName()));
+          }
+        }
       });
     } catch (IOException e) {
       log.error("Can't find the flow configuration file: " + configPath, e);

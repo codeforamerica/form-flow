@@ -3,12 +3,17 @@ package formflow.library.controllers;
 import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import formflow.library.data.Submission;
+import formflow.library.data.UserFile;
+import formflow.library.data.UserFileRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
@@ -20,8 +25,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
@@ -30,6 +40,9 @@ import org.springframework.util.LinkedMultiValueMap;
     "form-flow.lock-after-submitted[0].redirect=success"
 })
 public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
+
+  @MockBean
+  private UserFileRepositoryService userFileRepositoryService;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -286,5 +299,66 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(subflowIterationAfterEdit.get("numberInputSubflow")).isEqualTo("10");
     assertThat(subflowIterationAfterEdit.get("moneyInputSubflow")).isNull();
     assertThat(subflowIterationsAfterEdit.equals(subflowIterationsBeforeSubmit)).isTrue();
+  }
+  
+  @Test
+  void shouldErrorWhenAttemptingToUploadFilesToAFlowWithALockedSubmission() throws Exception {
+    // Make an initial post to create the submission and give it some data
+    mockMvc.perform(post("/flow/testFlow/inputs")
+        .session(session)
+        .params(new LinkedMultiValueMap<>(Map.of(
+            "textInput", List.of("firstFlowTextInputValue"),
+            "numberInput", List.of("10"))))
+    );
+
+    // Assert that the submissions submittedAt value is null before submitting
+    Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+    Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmission.isPresent()).isTrue();
+    assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
+
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
+        .session(session));
+    String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
+    result.andExpect(redirectedUrl(nextScreenUrl));
+
+    while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
+      // follow redirects
+      nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
+          .andExpect(status().is3xxRedirection()).andReturn()
+          .getResponse()
+          .getRedirectedUrl();
+    }
+    assertThat(nextScreenUrl).isEqualTo("/flow/testFlow/success");
+    FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
+    assertThat(nextScreen.getTitle()).isEqualTo("Success");
+
+    // Assert that the submissions submittedAt value is not null after submitting
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
+    assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
+    
+    UUID fileId = UUID.randomUUID();
+
+    MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+
+    when(userFileRepositoryService.save(any())).thenAnswer(invocation -> {
+      UserFile userFile = invocation.getArgument(0);
+      userFile.setFileId(fileId);
+      return userFile;
+    });
+
+    ResultActions resultAfterSubmit = mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
+            .file(testImage)
+            .param("flow", "testFlow")
+            .param("screen", "testUpload")
+            .param("inputName", "testUpload")
+            .param("thumbDataURL", "base64string")
+            .session(session)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    
+    assertThat(resultAfterSubmit.andReturn().getResponse().getContentAsString()).contains("You've already submitted this application. You can no longer upload documents at this time.");
   }
 }

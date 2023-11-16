@@ -29,6 +29,9 @@ flow:
   test:
     nextScreens:
       - name: success
+  testUpload:
+    nextScreens:
+      - name: pageWithCustomSubmitButton
   pageWithOptionalValidation:
     nextScreens:
       - name: success
