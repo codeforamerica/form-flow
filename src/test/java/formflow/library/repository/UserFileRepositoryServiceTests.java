@@ -62,7 +62,7 @@ public class UserFileRepositoryServiceTests {
   }
 
   @Test
-  void shouldUserDocTypeSetInUserFileBuilderCall() {
+  void shouldUseDocTypeSetInUserFileBuilderCall() {
     UserFile testFile = UserFile.builder()
         .submission(submission)
         .originalName("originalName.jpg")
