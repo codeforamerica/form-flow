@@ -22,10 +22,11 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
             .id(UUID.randomUUID())
             .urlParams(new HashMap<>())
             .inputData(new HashMap<>())
+            .flow("testFlow")
             .build();
     when(submissionRepositoryService.findById(submission.getId()))
             .thenReturn(Optional.of(submission));
-      setFlowInfoInSession(session, "testFlow", submission.getId());
+    setFlowInfoInSession(session, "testFlow", submission.getId());
   }
 
   @Test
