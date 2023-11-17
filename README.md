@@ -933,7 +933,7 @@ into your template to quickly see a preview and names of icons:
 <th:block th:replace="~{fragments/icons :: icons-list}"></th:block>
 ```
 
-## Input Types
+### Input Type Fragments
 
 Inputs are the building blocks of the form flow library. The library provides a set of input
 fragments
@@ -966,7 +966,7 @@ template which we have provided. This template makes use of an `aria-label` refe
 of
 the page instead of a traditional label.
 
-### Text
+#### Text
 
 Text inputs are used to gather text input from the user. They can be used to gather things like
 names, addresses, and emails, etc.
@@ -986,7 +986,7 @@ Example of using a text input:
 
 A convenience fragment is provided through `cfa:inputText`.
 
-### Text Area
+#### Text Area
 
 Text area inputs are used to gather large amounts of text. They are usually used for things like
 asking for user feedback, or more detailed explanations for question answers. Textarea inputs have
@@ -999,7 +999,7 @@ if no value is passed and maxlength will default to 500 if no value is passed.
 
 A convenience live template for text area inputs is provided through `cfa:inputTextArea`.
 
-### Number
+#### Number
 
 Number inputs are used to gather numbers from users. The number input makes use
 of `inputmode="numeric"` which will cause mobile devices to display the number pad when entering
@@ -1030,7 +1030,7 @@ the input data and is only shown in the user interface.
 
 A live template for numbers is provided through `cfa:inputNumber`.
 
-### Social Security Number
+#### Social Security Number
 
 The social security number input is provided specifically for asking users for their social security
 number.
@@ -1044,7 +1044,7 @@ placeholder.
 
 A convenience live template for SSN inputs is provided through `cfa:inputSSN`.
 
-### State
+#### State
 
 The state input provides a dropdown with all the US states pre-populated in it, in the format of
 state code to state name, like so:
@@ -1053,7 +1053,7 @@ state code to state name, like so:
 
 The value saved from this input is the selected state's code. Example `MA`.
 
-### Submit Button
+#### Submit Button
 
 Submit button will submit form data to the server and will move you along to the next screen,
 providing data validation was successful.
@@ -1063,7 +1063,7 @@ Optional parameters:
 * `classes` - the CSS style(s) to use. Default is `button button--primary`
 * `text` - the name of the button. Default is `Submit`
 
-### Continue Button
+#### Continue Button
 
 The Continue Button input will simply pass the user onto the next screen in the flow.
 No form data is submitted.
@@ -1072,7 +1072,7 @@ Optional parameter:
 
 * `text` - the name of the button. Default is `Continue`
 
-### Money
+#### Money
 
 Money inputs are used to gather monetary values. Visually, they are displayed as a single input with
 a dollar sign `$` prefixed in front of the input. Money inputs have an optional `placeholder`
@@ -1091,7 +1091,7 @@ values are valid monetary values.
 
 A live template for money inputs is provided through `cfa:inputMoney`.
 
-### Phone
+#### Phone
 
 Phone inputs are used to gather phone numbers. Visually, they are displayed as three seperate
 sections,
@@ -1101,7 +1101,7 @@ values will be stored in the database. Phone inputs also have an optional `place
 
 A convenience live template for phone inputs is provided through `cfa:inputPhone`.
 
-### YesOrNo
+#### YesOrN
 
 Yes or no inputs are used to gather a yes or no answers from a user. They are visually displayed as
 two buttons, one with a green check and the word `Yes`, the other with a red X and the word `No`.
@@ -1123,7 +1123,7 @@ ID of page headers in the form flow library.
 
 A convenience live template for yes or no inputs is provided through `cfa:inputYesOrNo`.
 
-### Checkbox
+#### Checkbox
 
 We provide two types of checkbox inputs. One is a single `checkbox`, useful for things like asking a
 user
@@ -1157,7 +1157,7 @@ the [character codepoint for the icon](https://github.com/google/material-design
 
 Below are examples of both types of checkboxes:
 
-#### Checkbox in set
+##### Checkbox in set
 
 ```html
 
@@ -1193,7 +1193,7 @@ Honeycrisp contains JavaScript logic that deselects the other checkboxes when "N
 selected. To enable it, you'll need to add `noneOfTheAbove.init()` to your JavaScript that runs
 after page load.
 
-#### Checkbox
+##### Checkbox
 
 ```html
 
@@ -1213,7 +1213,7 @@ create groupings of checkbox inputs. Note that when using this template, you can
 checkbox option fragment
 as many times as you like to create the necessary number of checkbox options.
 
-### Radio
+#### Radio
 
 Radio inputs are used to gather a single selection from a set of options. They are used in unison
 with
@@ -1258,7 +1258,7 @@ create groupings of radio inputs. Not that when using this template, you can cop
 option fragment
 as many times as you like to create the necessary number of radio options.
 
-### Select
+#### Select
 
 Select inputs are used to gather a single selection from a set of options. They are usually used
 when
@@ -1305,7 +1305,7 @@ provide a `cfa:selectOptionPlaceholder` live template which can be used to quick
 placeholder option
 as mentioned above.
 
-### Date
+#### Date
 
 Date inputs are used to gather dates, such as birth dates, start dates for places of employment,
 etc.
@@ -1313,10 +1313,11 @@ They are visually displayed as three separate inputs for Month, Day and Year in 
 
 A convenience live template for dates is provided through `cfa:inputDate`.
 
-### Address
+#### Address
 
 For convenience, we have provided a `cfa:address` live template to quickly create an address
 fragment.
+
 The address fragment is a combination of multiple fields including:
 
 - Street Address
@@ -1334,11 +1335,6 @@ The address fragment has two required parameters, `validate` and `inputName`.
   be `homeAddressStreetAddress1`, `homeAddressStreetAddress2`, `homeAddressCity`, `homeAddressState`,
   and `homeAddressZipCode`.
 
-The address fragment has five optional
-parameters: `streetAddressHelpText`, `streetAddress2HelpText`, `cityHelpText`, `stateHelpText`
-, and `zipCodeHelpText`.
-These will pass helper text to each specific field.
-
 Please note that when using the address fragment you will need to create corresponding fields in
 your flow inputs class for each of the above-mentioned inputs created by the fragment. For example,
 if your address fragments input name is `mailingAddress`, then you will need to create the following
@@ -1352,9 +1348,78 @@ fields in your flow inputs class:
     String mailingAddressZipCode;
 ```
 
-### Accessing Conditions
+The address fragment has these optional parameters
 
-### Accessing Submission Object
+- `streetAddressHelpText` - text used as help text for this field
+- `streetAddress2HelpText` - text used as help text for this field
+- `cityHelpText` - text used as help text for this field
+- `stateHelpText` - text used as help text for this field
+- `zipCodeHelpText` - text used as help text for this field
+- `streetAddressLabel` - text used for label for this field; if not passed in this will default to
+  the `address.street-address-1` key in the message source file.
+- `streetAddress2Label` - text used as label for this field; if not passed in this will default to
+  the `address.street-address-2` key in the message source file.
+- `cityLabel` - text used for label as this field; if not passed in this will default to
+  the `address.city` key in the message source file.
+- `stateLabel` - text used for label as this field; if not passed in this will default to
+  the `address.state` key in the message source file.
+- `zipCodeLabel` - text used for label as this field; if not passed in this will default to
+  the `address.zip` key in the message source file.
+
+#### Reveal
+
+There is a `reveal` fragment is based on
+the [Honeycrisp reveal element](https://honeycrisp.herokuapp.com/cfa/styleguide#molecules-reveal)
+component.
+
+This fragment will create a section with a header and a box of data. The box of data is closed by
+default. The intention is that a user can click on the header and the box containing a description
+about it will open up.
+
+Here is an example of using the `reveal` fragment:
+
+```html
+
+<th:block th:replace="~{'fragments/reveal' :: reveal(
+                controlId='r1',
+                linkLabel=~{::revealLabel2},
+                content=~{::revealContent2},
+                forceShowContent='true')}">
+  <th:block th:ref="revealContent2">
+    <p th:text="#{ssn-faqs.accordion2.expanded}"></p>
+  </th:block>
+</th:block>
+```
+
+The `forceShowContent` field is an optional input. If it is supplied and set to `true` the
+`reveal` element will start as open on the page. If not sent in or set to `false` the `reveal`
+element will start closed on the page.
+
+There is a live template called `cfa:reveal` that will create the structure necessary to use
+a `reveal`.
+
+#### Submit Buttons
+
+We provide two fragments for submit buttons.
+
+One with the primary button CSS classes (`button button--primary`):
+
+```html
+
+<th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+       text=#{doc-submit-confirmation.yes-submit-and-finish})}"/>
+```
+
+and one with the secondary button CSS classes (`button button--secondary`):
+
+```html
+
+<th:block th:replace="~{fragments/inputs/submitButtonSecondary :: submitButton(
+        text=#{upload-documents.button-text}, isHidden=true)}"/>
+```
+
+There is an optional field called `isHidden` available on both buttons. If set to `true`, the
+button will be hidden when the page loads (the `display-none` class will be added to its classes).
 
 ## Document Upload
 
