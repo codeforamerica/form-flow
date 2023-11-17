@@ -48,7 +48,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
   public void setUp() throws Exception {
     UUID submissionUUID = UUID.randomUUID();
     submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
-    // this setups flow info in the session to get passed along later on.
+    // this sets up flow info in the session to get passed along later on.
     setFlowInfoInSession(session, "testFlow", submission.getId());
     super.setUp();
   }
@@ -299,6 +299,137 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(subflowIterationAfterEdit.get("numberInputSubflow")).isEqualTo("10");
     assertThat(subflowIterationAfterEdit.get("moneyInputSubflow")).isNull();
     assertThat(subflowIterationsAfterEdit.equals(subflowIterationsBeforeSubmit)).isTrue();
+  }
+  
+  @Test
+  void shouldRedirectWhenAttemptingToGetTheSubflowDeleteConfirmationScreenForAFlowWithALockedSubmission() throws Exception {
+    // Make an initial post to create the submission and give it some data
+    mockMvc.perform(post("/flow/testFlow/subflowAddItem/new")
+        .session(session)
+        .params(new LinkedMultiValueMap<>(Map.of(
+            "textInputSubflow", List.of("textInputValue"),
+            "numberInputSubflow", List.of("10"))))
+    );
+
+    // Get the UUID for the iteration we just created
+    UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
+    Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+    List<Map<String, Object>> subflowIterationsBeforeSubmit = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
+        .get("testSubflow");
+    String uuidString = (String) subflowIterationsBeforeSubmit.get(0).get("uuid");
+
+    // Assert that the submissions submittedAt value is null before submitting
+    Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+    Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmission.isPresent()).isTrue();
+    assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
+
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
+        .session(session));
+    String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
+    result.andExpect(redirectedUrl(nextScreenUrl));
+
+    while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
+      // follow redirects
+      nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
+          .andExpect(status().is3xxRedirection()).andReturn()
+          .getResponse()
+          .getRedirectedUrl();
+    }
+    assertThat(nextScreenUrl).isEqualTo("/flow/testFlow/success");
+    FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
+    assertThat(nextScreen.getTitle()).isEqualTo("Success");
+
+    // Assert that the submissions submittedAt value is not null after submitting
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
+    assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
+    assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
+    
+    // Assert that we are redirected to the configured screen when we try to the subflow delete confirmation screen
+    mockMvc.perform(get("/flow/testFlow/testSubflow/" + uuidString + "/deleteConfirmation")
+            .session(session))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+  }
+  
+  @Test
+  void shouldRedirectWhenAttemptingToDeleteASubflowIterationFromAFlowThatIsLocked() throws Exception {
+    // Make an initial post to create the submission and give it some data
+    mockMvc.perform(post("/flow/testFlow/subflowAddItem/new")
+        .session(session)
+        .params(new LinkedMultiValueMap<>(Map.of(
+            "textInputSubflow", List.of("textInputValue"),
+            "numberInputSubflow", List.of("10"))))
+    );
+
+    // Get the UUID for the iteration we just created
+    UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
+    Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+    List<Map<String, Object>> subflowIterationsBeforeSubmit = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
+        .get("testSubflow");
+    String uuidString = (String) subflowIterationsBeforeSubmit.get(0).get("uuid");
+    
+    // Complete the subflow so we get a completed iteration
+    ResultActions iterationResult = mockMvc.perform(post("/flow/testFlow/subflowAddItemPage2/" + uuidString)
+        .session(session)
+        .params(new LinkedMultiValueMap<>(Map.of(
+            "textInputSubflowPage2", List.of("newValue"),
+            "moneyInputSubflowPage2", List.of("444")))));
+    
+    // We need to hit the navigation endpoint because that is where we set the iterationIsComplete flag
+    String screenAfterSubflow = "/flow/testFlow/subflowAddItemPage2/navigation?uuid=" + uuidString;
+    iterationResult.andExpect(redirectedUrl(screenAfterSubflow));
+
+    while (Objects.requireNonNull(screenAfterSubflow).contains("/navigation")) {
+      // follow redirects
+      screenAfterSubflow = mockMvc.perform(get(screenAfterSubflow).session(session))
+          .andExpect(status().is3xxRedirection()).andReturn()
+          .getResponse()
+          .getRedirectedUrl();
+    }
+    assertThat(screenAfterSubflow).isEqualTo("/flow/testFlow/test");
+    
+
+    // Assert that the submissions submittedAt value is null before submitting
+    Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+    Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    assertThat(testFlowSubmission.isPresent()).isTrue();
+    assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
+    // Assert the subflow iteration is complete
+    List<Map<String, Object>> subflowIterationsBeforeSubmitting = (List<Map<String, Object>>) testFlowSubmission.get().getInputData()
+        .get("testSubflow");
+    Map<String, Object> subflowIteration = subflowIterationsBeforeSubmitting.get(0);
+    assertThat(subflowIteration.get("iterationIsComplete")).isEqualTo(true);
+    
+    // Submit the flow, assert we reach the success page
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
+        .session(session));
+    String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
+    result.andExpect(redirectedUrl(nextScreenUrl));
+
+    while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
+      // follow redirects
+      nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
+          .andExpect(status().is3xxRedirection()).andReturn()
+          .getResponse()
+          .getRedirectedUrl();
+    }
+    assertThat(nextScreenUrl).isEqualTo("/flow/testFlow/success");
+    FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
+    assertThat(nextScreen.getTitle()).isEqualTo("Success");
+
+    // Assert that the submissions submittedAt value is not null after submitting
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
+    assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
+    assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
+    
+    // Assert that we are redirected when attempting to delete a subflow
+    mockMvc.perform(post("/flow/testFlow/testSubflow/" + uuidString + "/delete")
+            .session(session))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
   }
   
   @Test
