@@ -1,8 +1,6 @@
 package formflow.library.config;
 
-import formflow.library.exceptions.ConfigurationException;
-import formflow.library.exceptions.LandmarkNotSetException;
-import java.io.FileNotFoundException;
+import formflow.library.exceptions.FlowConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 
 /**
- * Parses the flow configuration yaml file and setups the FlowConfiguration list.
+ * Parses the flow configuration yaml file and adds validated flow configuration objects to the libraries list of flow configurations.
  */
 @Slf4j
 public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfiguration>> {
@@ -46,45 +44,55 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
    */
   @Override
   public List<FlowConfiguration> getObject() throws IOException {
+    List<FlowConfiguration> flowConfigurations = new ArrayList<>();
+    try {
+      Iterable<Object> flowConfigsIterable = loadFlowConfigurationsFromYaml();
+      flowConfigsIterable.forEach(flowConfig -> addValidatedFlowConfiguration((FlowConfiguration) flowConfig, flowConfigurations));
+    } catch (IOException e) {
+      log.error("Can't find the flow configuration file: " + configPath, e);
+      throw e;
+    }
+
+    return flowConfigurations;
+  }
+  
+  private Iterable<Object> loadFlowConfigurationsFromYaml() throws IOException {
     ClassPathResource classPathResource = new ClassPathResource(configPath);
 
     LoaderOptions loaderOptions = new LoaderOptions();
     loaderOptions.setAllowDuplicateKeys(false);
     loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
     loaderOptions.setAllowRecursiveKeys(true);
-
+    
     Yaml yaml = new Yaml(new Constructor(FlowConfiguration.class, loaderOptions), new Representer(new DumperOptions()),
         new DumperOptions(), loaderOptions);
-    List<FlowConfiguration> appConfigs = new ArrayList<>();
-    try {
-      Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
-      appConfigsIterable.forEach(appConfig -> {
-        FlowConfiguration flowConfig = (FlowConfiguration) appConfig;
-        
-        if (formFlowConfigurationProperties == null || !formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName())) {
-          appConfigs.add(flowConfig);
-        }
-        
-        if (formFlowConfigurationProperties != null && formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName())) {
-          if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getFirstScreen() == null) {
-            log.error("You have disabled flow {} but you did not add a landmarks first screen section to it's flow configuration file.", flowConfig.getName());
-            throw new ConfigurationException(String.format("You have disabled flow %s but you did not add a landmarks after submit pages section to it's flow configuration file.", flowConfig.getName()));
-          }
-        }
-        
-        if (formFlowConfigurationProperties != null && formFlowConfigurationProperties.isSubmissionLockedForFlow(flowConfig.getName())) {
-          if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
-            log.error("You have configured submission locking for flow {} but you did not add a landmarks after submit pages section to it's flow configuration file.", flowConfig.getName());
-            throw new ConfigurationException(String.format("You have configured submission locking for flow %s but you did not add a landmarks after submit pages section to it's flow configuration file.", flowConfig.getName()));
-          }
-        }
-      });
-    } catch (IOException e) {
-      log.error("Can't find the flow configuration file: " + configPath, e);
-      throw e;
-    }
+    return yaml.loadAll(classPathResource.getInputStream());
+  }
 
-    return appConfigs;
+  private void addValidatedFlowConfiguration(FlowConfiguration flowConfig, List<FlowConfiguration> flowConfigurations) {
+    if (shouldAddFlowConfiguration(flowConfig)) {
+      validateFlowConfiguration(flowConfig);
+      flowConfigurations.add(flowConfig);
+    }
+  }
+
+  private boolean shouldAddFlowConfiguration(FlowConfiguration flowConfig) {
+    return formFlowConfigurationProperties == null || !formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName());
+  }
+
+  private void validateFlowConfiguration(FlowConfiguration flowConfig) {
+    if (formFlowConfigurationProperties != null) {
+      if (formFlowConfigurationProperties.isSubmissionLockedForFlow(flowConfig.getName())) {
+        validateLandmarksAfterSubmitPages(flowConfig);
+      }
+    }
+  }
+
+  private void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
+    if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
+      throw new FlowConfigurationException("You have enabled submission locking for the flow " + flowConfig.getName() + 
+          " but the afterSubmitPages landmark is not set in your flow configuration yaml file.");
+    }
   }
 
   @Override
