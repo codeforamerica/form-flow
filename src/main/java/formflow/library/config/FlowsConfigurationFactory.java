@@ -91,7 +91,7 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
     }
   }
 
-  private void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
+  protected void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
     if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
       throw new FlowConfigurationException("You have enabled submission locking for the flow " + flowConfig.getName() + 
           " but the afterSubmitPages landmark is not set in your flow configuration yaml file.");

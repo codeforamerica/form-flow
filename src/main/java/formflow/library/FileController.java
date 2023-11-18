@@ -125,7 +125,6 @@ public class FileController extends FormFlowController {
       Submission submission = findOrCreateSubmission(httpSession, flow);
 
       if (shouldRedirectDueToLockedSubmission(flow, screen, submission)) {
-        String lockedSubmissionRedirectPage = formFlowConfigurationProperties.getLockedSubmissionRedirect(flow);
         log.info("The Submission for flow {} is locked. Cannot upload file.", flow);
         String message = messageSource.getMessage("upload-documents.locked-submission", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);

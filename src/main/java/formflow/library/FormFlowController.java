@@ -188,28 +188,13 @@ public abstract class FormFlowController {
    */
   public boolean shouldRedirectDueToLockedSubmission(String flowName, String screen, Submission submission) {
     FlowConfiguration flowConfig = getFlowConfigurationByName(flowName);
+    boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
     
-    if (submission == null) {
-      // This should hopefully never happen
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The Submission object was null when checking if the user should be redirected due to a locked submission.");
+    if (submissionIsLocked) {
+      boolean isSubmissionSubmitted = submission.getSubmittedAt() != null;
+      boolean isCurrentScreenAfterSubmit = flowConfig.getLandmarks().getAfterSubmitPages().contains(screen);
+      return isSubmissionSubmitted && !isCurrentScreenAfterSubmit;
     }
-    
-    if (flowConfig == null) {
-      // This should hopefully never happen
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The FlowConfiguration object was null when checking if the user should be redirected due to a locked submission.");
-    }
-
-    List<String> afterSubmitPages = flowConfig.getLandmarks().getAfterSubmitPages();
-    if (afterSubmitPages == null) {
-      
-      // Log error or handle the case where afterSubmitPages is null
-      return false;
-    }
-
-    boolean isSubmissionLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
-    boolean isSubmissionSubmitted = submission.getSubmittedAt() != null;
-    boolean isCurrentScreenAfterSubmit = afterSubmitPages.contains(screen);
-
-    return isSubmissionLocked && isSubmissionSubmitted && !isCurrentScreenAfterSubmit;
+    return false;
   }
 }
