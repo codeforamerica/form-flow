@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ class SubmissionRepositoryServiceTest {
     Submission firstSubmission = new Submission();
     firstSubmission.setFlow("testFlow");
 
-    firstSubmission = submissionRepositoryService.save(firstSubmission);
+    firstSubmission = saveAndReload(firstSubmission);
 
     assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
   }
@@ -55,10 +54,7 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-    UUID subId = submissionRepositoryService.save(submission).getId();
-
-    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(subId);
-    Submission savedSubmission = savedSubmissionOptional.orElseThrow();
+    Submission savedSubmission = saveAndReload(submission);
     assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
     assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
     assertThat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(savedSubmission.getSubmittedAt()))
@@ -77,18 +73,13 @@ class SubmissionRepositoryServiceTest {
         .flow("testFlow")
         .submittedAt(Date.from(timeNow))
         .build();
-    submission = submissionRepositoryService.save(submission);
+    Submission savedSubmission = saveAndReload(submission);
 
     var newInputData = Map.of(
         "newKey", "this is a new value",
         "otherNewKey", List.of("X", "Y", "Z"));
-    submission.setInputData(newInputData);
-    submissionRepositoryService.save(submission);
-
-    Optional<Submission> savedSubmissionOptional = submissionRepositoryService.findById(
-        submission.getId());
-
-    Submission savedSubmission = savedSubmissionOptional.orElseThrow();
+    savedSubmission.setInputData(newInputData);
+    savedSubmission = saveAndReload(savedSubmission);
     assertThat(savedSubmission.getInputData()).isEqualTo(newInputData);
   }
 
@@ -145,9 +136,7 @@ class SubmissionRepositoryServiceTest {
         .submittedAt(Date.from(timeNow))
         .build();
 
-    UUID subId = submissionRepositoryService.save(submission).getId();
-
-    Submission dbSubmission = (submissionRepositoryService.findById(subId)).get();
+    Submission dbSubmission = saveAndReload(submission);
     assertThat(dbSubmission.getInputData().containsKey("ssnInput")).isTrue();
     assertThat(dbSubmission.getInputData().containsKey("ssnInput_encrypted")).isFalse();
     assertThat(dbSubmission.getInputData().get("ssnInput")).isEqualTo("123-45-6789");
@@ -208,15 +197,19 @@ class SubmissionRepositoryServiceTest {
         .flow("testFlow")
         .build();
 
-    UUID id = submissionRepositoryService.save(submission).getId();
-    Submission savedSubmission = submissionRepositoryService.findById(id).get();
-
+    Submission savedSubmission = saveAndReload(submission);
     assertThat(savedSubmission.getCreatedAt()).isInThePast();
+
     savedSubmission.getInputData().put("newKey", "newValue");
-    submissionRepositoryService.save(savedSubmission);
-    Submission updatedSubmission = submissionRepositoryService.findById(id).get();
+    Submission updatedSubmission = saveAndReload(savedSubmission);
+
     assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
     assertThat(updatedSubmission.getUpdatedAt()).isInThePast();
     assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
+  }
+
+  private Submission saveAndReload(Submission submission) {
+    Submission savedSubmission = submissionRepositoryService.save(submission);
+    return submissionRepositoryService.findById(savedSubmission.getId()).orElseThrow();
   }
 }
