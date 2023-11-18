@@ -91,14 +91,14 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
     }
   }
 
-  void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
+  private void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
     if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
       throw new FlowConfigurationException("You have enabled submission locking for the flow " + flowConfig.getName() + 
           " but the afterSubmitPages landmark is not set in your flow configuration yaml file.");
     }
   }
-  
-  void validateLandmarksFirstScreen(FlowConfiguration flowConfig) {
+
+  protected void validateLandmarksFirstScreen(FlowConfiguration flowConfig) {
     if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getFirstScreen() == null) {
       throw new FlowConfigurationException("You have enabled the session continuity interceptor in your application but have not added a first screen landmark for the flow " + flowConfig.getName() +
           " in your flow configuration yaml file.");
