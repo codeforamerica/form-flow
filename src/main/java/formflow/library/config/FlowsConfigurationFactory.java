@@ -23,8 +23,10 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
   @Value("${form-flow.path:flows-config.yaml}")
   String configPath;
   
+  @Value("${form-flow.session-continuity-interceptor.enabled:false}")
+  boolean sessionContinuityInterceptorEnabled;
+  
   FormFlowConfigurationProperties formFlowConfigurationProperties;
-
 
   FlowsConfigurationFactory() {
     this.formFlowConfigurationProperties = null;
@@ -81,17 +83,34 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
   }
 
   private void validateFlowConfiguration(FlowConfiguration flowConfig) {
-    if (formFlowConfigurationProperties != null) {
-      if (formFlowConfigurationProperties.isSubmissionLockedForFlow(flowConfig.getName())) {
+    if (formFlowConfigurationProperties != null && formFlowConfigurationProperties.isSubmissionLockedForFlow(flowConfig.getName())) {
         validateLandmarksAfterSubmitPages(flowConfig);
-      }
+    }
+    if (sessionContinuityInterceptorEnabled) {
+      validateLandmarksFirstScreen(flowConfig);
     }
   }
 
-  private void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
+  void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
     if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
       throw new FlowConfigurationException("You have enabled submission locking for the flow " + flowConfig.getName() + 
           " but the afterSubmitPages landmark is not set in your flow configuration yaml file.");
+    }
+  }
+  
+  void validateLandmarksFirstScreen(FlowConfiguration flowConfig) {
+    if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getFirstScreen() == null) {
+      throw new FlowConfigurationException("You have enabled the session continuity interceptor in your application but have not added a first screen landmark for the flow " + flowConfig.getName() +
+          " in your flow configuration yaml file.");
+    }
+
+    String firstScreen = flowConfig.getLandmarks().getFirstScreen();
+
+    if (!flowConfig.getFlow().containsKey(firstScreen)) {
+      throw new FlowConfigurationException(String.format(
+          "Your flow configuration file for the flow %s does not contain a screen with the name '%s'. " +
+              "You may have misspelled the screen name. Please make sure to correctly set the 'firstScreen' in the flows configuration file 'landmarks' section.",
+          flowConfig.getName(), firstScreen));
     }
   }
 

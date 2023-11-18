@@ -1,6 +1,5 @@
 package formflow.library.config;
 
-import formflow.library.exceptions.LandmarkNotSetException;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ public class FlowsConfigurationFactoryConfig {
 
   @Autowired(required = false)
   FormFlowConfigurationProperties formFlowConfigurationProperties;
-
 
   /**
    * Bean to get a FlowsConfigurationFactory object.
@@ -38,7 +36,7 @@ public class FlowsConfigurationFactoryConfig {
    * @return list of flow configuration objects
    */
   @Bean
-  public List<FlowConfiguration> flowsConfiguration() throws IOException, LandmarkNotSetException {
+  public List<FlowConfiguration> flowsConfiguration() throws IOException {
     return flowsConfigurationFactory().getObject();
   }
 }
