@@ -31,7 +31,7 @@ Table of Contents
         * [Templates](#templates)
         * [Static Pages](#static-pages)
         * [Fragments](#fragments)
-        * [Input Types](#input-types)
+        * [Input Type Fragments](#input-type-fragments)
         * [Accessing Conditions](#accessing-conditions)
         * [Accessing Submission Object](#accessing-submission-object)
     * [Document Upload](#document-upload)
@@ -1101,10 +1101,10 @@ values will be stored in the database. Phone inputs also have an optional `place
 
 A convenience live template for phone inputs is provided through `cfa:inputPhone`.
 
-#### YesOrN
+#### YesOrNo
 
-Yes or no inputs are used to gather a yes or no answers from a user. They are visually displayed as
-two buttons, one with a green check and the word `Yes`, the other with a red X and the word `No`.
+Yes or no inputs are used to gather a `yes` or `no` answer from a user. They are visually displayed
+as two buttons, one with a green check and the word `Yes`, the other with a red X and the word `No`.
 The values that are submitted to the server are `true` and `false` respectively.
 
 Yes or No inputs are traditionally used for simple yes or no questions, such as "Are you pregnant?"
@@ -1337,7 +1337,8 @@ The address fragment has two required parameters, `validate` and `inputName`.
 
 Please note that when using the address fragment you will need to create corresponding fields in
 your flow inputs class for each of the above-mentioned inputs created by the fragment. For example,
-if your address fragments input name is `mailingAddress`, then you will need to create the following
+if your address fragment's input name is `mailingAddress`, then you will need to create the
+following
 fields in your flow inputs class:
 
 ```
@@ -1368,7 +1369,7 @@ The address fragment has these optional parameters
 
 #### Reveal
 
-There is a `reveal` fragment is based on
+There is a `reveal` fragment that is based on
 the [Honeycrisp reveal element](https://honeycrisp.herokuapp.com/cfa/styleguide#molecules-reveal)
 component.
 
@@ -1418,8 +1419,9 @@ and one with the secondary button CSS classes (`button button--secondary`):
         text=#{upload-documents.button-text}, isHidden=true)}"/>
 ```
 
-There is an optional field called `isHidden` available on both buttons. If set to `true`, the
-button will be hidden when the page loads (the `display-none` class will be added to its classes).
+There is an optional field called `isHidden` available on both buttons. If set to `true`,
+the `display-none` class will be added to the widget's classes resulting in the button being hidden
+when the page loads.
 
 ## Document Upload
 
