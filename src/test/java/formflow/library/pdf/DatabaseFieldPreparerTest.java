@@ -1,6 +1,7 @@
 package formflow.library.pdf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import formflow.library.data.Submission;
 import java.util.List;
@@ -58,5 +59,32 @@ class DatabaseFieldPreparerTest {
         Map.entry("submissionId", new DatabaseField("submissionId", submission.getId().toString())),
         Map.entry("updatedAt", new DatabaseField("updatedAt", "09/15/2020"))
     );
+  }
+  
+  @Test
+  void DbFieldsShouldNotBeRequired_shouldNotThrowErrorIfDbFieldsIsNull() {
+    DatabaseFieldPreparer dataBaseFieldPreparer = new DatabaseFieldPreparer();
+    PdfMap pdfMap = new PdfMap();
+    pdfMap.setFlow("flow1");
+    // Assert Does Not throw for a completely missing dbFields Map
+    pdfMapConfiguration = new PdfMapConfiguration(List.of(pdfMap));
+    assertDoesNotThrow(() -> dataBaseFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap(submission.getFlow())));
+    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap(submission.getFlow()))).isEmpty();
+    
+    // Assert does not throw for a null dbFields Map value
+    pdfMap.setDbFields(null);
+    assertDoesNotThrow(() -> dataBaseFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap(submission.getFlow())));
+    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap(submission.getFlow()))).isEmpty();
+
+    // Assert does not throw for an empty dbFields Map value
+    pdfMap.setDbFields(Map.of());
+    assertDoesNotThrow(() -> dataBaseFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap(submission.getFlow())));
+    assertThat(dataBaseFieldPreparer.prepareSubmissionFields(submission,
+        pdfMapConfiguration.getPdfMap(submission.getFlow()))).isEmpty();
   }
 }
