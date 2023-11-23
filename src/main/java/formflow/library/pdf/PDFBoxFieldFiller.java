@@ -1,13 +1,10 @@
 package formflow.library.pdf;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDCheckBox;
@@ -87,21 +84,32 @@ public class PDFBoxFieldFiller {
   private void substituteUnsupportedCharactersWithQuestionMarks(String field, PDField pdField) throws IOException {
     StringBuilder builder = new StringBuilder();
     Iterable<COSName> fontNames = pdField.getAcroForm().getDefaultResources().getFontNames();
-    for (COSName cosName: fontNames){
+    ArrayList<PDType1Font> currentFonts = new ArrayList<PDType1Font>();
+    for (COSName cosName: fontNames) {
       PDType1Font font = (PDType1Font) pdField.getAcroForm().getDefaultResources().getFont(cosName);
-      if (builder.isEmpty()){
-        for(int i = 0; i < field.length(); i++){
-          Character character = field.charAt(i);
-          if(font.hasGlyph(character)){
-            builder.append(character);
-          }else{
-            builder.append('?');
-          }
-        }
-      }
-      System.out.println("test");
-      pdField.setValue(builder.toString());
+      currentFonts.add(font);
     }
+
+      for(int i = 0; i < field.length(); i++){
+        Character character = field.charAt(i);
+        if(fontsIncludeGlyph(currentFonts, character)){
+          builder.append(character);
+        }else{
+          builder.append('?');
+        }
+
+        System.out.println("test");
+      }
+    pdField.setValue(builder.toString());
   }
 
+  private Boolean fontsIncludeGlyph(List<PDType1Font> fonts, Character character) throws IOException {
+    Boolean glyphFound = false;
+    for(PDType1Font font: fonts){
+      if(font.hasGlyph(character)){
+        glyphFound = true;
+      }
+    }
+    return glyphFound;
+  }
 }
