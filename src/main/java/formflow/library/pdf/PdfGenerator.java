@@ -3,6 +3,7 @@ package formflow.library.pdf;
 import formflow.library.data.Submission;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.List;
 
 @Component
@@ -11,14 +12,14 @@ public class PdfGenerator {
   private final SubmissionFieldPreparers submissionFieldPreparers;
   private final PdfFieldMapper pdfFieldMapper;
   private final PdfMapConfiguration pdfMapConfiguration;
-  private final PDFBoxFieldFiller pdfBoxFieldFiller;
+  private final PDFFormFiller pdfFormFiller;
 
   public PdfGenerator(SubmissionFieldPreparers submissionFieldPreparers,
-      PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration, PDFBoxFieldFiller pdfBoxFieldFiller) {
+      PdfFieldMapper pdfFieldMapper, PdfMapConfiguration pdfMapConfiguration, PDFFormFiller pdfFormFiller) {
     this.submissionFieldPreparers = submissionFieldPreparers;
     this.pdfFieldMapper = pdfFieldMapper;
     this.pdfMapConfiguration = pdfMapConfiguration;
-    this.pdfBoxFieldFiller = pdfBoxFieldFiller;
+    this.pdfFormFiller = pdfFormFiller;
   }
 
   /**
@@ -28,11 +29,10 @@ public class PdfGenerator {
    * @param submission the submission we are going to map the data of
    * @return A PdfFile which contains the path to the newly created and filled in PDF file.
    */
-  public PdfFile generate(String flow, Submission submission) {
+  public File generate(String flow, Submission submission) {
     List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
     List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, flow);
     String pathToPdfResource = pdfMapConfiguration.getPdfPathFromFlow(flow);
-    PdfFile tmpFile = pdfBoxFieldFiller.fill(pathToPdfResource, pdfFields);
-    return tmpFile;
+    return pdfFormFiller.fill(pathToPdfResource, pdfFields);
   }
 }
