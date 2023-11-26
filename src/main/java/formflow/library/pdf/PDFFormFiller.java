@@ -15,16 +15,16 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
-public class PDFBoxFieldFiller {
+public class PDFFormFiller {
 
   /**
    * Fill the fields in a PDF form with the values provided
    * @param pdfTemplatePath path to the PDF template
    * @param fields collection of field names and values
    * @param flatten whether to flatten the output PDF, preventing its use for further filling
-   * @return `PDFFile` record specifying the directory and name of the filled PDF file
+   * @return `File` object for the filled PDF file
    */
-  public PdfFile fill(String pdfTemplatePath, Collection<PdfField> fields, boolean flatten) {
+  public File fill(String pdfTemplatePath, Collection<PdfField> fields, boolean flatten) {
     try (PdfReader reader = new PdfReader(pdfTemplatePath)) {
       File outputFile = File.createTempFile("Filled_", ".pdf");
       PdfStamper pdfStamper = new PdfStamper(reader, new FileOutputStream(outputFile));
@@ -35,7 +35,7 @@ public class PDFBoxFieldFiller {
       }
       pdfStamper.setFormFlattening(flatten);
       pdfStamper.close();
-      return new PdfFile(outputFile.getParent(), outputFile.getName());
+      return outputFile;
     } catch (IOException e) {
       log.error("Failed to generate PDF: %s", e);
       throw new RuntimeException(e);
@@ -47,9 +47,9 @@ public class PDFBoxFieldFiller {
    * Fill the fields in a PDF form with the values provided and return a flattened PDF
    * @param pdfTemplatePath path to the PDF template
    * @param fields collection of field names and values
-   * @return `PDFFile` record specifying the directory and name of the filled and flattened PDF file
+   * @return `File` object for the filled PDF file
    */
-  public PdfFile fill(String pdfTemplatePath, Collection<PdfField> fields) {
+  public File fill(String pdfTemplatePath, Collection<PdfField> fields) {
     return fill(pdfTemplatePath, fields, true);
   }
 

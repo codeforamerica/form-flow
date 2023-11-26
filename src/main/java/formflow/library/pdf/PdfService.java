@@ -1,9 +1,12 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 @Service
 @Slf4j
@@ -26,10 +29,9 @@ public class PdfService {
    */
   public byte[] getFilledOutPDF(Submission submission) throws IOException {
     // 1. generate the pdf
-    PdfFile filledPdf = pdfGenerator.generate(submission.getFlow(), submission);
-    filledPdf.finalizeForSending();
-    byte[] pdfByteArray = filledPdf.fileBytes();
-    filledPdf.deleteFile();
+    File file = pdfGenerator.generate(submission.getFlow(), submission);
+    byte[] pdfByteArray = Files.readAllBytes(file.toPath());
+    file.delete();
     return pdfByteArray;
   }
 
