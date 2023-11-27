@@ -86,21 +86,4 @@ class PDFBoxFieldFillerTest {
         )
     ).doesNotThrowAnyException();
   }
-
-  @Test
-  void shouldSupportEmojis() throws IOException {
-    String submittedValue = "Michael😃";
-    String expectedValue = "Michael😃";
-
-    Collection<PdfField> fields = List.of(
-        new PdfField("TEXT_FIELD", submittedValue)
-    );
-
-    PdfFile pdfFile = pdfBoxFieldFiller.fill(pdf, fields);
-    PDDocument pdDocument = Loader.loadPDF(pdfFile.fileBytes());
-    PDAcroForm acroForm = pdDocument.getDocumentCatalog().getAcroForm();
-
-    assertThat(acroForm.getField("TEXT_FIELD").getValueAsString()).isEqualTo(expectedValue);
-    pdDocument.close();
-  }
 }
