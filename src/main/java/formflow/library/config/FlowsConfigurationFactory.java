@@ -39,7 +39,6 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
   /**
    * Takes in the flow configuration yaml file from the given form-flow.path application properties and parses it into a list of 
    * FlowConfiguration objects.
-   * 
    * Disabled flows will be excluded, detected using the form-flow.disabled-flows application property.
    * @return list of FlowConfiguration objects.
    * @throws IOException if the flow configuration file can't be found.
