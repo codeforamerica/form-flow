@@ -2,8 +2,7 @@ package formflow.library.pdf;
 
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfReader;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
+import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -13,6 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PDFFormFillerTest {
 
@@ -43,27 +43,15 @@ class PDFFormFillerTest {
   }
 
   @Test
-  @Disabled
-  void shouldSetNullTextFieldsAsEmptyString() throws IOException {
-    Collection<PdfField> fields = List.of(
-            new PdfField("TEXT_FIELD", null)
-    );
-    File file = pdfFormFiller.fill(pdf, fields);
-
-    Assertions.assertEquals(getField(file, "TEXT_FIELD"), "");
-
-  }
-
-  @Test
   void shouldAccept_a_with_macron() throws IOException {
-    String textFieldValue = "北京";
+    String textFieldValue = "Michaelā";
     Collection<PdfField> fields = List.of(
             new PdfField("TEXT_FIELD", textFieldValue)
     );
 
-    File file = pdfFormFiller.fill(pdf, fields, false);
+    File file = pdfFormFiller.fill(pdf, fields, true);
 
-    assertEquals(textFieldValue, getField(file, "TEXT_FIELD"));
+    assertTrue(getText(file).contains("Michael ā")); // openpdf's text extraction introduces a space
   }
 
   @Test
@@ -73,9 +61,9 @@ class PDFFormFillerTest {
             new PdfField("TEXT_FIELD", textFieldValue)
     );
 
-    File file = pdfFormFiller.fill(pdf, fields, false);
+    File file = pdfFormFiller.fill(pdf, fields, true);
 
-    assertEquals(textFieldValue, getField(file, "TEXT_FIELD"));
+    assertTrue(getText(file).contains(textFieldValue));
   }
 
   @Test
@@ -102,6 +90,13 @@ class PDFFormFillerTest {
     try (PdfReader reader = new PdfReader(file.getPath())) {
       AcroFields form = reader.getAcroFields();
       return form.getField(fieldName);
+    }
+  }
+
+  private static String getText(File file) throws IOException {
+    try (PdfReader reader = new PdfReader(file.getPath())) {
+      PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(reader);
+      return pdfTextExtractor.getTextFromPage(1);
     }
   }
 }
