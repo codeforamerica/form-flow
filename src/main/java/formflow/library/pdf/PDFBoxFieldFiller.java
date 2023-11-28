@@ -97,8 +97,6 @@ public class PDFBoxFieldFiller {
         }else{
           builder.append('?');
         }
-
-        System.out.println("test");
       }
     pdField.setValue(builder.toString());
   }
