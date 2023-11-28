@@ -2,6 +2,7 @@ package formflow.library.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
@@ -18,19 +19,14 @@ import org.springframework.test.context.TestPropertySource;
 public class FlowsConfigurationFactoryTest {
 
   private FlowsConfigurationFactory flowsConfigurationFactory;
-  private FormFlowConfigurationProperties formFlowConfigurationProperties;
-  
-  private SessionContinuityInterceptorConfiguration sessionContinuityInterceptorConfiguration;
-  private ClassPathResource classPathResource;
-  
-  String AFTER_SUBIT_MISCONFIGURATION_ERROR = "You have enabled submission locking for the flow testFlow but the afterSubmitPages landmark is not set in your flow configuration yaml file.";
+
+
+  String AFTER_SUBMIT_MISCONFIGURATION_ERROR = "You have enabled submission locking for the flow testFlow but the afterSubmitPages landmark is not set in your flow configuration yaml file.";
   String FIRST_SCREEN_MISCONFIGURATION_ERROR = "You have enabled the session continuity interceptor in your application but have not added a first screen landmark for the flow testFlow in your flow configuration yaml file.";
   String INCORRECT_FIRST_SCREEN_NAME_ERROR = "Your flow configuration file for the flow testFlow does not contain a screen with the name 'doesNotExistInTheFlow'. You may have misspelled the screen name. Please make sure to correctly set the 'firstScreen' in the flows configuration file 'landmarks' section.";
   @BeforeEach
   public void setUp() {
-    formFlowConfigurationProperties = mock(FormFlowConfigurationProperties.class);
-    sessionContinuityInterceptorConfiguration = mock(SessionContinuityInterceptorConfiguration.class);
-    classPathResource = mock(ClassPathResource.class);
+    FormFlowConfigurationProperties formFlowConfigurationProperties = mock(FormFlowConfigurationProperties.class);
     flowsConfigurationFactory = new FlowsConfigurationFactory(formFlowConfigurationProperties);
   }
 
@@ -41,19 +37,19 @@ public class FlowsConfigurationFactoryTest {
     flowConfig.setName("testFlow");
     // The factory should throw an exception when it tries to validate the flow since there is no landmarks section but submission locking is enabled
     FlowConfigurationException errorThrownForNoLandmarkSectionAtAll = assertThrows(FlowConfigurationException.class, () -> flowsConfigurationFactory.validateLandmarksAfterSubmitPages(flowConfig));
-    assertThat(errorThrownForNoLandmarkSectionAtAll.getMessage()).isEqualTo(AFTER_SUBIT_MISCONFIGURATION_ERROR);
+    assertEquals(errorThrownForNoLandmarkSectionAtAll.getMessage(), AFTER_SUBMIT_MISCONFIGURATION_ERROR);
     
     // Add a landmarks section that has no afterSubmitPages section, the factory should throw an exception due to the missing afterSubmitPages section
     LandmarkConfiguration landmarks = new LandmarkConfiguration();
     flowConfig.setLandmarks(landmarks);
     FlowConfigurationException errorThrownForNoAfterSubmitLandmark = assertThrows(FlowConfigurationException.class, () -> flowsConfigurationFactory.validateLandmarksAfterSubmitPages(flowConfig));
-    assertThat(errorThrownForNoAfterSubmitLandmark.getMessage()).isEqualTo(AFTER_SUBIT_MISCONFIGURATION_ERROR);
+    assertEquals(errorThrownForNoAfterSubmitLandmark.getMessage(), AFTER_SUBMIT_MISCONFIGURATION_ERROR);
     
     // Add a landmarks section that has a null afterSubmitPages section, the factory should throw an exception due to the null afterSubmitPages section
     landmarks.setAfterSubmitPages(null);
     flowConfig.setLandmarks(landmarks);
     FlowConfigurationException errorThrownForEmptyAfterSubmitLandmark = assertThrows(FlowConfigurationException.class, () -> flowsConfigurationFactory.validateLandmarksAfterSubmitPages(flowConfig));
-    assertThat(errorThrownForEmptyAfterSubmitLandmark.getMessage()).isEqualTo(AFTER_SUBIT_MISCONFIGURATION_ERROR);
+    assertEquals(errorThrownForEmptyAfterSubmitLandmark.getMessage(), AFTER_SUBMIT_MISCONFIGURATION_ERROR);
     
     // Add a landmarks section that has an afterSubmitPages section with at least one value, no error should be thrown
     landmarks.setAfterSubmitPages(new ArrayList<>(List.of("testAfterSubmitPage")));
@@ -73,28 +69,28 @@ public class FlowsConfigurationFactoryTest {
     // The factory should throw an exception when it tries to validate the flow since there is no landmarks section but session continuity interception is enabled
     FlowConfigurationException errorThrownForNoLandmarkSectionAtAll = assertThrows(FlowConfigurationException.class,
         () -> flowsConfigurationFactory.validateLandmarksFirstScreen(flowConfig));
-    assertThat(errorThrownForNoLandmarkSectionAtAll.getMessage()).isEqualTo(FIRST_SCREEN_MISCONFIGURATION_ERROR);
+    assertEquals(errorThrownForNoLandmarkSectionAtAll.getMessage(), FIRST_SCREEN_MISCONFIGURATION_ERROR);
 
     // Add a landmarks section that has no firstScreen section, the factory should throw an exception due to the missing firstScreen section
     LandmarkConfiguration landmarks = new LandmarkConfiguration();
     flowConfig.setLandmarks(landmarks);
     FlowConfigurationException errorThrownForNoFirstScreenLandmark = assertThrows(FlowConfigurationException.class,
         () -> flowsConfigurationFactory.validateLandmarksFirstScreen(flowConfig));
-    assertThat(errorThrownForNoFirstScreenLandmark.getMessage()).isEqualTo(FIRST_SCREEN_MISCONFIGURATION_ERROR);
+    assertEquals(errorThrownForNoFirstScreenLandmark.getMessage(), FIRST_SCREEN_MISCONFIGURATION_ERROR);
 
     // Add a landmarks section that has a null firstScreen section, the factory should throw an exception due to the null firstScreen section
     landmarks.setFirstScreen(null);
     flowConfig.setLandmarks(landmarks);
     FlowConfigurationException errorThrownForEmptyFirstScreenLandmark = assertThrows(FlowConfigurationException.class,
         () -> flowsConfigurationFactory.validateLandmarksFirstScreen(flowConfig));
-    assertThat(errorThrownForEmptyFirstScreenLandmark.getMessage()).isEqualTo(FIRST_SCREEN_MISCONFIGURATION_ERROR);
+    assertEquals(errorThrownForEmptyFirstScreenLandmark.getMessage(), FIRST_SCREEN_MISCONFIGURATION_ERROR);
 
     // Add a landmarks section that has an incorrect firstScreen name, the factory should throw an exception since the firstScreen name does not match any screen in the flow
     landmarks.setFirstScreen("doesNotExistInTheFlow");
     flowConfig.setLandmarks(landmarks);
     FlowConfigurationException errorThrownForIncorrectFirstScreenName = assertThrows(FlowConfigurationException.class,
         () -> flowsConfigurationFactory.validateLandmarksFirstScreen(flowConfig));
-    assertThat(errorThrownForIncorrectFirstScreenName.getMessage()).isEqualTo(INCORRECT_FIRST_SCREEN_NAME_ERROR);
+    assertEquals(errorThrownForIncorrectFirstScreenName.getMessage(), INCORRECT_FIRST_SCREEN_NAME_ERROR);
     
     // Add a landmarks section that has an firstScreen section with at least one value, no error should be thrown
     landmarks.setFirstScreen("testFirstScreen");

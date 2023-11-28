@@ -6,7 +6,6 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import jakarta.servlet.http.HttpSession;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -181,14 +180,13 @@ public abstract class FormFlowController {
   /**
    * Determines if the user should be redirected due to a locked submission.
    *
-   * @param flowName     The name of the flow.
-   * @param screen       The current screen name.
-   * @param submission   The submission object.
+   * @param screen     The current screen name.
+   * @param submission The submission object.
    * @return true if the user should be redirected, false otherwise.
    */
-  public boolean shouldRedirectDueToLockedSubmission(String flowName, String screen, Submission submission) {
-    FlowConfiguration flowConfig = getFlowConfigurationByName(flowName);
-    boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
+  public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission) {
+    FlowConfiguration flowConfig = getFlowConfigurationByName(submission.getFlow());
+    boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(submission.getFlow());
     
     if (submissionIsLocked) {
       boolean isSubmissionSubmitted = submission.getSubmittedAt() != null;

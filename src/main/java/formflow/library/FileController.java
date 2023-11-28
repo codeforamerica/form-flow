@@ -17,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -46,10 +45,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
@@ -124,7 +120,7 @@ public class FileController extends FormFlowController {
 
       Submission submission = findOrCreateSubmission(httpSession, flow);
 
-      if (shouldRedirectDueToLockedSubmission(flow, screen, submission)) {
+      if (shouldRedirectDueToLockedSubmission(screen, submission)) {
         log.info("The Submission for flow {} is locked. Cannot upload file.", flow);
         String message = messageSource.getMessage("upload-documents.locked-submission", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
