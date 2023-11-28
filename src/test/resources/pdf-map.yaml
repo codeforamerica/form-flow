@@ -1,5 +1,5 @@
 flow: ubi
-pdf: pdfs/ubi/Multipage-UBI-Form.pdf
+pdf: pdfs/Multipage-UBI-Form.pdf
 inputFields:
   firstName: APPLICANT_LEGAL_NAME_FIRST
   city: APPLICANT_CITY
@@ -7,4 +7,4 @@ inputFields:
     phone: PHONE
     email: EMAIL
 dbFields:
-  submittedAt: SUBMITTED_AT_DATE
+  submittedAt: DATE
