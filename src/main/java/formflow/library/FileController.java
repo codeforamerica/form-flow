@@ -150,7 +150,6 @@ public class FileController extends FormFlowController {
       if (fileExtension.equals("pdf")) {
         try (PdfReader ignored = new PdfReader(file.getBytes())) {
         } catch (BadPasswordException e) {
-          // TODO update when we add internationalization to use locale for message source
           String message = messageSource.getMessage("upload-documents.error-password-protected", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (IOException e) {
