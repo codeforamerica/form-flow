@@ -182,11 +182,12 @@ public abstract class FormFlowController {
    *
    * @param screen     The current screen name.
    * @param submission The submission object.
+   * @param flowName
    * @return true if the user should be redirected, false otherwise.
    */
-  public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission) {
-    FlowConfiguration flowConfig = getFlowConfigurationByName(submission.getFlow());
-    boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(submission.getFlow());
+  public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission, String flowName) {
+    FlowConfiguration flowConfig = getFlowConfigurationByName(flowName);
+    boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
     
     if (submissionIsLocked) {
       boolean isSubmissionSubmitted = submission.getSubmittedAt() != null;

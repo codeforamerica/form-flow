@@ -111,7 +111,7 @@ public class ScreenController extends FormFlowController {
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
-    if (shouldRedirectDueToLockedSubmission(screen, submission)) {
+    if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
@@ -177,7 +177,7 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
-    if (shouldRedirectDueToLockedSubmission(screen, submission)) {
+    if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
@@ -252,7 +252,7 @@ public class ScreenController extends FormFlowController {
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = getSubmissionFromSession(httpSession, flow);
 
-    if (shouldRedirectDueToLockedSubmission(screen, submission)) {
+    if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
@@ -313,7 +313,7 @@ public class ScreenController extends FormFlowController {
     String subflowName = currentScreen.getSubflow();
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
-    if (shouldRedirectDueToLockedSubmission(screen, submission)) {
+    if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new RedirectView(lockedSubmissionRedirectUrl);
     }
@@ -407,7 +407,7 @@ public class ScreenController extends FormFlowController {
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
     Submission submission = getSubmissionFromSession(httpSession, flow);
     
-    if (shouldRedirectDueToLockedSubmission(deleteConfirmationScreen, submission)) {
+    if (shouldRedirectDueToLockedSubmission(deleteConfirmationScreen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
@@ -455,7 +455,7 @@ public class ScreenController extends FormFlowController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    if (shouldRedirectDueToLockedSubmission(null, submission)) {
+    if (shouldRedirectDueToLockedSubmission(null, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
