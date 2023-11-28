@@ -1,5 +1,5 @@
 flow: ubi
-pdf: pdfs/Multipage-UBI-Form.pdf
+pdf: pdfs/testFlow/Multipage-UBI-Form.pdf
 inputFields:
   firstName: APPLICANT_LEGAL_NAME_FIRST
   city: APPLICANT_CITY

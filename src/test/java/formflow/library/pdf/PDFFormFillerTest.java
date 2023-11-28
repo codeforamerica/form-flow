@@ -27,10 +27,10 @@ class PDFFormFillerTest {
     String unselectedCheckboxValue = "Off";
 
     Collection<PdfField> fields = List.of(
-            new PdfField("TEXT_FIELD", textFieldValue),
-            new PdfField("RADIO_BUTTON", radioValue),
-            new PdfField("CHECKBOX_OPTION_1", checkboxSelectedValue),
-            new PdfField("CHECKBOX_OPTION_3", checkboxSelectedValue)
+        new PdfField("TEXT_FIELD", textFieldValue),
+        new PdfField("RADIO_BUTTON", radioValue),
+        new PdfField("CHECKBOX_OPTION_1", checkboxSelectedValue),
+        new PdfField("CHECKBOX_OPTION_3", checkboxSelectedValue)
     );
 
     File file = pdfFormFiller.fill(pdf, fields, false);
@@ -46,7 +46,7 @@ class PDFFormFillerTest {
   void shouldAccept_a_with_macron() throws IOException {
     String textFieldValue = "Michaelā";
     Collection<PdfField> fields = List.of(
-            new PdfField("TEXT_FIELD", textFieldValue)
+        new PdfField("TEXT_FIELD", textFieldValue)
     );
 
     File file = pdfFormFiller.fill(pdf, fields, true);
@@ -55,10 +55,22 @@ class PDFFormFillerTest {
   }
 
   @Test
+  void shouldAcceptOtherDiacritic() throws IOException {
+    String textFieldValue = "áàäéèêësubstringíîïóôöúûüç";
+    Collection<PdfField> fields = List.of(
+        new PdfField("TEXT_FIELD", textFieldValue)
+    );
+
+    File file = pdfFormFiller.fill(pdf, fields, true);
+
+    assertTrue(getText(file).contains("áàäéèêësubstringíîïóôöúûüç"));
+  }
+
+  @Test
   void shouldAcceptSimplifiedChinese() throws IOException {
     String textFieldValue = "北京";
     Collection<PdfField> fields = List.of(
-            new PdfField("TEXT_FIELD", textFieldValue)
+        new PdfField("TEXT_FIELD", textFieldValue)
     );
 
     File file = pdfFormFiller.fill(pdf, fields, true);
@@ -69,8 +81,8 @@ class PDFFormFillerTest {
   @Test
   void shouldNotThrowException_whenFieldIsNotFound() {
     assertThatCode(() -> pdfFormFiller.fill(pdf,
-                    List.of(new PdfField("definitely-not-a-field", ""))
-            )
+            List.of(new PdfField("definitely-not-a-field", ""))
+        )
     ).doesNotThrowAnyException();
   }
 
@@ -79,7 +91,7 @@ class PDFFormFillerTest {
     String submittedValue = "Michael😃";
 
     Collection<PdfField> fields = List.of(
-            new PdfField("TEXT_FIELD", submittedValue)
+        new PdfField("TEXT_FIELD", submittedValue)
     );
 
     File file = pdfFormFiller.fill(pdf, fields, false);

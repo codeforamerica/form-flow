@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 import formflow.library.data.Submission;
 import formflow.library.utilities.AbstractMockMvcTest;
 
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,13 +21,13 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setup() {
     submission = Submission.builder()
-            .id(UUID.randomUUID())
-            .urlParams(new HashMap<>())
-            .inputData(new HashMap<>())
-            .flow("testFlow")
-            .build();
+        .id(UUID.randomUUID())
+        .urlParams(new HashMap<>())
+        .inputData(new HashMap<>())
+        .flow("testFlow")
+        .build();
     when(submissionRepositoryService.findById(submission.getId()))
-            .thenReturn(Optional.of(submission));
+        .thenReturn(Optional.of(submission));
     setFlowInfoInSession(session, "testFlow", submission.getId());
   }
 
@@ -52,11 +54,11 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
   @Test
   void shouldGoToNextConditionalSubflowPage() throws Exception {
     postToUrlExpectingSuccessRedirectPattern(
-            "/flow/testFlow/fourth/new",
-            "/flow/testFlow/fourth/navigation?uuid=" + UUID_PATTERN_STRING,
-            new HashMap<>());
+        "/flow/testFlow/fourth/new",
+        "/flow/testFlow/fourth/navigation?uuid=" + UUID_PATTERN_STRING,
+        new HashMap<>());
     Map<String, Object> iterationData = getMostRecentlyCreatedIterationData(session, "testFlow", "testSubflow");
     assertThat(followRedirectsForUrl("/flow/testFlow/fourth/navigation?uuid=" + iterationData.get("uuid")))
-            .isEqualTo("/flow/testFlow/last");
+        .isEqualTo("/flow/testFlow/last");
   }
 }
