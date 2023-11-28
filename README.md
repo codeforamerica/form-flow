@@ -1751,7 +1751,8 @@ present if Smarty had performed address validation.
 
 ## PDF Generation
 
-The Form Flow Library uses the [OpenPDF](https://github.com/LibrePDF/OpenPDF) library to generate PDFs
+The Form Flow Library uses the [OpenPDF](https://github.com/LibrePDF/OpenPDF) library to generate
+PDFs
 from user input. In order to begin generating PDFs from your user responses, you will need to first
 create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
 inputs to PDF fields.
@@ -1816,12 +1817,12 @@ flow: ubi
 #### pdf
 
 The path to the pdf template file the FFB library should use when generating your PDF.
-The path should begin with a forward slash. For example `/pdfs/Example-PDF-File.pdf`.
+The path should begin with a forward slash. For example `/pdfs/exampleFlow/Example-PDF-File.pdf`.
 
 For example:
 
 ```yaml 
-pdf: /pdfs/Multipage-UBI-Form.pdf
+pdf: /pdfs/ubi/Multipage-UBI-Form.pdf
 ```
 
 #### inputFields
@@ -2154,11 +2155,14 @@ The Font Flow Library automatically uses all font files present in the `resource
 directory for PDF generation. To ensure that the data used to fill the
 PDFs has appropriate fonts available for display, we recommend the use of
 [Noto Fonts](https://fonts.google.com/noto). These fonts are available under the [SIL Open Font
-License, Version 1.1](https://scripts.sil.org/OFL) and are free for distribution. In particular, we have seen the best results from the
+License, Version 1.1](https://scripts.sil.org/OFL) and are free for distribution. In particular, we
+have seen the best results from the
 following 2 fonts:
 
-1. Cyrillic, Devanagari, Greek, Latin - [Noto Sans Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSans-Regular.ttf)
-1. Cyrillic, Han, Hiragana, Katakana, Latin, Simplified Han - [Noto Sans SC Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSansSC-Regular.ttf)
+1. Cyrillic, Devanagari, Greek,
+   Latin - [Noto Sans Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSans-Regular.ttf)
+1. Cyrillic, Han, Hiragana, Katakana, Latin, Simplified
+   Han - [Noto Sans SC Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSansSC-Regular.ttf)
 
 ## Sending Email
 
