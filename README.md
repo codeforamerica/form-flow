@@ -1799,8 +1799,7 @@ through `HOUSEHOLD_MEMBER_FIRST_NAME_5`.
 
 The next step in generating PDFs is to create a `pdf-map.yaml` file. This file will act as a map of
 input fields from your application to PDF fields in your template PDF file. This file should be
-added
-to your applications `resources` folder, in a folder named `pdfs`.
+added to your application's `resources` folder.
 
 The following sections describe the expected keys in the `pdf-map.yaml` file.
 
