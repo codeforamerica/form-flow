@@ -1,21 +1,32 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 
 @Service
 @Slf4j
 public class PdfService {
 
-  private final PdfGenerator pdfGenerator;
+  private final SubmissionFieldPreparers submissionFieldPreparers;
+  private final PdfFieldMapper pdfFieldMapper;
+  private final PdfMapConfiguration pdfMapConfiguration;
+  private final PDFFormFiller pdfFormFiller;
 
   /**
    * <b>PdfService</b> is a service that generates a byte[] of a flattened pdf.
    */
-  public PdfService(PdfGenerator pdfGenerator) {
-    this.pdfGenerator = pdfGenerator;
+  public PdfService(SubmissionFieldPreparers submissionFieldPreparers, PdfFieldMapper pdfFieldMapper,
+          PdfMapConfiguration pdfMapConfiguration, PDFFormFiller pdfFormFiller) {
+    this.submissionFieldPreparers = submissionFieldPreparers;
+    this.pdfFieldMapper = pdfFieldMapper;
+    this.pdfMapConfiguration = pdfMapConfiguration;
+    this.pdfFormFiller = pdfFormFiller;
   }
 
   /**
@@ -25,12 +36,23 @@ public class PdfService {
    * @return a pdf byte array
    */
   public byte[] getFilledOutPDF(Submission submission) throws IOException {
-    // 1. generate the pdf
-    PdfFile filledPdf = pdfGenerator.generate(submission.getFlow(), submission);
-    filledPdf.finalizeForSending();
-    byte[] pdfByteArray = filledPdf.fileBytes();
-    filledPdf.deleteFile();
+    File file = generate(submission);
+    byte[] pdfByteArray = Files.readAllBytes(file.toPath());
+    file.delete();
     return pdfByteArray;
+  }
+
+  /**
+   * Generates a PDF File based on Submission data
+   *
+   * @param submission the submission we are going to map the data of
+   * @return A File which contains the path to the newly created and filled in PDF file.
+   */
+  public File generate(Submission submission) {
+    List<SubmissionField> submissionFields = submissionFieldPreparers.prepareSubmissionFields(submission);
+    List<PdfField> pdfFields = pdfFieldMapper.map(submissionFields, submission.getFlow());
+    String pathToPdfResource = pdfMapConfiguration.getPdfPathFromFlow(submission.getFlow());
+    return pdfFormFiller.fill(pathToPdfResource, pdfFields);
   }
 
   /**
@@ -40,6 +62,6 @@ public class PdfService {
    * @return a generic filename string, including the '.pdf' extension
    */
   public String generatePdfName(Submission submission) {
-    return String.format("%s_%s.pdf", submission.getFlow(), submission.getId().toString());
+    return String.format("%s_%s.pdf", submission.getFlow(), submission.getId());
   }
 }

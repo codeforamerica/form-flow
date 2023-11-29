@@ -2,6 +2,8 @@ package formflow.library;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
+import com.lowagie.text.exceptions.BadPasswordException;
+import com.lowagie.text.pdf.PdfReader;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
@@ -15,20 +17,12 @@ import formflow.library.file.FileVirusScanner;
 import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -47,6 +41,12 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 @EnableAutoConfiguration
@@ -165,9 +165,8 @@ public class FileController extends FormFlowController {
 
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
       if (fileExtension.equals("pdf")) {
-        try (PDDocument ignored = Loader.loadPDF(file.getBytes())) {
-        } catch (InvalidPasswordException e) {
-          // TODO update when we add internationalization to use locale for message source
+        try (PdfReader ignored = new PdfReader(file.getBytes())) {
+        } catch (BadPasswordException e) {
           String message = messageSource.getMessage("upload-documents.error-password-protected", null, locale);
           return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (IOException e) {
