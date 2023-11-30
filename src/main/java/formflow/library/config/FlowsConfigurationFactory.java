@@ -1,5 +1,6 @@
 package formflow.library.config;
 
+import formflow.library.exceptions.FlowConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 
 /**
- * Parses the flow configuration yaml file and setups the FlowConfiguration list.
+ * Parses the flow configuration yaml file and adds validated flow configuration objects to the libraries list of flow configurations.
  */
 @Slf4j
 public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfiguration>> {
@@ -22,15 +23,17 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
   @Value("${form-flow.path:flows-config.yaml}")
   String configPath;
   
-  DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
-
+  @Value("${form-flow.session-continuity-interceptor.enabled:false}")
+  boolean sessionContinuityInterceptorEnabled;
+  
+  FormFlowConfigurationProperties formFlowConfigurationProperties;
 
   FlowsConfigurationFactory() {
-    this.disabledFlowPropertyConfiguration = null;
+    this.formFlowConfigurationProperties = null;
   }
 
-  FlowsConfigurationFactory(DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration) {
-    this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration;
+  FlowsConfigurationFactory(FormFlowConfigurationProperties formFlowConfigurationProperties) {
+    this.formFlowConfigurationProperties = formFlowConfigurationProperties;
   }
 
   /**
@@ -42,31 +45,72 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
    */
   @Override
   public List<FlowConfiguration> getObject() throws IOException {
+    List<FlowConfiguration> flowConfigurations = new ArrayList<>();
+    try {
+      Iterable<Object> flowConfigsIterable = loadFlowConfigurationsFromYaml();
+      flowConfigsIterable.forEach(flowConfig -> addValidatedFlowConfiguration((FlowConfiguration) flowConfig, flowConfigurations));
+    } catch (IOException e) {
+      log.error("Can't find the flow configuration file: " + configPath, e);
+      throw e;
+    }
+
+    return flowConfigurations;
+  }
+  
+  private Iterable<Object> loadFlowConfigurationsFromYaml() throws IOException {
     ClassPathResource classPathResource = new ClassPathResource(configPath);
 
     LoaderOptions loaderOptions = new LoaderOptions();
     loaderOptions.setAllowDuplicateKeys(false);
     loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
     loaderOptions.setAllowRecursiveKeys(true);
-
+    
     Yaml yaml = new Yaml(new Constructor(FlowConfiguration.class, loaderOptions), new Representer(new DumperOptions()),
         new DumperOptions(), loaderOptions);
-    List<FlowConfiguration> appConfigs = new ArrayList<>();
-    try {
-      Iterable<Object> appConfigsIterable = yaml.loadAll(classPathResource.getInputStream());
-      appConfigsIterable.forEach(appConfig -> {
-        FlowConfiguration flowConfig = (FlowConfiguration) appConfig;
-        if (disabledFlowPropertyConfiguration == null || !disabledFlowPropertyConfiguration.isFlowDisabled(flowConfig.getName())) {
-          appConfigs.add(flowConfig);
-        }
-        
-      });
-    } catch (IOException e) {
-      log.error("Can't find the flow configuration file: " + configPath, e);
-      throw e;
+    return yaml.loadAll(classPathResource.getInputStream());
+  }
+
+  private void addValidatedFlowConfiguration(FlowConfiguration flowConfig, List<FlowConfiguration> flowConfigurations) {
+    if (shouldAddFlowConfiguration(flowConfig)) {
+      validateFlowConfiguration(flowConfig);
+      flowConfigurations.add(flowConfig);
+    }
+  }
+
+  private boolean shouldAddFlowConfiguration(FlowConfiguration flowConfig) {
+    return formFlowConfigurationProperties == null || !formFlowConfigurationProperties.isFlowDisabled(flowConfig.getName());
+  }
+
+  private void validateFlowConfiguration(FlowConfiguration flowConfig) {
+    if (formFlowConfigurationProperties != null && formFlowConfigurationProperties.isSubmissionLockedForFlow(flowConfig.getName())) {
+        validateLandmarksAfterSubmitPages(flowConfig);
+    }
+    if (sessionContinuityInterceptorEnabled) {
+      validateLandmarksFirstScreen(flowConfig);
+    }
+  }
+
+  protected void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
+    if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
+      throw new FlowConfigurationException("You have enabled submission locking for the flow " + flowConfig.getName() + 
+          " but the afterSubmitPages landmark is not set in your flow configuration yaml file.");
+    }
+  }
+
+  protected void validateLandmarksFirstScreen(FlowConfiguration flowConfig) {
+    if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getFirstScreen() == null) {
+      throw new FlowConfigurationException("You have enabled the session continuity interceptor in your application but have not added a first screen landmark for the flow " + flowConfig.getName() +
+          " in your flow configuration yaml file.");
     }
 
-    return appConfigs;
+    String firstScreen = flowConfig.getLandmarks().getFirstScreen();
+
+    if (!flowConfig.getFlow().containsKey(firstScreen)) {
+      throw new FlowConfigurationException(String.format(
+          "Your flow configuration file for the flow %s does not contain a screen with the name '%s'. " +
+              "You may have misspelled the screen name. Please make sure to correctly set the 'firstScreen' in the flows configuration file 'landmarks' section.",
+          flowConfig.getName(), firstScreen));
+    }
   }
 
   @Override

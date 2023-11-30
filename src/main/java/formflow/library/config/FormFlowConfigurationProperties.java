@@ -3,11 +3,8 @@ package formflow.library.config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,8 +12,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "form-flow")
 @Getter
 @Setter
-public class DisabledFlowPropertyConfiguration {
+public class FormFlowConfigurationProperties {
   private List<Map<String, String>> disabledFlows = new ArrayList<>();
+  private List<Map<String, String>> lockAfterSubmitted = new ArrayList<>();
 
 
   /**
@@ -37,6 +35,28 @@ public class DisabledFlowPropertyConfiguration {
     return disabledFlows.stream()
         .filter(flow -> flow.get("flow").equals(flowName))
         .map(flow -> flow.getOrDefault("staticRedirectPage", ""))
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Checks if the Submission for the flow with flowName should be locked, preventing further updates after it has been submitted.
+   * @param flowName the name of the flow to check.
+   * @return true if the Submission should be locked for the given flow, false otherwise.
+   */
+  public boolean isSubmissionLockedForFlow(String flowName) {
+    return this.lockAfterSubmitted.stream().anyMatch(flow -> flow.get("flow").equals(flowName));
+  }
+
+  /**
+   * Gets the redirect screen designated for the given flow with a locked submission.
+   * @param flowName the name of the flow to check.
+   * @return the screen to redirect to if the submission is locked for the given flow.
+   */
+  public String getLockedSubmissionRedirect(String flowName) {
+    return lockAfterSubmitted.stream()
+        .filter(flow -> flow.get("flow").equals(flowName))
+        .map(flow -> flow.getOrDefault("redirect", ""))
         .findFirst()
         .orElse(null);
   }

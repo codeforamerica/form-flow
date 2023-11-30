@@ -6,8 +6,6 @@ import static formflow.library.interceptors.DisabledFlowInterceptor.PATH_FORMAT;
 import formflow.library.interceptors.DisabledFlowInterceptor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,10 +16,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class DisabledFlowInterceptorConfiguration implements WebMvcConfigurer {
   
-  DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration;
+  FormFlowConfigurationProperties formFlowConfigurationProperties;
   
-  public DisabledFlowInterceptorConfiguration(DisabledFlowPropertyConfiguration disabledFlowPropertyConfiguration) {
-    this.disabledFlowPropertyConfiguration = disabledFlowPropertyConfiguration;
+  public DisabledFlowInterceptorConfiguration(FormFlowConfigurationProperties formFlowConfigurationProperties) {
+    this.formFlowConfigurationProperties = formFlowConfigurationProperties;
   }
   
   /**
@@ -30,7 +28,7 @@ public class DisabledFlowInterceptorConfiguration implements WebMvcConfigurer {
    */
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new DisabledFlowInterceptor(disabledFlowPropertyConfiguration))
+    registry.addInterceptor(new DisabledFlowInterceptor(formFlowConfigurationProperties))
         .addPathPatterns(List.of(PATH_FORMAT));
   }
 }

@@ -1,6 +1,7 @@
 package formflow.library;
 
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
@@ -31,15 +32,15 @@ import java.util.UUID;
 @RequestMapping("/download")
 public class PdfController extends FormFlowController {
 
-  private final MessageSource messageSource;
   private final PdfService pdfService;
 
   public PdfController(MessageSource messageSource, PdfService pdfService,
       SubmissionRepositoryService submissionRepositoryService,
       UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
-    this.messageSource = messageSource;
+      List<FlowConfiguration> flowConfigurations,
+      FormFlowConfigurationProperties formFlowConfigurationProperties) {
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
+        messageSource);
     this.pdfService = pdfService;
   }
 

@@ -63,6 +63,7 @@ public class UploadBlockedIfVirusScanUnreachableTest extends AbstractMockMvcTest
             .param("flow", "testFlow")
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
+            .param("screen", "testUploadScreen")
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(HttpStatus.SERVICE_UNAVAILABLE.value()))
