@@ -182,7 +182,7 @@ public abstract class FormFlowController {
    *
    * @param screen     The current screen name.
    * @param submission The submission object.
-   * @param flowName
+   * @param flowName  The name of the flow to check.
    * @return true if the user should be redirected, false otherwise.
    */
   public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission, String flowName) {

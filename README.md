@@ -2688,8 +2688,8 @@ be included in the PDF that is generated or in any other processes that are trig
 
 An example of a time you might include a non-static page in the list of allowed pages is if you have
 a page that is used to collect feedback from the user after they have submitted their application. In
-this scenario you can include the feedback page in the list of allowed pages so that the user can
-can submit their feedback after they have submitted their application. The data would be saved
+this scenario you can include the feedback page in the list of allowed pages so that the user can 
+submit their feedback after they have submitted their application. The data would be saved
 in the Submission object, but would not be included in the PDF or any other processes that are triggered
 upon submitting.
 
