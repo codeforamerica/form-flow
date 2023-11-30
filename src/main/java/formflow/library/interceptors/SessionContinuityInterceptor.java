@@ -3,7 +3,6 @@ package formflow.library.interceptors;
 import formflow.library.FormFlowController;
 import formflow.library.ScreenController;
 import formflow.library.config.FlowConfiguration;
-import formflow.library.exceptions.LandmarkNotSetException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -31,7 +30,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
 
   private static final String REDIRECT_URL = "/";
 
-  List<FlowConfiguration> flowConfigurations;
+  public List<FlowConfiguration> flowConfigurations;
 
   public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
     this.flowConfigurations = flowConfigurations;
@@ -45,11 +44,10 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
    * Screen Controller.
    * @throws IOException             - thrown in the event that an input or output exception occurs when this method does a
    *                                 redirect.
-   * @throws LandmarkNotSetException - thrown in the event that a landmark(s) screen is misconfigured
    */
   @Override
   public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
-      throws IOException, LandmarkNotSetException {
+      throws IOException {
     String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
     Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
 
@@ -64,26 +62,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       return true;
     }
 
-    if (flowConfiguration.getLandmarks() == null) {
-      throw new LandmarkNotSetException(
-          "The SessionContinuityInterceptor is enabled, but no 'landmarks' section has been created in the application's form " +
-              "flows configuration file.");
-    }
-
-    if (flowConfiguration.getLandmarks().getFirstScreen() == null) {
-      throw new LandmarkNotSetException(
-          "The SessionContinuityInterceptor is enabled, but a 'firstScreen' page has not " +
-              "been identified in the 'landmarks' section in the application's form flows configuration file.");
-    }
-
     String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
-
-    if (!flowConfiguration.getFlow().containsKey(firstScreen)) {
-      throw new LandmarkNotSetException(String.format(
-          "The form flows configuration file does not contain a screen with the name '%s'. " +
-              "Please make sure to correctly set the 'firstScreen' in the form flows configuration file 'landmarks' section.",
-          firstScreen));
-    }
 
     if (session == null) {
       if (parsedUrl.get("screen").equals(firstScreen)) {

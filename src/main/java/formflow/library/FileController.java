@@ -5,6 +5,7 @@ import com.google.common.io.Files;
 import com.lowagie.text.exceptions.BadPasswordException;
 import com.lowagie.text.pdf.PdfReader;
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
@@ -55,7 +56,6 @@ public class FileController extends FormFlowController {
   private final CloudFileRepository cloudFileRepository;
   private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
-  private final MessageSource messageSource;
   private final FileValidationService fileValidationService;
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
@@ -74,13 +74,14 @@ public class FileController extends FormFlowController {
       FileVirusScanner fileVirusScanner,
       SubmissionRepositoryService submissionRepositoryService,
       List<FlowConfiguration> flowConfigurations,
+      FormFlowConfigurationProperties formFlowConfigurationProperties,
       MessageSource messageSource,
       FileValidationService fileValidationService,
       @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
       @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
+        messageSource);
     this.cloudFileRepository = cloudFileRepository;
-    this.messageSource = messageSource;
     this.fileValidationService = fileValidationService;
     this.maxFiles = maxFiles;
     this.fileVirusScanner = fileVirusScanner;
@@ -105,6 +106,7 @@ public class FileController extends FormFlowController {
       @RequestParam("flow") String flow,
       @RequestParam("inputName") String inputName,
       @RequestParam("thumbDataURL") String thumbDataUrl,
+      @RequestParam("screen") String screen,
       HttpSession httpSession,
       HttpServletRequest request,
       Locale locale
@@ -117,6 +119,13 @@ public class FileController extends FormFlowController {
       }
 
       Submission submission = findOrCreateSubmission(httpSession, flow);
+
+      if (shouldRedirectDueToLockedSubmission(screen, submission,flow)) {
+        log.info("The Submission for flow {} is locked. Cannot upload file.", flow);
+        String message = messageSource.getMessage("upload-documents.locked-submission", null, locale);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+      }
+      
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
         submission.setFlow(flow);

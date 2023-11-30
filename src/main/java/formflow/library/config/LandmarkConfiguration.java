@@ -1,5 +1,6 @@
 package formflow.library.config;
 
+import java.util.ArrayList;
 import lombok.Data;
 
 /**
@@ -8,4 +9,5 @@ import lombok.Data;
 @Data
 public class LandmarkConfiguration {
   String firstScreen;
+  ArrayList<String> afterSubmitPages;
 }

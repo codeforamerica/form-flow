@@ -29,6 +29,9 @@ flow:
   test:
     nextScreens:
       - name: success
+  testUpload:
+    nextScreens:
+      - name: pageWithCustomSubmitButton
   pageWithOptionalValidation:
     nextScreens:
       - name: success
@@ -49,6 +52,10 @@ subflows:
     iterationStartScreen: subflowAddItem
     reviewScreen: testReviewScreen
     deleteConfirmationScreen: testDeleteConfirmationScreen
+landmarks:
+  firstScreen: inputs
+  afterSubmitPages:
+    - success
 ---
 name: otherTestFlow
 flow:

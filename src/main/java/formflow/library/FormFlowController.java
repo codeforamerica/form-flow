@@ -1,6 +1,7 @@
 package formflow.library;
 
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,14 +24,21 @@ public abstract class FormFlowController {
   protected final UserFileRepositoryService userFileRepositoryService;
 
   protected final List<FlowConfiguration> flowConfigurations;
+  
+  protected final FormFlowConfigurationProperties formFlowConfigurationProperties;
+
+  protected final MessageSource messageSource;
 
   public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
   FormFlowController(SubmissionRepositoryService submissionRepositoryService, UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations) {
+      List<FlowConfiguration> flowConfigurations, FormFlowConfigurationProperties formFlowConfigurationProperties,
+      MessageSource messageSource) {
     this.submissionRepositoryService = submissionRepositoryService;
     this.userFileRepositoryService = userFileRepositoryService;
     this.flowConfigurations = flowConfigurations;
+    this.formFlowConfigurationProperties = formFlowConfigurationProperties;
+    this.messageSource = messageSource;
   }
 
   protected Submission saveToRepository(Submission submission) {
@@ -166,5 +175,25 @@ public abstract class FormFlowController {
 
     submissionMap.put(flow, id);
     session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
+  }
+
+  /**
+   * Determines if the user should be redirected due to a locked submission.
+   *
+   * @param screen     The current screen name.
+   * @param submission The submission object.
+   * @param flowName
+   * @return true if the user should be redirected, false otherwise.
+   */
+  public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission, String flowName) {
+    FlowConfiguration flowConfig = getFlowConfigurationByName(flowName);
+    boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
+    
+    if (submissionIsLocked) {
+      boolean isSubmissionSubmitted = submission.getSubmittedAt() != null;
+      boolean isCurrentScreenAfterSubmit = flowConfig.getLandmarks().getAfterSubmitPages().contains(screen);
+      return isSubmissionSubmitted && !isCurrentScreenAfterSubmit;
+    }
+    return false;
   }
 }

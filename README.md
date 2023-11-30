@@ -2644,6 +2644,55 @@ form-flow:
       staticRedirectPage: '/docUploadDisabled'
 ```
 
+### Locking the Submission for a flow once it has been submitted
+
+The form flow library provides a configuration mechanism to lock a Submission object once it has been submitted.
+This will prevent users from being able to edit a Submission object once it has been submitted. If 
+configured, the user will be redirected to a configured screen if they attempt to GET or POST a page 
+within a locked flow. 
+
+Note that this does not actually lock the Submission object, but rather prevents the user from accessing
+any endpoints that would update the Submission object.
+
+When enabled, the form flow library will check if a Submission object has been submitted by looking
+for a non-null `submittedAt` value. If the `submittedAt` value is not null, and a user attempts 
+to access a screen within the flow that is not part of a list of allowed pages, the library will redirect
+the user to the configured screen. See below for more on the list of allowed pages.
+
+To enable submission locking for a given flow, add the following to your `application.yaml` file:
+
+```yaml
+form-flow:
+  lock-after-submitted:
+    - flow: ubi
+      redirect: success
+    - flow: docUpload
+      redirect: docUploadSuccess
+```
+
+If you enable submission locking for a flow, you **must** provide a list of allowed pages that can be 
+accessed after given flows Submission object has been submitted. This list of allowed pages is configured
+within your `flows-config.yaml` files `landmarks` section. See below for an example of how to configure 
+the list of allowed pages for a given flow.
+
+```yaml
+landmarks:
+  afterSubmitPages:
+    - nextSteps
+    - success
+```
+
+Note that most of the time you will only want to include static pages in the list of allowed pages. 
+This is because any data that is submitted after the submission object has been submitted will not
+be included in the PDF that is generated or in any other processes that are triggered upon submitting.
+
+An example of a time you might include a non-static page in the list of allowed pages is if you have
+a page that is used to collect feedback from the user after they have submitted their application. In
+this scenario you can include the feedback page in the list of allowed pages so that the user can
+can submit their feedback after they have submitted their application. The data would be saved
+in the Submission object, but would not be included in the PDF or any other processes that are triggered
+upon submitting.
+
 #### Design System
 
 We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
