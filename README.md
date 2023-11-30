@@ -1,5 +1,27 @@
 # Form Flow Library  (FFB)
 
+A Spring Boot based Java library that provides a framework for developing **form flow** based
+applications. The intention is to speed up the creation of web applications that are a series of
+forms that collect input from users.
+
+The library includes tooling for:
+
+- Conditional navigation between screens and conditional display of elements on a screen
+- Manipulation of data before or after it is saved to the database
+- Subflows
+    - Repeating sections of screen(s) that build a collection of information (ex. ask for
+      information about all members of a household) before returning to the main flow
+- Input Validations
+    - Using [JPA Validation](https://www.baeldung.com/spring-boot-bean-validation)
+- Address Validation using [Smarty](https://smarty.com/)
+- A set of [Thymeleaf fragments](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/fragments) that create a library of reusable HTML components for Inputs, Screens, Forms, etc.
+- Data Persistence using [Hibernate](https://hibernate.org/)
+- File Uploads
+- PDF Generation based on user input
+
+An example project built off of this Form Flow library can be found in
+our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
+
 Table of Contents
 =================
 <!-- Update this section when you update sections now. 
@@ -93,75 +115,21 @@ Table of Contents
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
-A Spring Boot Java library that provides a framework for developing **form flow** based
-applications. The intention is to speed up the creation of web applications that are a series of
-forms that collect input from users.
+# What is a flow?
 
-The library includes tooling for:
+A flow is a series of screens that collect input from a user using HTML forms and inputs. Some of these
+screens may be purely informational, while others may collect data from the user. 
 
-- Conditions and Actions
-- Conditions for the flow of screens
-- Revealing of elements on a screen
+A flow dictates the order in which screens are shown to the user, and the conditions under which different
+screens may or may not be shown as well as any actions that should be run during, before or after data persistence
+for individual screens.
 
-- Subflows
-    - Repeating sections of screen(s) that build a collection of information (ex. ask for
-      information about all members of a household) before returning to the main flow
-- Input Validations
-    - Uses [JPA Validation](https://www.baeldung.com/spring-boot-bean-validation)
-- Template fragments
-    - A set
-      of [Thymeleaf fragments](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/fragments)
-
-      that create a library of reusable HTML components for Inputs, Screens, Forms, etc.
-- Data Persistence
-- File Uploads
-
-Out-of-the-box, integrations can be set up with common third-party services:
-
-- Intercom
-- Google Analytics
-- Mixpanel
-- Optimizely
-- Google Ads
-- Facebook Ads
-
-An example project built off of this Form Flow library can be found in
-our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
-
-# What is a form flow?
-
-# Concepts
-
-* Flows
-* Inputs
-* Screens
-* Conditions
-* Validations
-
-Flows are the top-level construct that define the navigation between a collection of screens. A flow
-can have many inputs to accept user data (e.g. first name, zip code, email, file upload). Each input
-can have zero to many validations.
-
-A flow also has many screens. Each screen can be made up of zero or more inputs. A flow has an
-ordering of screens, and can use defined conditions to control navigation. Conditions use submitted
-inputs to make a logical decision about showing or not showing a screen / part of a screen.
-
-```mermaid
-erDiagram      
-    Flow ||--|{ Screen : "ordered collection of"
-    Flow ||--o{ Input : "collection of"
-    Screen ||--o{ Input : displays
-    Input ||--o{ Validation : "validated by"
-    Input }|--o{ Condition: "determines"
-```
-
-## Flow
-
-## Screen
+Flows are defined in a YAML file called `flows-config.yaml` which is located in the `resources` folder of your
+application.
 
 ## Defining Screens ##
 
-All screens must have an entry in the flows-config in order to be rendered. Additionally, each
+All screens must have an entry in the `flows-config.yaml` in order to be rendered. Additionally, each
 screen should have its own template defined in a folder respective to the flow that screen is
 contained within. Example `/src/main/resources/templates/<flowName>/<templateName>`.
 
