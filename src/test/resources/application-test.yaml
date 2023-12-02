@@ -21,6 +21,7 @@ form-flow:
   pdf:
     path: 'src/test/resources/pdfs/'
     map-file: 'pdf-map.yaml'
+    fontDirectory: "classpath:pdf-fonts"
   email-client:
     mailgun:
       key: testing-fake-key
