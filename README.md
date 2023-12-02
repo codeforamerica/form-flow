@@ -2151,8 +2151,12 @@ the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 ### Font Support for generated PDFs
 
-The Font Flow Library automatically uses all font files present in the `resources/pdf-fonts`
-directory for PDF generation. To ensure that the data used to fill the
+The Font Flow Library automatically uses all font files present in the `/opt/pdf-fonts`
+directory for PDF generation. If a different location is desired, it can be configured
+using the property `form-flow.pdf.fontDirectory`. (Note: Remember to use "file:" as a prefix
+to the absolute path, e.g., for `/opt/benefitsapp/fonts` use `file:/opt/benefitsapp/fonts`.)
+
+To ensure that the data used to fill the
 PDFs has appropriate fonts available for display, we recommend the use of
 [Noto Fonts](https://fonts.google.com/noto). These fonts are available under the [SIL Open Font
 License, Version 1.1](https://scripts.sil.org/OFL) and are free for distribution. In particular, we
@@ -2163,6 +2167,9 @@ following 2 fonts:
    Latin - [Noto Sans Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSans-Regular.ttf)
 1. Cyrillic, Han, Hiragana, Katakana, Latin, Simplified
    Han - [Noto Sans SC Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSansSC-Regular.ttf)
+
+An example of providing these font files in the `/opt/pdf-fonts` directory is shown in
+the [starter app's Dockefile](https://github.com/codeforamerica/form-flow-starter-app/blob/main/Dockerfile).
 
 ## Sending Email
 
