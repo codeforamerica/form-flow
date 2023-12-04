@@ -6,15 +6,16 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +23,15 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 public class PDFFormFiller {
+
+  @Value("${form-flow.pdf.fontDirectory:file:/opt/pdf-fonts}")
+  private String pdfFontDirectoryPath;
+
+  private final ApplicationContext applicationContext;
+
+  public PDFFormFiller(ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+  }
 
   /**
    * Fill the fields in a PDF form with the values provided
@@ -63,7 +73,7 @@ public class PDFFormFiller {
    * Configure the fonts to be used if the default fonts do not support the characters in the values to be filled
    * @param acroFields the `AcroFields` object (the form) in the PDF template
    */
-  private static void configureSubstitutionFonts(AcroFields acroFields) {
+  private void configureSubstitutionFonts(AcroFields acroFields) {
     Set<String> files = getFontFiles();
     files.forEach(fontResource -> {
       BaseFont font = null;
@@ -81,17 +91,22 @@ public class PDFFormFiller {
    * @return Set of filenames with paths
    */
   @NotNull
-  private static Set<String> getFontFiles() {
-    URI directoryURI = null;
+  private Set<String> getFontFiles() {
+    log.info("Using font directory config: {}", pdfFontDirectoryPath);
+    Set<String> emptySet = new HashSet<>();
+    Resource resource = applicationContext.getResource(pdfFontDirectoryPath);
+    File fontDirectory = null;
     try {
-      directoryURI = new ClassPathResource("pdf-fonts").getURI();
+      fontDirectory = resource.getFile();
     } catch (IOException e) {
-      log.warn("Failed to find pdf-fonts directory: %s", e);
+      log.error("Could not open resource {}, Error: {}", resource, e.getMessage());
     }
-
-    return Stream.of(Objects.requireNonNull(new File(directoryURI).listFiles()))
-            .filter(file -> !file.isDirectory())
-            .map(File::getPath)
-            .collect(Collectors.toSet());
+    if (fontDirectory == null || !fontDirectory.isDirectory()) {
+      return emptySet;
+    }
+    return Stream.of(fontDirectory.listFiles())
+        .filter(file -> !file.isDirectory())
+        .map(File::getPath)
+        .collect(Collectors.toSet());
   }
 }

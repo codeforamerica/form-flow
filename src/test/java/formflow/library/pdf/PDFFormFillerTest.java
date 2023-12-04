@@ -4,6 +4,9 @@ import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +17,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ActiveProfiles("test")
+@SpringBootTest(properties = {
+    "form-flow.path=flows-config/test-flow.yaml"})
 class PDFFormFillerTest {
 
-  private final PDFFormFiller pdfFormFiller = new PDFFormFiller();
+  @Autowired
+  PDFFormFiller pdfFormFiller;
   private final String pdf = "/pdfs/testPdf.pdf";
 
   @Test
