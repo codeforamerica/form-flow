@@ -19,7 +19,7 @@ The library includes tooling for:
 - File Uploads
 - PDF Generation based on user input
 
-An example project built off of this Form Flow library can be found in
+An example project built with the use of this Form Flow library can be found in
 our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
 
 Table of Contents
@@ -30,23 +30,20 @@ Table of Contents
      a reasonable size 
 -->
 
-* [What is a form flow?](#what-is-a-form-flow)
-* [Concepts](#concepts)
-    * [Flow](#flow)
-    * [Screen](#screen)
+* [What is a flow?](#what-is-a-flow)
     * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
         * [Subflows Data](#subflows-data)
-    * [Submission Object](#submission-object)
     * [Conditions](#conditions)
         * [Using conditions in templates](#using-conditions-in-templates)
     * [Actions](#actions)
-    * [Defining Inputs](#defining-inputs)
-        * [Inputs Class](#inputs-class)
-        * [Dynamic Input Fields](#dynamic-input-fields)
-        * [Custom Annotations](#custom-annotations)
-        * [Input Data JSON Structure](#input-data-json-structure)
+* [Data Persistence and Defining Inputs](#data-persistence-and-defining-inputs)
+    * [Submission Object](#submission-object)
+    * [Inputs Class](#inputs-class)
+    * [Dynamic Input Fields](#dynamic-input-fields)
+    * [Custom Annotations](#custom-annotations)
+    * [Input Data JSON Structure](#input-data-json-structure)
 * [General Information](#general-information)
     * [Thymeleaf](#thymeleaf)
         * [Using Thymeleaf](#using-thymeleaf)
@@ -54,8 +51,8 @@ Table of Contents
         * [Static Pages](#static-pages)
         * [Fragments](#fragments)
         * [Input Type Fragments](#input-type-fragments)
-        * [Accessing Conditions](#accessing-conditions)
-        * [Accessing Submission Object](#accessing-submission-object)
+        * [Accessing Conditions in Templates](#accessing-conditions-in-tempates)
+        * [Accessing Submission Data in Templates](#accessing-submision-data-in-templates)
     * [Document Upload](#document-upload)
         * [AWS S3](#aws-s3)
         * [File Naming Conventions](#file-naming-conventions)
@@ -118,16 +115,22 @@ Table of Contents
 # What is a flow?
 
 A flow is a series of screens that collect input from a user using HTML forms and inputs. Some of these
-screens may be purely informational, while others may collect data from the user. 
+screens may be purely informational, while others may collect data from the user. A flow may include 
+one or more subflows which are repeating sections of one or more screens within a regular flow. 
+Examples of subflows include household builders that ask a repeating set of questions about members 
+of a household or job builders that ask an individual to enter information about each job they have.
 
-A flow dictates the order in which screens are shown to the user, and the conditions under which different
-screens may or may not be shown as well as any actions that should be run during, before or after data persistence
+A flow dictates the order in which screens are shown to the user, and the `Conditions` under which different
+screens may or may not be shown as well as any `Actions` that should be run during, before or after data persistence
 for individual screens.
 
 Flows are defined in a YAML file called `flows-config.yaml` which is located in the `resources` folder of your
 application.
 
-## Defining Screens ##
+All data from form inputs within a given flow is stored in a `Submission` object. This data is persisted
+to the database as JSON.
+
+## Defining Screens
 
 All screens must have an entry in the `flows-config.yaml` in order to be rendered. Additionally, each
 screen should have its own template defined in a folder respective to the flow that screen is
@@ -274,53 +277,6 @@ Incomplete iterations will not be included in the generated PDF of the submissio
 accessible in the
 database for error resolution and debugging.
 
-## Submission Object
-
-Submission data is stored in the `Submission` object, persisted to PostgreSQL via the Hibernate ORM.
-
-```java
-class Submission {
-
-  @Id
-  @GeneratedValue
-  private UUID id;
-
-  @Column(name = "flow")
-  private String flow;
-
-  @Type(JsonType.class)
-  @Column(name = "input_data", columnDefinition = "jsonb")
-  private Map<String, Object> inputData;
-
-  @Type(JsonType.class)
-  @Column(name = "url_params", columnDefinition = "jsonb")
-  private Map<String, String> urlParams;
-
-  @CreationTimestamp
-  @Temporal(TIMESTAMP)
-  @Column(name = "created_at")
-  private Date createdAt;
-
-  @UpdateTimestamp
-  @Temporal(TIMESTAMP)
-  @Column(name = "updated_at")
-  private Date updatedAt;
-
-  @Temporal(TIMESTAMP)
-  @Column(name = "submitted_at")
-  private Date submittedAt;
-
-  public Submission() {
-    inputData = new HashMap<>();
-    urlParams = new HashMap<>();
-  }
-}
-```
-
-The `inputData` field is a JSON object that stores data from the user's input as a given flow
-progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
-have access to it.
-
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
@@ -434,10 +390,62 @@ More example actions can be found in
 our [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/actions)
 .
 
-## Defining Inputs
+## Data Persistence and Defining Inputs
+
+The Form Flow Library uses the Hibernate ORM to persist data to a PostgreSQL database.
+Data is stored in a Java object called `Submission` which is persisted to the database as JSON.
 
 Inputs to the application are defined in two places - the template in which they are rendered, and
 in a separate class for validation.
+
+## Submission Object
+
+Submission data is stored in the `Submission` object, persisted to PostgreSQL via the Hibernate ORM.
+
+An example `Submission` object can be seen below:
+
+```java
+class Submission {
+
+  @Id
+  @GeneratedValue
+  private UUID id;
+
+  @Column(name = "flow")
+  private String flow;
+
+  @Type(JsonType.class)
+  @Column(name = "input_data", columnDefinition = "jsonb")
+  private Map<String, Object> inputData;
+
+  @Type(JsonType.class)
+  @Column(name = "url_params", columnDefinition = "jsonb")
+  private Map<String, String> urlParams;
+
+  @CreationTimestamp
+  @Temporal(TIMESTAMP)
+  @Column(name = "created_at")
+  private Date createdAt;
+
+  @UpdateTimestamp
+  @Temporal(TIMESTAMP)
+  @Column(name = "updated_at")
+  private Date updatedAt;
+
+  @Temporal(TIMESTAMP)
+  @Column(name = "submitted_at")
+  private Date submittedAt;
+
+  public Submission() {
+    inputData = new HashMap<>();
+    urlParams = new HashMap<>();
+  }
+}
+```
+
+Note that the `inputData` field is a JSON object that stores data from the user's input as a given flow
+progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
+have access to it.
 
 ### Inputs Class
 
