@@ -36,13 +36,16 @@ Table of Contents
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
         * [Subflows Data](#subflows-data)
     * [Conditions](#conditions)
-        * [Using conditions in templates](#using-conditions-in-templates)
+        * [Using Conditions in Templates](#using-conditions-in-templates)
     * [Actions](#actions)
 * [Data Persistence and Defining Inputs](#data-persistence-and-defining-inputs)
     * [Submission Object](#submission-object)
     * [Inputs Class](#inputs-class)
+        * [Validating Inputs](#validating-inputs)
     * [Dynamic Input Fields](#dynamic-input-fields)
     * [Custom Annotations](#custom-annotations)
+        * [Validation Annotations](#validation-annotations)
+        * [Marker Annotations](#marker-annotations)
     * [Input Data JSON Structure](#input-data-json-structure)
 * [General Information](#general-information)
     * [Thymeleaf](#thymeleaf)
@@ -51,8 +54,6 @@ Table of Contents
         * [Static Pages](#static-pages)
         * [Fragments](#fragments)
         * [Input Type Fragments](#input-type-fragments)
-        * [Accessing Conditions in Templates](#accessing-conditions-in-tempates)
-        * [Accessing Submission Data in Templates](#accessing-submision-data-in-templates)
     * [Document Upload](#document-upload)
         * [AWS S3](#aws-s3)
         * [File Naming Conventions](#file-naming-conventions)
@@ -65,38 +66,67 @@ Table of Contents
         * [Downloading individual files](#downloading-individual-files)
         * [Downloading all files](#downloading-all-files)
     * [Address Validation](#address-validation)
+        * [Registration with Smarty](#registration-with-smarty)
+        * [How to configure](#how-to-configure)
+        * [Validating an address](#validating-an-address)
+        * [Storage of Validated Addresses](#storage-of-validated-addresses)
+        * [Viewing the Validated Address](#viewing-the-validated-address)
     * [PDF Generation](#pdf-generation)
+        * [Creating a Template PDF File](#creating-a-template-pdf-file)
+        * [Creating a pdf-map.yaml File](#creating-a-pdf-mapyaml-file)
+        * [Default Field Preparers](#default-field-preparers)
+        * [SubmissionField](#submissionfield)
     * [Sending Email](#sending-email)
+        * [Building a Custom Email Service](#building-a-custom-email-service)
+        * [Creating a Custom Email Service With EmailClient](#creating-a-custom-email-service-with-emailclient)
         * [Mailgun](#mailgun)
     * [Localization](#localization)
+        * [Setting Application Properties](#setting-application-properties)
+        * [Supplying Translation Files](#supplying-translation-files)
+        * [Messages in the Library](#messages-in-the-library)
+        * [Using Transifex](#using-transifex)
+        * [How Spring Boot Handles Localization](#how-spring-boot-handles-localization)
+        * [Mixpanel event from language selector](#mixpanel-event-from-language-selector)
     * [Interceptors](#interceptors)
-        * [SessionContinuityInterceptor](#sessioncontinuityinterceptor)
-* [How to use](#how-to-use)
-    * [Configuration Details](#configuration-details)
-        * [Environment Variables](#environment-variables)
-        * [Application Configuration](#application-configuration)
-        * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
+        * [Session Continuity Interceptor](#session-continuity-interceptor)
+        * [Disabled Flow Interceptor](#disabled-flow-interceptor)
+* [How to Configure Applications Using the Form Flow Library](#how-to-configure-applications-using-the-form-flow-library)
+    * [Environment Variables](#environment-variables)
+    * [Application Configuration](#application-configuration)
+        * [Disabling a Flow](#disabling-a-flow)
+        * [Locking the Submission for a Flow Once It Has Been Submitted](#locking-the-submission-for-a-flow-once-it-has-been-submitted)
+        * [Design System](#design-system)
+        * [File Upload Properties](#file-upload-properties)
+        * [Error Properties](#error-properties)
+        * [Actuator Endpoints](#actuator-endpoints)
+    * [Flow and Subflow Configuration](#flow-and-subflow-configuration)
+        * [flows-config.yaml File](#flows-configyaml-file)
+        * [flows-config.yaml Basic Configuration](#flows-configyaml-basic-configuration)
+        * [Multiple Flows](#multiple-flows)
         * [Screens](#screens)
         * [Defining Subflows](#defining-subflows)
-        * [Thymeleaf Model Data](#thymeleaf-model-data)
-        * [Conditions / Actions](#conditions--actions)
-        * [Logging](#logging)
-        * [Library Details](#library-details)
+    * [Thymeleaf Model Data](#thymeleaf-model-data)
+    * [Conditions / Actions](#conditions--actions)
+    * [Logging](#logging)
+    * [Library Publishing Details](#library-publishing-details)
 * [Developer Setup](#developer-setup)
     * [Mac and Linux](#mac-and-linux)
     * [Windows](#windows)
     * [Spring Profiles](#spring-profiles)
-        * [DevController](#devcontroller)
+        * [Dev Profile](#dev-profile)
+        * [Dev Controller](#dev-controller)
+        * [Test Profile](#test-profile)
+        * [Demo Profile](#demo-profile)
         * [IntelliJ Configuration](#intellij-configuration)
     * [IntelliJ Setup](#intellij-setup)
-        * [Connect flows config schema](#connect-flows-config-schema)
+        * [Connect Flows Config Schema](#connect-flows-config-schema)
         * [Applying Live Templates to your IntelliJ IDE](#applying-live-templates-to-your-intellij-ide)
         * [Using Live Templates](#using-live-templates)
-        * [Contribute new Live Templates](#contribute-new-live-templates)
+        * [Contribute New Live Templates](#contribute-new-live-templates)
         * [Set Java SDK](#set-java-sdk)
         * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
         * [Testing](#testing)
-    * [Setup Fake Filler (optional, Chrome &amp; Firefox)](#setup-fake-filler-optional-chrome--firefox)
+    * [Setup Fake Filler (Optional - Recommended for Chrome &amp; Firefox)](#setup-fake-filler-optional---recommended-for-chrome--firefox)
 * [Gradle tasks](#gradle-tasks)
     * [checkForNpm](#checkForNpm)
     * [npmInstall](#npmInstall)
@@ -309,7 +339,7 @@ More examples of conditions can be found in our
 [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/conditions)
 .
 
-### Using conditions in templates
+### Using Conditions in Templates
 
 We have created a Java object named `templateManager` that's part of the model data handed to the
 Thymeleaf templates. Template code can run conditions via this object, like so:
@@ -390,7 +420,7 @@ More example actions can be found in
 our [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/actions)
 .
 
-## Data Persistence and Defining Inputs
+# Data Persistence and Defining Inputs
 
 The Form Flow Library uses the Hibernate ORM to persist data to a PostgreSQL database.
 Data is stored in a Java object called `Submission` which is persisted to the database as JSON.
@@ -447,7 +477,7 @@ Note that the `inputData` field is a JSON object that stores data from the user'
 progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
 have access to it.
 
-### Inputs Class
+## Inputs Class
 
 The inputs class's location is defined by the application using this library. The application using
 this library will need a field in its `application.yaml` that shows the location of the input class(
@@ -489,7 +519,20 @@ class ApplicationInformation extends FlowInputs {
 }
 ```
 
-### Dynamic Input Fields
+### Validating Inputs
+
+Validations for inputs use the Java Bean Validation, more specifically, Hibernate validations.
+For a list of validation decorators,
+see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
+
+Note that our implementation does not make a field required, unless `@NotEmpty`, `@NotBlank`, or
+`@NotNull` is used. If a validation annotation such as `@Email` is used, it will not
+actually validate the annotated input unless a user actually enters a value for that input. If you
+use `@Email` and `@NotBlank` together, that causes both validations to run even if the user did not
+enter a value, validating both that they need to enter a value due to `@NotBlank` and because the
+blank value needs to be a validly formatted email address due to `@Email`.
+
+## Dynamic Input Fields
 
 A field is dynamic if it is unknown exactly how many of them will be form submitted in a page.
 
@@ -569,50 +612,14 @@ Note that if a field happens to have the `DYNAMIC_FIELD_MARKER` (`_wildcard_`) i
 the field doesn't have the `@DynamicField` annotation, the system will not treat that field as a
 dynamic field and will throw an exception.
 
-### Validating Inputs
+## Custom Annotations
 
-Validations for inputs use the Java Bean Validation,more specifically,Hibernate
-validations.For a list of validation decorators,
-see[Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
-
-Note that our implementation does not make a field required,unless `@NotEmpty`, `@NotBlank`,or
-`@NotNull` is used.If a validation annotation such as `@Email` is used,it will not
-actually validate the annotated input unless a user actually enters a value for that input.If you
-use `@Email` and `@NotBlank` together,that causes both validations to run even if the user did not
-enter a value,validating both that they need to enter a value due to `@NotBlank` and because the
-blank value needs to be a validly formatted email address due to `@Email`.
-
-### Custom Annotations
-
-#### Marker Annotations
-
-Marker annotations are used to mark a field for certain functionality.These annotations may or may
-not have any validation associated with them;they may simply mark the field for some usage.
-
-##### @Encrypted
-
-```java
-@Encrypted
-private String socialSecurityNumber;
-```
-
-This is a marker annotation that tells the FFB to encrypt the field before saving it to the
-database. The FFB library uses [Google's Tink](https://developers.google.com/tink) open-source
-cryptographic library to perform the cryptography.
-
-The field will be decrypted when retrieved from the database.
-
-Marking a field with `@Encrypted` guarantees that the field will be encrypted when present in the
-database.
-
-No validation is provided with this annotation.
-
-#### Validation Annotations
+### Validation Annotations
 
 We implement [custom validations for convenience](/src/main/java/formflow/library/data/validators).
 Use them the same way you would any other JavaX validator.
 
-##### @Money
+#### @Money
 
 ```java
 @Money(message = "Please make sure to enter a valid dollar amount.")
@@ -638,7 +645,7 @@ Does not accept values such as:
 .5
 ```
 
-##### @Phone
+#### @Phone
 
 Used to validate 10-digit phone numbers.
 
@@ -676,7 +683,30 @@ Does not accept values such as:
 "der"
 ```
 
-### Input Data JSON Structure
+### Marker Annotations
+
+Marker annotations are used to mark a field for certain functionality. These annotations may or may
+not have any validation associated with them; they may simply mark the field for some usage.
+
+#### @Encrypted
+
+```java
+@Encrypted
+private String socialSecurityNumber;
+```
+
+This is a marker annotation that tells the FFB to encrypt the field before saving it to the
+database. The FFB library uses [Google's Tink](https://developers.google.com/tink) open-source
+cryptographic library to perform the cryptography.
+
+The field will be decrypted when retrieved from the database.
+
+Marking a field with `@Encrypted` guarantees that the field will be encrypted when present in the
+database.
+
+No validation is provided with this annotation.
+
+## Input Data JSON Structure
 
 As the end user walks through the flow entering data, their input data will get stored as JSON in
 the database. It is stored in a column named `inputData` on the `submissions` table.
@@ -740,11 +770,11 @@ specific iteration's data.
 
 ## Thymeleaf
 
-### Using Thymeleaf
-
-We use Thymeleaf for frontend views. Thymeleaf is a Java based HTML framework for frontend
+We use Thymeleaf for frontend templating. Thymeleaf is a Java based HTML framework for frontend
 templating.
 [You can learn more about Thymeleaf here.](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
+
+### Using Thymeleaf
 
 We use Thymeleaf's concept
 of  [fragments](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#fragments) to store
@@ -1540,7 +1570,7 @@ bucket. This will automatically delete files in your bucket that are older than 
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
-## Virus Scanning
+### Virus Scanning
 
 File uploads made through form flow can be scanned for viruses. We provide a way to pass
 files to a ClamAV server.
@@ -1593,15 +1623,13 @@ the `user_files` table associated with a submission are zipped together and down
 
 Form flow library will support address validation through [Smarty](https://www.smarty.com/).
 
-### Smarty
-
-#### Registration with Smarty
+### Registration with Smarty
 
 Create an account with Smarty at [Smarty](https://www.smarty.com/) and once setup, go to the API
 keys screen
 and make note of your `auth-id` and `auth-token`. You will need these to configure your application.
 
-#### How to configure
+### How to configure
 
 You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
 the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
@@ -1684,7 +1712,7 @@ whether Smarty validation for that address should be performed. The before menti
 parameter
 of the address fragment is used to determine the value of this hidden field.
 
-### Viewing the validated address
+### Viewing the Validated Address
 
 We have provided two live templates `cfa:pickAddressScreen` and `cfa:verifyAddressScreen`.
 The `cfa:pickAddressScreen` will display a radio input with
@@ -1733,7 +1761,7 @@ from user input. In order to begin generating PDFs from your user responses, you
 create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
 inputs to PDF fields.
 
-### Creating a template PDF file
+### Creating a Template PDF File
 
 The first step in generating PDFs is to create a template PDF file. This file will be used by the
 FFB
@@ -1772,7 +1800,7 @@ template file should have a name of `HOUSEHOLD_MEMBER_FIRST_NAME_n` where `n` is
 number. If you have 5 possible iterations you would have `HOUSEHOLD_MEMBER_FIRST_NAME_1`
 through `HOUSEHOLD_MEMBER_FIRST_NAME_5`.
 
-### Creating a pdf-map.yaml file
+### Creating a pdf-map.yaml File
 
 The next step in generating PDFs is to create a `pdf-map.yaml` file. This file will act as a map of
 input fields from your application to PDF fields in your template PDF file. This file should be
@@ -1955,11 +1983,10 @@ All of these preparers will run by default against the `inputFields` you have in
 `pdf-map.yaml` file. Should you want to customize or inject fields you can do so
 using [custom preparers](#custom-preparers).
 
-#### SubmissionField
+### SubmissionField
 
 SubmissionField is an interface that represents a mapping between your applications inputs and their
-values. SubmissionField's are used by the FFB library during PDF generation to map your application'
-s
+values. SubmissionField's are used by the FFB library during PDF generation to map your application's
 input values to the correct PDF Fields. There are 3 types of SubmissionFields:
 <table>
     <tr>
@@ -2149,13 +2176,13 @@ the [starter app's Dockefile](https://github.com/codeforamerica/form-flow-starte
 
 ## Sending Email
 
-Form flow library(FFL) is using [Mailgun](#mailgun) as its default email service provider. If you
+Form flow library(FFL) is using [Mailgun](https://www.mailgun.com/) as its default email service provider. If you
 would like to use an alternative email service, then you have two choices:
 
 1. Build a custom email client service that does not implement the EmailClient interface.
 2. Create an email service that implements the EmailClient interface.
 
-### Building a custom email service
+### Building a Custom Email Service
 
 1. Add the alternative email client to the dependencies in your application
 2. Generate a service using your alternative email client
@@ -2163,7 +2190,7 @@ would like to use an alternative email service, then you have two choices:
    example: [SendEmailClient](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java))
    or from an endpoint
 
-### Creating a custom email service with EmailClient.
+### Creating a Custom Email Service With EmailClient
 
 The
 FFLs’ [EmailClient](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/email/EmailClient.java)
@@ -2341,7 +2368,7 @@ Mailgun error codes can be found
 
 ## Localization
 
-### Setting application properties
+### Setting Application Properties
 
 Form flow library will read the languages set in an apps `application.properties`.
 
@@ -2360,13 +2387,13 @@ Refer to
 the [language tag syntax](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang#language_tag_syntax)
 to see what language you want to support.
 
-### Supplying translation files
+### Supplying Translation Files
 
 Translations need to be added to `messages_xx.properties` files in the
 applications `src/main/resources`
 directory, where `xx` is the language the translations are for.
 
-#### Messages in the library
+### Messages in the Library
 
 The library comes with [English](src/main/resources/messages-form-flow.properties)
 and [Spanish](src/main/resources/messages-form-flow_es.properties) messages. These are loaded into
@@ -2376,9 +2403,13 @@ the application's messages and can get overridden by message keys that exist in 
 To override a message from the library, use the same key in each of your messages files in your
 application.
 
-#### Using [Transifex](https://www.transifex.com/)
+### Using Transifex
 
-##### File encoding in your application
+[Transifex](https://www.transifex.com/) is a translation management platform that allows you to easily
+maintain translations between your application and translators. You can integrate it directly
+with GitHub to automatically create pull requests when new translations have been added.
+
+#### File encoding in your application
 
 Java properties requires ISO-8859-1 by default in order to support Transifex.
 
@@ -2388,7 +2419,7 @@ the [default file encoding for Intellij](https://www.jetbrains.com/help/idea/pro
 1. In the Settings, select **Editor | File Encodings**.
 2. Select `ISO-8859-1` from the **Default encoding for properties files** list.
 
-##### Connect to [Transifex](https://www.transifex.com/)
+#### Connect to Transifex
 
 You can use
 a [GitHub integration to allow Transifex](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration)
@@ -2412,7 +2443,7 @@ git:
 
 ```
 
-### How Spring Boot handles localization
+### How Spring Boot Handles Localization
 
 Spring boot uses
 a [locale change interceptor](https://www.baeldung.com/spring-boot-internationalization#localechangeinterceptor)
@@ -2420,7 +2451,7 @@ to intercept a `lang` query parameter (by default) to then change the locale
 and [sets a cookie](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/i18n/CookieLocaleResolver.html)
 to remember the locale.
 
-### Mixpanel event from language selector
+### Mixpanel Event From Language Selector
 
 If your application is using [Mixpanel](https://mixpanel.com/), and you want to keep track of clicks
 into the language selector
@@ -2437,7 +2468,7 @@ controllers. Form-flow library uses the `SessionContinuityInterceptor` to preven
 entering a
 flow without a session.
 
-### SessionContinuityInterceptor
+### Session Continuity Interceptor
 
 The `SessionContinuityInterceptor` prevents clients from entering the middle of a flow without
 starting a
@@ -2446,18 +2477,7 @@ a client will be returned to the index page of an application.
 
 ⚠️ __It is set to be the last interceptor run by any application using Form Flow library.__
 
-#### Configuration
-
-1. In the `application.yaml`, set the `session-continuity-interceptor.enabled` field
-   to `true`/`false` to enable
-   or disable the interceptor
-2. Set the `flows-config.yaml` with the `landmarks.firstScreen` yaml field.
-
-If this interceptor is enabled, but the `landmarks.firstScreen` is not set correctly, an error will
-be thrown. The error will identify
-the malformed `landmarks.firstScreen` element.
-
-##### Setup application.yaml for SessionContinuityInterceptor
+#### Setup application.yaml for SessionContinuityInterceptor
 
 The `SessionContinuityInterceptor` can be turned on or off by adding true or false to
 the `session-continuity-interceptor.enabled` fields of the `application.yaml` file.
@@ -2467,6 +2487,19 @@ form-flow:
   session-continuity-interceptor:
     enabled: true
 ```
+
+If you would like to configure the SessionContinuityInterceptor in your application you can follow
+the steps below:
+
+1. In the `application.yaml`, set the `session-continuity-interceptor.enabled` field
+   to `true`/`false` to enable
+   or disable the interceptor
+2. Set the `flows-config.yaml` with the `landmarks.firstScreen` yaml field for each flow in your 
+   application.
+
+If this interceptor is enabled, but the `landmarks.firstScreen` is not set correctly, an error will
+be thrown. The error will identify
+the malformed `landmarks.firstScreen` element.
 
 Note: If you do not include
 the `session-continuity-interceptor.enabled` field in your `application.yaml` file the application
@@ -2514,6 +2547,15 @@ landmarks:
   firstScreen: howThisWorks
 ```
 
+### Disabled Flow Interceptor
+
+The `DisabledFlowInterceptor` is an interceptor that prevents users from accessing a flow that has
+been disabled through configuration. This interceptor will redirect users to a configured static
+screen when they attempt to access a screen within a disabled flow.
+
+For more information on disabling a flow, please see the [Disabling a Flow](#disabling-a-flow)
+section.
+
 ## Landmarks
 
 Landmarks are a way of indicating that a page has a special purpose. Landmarks are added to
@@ -2547,11 +2589,9 @@ when they attempt to access a screen within a disabled flow.
 For more information on disabling a flow, please see the [Disabling a Flow](#disabling-a-flow)
 section.
 
-# How to use
+# How to Configure Applications Using the Form Flow Library
 
-## Configuration Details
-
-### Environment Variables
+## Environment Variables
 
 When configuring your application, the form flow library will expect to find your secret information
 in the environment. One way to do this is by creating an `.env` file that is a copy of
@@ -2565,7 +2605,7 @@ form flow library.
 You can also tell IntelliJ to load environment information from this file, too, by using
 the [Env File Plugin](https://plugins.jetbrains.com/plugin/7861-envfile/).
 
-### Application Configuration
+## Application Configuration
 
 The main configuration file for any Spring Boot application is the `application.yaml` file. For
 general information about the file, please see
@@ -2599,7 +2639,7 @@ form-flow:
   path: 'name-of-file.yaml'
 ```
 
-#### Disabling a Flow
+### Disabling a Flow
 
 The form flow library provides a configuration mechanism to disable a flow. This will prevent users
 from being able to access a given flow, and will redirect the user to a configured screen if they
@@ -2627,7 +2667,7 @@ form-flow:
       staticRedirectPage: '/docUploadDisabled'
 ```
 
-### Locking the Submission for a flow once it has been submitted
+### Locking the Submission for a Flow Once It Has Been Submitted
 
 The form flow library provides a configuration mechanism to lock a Submission object once it has been submitted.
 This will prevent users from being able to edit a Submission object once it has been submitted. If 
@@ -2676,7 +2716,7 @@ submit their feedback after they have submitted their application. The data woul
 in the Submission object, but would not be included in the PDF or any other processes that are triggered
 upon submitting.
 
-#### Design System
+### Design System
 
 We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
 the [US Web Design System (USWDS)](https://designsystem.digital.gov/). Enabling this
@@ -2700,7 +2740,7 @@ locally. You can learn more about the [Gradle tasks in the section below](#gradl
 | `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used. |
 |
 
-#### File upload properties
+### File Upload Properties
 
 | Property                                | Default                                                    | Description                                                                                                                           |
 |-----------------------------------------|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
@@ -2710,7 +2750,7 @@ locally. You can learn more about the [Gradle tasks in the section below](#gradl
 | `form-flow.uploads.thumbnail-width`     | `64`                                                       | Thumbnail width in pixels                                                                                                             |
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
 
-##### Virus scanner properties
+#### Virus Scanner Properties
 
 | Property                                                | Default | Description                                                                                                                                         |
 |---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -2719,7 +2759,7 @@ locally. You can learn more about the [Gradle tasks in the section below](#gradl
 | `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                              |
 | `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesn't return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
 
-##### Max file size configuration
+#### Max File Size Configuration
 
 If `form-flow.uploads.max-file-size` is not set, then the server will use its default value of 1MB
 preventing
@@ -2738,7 +2778,7 @@ server:
     max-http-form-post-size: ${form-flow.uploads.max-file-size}MB
 ```
 
-#### Error properties
+### Error Properties
 
 | Property                                | Default    | Description                                                                                                        |
 |-----------------------------------------|------------|--------------------------------------------------------------------------------------------------------------------|
@@ -2750,17 +2790,15 @@ We've chosen to use a yaml version of the application file, but you could also s
 inputs line would look like this: `form-flow.path='flows-config.yaml'`. Throughout this document,
 when we reference a configuration from this file, we will write it as dot separated parameters.
 
-#### Actuator Endpoints
+### Actuator Endpoints
 
 Spring Boot provides a module,
 called [`spring-boot-starter-actuator`](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints),
 that will expose endpoints that will allow you to monitor and interact with your application.
 
 **⚠️ While these are very powerful, they can also reveal sensitive information about your
-application. They are a huge security concern.**
-
-It's best to disable them in production and demo environments, or just leave the `health` and
-`info` endpoints exposed.
+application. They are a huge security concern. It's best to disable them in production and demo 
+environments, or just leave the `health` and `info` endpoints exposed. ⚠️**
 
 In our starter application, we have left all endpoints open in the `dev` environment, while we close
 most of them down in our `demo` environment.
@@ -2784,9 +2822,9 @@ actuator endpoints.
 * [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints)
 * [Actuator API](https://docs.spring.io/spring-boot/docs/3.1.2/actuator-api/htmlsingle)
 
-### Flow and Subflow Configuration
+## Flow and Subflow Configuration
 
-#### flows-config.yaml file
+### flows-config.yaml File
 
 The `flows-config.yaml` file contains the core flow through screens of the application.
 It will contain a list of screens in your application as well as any conditions or actions
@@ -2797,7 +2835,7 @@ in `src/main/resources`. You can have the library load a file with a different n
 the property `form-flow.path` in the `application.yaml` file. The library will then load the
 specified file instead and pull the flow configuration from there.
 
-#### flows-config.yaml basic configuration
+### flows-config.yaml Basic Configuration
 
 To configure a flow, create a `flows-config.yaml` in your app at `src/main/resources`.
 
@@ -2840,7 +2878,7 @@ flow:
     nextScreens: null
 landmarks:
   firstScreen: firstScreen
-  ___
+___
 name: someOtherFlow
 flow:
   otherFlowScreen:
@@ -2850,7 +2888,7 @@ You can have IntelliJ do autocomplete and validation for fields in the `flows-co
 configuring IntelliJ to use
 the `flows-config-schema.json`, [as described here](#connect-flows-config-schema).
 
-#### Multiple Flows
+### Multiple Flows
 
 The Form Flow library is able to accommodate multiple form flows in one application. For example,
 one could create a signup form in one flow and use a separate flow for collecting documentation from
@@ -2930,11 +2968,11 @@ flow:
     nextScreens:
       - name: success
   success:
-    nextScreens:
+    nextScreens: null
   # NOTE: this screen still needs to be defined in `flow` to be rendered even though
   # it isn't the nextScreen of any other Screen
   docsDeleteConfirmation:
-    nextScreens:
+    nextScreens: null
 subflow:
   docs:
     entryScreen: docsEntry
@@ -2947,7 +2985,7 @@ subflow:
 
 ![Diagram showing screens that are in iteration loops to have the subflow key](readme-assets/subflow-stickies.png)
 
-### Thymeleaf Model Data
+## Thymeleaf Model Data
 
 We provide some data to the model for ease of use access in Thymeleaf templates. Below are the data
 types we pass and when they are available.
@@ -2968,14 +3006,16 @@ types we pass and when they are available.
 | `subflowIsEmpty`     | Boolean                 | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Indicates that the subflow being accessed no longer has entries.                                                                                                                                                 |
 | `entryScreen`        | String                  | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Name of the entry screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                                                                         |
 
-There are spots in the templates where the `T` operator is used.
-[For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html)
+There are spots in the templates where the `T` operator is used. The T operator allows us to call
+static methods as well as fields from Java classes directly in our Thymeleaf templates. For an example, 
+see our [checkbox template where it is used](https://github.com/codeforamerica/form-flow/blob/315eadbf09a3e7c516184274c582039a30ba27d2/src/main/resources/templates/fragments/inputs/checkbox.html#L24) to see if the current form data contains a value for the checkbox
+element to decide whether to check the box.
+[For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html) section 6.5.8 Types.
 
-### Conditions / Actions
+Also remember that conditions can be accessed in Thymeleaf templates. Fore more information on using
+conditions in your templates see: [Using Conditions in Templates](#conditions).
 
-#### Coming Soon!
-
-### Logging
+## Logging
 
 Form Flow adds the following attributes to
 the [Mapped Diagnostic Context](https://logback.qos.ch/manual/mdc.html):
@@ -2993,11 +3033,7 @@ above document. For an example that exposes the entire Mapped Diagnostic Context
 JSON-formatted logs,
 see https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/logback-spring.xml.
 
-### Library Details
-
-### Publishing
-
-#### Maven Central
+## Library Publishing Details
 
 Currently, the Form Flow builder library is published on Sonatype. It can be pulled into a gradle
 file like so:
@@ -3019,7 +3055,7 @@ After cloning the repository, run `./setup.sh` from the root of the repo's direc
 
 ## Windows
 
-Check the setup script for the most up to date list of dependencies and steps you'll need to install
+Check the setup script for the most up-to-date list of dependencies and steps you'll need to install
 manually.
 
 ## Spring Profiles
@@ -3028,12 +3064,21 @@ There are a
 few [Spring Profiles](https://docs.spring.io/spring-boot/docs/1.2.0.M1/reference/html/boot-features-profiles.html)
 we use in the Form Flow library.
 
-### `dev` profile
+### Dev profile
 
-This `dev` profile allows for some information to be accessible to developers more easily. The
+The `dev` profile allows for some information to be accessible to developers more easily. The
 profile should only be used in a developer's environment.
 
-#### DevController
+Note that the `dev` profile is set to include all actuator endpoints which provide useful information
+about your application. Most of these endpoints except for `health` and `info` are disabled by default
+in all other profiles.
+
+**⚠️ For Security purposes, make absolutely certain that you do not enable other actuator endpoints 
+outside the `dev` profile unless you fully understand what you are doing. ⚠️**
+
+For more informaton on actuator endpoints see: [Actuator Endpoints](#actuator-endpoints)
+
+#### Dev Controller
 
 The developer profile controller is the `DevController` and it contains endpoints that developers
 might be interested in.
@@ -3044,7 +3089,16 @@ Current endpoints available:
 |--------------|-------------------------------------------------------------------------------|
 | `/dev/icons` | Displays the icons available for developers to pull in with the icon fragment |
 
-#### IntelliJ Configuration
+### Test Profile
+
+Items in the `test` profile will only be available when unit and journey tests are being
+run.
+
+### Demo Profile
+
+Items in the `demo` profile will be available in the staging/demo environment.
+
+### IntelliJ Configuration
 
 To run under a specific profile in IntelliJ, go to the `Run` menu and
 choose `Edit Configurations...`. Choose your application's profile. In the `Active profiles` field
@@ -3052,18 +3106,9 @@ add `dev`. If no `Active Profiles` field exists, click on `Modify Options` and
 choose `Spring Boot -> Active profiles`. This should add the `Active Profiles` field to the IntelliJ
 form for you to fill in.
 
-### `test` profile
-
-The items that are part of this profile will only be available when unit and journey tests are being
-run.
-
-### `demo` profile
-
-The items that are part of this profile will be available in the staging/demo environment.
-
 ## IntelliJ Setup
 
-### Connect flows config schema
+### Connect Flows Config Schema
 
 We use [JSON schema](https://json-schema.org/understanding-json-schema/index.html) to autocomplete
 and validate the `flows-config.yaml` file.
@@ -3072,13 +3117,13 @@ Follow the steps below in IntelliJ to connect the schema to your project's versi
 of `flows-config.yaml`:
 
 1. Download [`flows-config-schema.json` here.](intellij-settings/flows-config-schema.json)
-1. Open IntelliJ preferences (`Cmd + ,` on mac)
-1. Navigate to "JSON Schema Mappings"
-1. Select the "+" in the top left to add a new mapping
-1. Name can be anything (i.e. "Flow Config")
-1. "Schema file or URL" needs to be set to the `flows-config-schema.json` file you just downloaded
-1. "Schema version" set to "JSON Schema version 7"
-1. Use the "+" under schema version to add a file:
+2. Open IntelliJ preferences (`Cmd + ,` on mac)
+3. Navigate to "JSON Schema Mappings"
+4. Select the "+" in the top left to add a new mapping
+5. Name can be anything (i.e. "Flow Config")
+6. "Schema file or URL" needs to be set to the `flows-config-schema.json` file you just downloaded
+7. "Schema version" set to "JSON Schema version 7"
+8. Use the "+" under schema version to add a file:
     - a new file and connect to `src/main/resources/flows-config.yaml`
     - a folder and connect to `src/test/resources/flows-config`
 
@@ -3087,7 +3132,7 @@ appearing for you.
 
 ![IntelliJ JSON Schema Mappings menu](readme-assets/intellij-json-schema-mappings.png)
 
-### Applying Live Templates to your IntelliJ IDE ###
+### Applying Live Templates to Your IntelliJ IDE
 
 As a team, we use [IntelliJ](https://www.jetbrains.com/idea/) and can use
 the [Live Templates](https://www.jetbrains.com/help/idea/using-live-templates.html) feature to
@@ -3106,12 +3151,12 @@ of your previous settings. So we're going to use a copy/paste approach.
 5. Highlight the template group "CfA", right click and "Paste"
 6. You should now see Live templates with the prefix "cfa:" populated in the template group
 
-### Using Live Templates ###
+### Using Live Templates
 
 Once you have Live Templates installed on your IntelliJ IDE, in (`.html`, `.java`) files you can use
 our Live Templates by typing `cfa:` and a list of templates to autofill will show itself.
 
-### Contribute new Live Templates ###
+### Contribute New Live Templates
 
 If you have created a template which you feel is valuable outside the context of your specific app,
 you can contribute it to this project so that other teams can use it.
@@ -3141,7 +3186,7 @@ this command:
 - Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.X`
   in `File > Project Structure`
 
-### Setup Platform Flavored Google Styles for Java ##
+### Setup Platform Flavored Google Styles for Java
 
 In IntelliJ go to `Preferences --> Editor --> Code Style --> Java` and next to Scheme hit the
 cogwheel and `Import Scheme --> IntelliJ Code Style XML` with
@@ -3159,9 +3204,10 @@ From the project root invoke
 You can run tests directly in IntelliJ by running tests from test folder (via right click
 or `ctrl + shift + r`).
 
-## Setup Fake Filler (optional, Chrome & Firefox)
+## Setup Fake Filler (Optional - Recommended for Chrome & Firefox)
 
-We use an automatic form filler to make manual test easier.
+We use an automatic form filler to make manual testing easier. This will automatically fill your
+form screens with fake data.
 
 Install [Fake Filler for Chrome](https://chrome.google.com/webstore/detail/fake-filler/bnjjngeaknajbdcgpfkgnonkmififhfo)
 or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake-filler/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search)
