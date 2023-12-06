@@ -12,7 +12,7 @@ import jakarta.validation.Payload;
 
 /**
  * Custom annotation for validating monetary values. This annotation can be used on fields to ensure that they contain a valid
- * representation of a monetary amount. The validation logic is implemented by the MoneyValidator class.
+ * representation of a monetary amount. It uses {@link MoneyValidator} for the validation logic.
  */
 @Target({FIELD})
 @Retention(RUNTIME)
