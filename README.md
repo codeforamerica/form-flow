@@ -2181,9 +2181,9 @@ have seen the best results from the
 following 2 fonts:
 
 1. Cyrillic, Devanagari, Greek,
-   Latin - [Noto Sans Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSans-Regular.ttf)
+   Latin - [Noto Sans Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/pdf-fonts/NotoSans-Regular.ttf)
 1. Cyrillic, Han, Hiragana, Katakana, Latin, Simplified
-   Han - [Noto Sans SC Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/resources/pdf-fonts/NotoSansSC-Regular.ttf)
+   Han - [Noto Sans SC Regular](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/pdf-fonts/NotoSansSC-Regular.ttf)
 
 An example of providing these font files in the `/opt/pdf-fonts` directory is shown in
 the [starter app's Dockefile](https://github.com/codeforamerica/form-flow-starter-app/blob/main/Dockerfile).

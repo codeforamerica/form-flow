@@ -20,7 +20,7 @@ targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
 
 group = "org.codeforamerica.platform"
-version = "0.0.17-SNAPSHOT"
+version = "0.0.18-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -82,7 +82,7 @@ dependencies {
     implementation 'com.github.librepdf:openpdf:1.3.33'
     implementation 'org.yaml:snakeyaml:2.2'
     implementation 'com.mailgun:mailgun-java:1.1.0'
-    implementation 'com.google.crypto.tink:tink:1.11.0'
+    implementation 'com.google.crypto.tink:tink:1.12.0'
     implementation 'org.springframework.session:spring-session-jdbc'
 
     // For M1 issue?
@@ -103,7 +103,7 @@ dependencies {
     // aws-java-sdk-s3 uses version httpclient:4.5.13, so if we see any differences in testing going forward
     // we should take a look at this dependency and see if it's really testing things correctly and
     // monitor the dependencies.
-    testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+    testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.2.3'
     testImplementation 'io.github.bonigarcia:webdrivermanager:5.6.2'
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
