@@ -10,7 +10,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-
+/**
+ * Service class for validating addresses using the SmartyStreets API. This service handles the creation of validation requests,
+ * interaction with the SmartyStreets client, and processing of the validation results.
+ */
 @Service
 public class AddressValidationService {
 
@@ -22,7 +25,16 @@ public class AddressValidationService {
   private final String license;
   private final boolean isDisabled;
 
-
+  /**
+   * Constructs an AddressValidationService with dependencies and configuration properties.
+   *
+   * @param validationRequestFactory Factory for creating validation requests.
+   * @param clientFactory            Factory for creating SmartyStreets clients.
+   * @param authId                   The authentication ID for the SmartyStreets API.
+   * @param authToken                The authentication token for the SmartyStreets API.
+   * @param license                  The license key for the SmartyStreets API.
+   * @param isDisabled               Application property indicating if address validation is disabled.
+   */
   public AddressValidationService(
       ValidationRequestFactory validationRequestFactory,
       ClientFactory clientFactory,
@@ -38,6 +50,16 @@ public class AddressValidationService {
     this.isDisabled = isDisabled;
   }
 
+  /**
+   * Validates addresses contained in a FormSubmission object. It returns a map where each key is an identifier of an address and
+   * each value is the validated address. If address validation is disabled, it returns an empty map.
+   *
+   * @param formSubmission The form submission containing the addresses to be validated.
+   * @return A map of identifier strings to ValidatedAddress objects.
+   * @throws SmartyException      If there is an error in the SmartyStreets API call.
+   * @throws IOException          If there is an I/O error.
+   * @throws InterruptedException If the thread is interrupted during the process.
+   */
   public Map<String, ValidatedAddress> validate(FormSubmission formSubmission)
       throws SmartyException, IOException, InterruptedException {
 
