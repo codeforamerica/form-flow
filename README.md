@@ -18,6 +18,7 @@ The library includes tooling for:
 - Data Persistence using [Hibernate](https://hibernate.org/)
 - File Uploads
 - PDF Generation based on user input
+- Sending emails using [Mailgun](https://www.mailgun.com/)
 
 An example project built with the use of this Form Flow library can be found in
 our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
@@ -30,7 +31,7 @@ Table of Contents
      a reasonable size 
 -->
 
-* [What is a flow?](#what-is-a-flow)
+* [What Is a Flow?](#what-is-a-flow)
     * [Defining Screens](#defining-screens)
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
@@ -63,12 +64,12 @@ Table of Contents
         * [S3 File Retention Policies](#s3-file-retention-policies)
         * [Virus Scanning](#virus-scanning)
     * [Document Download](#document-download)
-        * [Downloading individual files](#downloading-individual-files)
-        * [Downloading all files](#downloading-all-files)
+        * [Downloading Individual Files](#downloading-individual-files)
+        * [Downloading All Files](#downloading-all-files)
     * [Address Validation](#address-validation)
         * [Registration with Smarty](#registration-with-smarty)
-        * [How to configure](#how-to-configure)
-        * [Validating an address](#validating-an-address)
+        * [How to Configure](#how-to-configure)
+        * [Validating an Address](#validating-an-address)
         * [Storage of Validated Addresses](#storage-of-validated-addresses)
         * [Viewing the Validated Address](#viewing-the-validated-address)
     * [PDF Generation](#pdf-generation)
@@ -86,7 +87,7 @@ Table of Contents
         * [Messages in the Library](#messages-in-the-library)
         * [Using Transifex](#using-transifex)
         * [How Spring Boot Handles Localization](#how-spring-boot-handles-localization)
-        * [Mixpanel event from language selector](#mixpanel-event-from-language-selector)
+        * [Mixpanel Event From Language Selector](#mixpanel-event-from-language-selector)
     * [Interceptors](#interceptors)
         * [Session Continuity Interceptor](#session-continuity-interceptor)
         * [Disabled Flow Interceptor](#disabled-flow-interceptor)
@@ -142,7 +143,7 @@ Table of Contents
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
-# What is a flow?
+# What Is a Flow?
 
 A flow is a series of screens that collect input from a user using HTML forms and inputs. Some of these
 screens may be purely informational, while others may collect data from the user. A flow may include 
@@ -214,9 +215,21 @@ in the array is one iteration.
 
 These are screens that every subflow must have.
 
-Here is an example of a *subflow* yaml:
+Here is an example of a `subflow` configuration in a `flows-config.yaml`:
 
 ```yaml
+name: exampleFlow
+flow:
+  docsEntry:
+    # Does not include subflow because it is technically not inside the subflow
+    nextScreens:
+        - name: docsStart
+  docsStart:
+    # Uses subflow because this screen is inside the docs subflow
+    subflow: docs
+    nextScreens: 
+    - name: docsReview
+  # ... other screens ...
 subflow:
   docs:
     entryScreen: docsEntry
@@ -300,7 +313,7 @@ subflow.
 
 The `iterationIsComplete` field will indicate if an iteration was completed, meaning the person
 filling out the subflow made it all the way through all screens within the subflow and clicked
-submit(POST)/continue(GET) on the
+submit (POST) or continue (GET) on the
 final screen of the iteration (heading to the review page). If that person backs out of the subflow
 before completing it, then `iterationIsComplete` will remain false.
 Incomplete iterations will not be included in the generated PDF of the submission, but are still
@@ -310,7 +323,8 @@ database for error resolution and debugging.
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
-form flow configuration file. They are generally used to determine template or page flow.
+form flow configuration file. They are generally used to determine the flow of pages in a `flows-config.yaml` file
+or conditionally showing or hiding elements ina  thymeleaf template.
 
 Conditions are Java objects that implement the `Condition`
 [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Condition.java)
@@ -341,13 +355,12 @@ More examples of conditions can be found in our
 
 ### Using Conditions in Templates
 
-We have created a Java object named `templateManager` that's part of the model data handed to the
+We have created a Java object named `ConditionManager` that's part of the model data handed to the
 Thymeleaf templates. Template code can run conditions via this object, like so:
 
 ```html
-
 <div
-    th:with="showCondition=${templateManager.runCondition('ConditionName', submission, 'data')}">
+    th:with="showCondition=${conditionManager.runCondition('ConditionName', submission, 'data')}">
   <h1 th:if="showCondition">Conditionally show this element</h1>
 </div>
 ```
@@ -474,14 +487,14 @@ class Submission {
 ```
 
 Note that the `inputData` field is a JSON object that stores data from the user's input as a given flow
-progresses. This field is placed in the model handed to the Thymeleaf templates, so each page should
+progresses. This field is placed in the model handed to the Thymeleaf templates, so each screen should
 have access to it.
 
 ## Inputs Class
 
-The inputs class's location is defined by the application using this library. The application using
-this library will need a field in its `application.yaml` that shows the location of the input class(
-es). It should look like this:
+The inputs class's location is defined by the application using this library. Applications will need
+a field in its `application.yaml` that shows the location of the input class(es). 
+It should look like this:
 
 ```yaml
 form-flow:
@@ -493,7 +506,8 @@ defined in the application's `flows-config.yaml` configuration, is `ubi` we will
 the name of `Ubi` to be located at the specified input path.
 
 An example inputs class can be seen below, with example validations. Note that all inputs classes
-should extend the class `FlowInputs` which provides CSRF functionality for security.
+should extend the class `FlowInputs` which provides [CSRF](https://owasp.org/www-community/attacks/csrf) 
+functionality for security.
 
 Also note that for single value inputs the type when defining the input is String. However, for
 input types that can contain more than one value, the type is ArrayList<String>.
@@ -521,7 +535,7 @@ class ApplicationInformation extends FlowInputs {
 
 ### Validating Inputs
 
-Validations for inputs use the Java Bean Validation, more specifically, Hibernate validations.
+Validations for inputs use Java Bean Validation, but more specifically, Hibernate validations.
 For a list of validation decorators,
 see [Hibernate's documentation.](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints)
 
@@ -534,7 +548,7 @@ blank value needs to be a validly formatted email address due to `@Email`.
 
 ## Dynamic Input Fields
 
-A field is dynamic if it is unknown exactly how many of them will be form submitted in a page.
+A field is dynamic if it is unknown exactly how many of them will be submitted on a given form screen.
 
 For example, if a user uploads a number of files on one screen, and you need to attach data to
 each file on another screen, the exact number of files is unknown to the template generating
@@ -545,9 +559,9 @@ to mark this field as dynamic.
 
 To create a dynamic field you need to do two things:
 
-1. create the field in the inputs file and apply the `@DynamicField` annotation to it, as well as
+1. Create the field in the inputs file and apply the `@DynamicField` annotation to it, as well as
    any other annotations that apply to the field.
-2. create the input fields in the thymeleaf template and make sure they are named appropriately, as
+2. Create the input fields in the thymeleaf template and make sure they are named appropriately, as
    described below.
 
 Here is an example of how to set up a dynamic field.
@@ -716,7 +730,7 @@ the database. It is stored in a column named `inputData` on the `submissions` ta
   JSON data. The keys will be the input fields name.
 * The input fields that are part of a subflow will be stored in an array under a key that is the
   name of the subflow. To access the current item's data on a subflow page, use `fieldData`.
-* Field names are used as keys. We use them directly as they are and therefore they must be unique
+* Field names are used as keys. We use them directly as they are, and therefore they must be unique
   across a whole flow to avoid naming collisions. The example applies a prefix to the fields, but
   that's just for ease of being clear in the example. The system does not apply prefixes.
 
@@ -763,7 +777,7 @@ So the resulting JSON stored in the database has input fields as key values, and
 subflow name is the key value.
 
 Note that the subflows are an array of repeating entries - one for each iteration a user made of the
-subflow. Each iteration has a unique UUID associated with it so we can have a way of working with a
+subflow. Each iteration has a unique UUID associated with it, so we can have a way of working with a
 specific iteration's data.
 
 # General Information
@@ -788,23 +802,18 @@ Thymeleaf is also capable of making direct calls to Java class methods using wha
 Spring Expression Language T operator. This allows you to implement Java code in your Thymeleaf
 templates. We provide two classes for this purpose:
 
-- ConditionDefinitions
+- ConditionManager
     - Houses methods which should always return Booleans and can be used to conditionally show or
       hide sections of a Thymeleaf template
-- ViewUtilities
-    - Houses methods for general purpose manipulation of data to display on the frontend in
-      Thymeleaf templates
 
 An example of using the T operator can be found in the `incomeAmounts` template from the starter
 app.
 
 ```html
-
 <main id="content" role="main" class="form-card spacing-above-35"
-      th:with="selectedSelf=${T(org.codeforamerica.formflowstarter.app.config.ConditionDefinitions).incomeSelectedSelf(submission, uuid)},
-                     houseHoldMemberName=${T(org.codeforamerica.formflowstarter.app.data.Submission).getSubflowEntryByUuid('income', uuid, submission).householdMember}">
-  ...
-</main>
+      th:with="
+            selectedSelf=${conditionManager.runCondition('IncomeSelectedSelf', submission, uuid)},
+                     houseHoldMemberName=${fieldData.householdMember}">
 ```
 
 ### Templates
@@ -1182,7 +1191,7 @@ Below are examples of both types of checkboxes:
 ```
 
 Note that the `checkboxInSet` fragment is used to provide multiple options within
-a `checkboxFieldset` fragment. Also note that the input name fo the `checkboxFieldset` and
+a `checkboxFieldset` fragment. Also note that the input name for the `checkboxFieldset` and
 the `checkboxInSet` are the same. This is how the fieldset and internal checkbox options are grouped
 into a single multiple checkbox input.
 
@@ -1218,6 +1227,11 @@ to quickly
 create groupings of checkbox inputs. Note that when using this template, you can copy the inner
 checkbox option fragment
 as many times as you like to create the necessary number of checkbox options.
+
+Note that when working with multi-value checkboxes (read: checkboxInSet) in tests, the name of your
+checkbox needs to include a `[]` at the end. For example, if your checkbox name is `gender`, then 
+in test it would be `gender[]`. This is done so that we can differentiate between single value checkboxes
+and multi-value in test. 
 
 #### Radio
 
@@ -1313,7 +1327,7 @@ as mentioned above.
 
 #### Date
 
-Date inputs are used to gather dates, such as birth dates, start dates for places of employment,
+Date inputs are used to gather dates, such as birthdates, start dates for places of employment,
 etc.
 They are visually displayed as three separate inputs for Month, Day and Year in MM/DD/YYYY format.
 
@@ -1460,10 +1474,10 @@ submission it is a part of, like so:
    `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
 ```
 
-The `flow_name` is the current flow the user is in and the `input_name` is the name of the file
-upload widget that uploaded the file. If there are multiple files uploaded via the same widget, then
-there will be many files with the same `flow_name` and `input_name`, though the UUID will be unique
-for each file.
+The `flow_name` is the flow the user was in when they uploaded the file and the `input_name` is the 
+name of the file upload widget that uploaded the file. If there are multiple files uploaded via the 
+same widget, then there will be many files with the same `flow_name` and `input_name`, though the 
+UUID will be unique for each file.
 
 Here is an example of what two files uploaded via the same input will look like in S3 (flow name
 is `ubi` and widget name is `homedoc`):
@@ -1604,14 +1618,14 @@ Form flow library allows users to either:
 In order to download from these endpoints, the HTTP session must have an attribute of "id" that
 matches the submission's UUID.
 
-### Downloading individual files
+### Downloading Individual Files
 
 To download individual files a user can use the single-file download
 endpoint: `/file-download/{submissionId}/{fileId}`.  
 The `submissionId` must be included in the session as an attribute and the `fileId` must be found in
 the `user_files` table in order for the file to be retrieved.
 
-### Downloading all files
+### Downloading All Files
 
 In order to download all the files associated with a submission a user needs to use the download-all
 endpoint:  `/file-download/{submissionId}`. The download-all endpoint requires that the `id`
@@ -1629,7 +1643,7 @@ Create an account with Smarty at [Smarty](https://www.smarty.com/) and once setu
 keys screen
 and make note of your `auth-id` and `auth-token`. You will need these to configure your application.
 
-### How to configure
+### How to Configure
 
 You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
 the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
@@ -2154,7 +2168,7 @@ the [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-
 
 ### Font Support for generated PDFs
 
-The Font Flow Library automatically uses all font files present in the `/opt/pdf-fonts`
+The Form Flow Library automatically uses all font files present in the `/opt/pdf-fonts`
 directory for PDF generation. If a different location is desired, it can be configured
 using the property `form-flow.pdf.fontDirectory`. (Note: Remember to use "file:" as a prefix
 to the absolute path, e.g., for `/opt/benefitsapp/fonts` use `file:/opt/benefitsapp/fonts`.)
@@ -2323,13 +2337,11 @@ arguments. SendEmail is overloaded allowing it to be called in three ways:
 3. `sendEmail( String subject, String recipientEmail, String emailBody, List<String> emailsToCC,
    List<String> emailsToBCC, List<File> attachments, boolean requireTls)`
 
-Below is and example of a sendEmail() call being made by an application using the form flow library.
+Below is an example of a sendEmail() call being made by an application using the form flow library.
 Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
-      ...
-    MessageResponse response;
-    response=mailgunEmailClient.sendEmail(
+MessageResponse response = mailgunEmailClient.sendEmail(
     emailSubject,
     recipientEmail,
     emailToCc,
@@ -2337,19 +2349,18 @@ Please note that pdfs is a list of files to be passed as attachments with the em
     emailBody,
     pdfs,
     requireTls
-    );
-    ...
+);
 ```
 
 The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
-mailgun. The message response should mirror the code found below if a message has been successfully
+mailgun as JSON. The message response should mirror the JSON found below if a message has been successfully
 queued by Mailgun.
 
-```java
+```json
 {
     "message":"Queued. Thank you.",
     "id":"<20111114174239.25659.5817@samples.mailgun.org>"
-    }
+}
 ```
 
 When a malformed(bad) email is sent to the Mailgun api, mailgun throws an error. The error includes
@@ -3076,7 +3087,7 @@ in all other profiles.
 **⚠️ For Security purposes, make absolutely certain that you do not enable other actuator endpoints 
 outside the `dev` profile unless you fully understand what you are doing. ⚠️**
 
-For more informaton on actuator endpoints see: [Actuator Endpoints](#actuator-endpoints)
+For more information on actuator endpoints see: [Actuator Endpoints](#actuator-endpoints)
 
 #### Dev Controller
 
@@ -3158,12 +3169,12 @@ our Live Templates by typing `cfa:` and a list of templates to autofill will sho
 
 ### Contribute New Live Templates
 
-If you have created a template which you feel is valuable outside the context of your specific app,
+If you have created a template that you feel is valuable outside the context of your specific app,
 you can contribute it to this project so that other teams can use it.
 
 1. Open Preferences (`cmd + ,`), search or find the section "Live Templates"
 2. Find or create the Live Template you want to contribute
-3. Right click and "Copy" (this will copy the Live Template in XML form)
+3. Right-click and "Copy" (this will copy the Live Template in XML form)
 4. Create a PR on this repository in GitHub which includes an update to the templates.
    a. Open [intellij-settings/LiveTemplates.xml](intellij-settings/LiveTemplates.xml) in this repo
    b. Paste at the bottom of the file
@@ -3201,7 +3212,7 @@ From the project root invoke
 
 #### IntelliJ
 
-You can run tests directly in IntelliJ by running tests from test folder (via right click
+You can run tests directly in IntelliJ by running tests from the test folder (via right-click
 or `ctrl + shift + r`).
 
 ## Setup Fake Filler (Optional - Recommended for Chrome & Firefox)
@@ -3226,7 +3237,7 @@ or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake
 
 # Gradle tasks
 
-This documentation is for custom tasks writing in
+This documentation is for custom tasks written in
 the [Starter Application's `build.gradle`](https://github.com/codeforamerica/form-flow-starter-app/blob/main/build.gradle).
 
 ## checkForNpm
@@ -3236,7 +3247,7 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew checkForNpm
   ```
-  This task will automatically run in the `build` process if `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system application
   property is set.
 
 ## npmInstall
@@ -3246,7 +3257,7 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew npmInstall
   ```
-  This task will automatically run in the `build` process if `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system application
   property is set.
 
 ## moveNodeModulesToGenerated
@@ -3266,7 +3277,7 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew moveUSWDSImagesToGenerated
   ```
-  This task will automatically run in the `build` process if `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system application
   property is set.
 
 ## compileSass
@@ -3276,7 +3287,7 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew compileSass
   ```
-  This task will automatically run in the `build` process if `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system application
   property is set.
 
 ## compileJs
@@ -3286,7 +3297,7 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew compileJs
   ```
-  This task will automatically run in the `build` process if `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system application
   property is set.
 
 ## watchCompileSass
