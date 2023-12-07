@@ -1,16 +1,16 @@
 package formflow.library.data;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
- * Service to retrieve and store Submission objects in the database.
+ * Service to retrieve and store {@link formflow.library.data.Submission} objects in the database.
  */
 @Service
 @Transactional
@@ -29,8 +29,8 @@ public class SubmissionRepositoryService {
   /**
    * Saves the Submission in the database.
    *
-   * @param submission the submission to save, not null
-   * @return UUID of the saved submission
+   * @param  submission the {@link formflow.library.data.Submission} to save, not null
+   * @return the saved {@link formflow.library.data.Submission}
    */
   public Submission save(Submission submission) {
     var newRecord = submission.getId() == null;
