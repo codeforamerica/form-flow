@@ -20,6 +20,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Component that generates a filled PDF from a template and a collection of {@link PdfField}
+ */
 @Slf4j
 @Component
 public class PDFFormFiller {
@@ -29,6 +32,10 @@ public class PDFFormFiller {
 
   private final ApplicationContext applicationContext;
 
+  /**
+   * Constructor
+   * @param applicationContext The Spring {@link ApplicationContext} that provides configuration information
+   */
   public PDFFormFiller(ApplicationContext applicationContext) {
     this.applicationContext = applicationContext;
   }
