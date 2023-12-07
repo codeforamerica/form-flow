@@ -324,7 +324,7 @@ database for error resolution and debugging.
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
 form flow configuration file. They are generally used to determine the flow of pages in a `flows-config.yaml` file
-or conditionally showing or hiding elements ina  thymeleaf template.
+or conditionally showing or hiding elements in a thymeleaf template.
 
 Conditions are Java objects that implement the `Condition`
 [interface](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/config/submission/Condition.java)
