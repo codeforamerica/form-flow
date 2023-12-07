@@ -11,12 +11,12 @@ public class InputUtils {
    * Static function to help determine if a String or ArrayList contains the {@code target} value.
    *
    * <p>
-   * Currently this performs a comparison between two data types:
+   * Currently, this performs a comparison between two data types:
    *     <ul>
    *         <li>String - checks if the {@code value} equals the {@code target} </li>
    *         <li>ArrayList of Strings - checks if the {@code target} is in the ArrayList</li>
    *     </ul>
-   * <p>
+   * </p>
    *
    * @param value  Object to check if it equals or contains the {@code target} string
    * @param target string to find in {@code target}

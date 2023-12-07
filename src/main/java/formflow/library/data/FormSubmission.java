@@ -21,6 +21,9 @@ import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_
 @Data
 public class FormSubmission {
 
+  /**
+   * Form data that is received from the client.
+   */
   public Map<String, Object> formData;
   private List<String> unvalidatedFields = List.of(
       UNVALIDATED_FIELD_MARKER_CSRF,
