@@ -19,6 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 public abstract class FormFlowController {
 
+  /**
+   * This is an abstract controller class used to pass services and helper methods to controllers.
+   */
+
   protected final SubmissionRepositoryService submissionRepositoryService;
 
   protected final UserFileRepositoryService userFileRepositoryService;
@@ -41,10 +45,21 @@ public abstract class FormFlowController {
     this.messageSource = messageSource;
   }
 
+  /**
+   * Saves a submission
+   * @param submission submission saved through the submission repository service.
+   * @return A decrypted submission
+   */
   protected Submission saveToRepository(Submission submission) {
     return saveToRepository(submission, null);
   }
 
+  /**
+   * Saves a Submission
+   * @param submission - a submission saved through the submission repository service
+   * @param subflowName - Null or a String of a subflow name
+   * @return A decrypted submission
+   */
   protected Submission saveToRepository(Submission submission, String subflowName) {
     submissionRepositoryService.removeFlowCSRF(submission);
     if (subflowName != null && !subflowName.isBlank()) {
@@ -53,6 +68,11 @@ public abstract class FormFlowController {
     return submissionRepositoryService.save(submission);
   }
 
+  /**
+   * Takes in a flow and returns the flow configuration
+   * @param flow A String of a flow name.
+   * @return Returns a FlowConfiguration object.
+   */
   protected FlowConfiguration getFlowConfigurationByName(String flow) {
     List<FlowConfiguration> flowConfigurationList = flowConfigurations.stream().filter(
         flowConfiguration -> flowConfiguration.getName().equals(flow)).toList();
@@ -64,6 +84,11 @@ public abstract class FormFlowController {
     return flowConfigurationList.get(0);
   }
 
+  /**
+   * Checks if there are any flows with the name of
+   * @param flow
+   * @return
+   */
   protected Boolean doesFlowExist(String flow) {
     return flowConfigurations.stream().anyMatch(
         flowConfiguration -> flowConfiguration.getName().equals(flow)
@@ -150,7 +175,7 @@ public abstract class FormFlowController {
     return null;
   }
 
-  /*
+  /**
    * A method that will store the Submission ID, based on flow, in the HttpSession provided.
    *
    * @param session The HttpSession to store information in
