@@ -1,18 +1,19 @@
 package formflow.library.file;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 import formflow.library.utilities.AbstractBasePageTest;
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(properties = {
     "form-flow.path=flows-config/test-upload-flow.yaml",
@@ -58,7 +59,6 @@ public class UploadJourneyTests extends AbstractBasePageTest {
 
     //Race condition caused by uploadPasswordProtectedPdf waits until upload file has file details added instead
     //of waiting until file upload is complete.
-    //TODO: Change uploadFile() to wait until file upload is complete.  Key off of delete link?
     try {
       Thread.sleep(500);
     } catch (InterruptedException e) {

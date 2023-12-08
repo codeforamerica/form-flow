@@ -1,13 +1,14 @@
 package formflow.library.pdf;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -47,7 +48,6 @@ public class PdfMapSubflow {
    *          incomeSelf: INCOME_HAS_SELF_EMPLOYMENT_MEMBER
    *          incomeUnemployment: INCOME_HAS_UNEMPLOYMENT_MEMBER
    * </pre>
-   * // TODO - start here
    *
    * @return
    */

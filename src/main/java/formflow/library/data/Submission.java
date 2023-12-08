@@ -100,7 +100,6 @@ public class Submission {
    * <p>
    * If the subflow is not present in the submission or the UUID is not present in a set of the subflow's data, null will be
    * returned.
-   *     TODO this will actually throw an exception, it seems, if the subflow is found, but the UUID is not in it - maybe that's okay?
    * </p>
    *
    * @param subflowName subflow of interest, not null
