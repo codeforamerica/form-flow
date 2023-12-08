@@ -1,8 +1,5 @@
 package formflow.library.data;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +9,10 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
@@ -83,33 +83,5 @@ public class SubmissionEncryptionServiceTest {
     assertThat(decryptedSubflow.containsKey("ssnInputSubflow")).isTrue();
     assertThat(decryptedSubflow.containsKey("ssnInputSubflow" + service.ENCRYPT_SUFFIX)).isFalse();
     assertThat(decryptedSubflow.get("ssnInputSubflow")).isEqualTo(originalSubflow.get("ssnInputSubflow"));
-  }
-
-
-  void encryptDecryptListOfStrings() {
-    submission = Submission.builder()
-      .inputData(Map.of(
-          "ssnInput", List.of("111-11-1111", "222-22-2222")))
-      .urlParams(new HashMap<>())
-      .flow("testFlow")
-      .submittedAt(Date.from(Instant.now()))
-      .build();
-
-    Submission encryptedSubmission = service.encrypt(submission);
-    assertThat(encryptedSubmission.getInputData().containsKey("ssnInput")).isFalse();
-    assertThat(encryptedSubmission.getInputData().containsKey("ssnInput" + service.ENCRYPT_SUFFIX)).isTrue();
-    assertThat(encryptedSubmission.getInputData().get("ssnInput" + service.ENCRYPT_SUFFIX))
-      .isNotEqualTo(submission.getInputData().get("ssnInput"));
-
-    Submission decryptedSubmission = service.decrypt(encryptedSubmission);
-    assertThat(decryptedSubmission.getInputData().containsKey("ssnInput")).isTrue();
-    assertThat(decryptedSubmission.getInputData().get("ssnInput")).isEqualTo("123-45-6789");
-    assertThat(decryptedSubmission.getInputData().containsKey("ssnInput" + service.ENCRYPT_SUFFIX)).isFalse();
-    assertThat(decryptedSubmission.getInputData().get("ssnInput"))
-      .isNotEqualTo(encryptedSubmission.getInputData().get("ssnInput" + service.ENCRYPT_SUFFIX));
-  }
-
-  void encryptDecryptListOfStringInSubflow() {
-    // TODO
   }
 }

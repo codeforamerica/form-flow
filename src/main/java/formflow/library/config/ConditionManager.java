@@ -29,7 +29,6 @@ public class ConditionManager {
     Condition condition = getCondition(conditionName);
     if (condition == null) {
       log.warn("Condition not found: " + conditionName);
-      // TODO: an exception would be clearer, should we do that?
       return false;
     }
     return condition.run(submission);
@@ -39,7 +38,6 @@ public class ConditionManager {
     Condition condition = getCondition(conditionName);
     if (condition == null) {
       log.warn("Condition not found: " + conditionName);
-      // TODO: an exception would be clearer, should we do that?
       return false;
     }
     return condition.run(submission, uuid);

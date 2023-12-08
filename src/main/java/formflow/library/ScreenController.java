@@ -1,5 +1,7 @@
 package formflow.library;
 
+import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
+
 import com.smartystreets.api.exceptions.SmartyException;
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
@@ -26,7 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -46,8 +47,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.RedirectView;
-
-import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
 /**
  * A controller to render any screen in flows, including subflows.
@@ -77,7 +76,8 @@ public class ScreenController extends FormFlowController {
       ActionManager actionManager,
       FileValidationService fileValidationService,
       MessageSource messageSource) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties, messageSource);
+    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
+        messageSource);
     this.validationService = validationService;
     this.addressValidationService = addressValidationService;
     this.conditionManager = conditionManager;
@@ -181,7 +181,7 @@ public class ScreenController extends FormFlowController {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
-    
+
     FormSubmission formSubmission = new FormSubmission(formData);
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission);
 
@@ -304,7 +304,7 @@ public class ScreenController extends FormFlowController {
         flow,
         screen,
         uuid);
-    
+
     // Checks to see if flow and screen exist
     ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
@@ -317,7 +317,7 @@ public class ScreenController extends FormFlowController {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new RedirectView(lockedSubmissionRedirectUrl);
     }
-    
+
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, iterationUuid);
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
@@ -406,7 +406,7 @@ public class ScreenController extends FormFlowController {
     String deleteConfirmationScreen = getFlowConfigurationByName(flow)
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
     Submission submission = getSubmissionFromSession(httpSession, flow);
-    
+
     if (shouldRedirectDueToLockedSubmission(deleteConfirmationScreen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
@@ -540,12 +540,10 @@ public class ScreenController extends FormFlowController {
     if (isConditionalNavigation(currentScreen) && !nextScreens.isEmpty()) {
       nextScreen = nextScreens.get(0);
     } else {
-      // TODO this needs to throw an error if there are more than 1 next screen that don't have a condition or more than one evaluate to true
       nextScreen = getNonConditionalNextScreen(currentScreen);
     }
 
     log.info("getNextScreenName: currentScreen:" + currentScreen + ", nextScreen: " + nextScreen.getName());
-    // TODO throw a better error if the next screen doesn't exist (incorrect name / name is not in flow config)
     return nextScreen.getName();
   }
 
@@ -677,7 +675,7 @@ public class ScreenController extends FormFlowController {
       // We keep "currentSubflowItem" for backwards compatability at this point
       model.put("currentSubflowItem", model.get("fieldData"));
     }
-    
+
     if (RequestContextUtils.getInputFlashMap(request) != null) {
       model.put("lockedSubmissionMessage", RequestContextUtils.getInputFlashMap(request).get("lockedSubmissionMessage"));
     }
@@ -751,8 +749,10 @@ public class ScreenController extends FormFlowController {
 
   private String getLockedSubmissionRedirectUrl(String flow, RedirectAttributes redirectAttributes, Locale locale) {
     String lockedSubmissionRedirectPage = formFlowConfigurationProperties.getLockedSubmissionRedirect(flow);
-    log.info("The Submission for flow {} is locked. Redirecting to locked submission redirect page: {}", flow, lockedSubmissionRedirectPage);
-    redirectAttributes.addFlashAttribute("lockedSubmissionMessage", messageSource.getMessage("general.locked-submission", null, locale));
+    log.info("The Submission for flow {} is locked. Redirecting to locked submission redirect page: {}", flow,
+        lockedSubmissionRedirectPage);
+    redirectAttributes.addFlashAttribute("lockedSubmissionMessage",
+        messageSource.getMessage("general.locked-submission", null, locale));
     return String.format("/flow/%s/%s", flow, lockedSubmissionRedirectPage);
   }
 }
