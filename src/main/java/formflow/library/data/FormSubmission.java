@@ -75,7 +75,7 @@ public class FormSubmission {
   /**
    * Retrieves a map of form fields that are eligible for validation. Fields marked as unvalidated are excluded from this map.
    *
-   * @return A Map containing the form fields that can be validated.
+   * @return A Map containing only validated address data mapped by field names.
    */
   public Map<String, Object> getValidatableFields() {
     return formData.entrySet().stream().filter(
