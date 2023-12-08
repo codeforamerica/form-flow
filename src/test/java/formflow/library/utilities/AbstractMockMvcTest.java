@@ -84,7 +84,6 @@ public abstract class AbstractMockMvcTest {
         .build();
   }
 
-  // TODO: Replace varargs parameters with `new HashMap<>(Map.of(key1, value1, ...));`
   protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
     if (flowInfo.length % 2 != 0) {
       throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
@@ -255,7 +254,6 @@ public abstract class AbstractMockMvcTest {
   }
 
   protected String getUrlForPageName(String pageName) {
-    // TODO - remove assumption that flow is named testFlow - may not always be
     return "/flow/testFlow/" + pageName;
   }
 
@@ -280,7 +278,6 @@ public abstract class AbstractMockMvcTest {
 
   @NotNull
   protected ResultActions getPage(String pageName) throws Exception {
-    // TODO - remove assumption that flow is named testFlow - may not always be
     MockHttpServletRequestBuilder get = get("/flow/testFlow/" + pageName).session(session);
     return mockMvc.perform(get);
   }
@@ -297,7 +294,6 @@ public abstract class AbstractMockMvcTest {
    * @return a form page that can be asserted against
    */
   protected FormScreen followRedirectsForPageName(String currentPageName) throws Exception {
-    // TODO - remove assumption that flow is named testFlow - may not always be
     var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
