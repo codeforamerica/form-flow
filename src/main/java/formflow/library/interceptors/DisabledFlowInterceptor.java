@@ -19,22 +19,35 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 @Slf4j
 public class DisabledFlowInterceptor implements HandlerInterceptor, Ordered {
+
+  /**
+   * A URL path, set to: {@code flow/<flow>/<screen>}.
+   */
   public static final String PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
 
+  /**
+   * A class that has all form flow configuration properties.
+   */
   FormFlowConfigurationProperties formFlowConfigurationProperties;
-  
+
+
+  /**
+   * Default constructor for DisabledFlowInterceptor. Sets {@code formFlowConfigurationProperties}.
+   *
+   * @param formFlowConfigurationProperties The configuration properties for form flow.
+   */
   public DisabledFlowInterceptor(FormFlowConfigurationProperties formFlowConfigurationProperties) {
     this.formFlowConfigurationProperties = formFlowConfigurationProperties;
   }
 
   /**
    * Redirects users to the configured screen if a flow is marked as disabled.
-   * 
-   * @param request current HTTP request
+   *
+   * @param request  current HTTP request
    * @param response current HTTP response
-   * @param handler chosen handler to execute, for type and/or instance evaluation
-   * @return true if the flow is enabled, which will pass the request to the next registered interceptor. False if the flow is disabled, 
-   * which will redirect the user to the configured staticRedirectPage, and stop the interceptor chain.
+   * @param handler  chosen handler to execute, for type and/or instance evaluation
+   * @return true if the flow is enabled, which will pass the request to the next registered interceptor. False if the flow is
+   * disabled, which will redirect the user to the configured staticRedirectPage, and stop the interceptor chain.
    */
 
   @Override
@@ -52,7 +65,7 @@ public class DisabledFlowInterceptor implements HandlerInterceptor, Ordered {
       try {
         response.sendRedirect(staticRedirectPage);
       } catch (IOException e) {
-        throw new RuntimeException(e);  
+        throw new RuntimeException(e);
       }
       return false;
     }

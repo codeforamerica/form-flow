@@ -7,6 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Controller responsible for handling development environment specific requests. It is active only when the application is
+ * running in the `dev` profile.
+ */
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -15,9 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class DevController {
 
   /**
-   * Renders a page that will show the current icons available.
+   * Handles the GET request to `dev/icons`. This method renders a page that displays the current icons available in the
+   * development environment.
    *
-   * @return the icons html page
+   * @return The name of the HTML page that shows the icons.
    */
   @GetMapping("/icons")
   String getIcons() {

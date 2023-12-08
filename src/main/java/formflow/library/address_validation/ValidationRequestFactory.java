@@ -12,13 +12,28 @@ import org.springframework.stereotype.Component;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
+/**
+ * Factory for creating batches of address validation requests. This class processes a FormSubmission and constructs a batch of
+ * address lookups to be used with the SmartyStreets API.
+ */
 @Slf4j
 @Component
 public class ValidationRequestFactory {
 
+  /**
+   * Default constructor for ValidationRequestFactory.
+   */
   public ValidationRequestFactory() {
   }
 
+  /**
+   * Creates a batch of address validation lookups from a given FormSubmission. It filters the form data for address fields marked
+   * for validation and constructs smarty lookups for each.
+   *
+   * @param formSubmission The FormSubmission containing the data to be validated.
+   * @return A Batch object containing all the address lookups ready to be sent to SmartyStreets.
+   * @throws RuntimeException If the number of lookups exceeds the maximum batch size limit.
+   */
   public Batch create(FormSubmission formSubmission) {
     Batch smartyBatch = new Batch();
     List<String> addressInputNames = formSubmission.getFormData().keySet().stream()
