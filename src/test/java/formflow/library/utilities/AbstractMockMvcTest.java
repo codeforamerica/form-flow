@@ -1,8 +1,6 @@
 package formflow.library.utilities;
 
 import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
-import static formflow.library.utilities.TestUtils.resetSubmission;
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,9 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
-import formflow.library.controllers.ScreenControllerTest;
 import formflow.library.data.Submission;
-
+import formflow.library.data.SubmissionRepositoryService;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,11 +29,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import formflow.library.data.SubmissionRepositoryService;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Element;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -88,11 +82,6 @@ public abstract class AbstractMockMvcTest {
         .webAppContextSetup(this.webApplicationContext)
         .apply(sharedHttpSession()) // use this session across requests
         .build();
-  }
-
-  @AfterEach
-  void cleanup() {
-    resetSubmission();
   }
 
   // TODO: Replace varargs parameters with `new HashMap<>(Map.of(key1, value1, ...));`
