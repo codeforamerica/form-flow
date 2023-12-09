@@ -2817,10 +2817,10 @@ most of them down in our `demo` environment.
 Example configuration can be found in the following files under the `management.endpoints` section:
 
 * Starter Application
-  [`dev`](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application-dev.yaml)
+  [dev](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application-dev.yaml)
   environment
 * Starter Application
-  [`demo`](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application-demo.yaml)
+  [demo](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/resources/application-demo.yaml)
   environment
 
 Both of these build on / override the setup in the
