@@ -15,15 +15,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class DisabledFlowInterceptorConfiguration implements WebMvcConfigurer {
-  
+
   FormFlowConfigurationProperties formFlowConfigurationProperties;
-  
+
+  /**
+   * Default constructor for DisabledFlowInterceptorConfiguration. Sets {@code formFlowConfigurationProperties}.
+   *
+   * @param formFlowConfigurationProperties The configuration properties for form flow.
+   */
   public DisabledFlowInterceptorConfiguration(FormFlowConfigurationProperties formFlowConfigurationProperties) {
     this.formFlowConfigurationProperties = formFlowConfigurationProperties;
   }
-  
+
   /**
    * Adds the DisabledFlowInterceptor to the Interceptor registry.
+   *
    * @param registry The Interceptor registry.
    */
   @Override

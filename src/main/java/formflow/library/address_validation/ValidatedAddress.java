@@ -3,6 +3,10 @@ package formflow.library.address_validation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Represents a validated address. This class stores information about an address, including street address, apartment number,
+ * city, state, and zip code.
+ */
 @Data
 @AllArgsConstructor
 public class ValidatedAddress {

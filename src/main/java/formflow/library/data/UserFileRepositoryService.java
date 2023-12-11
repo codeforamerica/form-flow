@@ -1,11 +1,12 @@
 package formflow.library.data;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * Service to retrieve and store UploadedFile objects in the database.
@@ -15,8 +16,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserFileRepositoryService {
 
+  /**
+   * The {@link UserFileRepository} used by this service
+   */
   UserFileRepository repository;
 
+  /**
+   * Constructor
+   * @param repository the {@link UserFileRepository} used by this service
+   */
   public UserFileRepositoryService(UserFileRepository repository) {
     this.repository = repository;
   }
@@ -51,10 +59,22 @@ public class UserFileRepositoryService {
     repository.deleteById(id);
   }
 
+  /**
+   * Finds all the {@link UserFile}s associated with a {@link Submission}}
+   *
+   * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
+   * @return {@link List} of associated {@link UserFile} objects
+   */
   public List<UserFile> findAllBySubmission(Submission submission) {
     return repository.findAllBySubmission(submission);
   }
 
+  /**
+   * Gets a count of all the {@link UserFile}s associated with a {@link Submission}}
+   *
+   * @param submission the {@link Submission} for which the count of associated {@link UserFile}s are sought
+   * @return count of {@link UserFile}s
+   */
   public long countBySubmission(Submission submission) {
     return repository.countBySubmission(submission);
   }
