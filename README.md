@@ -800,7 +800,7 @@ etc. [You can view these fragments here.](src/main/resources/templates/fragments
 
 Thymeleaf is also capable of making direct calls to Java class methods using what is known as the
 Spring Expression Language T operator. This allows you to implement Java code in your Thymeleaf
-templates. We provide two classes for this purpose:
+templates. The library provides a convenience class for this purpose:
 
 - ConditionManager
     - Houses methods which should always return Booleans and can be used to conditionally show or
