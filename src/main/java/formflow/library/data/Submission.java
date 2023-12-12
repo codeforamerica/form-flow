@@ -148,7 +148,7 @@ public class Submission {
   }
 
   /**
-   * Merges the passed in subflow's iteration data into the Submission's subflow's data for that iteration.
+   * Merges the passed in form submission data with the subflow's iteration data into the Submission's subflow's data for that iteration.
    *
    * @param subflowName        subflow that the iteration data belongs with, not null
    * @param iterationToUpdate  existing data for a particular iteration of a subflow, may be empty, but not null
