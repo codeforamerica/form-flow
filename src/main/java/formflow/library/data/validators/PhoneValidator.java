@@ -21,6 +21,9 @@ public class PhoneValidator implements ConstraintValidator<Phone, String> {
    */
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
-    return Pattern.matches("(\\([2-9][0-8][0-9]\\)\\s\\d{3}-\\d{4})", value);
+    if (value != null && !value.isBlank()){
+      return Pattern.matches("(\\([2-9][0-8][0-9]\\)\\s\\d{3}-\\d{4})", value);
+    }
+    return true;
   }
 }
