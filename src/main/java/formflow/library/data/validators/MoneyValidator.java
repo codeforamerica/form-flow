@@ -22,6 +22,6 @@ public class MoneyValidator implements ConstraintValidator<Money, String> {
    */
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
-    return Pattern.matches("(^(0|([1-9]\\d*))?(\\.\\d{1,2})?$)?", value);
+    return value == null || Pattern.matches("(^(0|([1-9]\\d*))?(\\.\\d{1,2})?$)?", value);
   }
 }
