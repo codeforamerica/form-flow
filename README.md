@@ -1,3 +1,6 @@
+![Code for America, Form Flow Library](readme-assets/FFB-Version-1-Gift.png)
+
+
 # Form Flow Library  (FFB)
 
 A Spring Boot based Java library that provides a framework for developing **form flow** based
