@@ -1,19 +1,18 @@
 package formflow.library.pdf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import formflow.library.data.Submission;
-import org.joda.time.DateTime;
+import formflow.library.utilities.TestUtils;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
@@ -30,7 +29,7 @@ class PdfServiceTest {
     );
     Submission submission = Submission.builder()
         .flow("ubi")
-        .submittedAt((DateTime.parse("2023-11-28").toDate()))
+        .submittedAt(TestUtils.makeOffsetDateTime("2023-11-28"))
         .inputData(inputData)
         .build();
     File pdfFile = pdfService.generate(submission);

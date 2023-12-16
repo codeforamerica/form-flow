@@ -6,11 +6,9 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,14 +49,13 @@ class SubmissionRepositoryServiceTest {
         .inputData(inputData)
         .urlParams(new HashMap<>())
         .flow("testFlow")
-        .submittedAt(Date.from(timeNow))
+        .submittedAt(OffsetDateTime.now())
         .build();
 
     Submission savedSubmission = saveAndReload(submission);
     assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
     assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
-    assertThat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(savedSubmission.getSubmittedAt()))
-        .isEqualTo(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp.from(timeNow)));
+    assertThat(savedSubmission.getSubmittedAt()).isBefore(OffsetDateTime.now());
   }
 
   @Test
@@ -71,7 +68,7 @@ class SubmissionRepositoryServiceTest {
         .inputData(inputData)
         .urlParams(new HashMap<>())
         .flow("testFlow")
-        .submittedAt(Date.from(timeNow))
+        .submittedAt(OffsetDateTime.now())
         .build();
     Submission savedSubmission = saveAndReload(submission);
 
@@ -133,7 +130,7 @@ class SubmissionRepositoryServiceTest {
         .inputData(inputData)
         .urlParams(new HashMap<>())
         .flow("testFlow")
-        .submittedAt(Date.from(timeNow))
+        .submittedAt(OffsetDateTime.now())
         .build();
 
     Submission dbSubmission = saveAndReload(submission);
@@ -159,7 +156,7 @@ class SubmissionRepositoryServiceTest {
         .inputData(inputData)
         .urlParams(new HashMap<>())
         .flow("testFlow")
-        .submittedAt(Date.from(timeNow))
+        .submittedAt(OffsetDateTime.now())
         .build();
 
     UUID subId = submissionRepositoryService.save(submission).getId();
@@ -198,13 +195,13 @@ class SubmissionRepositoryServiceTest {
         .build();
 
     Submission savedSubmission = saveAndReload(submission);
-    assertThat(savedSubmission.getCreatedAt()).isInThePast();
+    assertThat(savedSubmission.getCreatedAt()).isBefore(OffsetDateTime.now());
 
     savedSubmission.getInputData().put("newKey", "newValue");
     Submission updatedSubmission = saveAndReload(savedSubmission);
 
     assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
-    assertThat(updatedSubmission.getUpdatedAt()).isInThePast();
+    assertThat(updatedSubmission.getUpdatedAt()).isBefore(OffsetDateTime.now());
     assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
   }
 

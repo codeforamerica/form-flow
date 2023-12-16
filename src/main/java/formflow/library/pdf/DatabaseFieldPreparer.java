@@ -1,10 +1,9 @@
 package formflow.library.pdf;
 
 import formflow.library.data.Submission;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,11 +12,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {
 
+  private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, SubmissionField> databaseFields = new HashMap<>();
     Map<String, Object> dbFields = pdfMap.getDbFields();
-    
+
     if (dbFields != null) {
       dbFields.forEach((fieldName, value) -> {
         switch (fieldName) {
@@ -33,15 +34,11 @@ public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {
         }
       });
     }
-    
+
     return databaseFields;
   }
 
-  private String formatDateWithNoTime(Date date) {
-    DateTimeFormatter formatter = DateTimeFormatter
-        .ofPattern("MM/dd/yyyy")
-        .withLocale(Locale.US)
-        .withZone(java.time.ZoneId.systemDefault());
-    return formatter.format(date.toInstant());
+  private String formatDateWithNoTime(OffsetDateTime offsetDateTime) {
+    return dateTimeFormatter.format(offsetDateTime);
   }
 }
