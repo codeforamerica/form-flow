@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import formflow.library.data.Submission;
+import formflow.library.utilities.TestUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +19,10 @@ class DatabaseFieldPreparerTest {
   @BeforeEach
   void setUp() {
     submission = Submission.builder().flow("flow1").build();
-    submission.setSubmittedAt(DateTime.parse("2020-09-15").toDate());
-    submission.setCreatedAt(DateTime.parse("2020-09-15").minusDays(1).toDate());
+    submission.setSubmittedAt(TestUtils.makeOffsetDateTime("2020-09-15"));
+    submission.setCreatedAt(TestUtils.makeOffsetDateTime("2020-09-15").minusDays(1));
     submission.setId(UUID.randomUUID());
-    submission.setUpdatedAt(DateTime.parse("2020-09-15").toDate());
+    submission.setUpdatedAt(TestUtils.makeOffsetDateTime("2020-09-15"));
     PdfMap pdfMap = new PdfMap();
     pdfMap.setDbFields(Map.of(
             "submittedAt", "SUBMITTED_AT",

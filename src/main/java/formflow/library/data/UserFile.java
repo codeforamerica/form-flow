@@ -1,7 +1,5 @@
 package formflow.library.data;
 
-import static jakarta.persistence.TemporalType.TIMESTAMP;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,8 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -50,9 +47,8 @@ public class UserFile {
   private Submission submission;
 
   @CreationTimestamp
-  @Temporal(TIMESTAMP)
   @Column(name = "created_at")
-  private Date createdAt;
+  private OffsetDateTime createdAt;
 
   @Column(name = "original_name")
   private String originalName;

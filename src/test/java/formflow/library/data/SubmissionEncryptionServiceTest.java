@@ -1,18 +1,16 @@
 package formflow.library.data;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
@@ -34,7 +32,7 @@ public class SubmissionEncryptionServiceTest {
         )
         .urlParams(new HashMap<>())
         .flow("testFlow")
-        .submittedAt(Date.from(Instant.now()))
+        .submittedAt(OffsetDateTime.now())
         .build();
   }
 

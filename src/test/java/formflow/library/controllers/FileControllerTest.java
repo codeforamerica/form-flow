@@ -25,8 +25,7 @@ import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utils.UserFileMap;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Date;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -263,7 +262,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     UserFile testUserFile = UserFile.builder()
         .fileId(fileId)
         .submission(submission)
-        .createdAt(Date.from(Instant.now()))
+        .createdAt(OffsetDateTime.now())
         .originalName("coolFile.jpg")
         .repositoryPath("pathToS3")
         .mimeType(".pdf")

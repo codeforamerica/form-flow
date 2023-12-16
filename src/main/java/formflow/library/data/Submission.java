@@ -1,7 +1,6 @@
 package formflow.library.data;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
-import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 import formflow.library.inputs.AddressParts;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -10,9 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,18 +62,15 @@ public class Submission {
   private Map<String, String> urlParams;
 
   @CreationTimestamp
-  @Temporal(TIMESTAMP)
   @Column(name = "created_at")
-  private Date createdAt;
+  private OffsetDateTime createdAt;
 
   @UpdateTimestamp
-  @Temporal(TIMESTAMP)
   @Column(name = "updated_at")
-  private Date updatedAt;
+  private OffsetDateTime updatedAt;
 
-  @Temporal(TIMESTAMP)
   @Column(name = "submitted_at")
-  private Date submittedAt;
+  private OffsetDateTime submittedAt;
 
   /**
    * The key name for the field in an iteration's data that holds the status of completion for the iteration.
