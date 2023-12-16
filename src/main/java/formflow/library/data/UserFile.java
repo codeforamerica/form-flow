@@ -20,6 +20,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.SourceType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +47,7 @@ public class UserFile {
   @JoinColumn(name = "submission_id")
   private Submission submission;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(name = "created_at")
   private OffsetDateTime createdAt;
 
