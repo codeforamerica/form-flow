@@ -28,7 +28,7 @@ public abstract class FormFlowController {
   protected final UserFileRepositoryService userFileRepositoryService;
 
   protected final List<FlowConfiguration> flowConfigurations;
-  
+
   protected final FormFlowConfigurationProperties formFlowConfigurationProperties;
 
   protected final MessageSource messageSource;
@@ -47,6 +47,7 @@ public abstract class FormFlowController {
 
   /**
    * Saves a submission
+   *
    * @param submission submission saved through the submission repository service.
    * @return A decrypted submission
    */
@@ -56,7 +57,8 @@ public abstract class FormFlowController {
 
   /**
    * Saves a Submission
-   * @param submission - a submission saved through the submission repository service
+   *
+   * @param submission  - a submission saved through the submission repository service
    * @param subflowName - Null or a String of a subflow name
    * @return A decrypted submission
    */
@@ -69,9 +71,10 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Takes in a flow and returns the flow configuration
-   * @param flow A String of a flow name.
-   * @return Returns a FlowConfiguration object.
+   * Gets the {@link FlowConfiguration} object for a given flow
+   *
+   * @param flow {@link String} of a flow name.
+   * @return Returns a {@link FlowConfiguration} object.
    */
   protected FlowConfiguration getFlowConfigurationByName(String flow) {
     List<FlowConfiguration> flowConfigurationList = flowConfigurations.stream().filter(
@@ -86,6 +89,7 @@ public abstract class FormFlowController {
 
   /**
    * Checks if there are any flows with the name of
+   *
    * @param flow
    * @return
    */
@@ -178,9 +182,9 @@ public abstract class FormFlowController {
   /**
    * A method that will store the Submission ID, based on flow, in the HttpSession provided.
    *
-   * @param session The HttpSession to store information in
+   * @param session    The HttpSession to store information in
    * @param submission The Submission whose information will be stored
-   * @param flow A string containing the name of the flow to store the Submission data for
+   * @param flow       A string containing the name of the flow to store the Submission data for
    */
   protected void setSubmissionInSession(HttpSession session, Submission submission, String flow) {
     if (session == null) {
@@ -207,13 +211,13 @@ public abstract class FormFlowController {
    *
    * @param screen     The current screen name.
    * @param submission The submission object.
-   * @param flowName  The name of the flow to check.
+   * @param flowName   The name of the flow to check.
    * @return true if the user should be redirected, false otherwise.
    */
   public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission, String flowName) {
     FlowConfiguration flowConfig = getFlowConfigurationByName(flowName);
     boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
-    
+
     if (submissionIsLocked) {
       boolean isSubmissionSubmitted = submission.getSubmittedAt() != null;
       boolean isCurrentScreenAfterSubmit = flowConfig.getLandmarks().getAfterSubmitPages().contains(screen);
