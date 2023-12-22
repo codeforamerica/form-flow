@@ -1,18 +1,15 @@
 package formflow.library.data;
 
-import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * Service to retrieve and store UploadedFile objects in the database.
  */
 @Service
-@Transactional
 @Slf4j
 public class UserFileRepositoryService {
 

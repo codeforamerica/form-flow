@@ -206,7 +206,6 @@ class SubmissionRepositoryServiceTest {
   }
 
   private Submission saveAndReload(Submission submission) {
-    Submission savedSubmission = submissionRepositoryService.save(submission);
-    return submissionRepositoryService.findById(savedSubmission.getId()).orElseThrow();
+    return submissionRepositoryService.save(submission);
   }
 }

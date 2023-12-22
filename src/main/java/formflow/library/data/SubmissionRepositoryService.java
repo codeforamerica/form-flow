@@ -1,19 +1,16 @@
 package formflow.library.data;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * Service to retrieve and store {@link formflow.library.data.Submission} objects in the database.
  */
 @Service
-@Transactional
 @Slf4j
 public class SubmissionRepositoryService {
 

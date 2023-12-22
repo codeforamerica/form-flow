@@ -20,6 +20,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.SourceType;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +67,7 @@ public class UserFile {
   @Column(name = "virus_scanned")
   private boolean virusScanned;
 
+  @Generated
   @Column(name = "doc_type_label")
   private String docTypeLabel;
 

@@ -9,7 +9,6 @@ import formflow.library.data.UserFileRepositoryService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import org.springframework.util.MimeTypeUtils;
 
 @ActiveProfiles("test")
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
-public class UserFileRepositoryServiceTests {
+public class UserFileRepositoryServiceTest {
 
   @Autowired
   private UserFileRepositoryService userFileRepositoryService;
@@ -78,7 +77,6 @@ public class UserFileRepositoryServiceTests {
   }
 
   private UserFile saveAndReload(UserFile testFile) {
-    UserFile savedFile = userFileRepositoryService.save(testFile);
-    return userFileRepositoryService.findById(savedFile.getFileId()).orElseThrow();
+    return userFileRepositoryService.save(testFile);
   }
 }
