@@ -2739,7 +2739,7 @@ via the field `lockedSubmissionMessage`.
 For an example see the [starter-apps success screen](https://github.com/codeforamerica/form-flow-starter-app/blob/8c3ec600bcbccdae47b25e9943af1fc747a18dd6/src/main/resources/templates/ubi/success.html#L13).
 
 The default message can be overwritten by placing a message string with the key `general.locked-submission`
-and your desired value in your applications `messages.properties` file.
+and your desired value in your application's `messages.properties` file.
 
 ### Design System
 
