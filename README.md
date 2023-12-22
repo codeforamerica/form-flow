@@ -2730,6 +2730,17 @@ submit their feedback after they have submitted their application. The data woul
 in the Submission object, but would not be included in the PDF or any other processes that are triggered
 upon submitting.
 
+#### Accessing the Submission Locked Redirect Message in Thymeleaf
+
+For convenience the form flow library inserts a message into the Thymeleaf model when a user has
+been redirected due to submission locking. This message can be accessed in your Thymeleaf templates
+via the field `lockedSubmissionMessage`. 
+
+For an example see the [starter-apps success screen](https://github.com/codeforamerica/form-flow-starter-app/blob/8c3ec600bcbccdae47b25e9943af1fc747a18dd6/src/main/resources/templates/ubi/success.html#L13).
+
+The default message can be overwritten by placing a message string with the key `general.locked-submission`
+and your desired value in your applications `messages.properties` file.
+
 ### Design System
 
 We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
