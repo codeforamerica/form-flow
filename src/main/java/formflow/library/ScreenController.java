@@ -20,6 +20,7 @@ import formflow.library.file.FileValidationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
-import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -204,7 +204,7 @@ public class ScreenController extends FormFlowController {
               submission.getId()
           )
       );
-      submission.setSubmittedAt(DateTime.now().toDate());
+      submission.setSubmittedAt(OffsetDateTime.now());
     }
 
     // if there's already a session

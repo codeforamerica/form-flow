@@ -1,7 +1,5 @@
 package formflow.library.data;
 
-import static jakarta.persistence.TemporalType.TIMESTAMP;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,8 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -23,6 +20,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.SourceType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,10 +47,9 @@ public class UserFile {
   @JoinColumn(name = "submission_id")
   private Submission submission;
 
-  @CreationTimestamp
-  @Temporal(TIMESTAMP)
+  @CreationTimestamp(source = SourceType.DB)
   @Column(name = "created_at")
-  private Date createdAt;
+  private OffsetDateTime createdAt;
 
   @Column(name = "original_name")
   private String originalName;
