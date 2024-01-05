@@ -46,7 +46,7 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Saves a submission
+   * Saves a {@link Submission}
    *
    * @param submission submission saved through the submission repository service.
    * @return A decrypted submission
@@ -56,10 +56,10 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Saves a Submission
+   * Saves a {@link Submission}
    *
    * @param submission  - a submission saved through the submission repository service
-   * @param subflowName - Null or a String of a subflow name
+   * @param subflowName - String of a subflow name or null
    * @return A decrypted submission
    */
   protected Submission saveToRepository(Submission submission, String subflowName) {
@@ -72,6 +72,7 @@ public abstract class FormFlowController {
 
   /**
    * Gets the {@link FlowConfiguration} object for a given flow
+   * @throws ResponseStatusException when FlowConfigurations are not found.
    *
    * @param flow {@link String} of a flow name.
    * @return Returns a {@link FlowConfiguration} object.
@@ -88,10 +89,10 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Checks if there are any flows with the name of
+   * Checks if there are any flows matching the String parameter.
    *
-   * @param flow
-   * @return
+   * @param flow {@link String} of a flow name.
+   * @return {@link Boolean} True if the flow is found in the FlowConfiguration.  False if the flow is {}not found in the flowConfiguration.
    */
   protected Boolean doesFlowExist(String flow) {
     return flowConfigurations.stream().anyMatch(
@@ -99,6 +100,15 @@ public abstract class FormFlowController {
     );
   }
 
+  /**
+   * Throws a {@link ResponseStatusException} when called that includes the status, {@code HttpStatus.NOT_FOUND}, and an error message.
+   *
+   * @param flow {@link String} of the flow name.
+   * @param screen Screen name of a flow
+   * @param message Message about the request issue
+   *
+   * @throws ResponseStatusException Throws a {@link ResponseStatusException} when called.
+   */
   protected static void throwNotFoundError(String flow, String screen, String message) {
     throw new ResponseStatusException(HttpStatus.NOT_FOUND,
         String.format("There was a problem with the request (flow: %s, screen: %s): %s",
@@ -107,11 +117,12 @@ public abstract class FormFlowController {
   }
 
   /**
-   * If the submission information exists in the HttpSession, find it in the db. If a submission is not found, create a new one.
+   * If the submission information exists in the {@link HttpSession}, find it in the db. If a submission is not found, create a new one.
    *
-   * @param httpSession The HttpSession to look in for information
+   * @param httpSession The {@link HttpSession}to look in for information
    * @param flow        The name of the flow to retrieve data about
-   * @return Submission A Submission object from the database or a new one if one was not found
+   * @exception ResponseStatusException Thrown when a {@code submission} is not found when {@code getSubmissionFromSession()} is called.
+   * @return A {@link Submission} object from the database or a new one if one was not found
    */
   public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
     Submission submission = null;
@@ -129,10 +140,11 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Returns the UUID of the Submission associated with the given flow.
+   * Returns the {@link UUID} of the {@link Submission} associated with the given flow.
    *
-   * @param session The HttpSession the user is in
+   * @param session The {@link HttpSession} the user is in
    * @param flow    The flow to look up the submission ID for
+   * @throws ResponseStatusException if {@code throwNotFoundError()} is called.
    * @return The submission id if it exists for the given flow, else null
    */
   public static UUID getSubmissionIdForFlow(HttpSession session, String flow) {
@@ -149,12 +161,12 @@ public abstract class FormFlowController {
   }
 
   /**
-   * This method will return a Submission that was referenced the HttpSession for a particular flow, if one exists. If the session
-   * or now Submission exists, a null will be returned.
+   * This method will return a Submission that was referenced the {@link HttpSession} for a particular flow, if one exists. If the session
+   * or now Submission does not exist, a null will be returned.
    *
-   * @param session the HttpSession data will be looked for in
-   * @param flow    the current flow to retrieve the Submission for
-   * @return Submission for the flow, if one exists, else null
+   * @param session the {@link HttpSession} data will be looked for in
+   * @param flow    the current flow to retrieve the {@link Submission} for
+   * @return {@link Submission} for the flow, if one exists, else null
    */
   protected Submission getSubmissionFromSession(HttpSession session, String flow) {
     if (session == null) {
@@ -180,11 +192,11 @@ public abstract class FormFlowController {
   }
 
   /**
-   * A method that will store the Submission ID, based on flow, in the HttpSession provided.
+   * A method that will store the Submission ID, based on flow, in the {@link HttpSession} provided.
    *
-   * @param session    The HttpSession to store information in
-   * @param submission The Submission whose information will be stored
-   * @param flow       A string containing the name of the flow to store the Submission data for
+   * @param session    The {@link HttpSession} to store information in
+   * @param submission The {@link Submission} whose information will be stored
+   * @param flow       A {@link String} containing the name of the flow to store the Submission data for
    */
   protected void setSubmissionInSession(HttpSession session, Submission submission, String flow) {
     if (session == null) {
