@@ -66,7 +66,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.integration:spring-integration-ws:6.2.0'
+    implementation 'org.springframework.integration:spring-integration-ws:6.2.1'
     implementation 'com.google.guava:guava:33.0.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -81,7 +81,7 @@ dependencies {
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.16.1'
     implementation 'com.github.librepdf:openpdf:1.3.34'
     implementation 'org.yaml:snakeyaml:2.2'
-    implementation 'com.mailgun:mailgun-java:1.1.0'
+    implementation 'com.mailgun:mailgun-java:1.1.1'
     implementation 'com.google.crypto.tink:tink:1.12.0'
     implementation 'org.springframework.session:spring-session-jdbc'
 
