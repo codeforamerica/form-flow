@@ -19,6 +19,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.FileValidationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.constraints.Pattern;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,10 +57,12 @@ import org.springframework.web.servlet.view.RedirectView;
 @EnableAutoConfiguration
 @Slf4j
 @RequestMapping(ScreenController.FLOW)
+@Validated
 public class ScreenController extends FormFlowController {
 
   public static final String FLOW = "/flow";
   public static final String FLOW_SCREEN_PATH = "{flow}/{screen}";
+  private final String UUID_REGEX = "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}";
   private final ValidationService validationService;
   private final AddressValidationService addressValidationService;
   private final ConditionManager conditionManager;
@@ -395,7 +399,7 @@ public class ScreenController extends FormFlowController {
   ModelAndView deleteConfirmation(
       @PathVariable String flow,
       @PathVariable String subflow,
-      @PathVariable String uuid,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String uuid,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,

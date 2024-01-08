@@ -2,6 +2,7 @@ package formflow.library.controllers;
 
 import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,6 +20,7 @@ import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.data.Submission;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
+import jakarta.servlet.ServletException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +68,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       "GET, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, testFlow, screenThatDoesNotExist",
       "POST, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, flowThatDoesNotExist, screen",
       "POST, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, testFlow, screenThatDoesNotExist",
-      "GET, /flow/{flow}/{subflowName}/thisIsAUUIDForASubflow/deleteConfirmation, flowThatDoesNotExist, testSubflow",
+      "GET, /flow/{flow}/{subflowName}/117fdfa1-e914-4b3a-a040-a6109a1ea6f8/deleteConfirmation, flowThatDoesNotExist, testSubflow",
       "POST, /flow/{flow}/{subflowName}/thisIsAUUIDForASubflow/delete, flowThatDoesNotExist, testSubflow",
       "GET, /flow/{flow}/{screen}/navigation, flowThatDoesNotExist, screen",
       "GET, /flow/{flow}/{screen}/navigation, testFlow, screenThatDoesNotExist"
@@ -77,6 +79,13 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       case "GET" -> mockMvc.perform(get(path, flow, screen)).andExpect(status().isNotFound());
       case "POST" -> mockMvc.perform(post(path, flow, screen)).andExpect(status().isNotFound());
     }
+  }
+
+  @Test()
+  void endpointShouldNotAcceptInvalidUuid() throws Exception {
+    String badPath = "/flow/{flow}/{subflowName}/thisIsAUUIDForASubflow/deleteConfirmation";
+
+    assertThrows(ServletException.class, () -> mockMvc.perform(get(badPath, "testFlow", "testSubflow")));
   }
 
   @Nested
@@ -216,7 +225,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
           .get("subflowWithAGetAndThenAPost");
       assertThat((Boolean) iterationsAfterSecondPost.get(0).get("iterationIsComplete")).isTrue();
     }
-    
+
     @Test
     public void shouldHandleGoingFromANonSubflowPostScreenIntoASubflow() throws Exception {
       setFlowInfoInSession(session, "testSubflowLogic", submission.getId());
@@ -228,7 +237,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       );
       String nextScreenUrl = "/flow/testSubflowLogic/testEntryScreen/navigation";
       result.andExpect(redirectedUrl(nextScreenUrl));
-      
+
       while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
         // follow redirects
         nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
