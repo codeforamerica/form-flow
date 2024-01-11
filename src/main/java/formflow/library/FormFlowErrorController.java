@@ -34,7 +34,7 @@ public class FormFlowErrorController implements ErrorController {
    * Constructor for the {@link FormFlowErrorController} class
    * @param showStackTrace The {@link Boolean} variable for determining an endpoint
    * @param errorPath A {@link String} endpoint to a generic error screen
-   * @param prettyPrintPackages {@link String} a comma separated list
+   * @param prettyPrintPackages {@link String} a comma-separated list
    * @param errorAttributes An {@link ErrorAttributes} object
    */
   public FormFlowErrorController(
