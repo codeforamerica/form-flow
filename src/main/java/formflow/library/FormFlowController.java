@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 public abstract class FormFlowController {
 
   /**
-   * This is an abstract controller class used to pass services and helper methods to controllers.
+   * A parent controller class for form-flow controllers
    */
 
   protected final SubmissionRepositoryService submissionRepositoryService;
@@ -48,8 +48,8 @@ public abstract class FormFlowController {
   /**
    * Saves a {@link Submission}
    *
-   * @param submission submission saved through the submission repository service.
-   * @return A decrypted submission
+   * @param submission {@link Submission} saved through the submission repository service.
+   * @return The saved {@link Submission} object
    */
   protected Submission saveToRepository(Submission submission) {
     return saveToRepository(submission, null);
@@ -60,7 +60,7 @@ public abstract class FormFlowController {
    *
    * @param submission  - a submission saved through the submission repository service
    * @param subflowName - String of a subflow name or null
-   * @return A decrypted submission
+   * @return The saved {@link Submission} object
    */
   protected Submission saveToRepository(Submission submission, String subflowName) {
     submissionRepositoryService.removeFlowCSRF(submission);
@@ -92,7 +92,7 @@ public abstract class FormFlowController {
    * Checks if there are any flows matching the String parameter.
    *
    * @param flow {@link String} of a flow name.
-   * @return {@link Boolean} True if the flow is found in the FlowConfiguration.  False if the flow is {}not found in the flowConfiguration.
+   * @return {@link Boolean} {@code True} if the flow is found in the {@link FlowConfiguration}. <br>{@link Boolean} {@code False} if the flow is not found in the {@link FlowConfiguration}.
    */
   protected Boolean doesFlowExist(String flow) {
     return flowConfigurations.stream().anyMatch(
@@ -121,8 +121,7 @@ public abstract class FormFlowController {
    *
    * @param httpSession The {@link HttpSession}to look in for information
    * @param flow        The name of the flow to retrieve data about
-   * @exception ResponseStatusException Thrown when a {@code submission} is not found when {@code getSubmissionFromSession()} is called.
-   * @return A {@link Submission} object from the database or a new one if one was not found
+   * @return The {@link Submission} object from the database or a new {@link Submission} object if one was not found
    */
   public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
     Submission submission = null;
