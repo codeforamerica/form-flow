@@ -58,8 +58,8 @@ public abstract class FormFlowController {
   /**
    * Saves a {@link Submission}
    *
-   * @param submission  - a submission saved through the submission repository service
-   * @param subflowName - String of a subflow name or null
+   * @param submission  a {@link Submission} saved through the submission repository service
+   * @param subflowName {@link String} of a subflow name or null
    * @return The saved {@link Submission} object
    */
   protected Submission saveToRepository(Submission submission, String subflowName) {
@@ -89,7 +89,7 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Checks if there are any flows matching the String parameter.
+   * Checks if there are any flows matching the flow name passed in.
    *
    * @param flow {@link String} of a flow name.
    * @return {@link Boolean} {@code True} if the flow is found in the {@link FlowConfiguration}. <br>{@link Boolean} {@code False} if the flow is not found in the {@link FlowConfiguration}.
