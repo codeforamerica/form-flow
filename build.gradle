@@ -182,12 +182,12 @@ publishing {
                         name = 'Bethany Seeger'
                         email = 'bseeger@codeforamerica.org'
                     }
-                     developer {
+                    developer {
                         id = 'vrajmohan'
                         name = 'Vraj Mohan'
                         email = 'vraj@codeforamerica.org'
                     }
-                     developer {
+                    developer {
                         id = 'marthapidcock'
                         name = 'Martha Pidcock'
                         email = 'mpidcock@codeforamerica.org'
@@ -225,6 +225,6 @@ nexusPublishing {
     }
 }
 
- javadoc {
-     options.addStringOption('Xmaxwarns', '1000')
- }
+javadoc {
+    options.addStringOption('Xmaxwarns', '1000')
+}

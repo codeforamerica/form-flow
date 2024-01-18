@@ -197,7 +197,7 @@ public class ScreenController extends FormFlowController {
     handleAddressValidation(submission, formSubmission);
 
     // handle submit actions, if requested
-    if (request.getRequestURI().toLowerCase().contains("submit")) {
+    if (request.getRequestURI().toLowerCase().endsWith("/submit")) {
       log.info(
           String.format(
               "Marking the application (%s) as submitted",
