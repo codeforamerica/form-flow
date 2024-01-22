@@ -260,6 +260,14 @@ public class ScreenController extends FormFlowController {
     // Address validation
     handleAddressValidation(submission, formSubmission);
 
+    // if there's already a session
+    if (submission.getId() != null) {
+      submission.mergeFormDataWithSubmissionData(formSubmission);
+    } else {
+      submission.setFlow(flow);
+      submission.setInputData(formSubmission.getFormData());
+    }
+
     // handle marking the record as submitted, if necessary
     if (submitSubmission) {
       log.info(
@@ -269,14 +277,6 @@ public class ScreenController extends FormFlowController {
           )
       );
       submission.setSubmittedAt(OffsetDateTime.now());
-    }
-
-    // if there's already a session
-    if (submission.getId() != null) {
-      submission.mergeFormDataWithSubmissionData(formSubmission);
-    } else {
-      submission.setFlow(flow);
-      submission.setInputData(formSubmission.getFormData());
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
@@ -403,7 +403,8 @@ public class ScreenController extends FormFlowController {
         submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
       }
       if (isNewIteration) {
-        ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+        ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+            .get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
         formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         subflow.add(formSubmission.getFormData());
@@ -714,7 +715,8 @@ public class ScreenController extends FormFlowController {
     // Merge form data that was submitted, with already existing inputData
     // This helps in the case of errors, so all the current data is on the page
     if (httpSession.getAttribute("formDataSubmission") != null) {
-      FormSubmission formSubmission = new FormSubmission((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+      FormSubmission formSubmission = new FormSubmission(
+          (Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
       if (subflowName != null && uuid != null && !uuid.isBlank()) {
         // there is existing data to merge with
         submission.mergeFormDataWithSubflowIterationData(subflowName, submission.getSubflowEntryByUuid(subflowName, uuid),
