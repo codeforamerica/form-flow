@@ -1,6 +1,7 @@
 package formflow.library;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
+import static formflow.library.utils.RegexUtils.UUID_REGEX;
 
 import com.smartystreets.api.exceptions.SmartyException;
 import formflow.library.address_validation.AddressValidationService;
@@ -62,7 +63,6 @@ public class ScreenController extends FormFlowController {
 
   public static final String FLOW = "/flow";
   public static final String FLOW_SCREEN_PATH = "{flow}/{screen}";
-  private final String UUID_REGEX = "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}";
   private final ValidationService validationService;
   private final AddressValidationService addressValidationService;
   private final ConditionManager conditionManager;
@@ -104,7 +104,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String flow,
       @PathVariable String screen,
       @RequestParam(required = false) Map<String, String> query_params,
-      @RequestParam(value = "uuid", required = false) String uuid,
+      @RequestParam(value = "uuid", required = false) @Pattern(regexp = UUID_REGEX) String uuid,
       RedirectAttributes redirectAttributes,
       HttpSession httpSession,
       HttpServletRequest request,
@@ -304,7 +304,7 @@ public class ScreenController extends FormFlowController {
   ModelAndView getSubflowScreen(
       @PathVariable String flow,
       @PathVariable String screen,
-      @PathVariable String uuid,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String uuid,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -360,7 +360,7 @@ public class ScreenController extends FormFlowController {
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
       @PathVariable String screen,
-      @PathVariable String uuid,
+      @PathVariable @Pattern(regexp = "(" + UUID_REGEX + ")|(?i)(new)") String uuid,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -505,7 +505,7 @@ public class ScreenController extends FormFlowController {
   ModelAndView deleteSubflowIteration(
       @PathVariable String flow,
       @PathVariable String subflow,
-      @PathVariable String uuid,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String uuid,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -568,7 +568,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable String screen,
       HttpSession httpSession,
       HttpServletRequest request,
-      @RequestParam(required = false) String uuid
+      @RequestParam(required = false) @Pattern(regexp = UUID_REGEX) String uuid
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     log.info(

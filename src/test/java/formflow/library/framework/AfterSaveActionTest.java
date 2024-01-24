@@ -85,11 +85,11 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     String expectedRecipient = "test@example.com";
     String expectedBody = "This is a test email";
 
-    ResultActions test = postWithoutData("subflowIterationStart/new");
+    ResultActions test = postWithoutData("subflowIterationStart/NEW");
     String url = test.andExpect(status().is3xxRedirection())
-            .andReturn()
-            .getResponse()
-            .getRedirectedUrl();
+        .andReturn()
+        .getResponse()
+        .getRedirectedUrl();
     assertThat(url).isNotNull();
     assertThat(url.contains("next"));
 

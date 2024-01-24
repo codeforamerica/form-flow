@@ -64,12 +64,12 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       "POST, /flow/{flow}/{screen}, testFlow, screenThatDoesNotExist",
       "POST, /flow/{flow}/{screen}/submit, flowThatDoesNotExist, screen",
       "POST, /flow/{flow}/{screen}/submit, testFlow, screenThatDoesNotExist",
-      "GET, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, flowThatDoesNotExist, screen",
-      "GET, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, testFlow, screenThatDoesNotExist",
-      "POST, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, flowThatDoesNotExist, screen",
-      "POST, /flow/{flow}/{screen}/thisIsAUUIDForASubflow, testFlow, screenThatDoesNotExist",
+      "GET, /flow/{flow}/{screen}/b9b5a3fd-cb16-47dd-b047-6295a974821a, flowThatDoesNotExist, screen",
+      "GET, /flow/{flow}/{screen}/b9b5a3fd-cb16-47dd-b047-6295a974821a, testFlow, screenThatDoesNotExist",
+      "POST, /flow/{flow}/{screen}/b9b5a3fd-cb16-47dd-b047-6295a974821a, flowThatDoesNotExist, screen",
+      "POST, /flow/{flow}/{screen}/B9B5A3FD-CB16-47DD-B047-6295A974821A, testFlow, screenThatDoesNotExist",
       "GET, /flow/{flow}/{subflowName}/117fdfa1-e914-4b3a-a040-a6109a1ea6f8/deleteConfirmation, flowThatDoesNotExist, testSubflow",
-      "POST, /flow/{flow}/{subflowName}/thisIsAUUIDForASubflow/delete, flowThatDoesNotExist, testSubflow",
+      "POST, /flow/{flow}/{subflowName}/b9b5a3fd-cb16-47dd-b047-6295a974821a/delete, flowThatDoesNotExist, testSubflow",
       "GET, /flow/{flow}/{screen}/navigation, flowThatDoesNotExist, screen",
       "GET, /flow/{flow}/{screen}/navigation, testFlow, screenThatDoesNotExist"
   })
@@ -107,11 +107,11 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     public void modelIncludesCurrentSubflowItem() throws Exception {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       HashMap<String, String> subflowItem = new HashMap<>();
-      subflowItem.put("uuid", "aaa-bbb-ccc");
+      subflowItem.put("uuid", "b9b5a3fd-cb16-47dd-b047-6295a974821a");
       subflowItem.put("firstNameSubflow", "foo bar baz");
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
-      getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
+      getPageExpectingSuccess("subflowAddItem/b9b5a3fd-cb16-47dd-b047-6295a974821a");
     }
 
     @Test
