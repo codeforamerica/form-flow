@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * {@link FormFlowErrorController} Manages the endpoints reached when malformed {@link WebRequest}s are generated.
+ */
 @Controller
 public class FormFlowErrorController implements ErrorController {
 
@@ -27,6 +30,13 @@ public class FormFlowErrorController implements ErrorController {
   private final String prettyPrintPackages;
   private final ErrorAttributes errorAttributes;
 
+  /**
+   * Constructor for the {@link FormFlowErrorController} class
+   * @param showStackTrace The {@link Boolean} variable for determining an endpoint
+   * @param errorPath A {@link String} endpoint to a generic error screen
+   * @param prettyPrintPackages {@link String} a comma-separated list
+   * @param errorAttributes An {@link ErrorAttributes} object
+   */
   public FormFlowErrorController(
       @Value("${form-flow.error.show-stack-trace:false}") boolean showStackTrace,
       @Value("${server.error.path:errors/genericError}") String errorPath,
@@ -38,6 +48,11 @@ public class FormFlowErrorController implements ErrorController {
     this.prettyPrintPackages = prettyPrintPackages;
   }
 
+  /**
+   * Displays errors in a {@link WebRequest}
+   * @param webRequest Malformed {@link WebRequest}
+   * @return a {@link ModelAndView} class object
+   */
   @RequestMapping("/error")
   public ModelAndView handleError(WebRequest webRequest) {
     String prettyException = prettyPrintStackTrace(errorAttributes.getError(webRequest));
@@ -54,6 +69,11 @@ public class FormFlowErrorController implements ErrorController {
     }
   }
 
+  /**
+   * Method takes a {@link Throwable} object returns a {@link String} stacktrace with HTML formatting
+   * @param e {@link Throwable} error
+   * @return A formatted stack trace as a {@link String}
+   */
   private String prettyPrintStackTrace(Throwable e) {
     if (e == null) {
       return "";
