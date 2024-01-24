@@ -160,14 +160,17 @@ public class ScreenController extends FormFlowController {
    * If validation of input data fails this will redirect the client to the same screen so they can fix the data.
    * </p>
    *
-   * @param formData    The input data from current screen, can be null
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param httpSession The HTTP session if it exists, can be null
+   * @param formData           The input data from current screen, can be null
+   * @param flow               The current flow name, not null
+   * @param screen             The current screen name in the flow, not null
+   * @param httpSession        The HTTP session if it exists, can be null
+   * @param request            The HttpServletRequest
+   * @param redirectAttributes The attributes used/modified in the case of a redirect happening
+   * @param locale             The language the user request we work in
    * @return a redirect to endpoint that gets the next screen in the flow
    */
-  @PostMapping({FLOW_SCREEN_PATH, FLOW_SCREEN_PATH + "/submit"})
-  ModelAndView postScreen(
+  @PostMapping(FLOW_SCREEN_PATH)
+  ModelAndView postScreenNoSubmit(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable String flow,
       @PathVariable String screen,
@@ -176,6 +179,67 @@ public class ScreenController extends FormFlowController {
       RedirectAttributes redirectAttributes,
       Locale locale
   ) throws SmartyException, IOException, InterruptedException {
+    return handlePost(formData, flow, screen, httpSession, request, redirectAttributes, locale, false);
+  }
+
+  /**
+   * Processes input data from current screen and mark the Submission as "submitted" (complete) during the process.
+   *
+   * <p>
+   * If validation of input data passes this will redirect to move the client to the next screen.
+   * </p>
+   * <p>
+   * If validation of input data fails this will redirect the client to the same screen so they can fix the data.
+   * </p>
+   *
+   * @param formData           The input data from current screen, can be null
+   * @param flow               The current flow name, not null
+   * @param screen             The current screen name in the flow, not null
+   * @param httpSession        The HTTP session if it exists, can be null
+   * @param request            The HttpServletRequest
+   * @param redirectAttributes The attributes used/modified in the case of a redirect happening
+   * @param locale             The language the user request we work in
+   * @return a redirect to endpoint that gets the next screen in the flow
+   */
+  @PostMapping(FLOW_SCREEN_PATH + "/submit")
+  ModelAndView postScreenSubmit(
+      @RequestParam(required = false) MultiValueMap<String, String> formData,
+      @PathVariable String flow,
+      @PathVariable String screen,
+      HttpSession httpSession,
+      HttpServletRequest request,
+      RedirectAttributes redirectAttributes,
+      Locale locale
+  ) throws SmartyException, IOException, InterruptedException {
+    return handlePost(formData, flow, screen, httpSession, request, redirectAttributes, locale, true);
+  }
+
+  /**
+   * Handle the logic for a POST, taking into account which endpoint the request came through. If it came through the "/submit"
+   * version of the endpoint, then we will mark the submission as "submitted". Otherwise, the POST logic is exactly the same for
+   * both.
+   *
+   * @param formData           The input data from current screen, can be null
+   * @param flow               The current flow name, not null
+   * @param screen             The current screen name in the flow, not null
+   * @param httpSession        The HTTP session if it exists, can be null
+   * @param request            The HttpServletRequest
+   * @param redirectAttributes The attributes used/modified in the case of a redirect happening
+   * @param locale             The language the user request we work in
+   * @param submitSubmission   Boolean indicating whether the Submission should be marked as officially complete ("submitted")
+   * @return a redirect to endpoint that gets the next screen in the flow
+   */
+  private ModelAndView handlePost(
+      MultiValueMap<String, String> formData,
+      String flow,
+      String screen,
+      HttpSession httpSession,
+      HttpServletRequest request,
+      RedirectAttributes redirectAttributes,
+      Locale locale,
+      boolean submitSubmission
+  ) throws SmartyException, IOException, InterruptedException {
+
     log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
     // Checks if screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
@@ -200,8 +264,16 @@ public class ScreenController extends FormFlowController {
     // Address validation
     handleAddressValidation(submission, formSubmission);
 
-    // handle submit actions, if requested
-    if (request.getRequestURI().toLowerCase().contains("submit")) {
+    // if there's already a session
+    if (submission.getId() != null) {
+      submission.mergeFormDataWithSubmissionData(formSubmission);
+    } else {
+      submission.setFlow(flow);
+      submission.setInputData(formSubmission.getFormData());
+    }
+
+    // handle marking the record as submitted, if necessary
+    if (submitSubmission) {
       log.info(
           String.format(
               "Marking the application (%s) as submitted",
@@ -209,14 +281,6 @@ public class ScreenController extends FormFlowController {
           )
       );
       submission.setSubmittedAt(OffsetDateTime.now());
-    }
-
-    // if there's already a session
-    if (submission.getId() != null) {
-      submission.mergeFormDataWithSubmissionData(formSubmission);
-    } else {
-      submission.setFlow(flow);
-      submission.setInputData(formSubmission.getFormData());
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
@@ -343,7 +407,8 @@ public class ScreenController extends FormFlowController {
         submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
       }
       if (isNewIteration) {
-        ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+        ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+            .get(subflowName);
         formSubmission.getFormData().put("uuid", iterationUuid);
         formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         subflow.add(formSubmission.getFormData());
@@ -654,7 +719,8 @@ public class ScreenController extends FormFlowController {
     // Merge form data that was submitted, with already existing inputData
     // This helps in the case of errors, so all the current data is on the page
     if (httpSession.getAttribute("formDataSubmission") != null) {
-      FormSubmission formSubmission = new FormSubmission((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+      FormSubmission formSubmission = new FormSubmission(
+          (Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
       if (subflowName != null && uuid != null && !uuid.isBlank()) {
         // there is existing data to merge with
         submission.mergeFormDataWithSubflowIterationData(subflowName, submission.getSubflowEntryByUuid(subflowName, uuid),

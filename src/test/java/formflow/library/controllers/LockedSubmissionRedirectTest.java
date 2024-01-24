@@ -62,15 +62,14 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
             "textInput", List.of("firstFlowTextInputValue"),
             "numberInput", List.of("10"))))
     );
-    
+
     // Assert that the submissions submittedAt value is null before submitting
     Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
     Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
-    
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -84,19 +83,21 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(nextScreenUrl).isEqualTo("/flow/testFlow/success");
     FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
     assertThat(nextScreen.getTitle()).isEqualTo("Success");
-    
+
     // Assert that the submissions submittedAt value is not null after submitting
-    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
-    
+
     // Assert that we are redirected to the configured screen when we try to go back into the flow when the submission should be locked
     mockMvc.perform(get("/flow/testFlow/inputs")
-        .session(session))
+            .session(session))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
   }
-  
+
   @Test
   void shouldRedirectToConfiguredScreenWhenPostingDataToAFlowThatHasBeenConfiguredToLockAfterBeingSubmittedWithoutUpdatingSubmissionObject()
       throws Exception {
@@ -114,8 +115,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
 
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -131,29 +131,34 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(nextScreen.getTitle()).isEqualTo("Success");
 
     // Assert that the submissions submittedAt value is not null after submitting
-    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
-    
+
     // Post again and assert that the submission is not updated
     mockMvc.perform(post("/flow/testFlow/inputs")
-        .session(session)
-        .params(new LinkedMultiValueMap<>(Map.of(
-            "textInput", List.of("newValue"),
-            "numberInput", List.of("333"),
-            "moneyInput", List.of("444")))))
+            .session(session)
+            .params(new LinkedMultiValueMap<>(Map.of(
+                "textInput", List.of("newValue"),
+                "numberInput", List.of("333"),
+                "moneyInput", List.of("444")))))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
 
-    Optional<Submission> testFlowSubmissionAfterAttemptingToPostAfterSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterAttemptingToPostAfterSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getSubmittedAt()).isNotNull();
-    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("textInput")).isEqualTo("firstFlowTextInputValue");
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("textInput")).isEqualTo(
+        "firstFlowTextInputValue");
     assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("numberInput")).isEqualTo("10");
     assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().get("moneyInput")).isNull();
-    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData().equals(testFlowSubmissionAfterBeingSubmitted.get().getInputData())).isTrue();
+    assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData()
+        .equals(testFlowSubmissionAfterBeingSubmitted.get().getInputData())).isTrue();
   }
-  
+
   @Test
   void shouldRedirectWhenAttemptingToGetAScreenInsideASubflowThatIsNotAllowedForAFlowWithALockedSubmission() throws Exception {
     // Make an initial post to create the submission and give it some data
@@ -163,7 +168,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
             "textInputSubflow", List.of("textInputValue"),
             "numberInputSubflow", List.of("10"))))
     );
-    
+
     // Get the UUID for the iteration we just created
     UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
     Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
@@ -177,8 +182,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
 
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -194,23 +198,26 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(nextScreen.getTitle()).isEqualTo("Success");
 
     // Assert that the submissions submittedAt value is not null after submitting
-    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
 
     // Assert that we are redirected to the configured screen when we try to go back into the flow when the submission should be locked
-    mockMvc.perform(get("/flow/testFlow/subflowAddItem/" + uuidString )
+    mockMvc.perform(get("/flow/testFlow/subflowAddItem/" + uuidString)
             .session(session))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
-    
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+
     // Assert the same as above but for the /edit endpoint
     mockMvc.perform(get("/flow/testFlow/subflowAddItem/" + uuidString + "/edit")
             .session(session))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
   }
-  
+
   @Test
   void shouldRedirectToConfiguredScreenWhenPostingSubflowDataToAFlowThatHasBeenConfiguredToLockAfterBeingSubmittedWithoutUpdatingSubmissionObject()
       throws Exception {
@@ -234,10 +241,9 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
-    
+
     // Submit the flow, assert we reach the success page
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -253,10 +259,11 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(nextScreen.getTitle()).isEqualTo("Success");
 
     // Assert that the submissions submittedAt value is not null after submitting
-    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
-    
+
     // Post again and assert that the submission is not updated and that we are redirected
     mockMvc.perform(post("/flow/testFlow/subflowAddItem/" + uuidString)
             .session(session)
@@ -265,20 +272,23 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
                 "numberInputSubflow", List.of("333"),
                 "moneyInputSubflow", List.of("444")))))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
 
-    Optional<Submission> testFlowSubmissionAfterAttemptingToPostAfterSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterAttemptingToPostAfterSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getSubmittedAt()).isNotNull();
 
-    List<Map<String, Object>> subflowIterationsAfterSubmit = (List<Map<String, Object>>) testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getInputData()
+    List<Map<String, Object>> subflowIterationsAfterSubmit = (List<Map<String, Object>>) testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get()
+        .getInputData()
         .get("testSubflow");
     Map<String, Object> subflowIteration = subflowIterationsAfterSubmit.get(0);
     assertThat(subflowIteration.get("textInputSubflow")).isEqualTo("textInputValue");
     assertThat(subflowIteration.get("numberInputSubflow")).isEqualTo("10");
     assertThat(subflowIteration.get("moneyInputSubflow")).isNull();
     assertThat(subflowIterationsAfterSubmit.equals(subflowIterationsBeforeSubmit)).isTrue();
-    
+
     // Do the same but for the /edit endpoint
     mockMvc.perform(post("/flow/testFlow/subflowAddItem/" + uuidString + "/edit")
             .session(session)
@@ -287,12 +297,15 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
                 "numberInputSubflow", List.of("111"),
                 "moneyInputSubflow", List.of("222")))))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
 
-    Optional<Submission> testFlowSubmissionAfterAttemptingToEditAfterSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterAttemptingToEditAfterSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterAttemptingToEditAfterSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterAttemptingToEditAfterSubmitted.get().getSubmittedAt()).isNotNull();
-    List<Map<String, Object>> subflowIterationsAfterEdit = (List<Map<String, Object>>) testFlowSubmissionAfterAttemptingToEditAfterSubmitted.get().getInputData()
+    List<Map<String, Object>> subflowIterationsAfterEdit = (List<Map<String, Object>>) testFlowSubmissionAfterAttemptingToEditAfterSubmitted.get()
+        .getInputData()
         .get("testSubflow");
     Map<String, Object> subflowIterationAfterEdit = subflowIterationsAfterEdit.get(0);
     assertThat(subflowIterationAfterEdit.get("textInputSubflow")).isEqualTo("textInputValue");
@@ -300,7 +313,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(subflowIterationAfterEdit.get("moneyInputSubflow")).isNull();
     assertThat(subflowIterationsAfterEdit.equals(subflowIterationsBeforeSubmit)).isTrue();
   }
-  
+
   @Test
   void shouldRedirectWhenAttemptingToGetTheSubflowDeleteConfirmationScreenForAFlowWithALockedSubmission() throws Exception {
     // Make an initial post to create the submission and give it some data
@@ -324,8 +337,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
 
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -345,14 +357,15 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
-    
+
     // Assert that we are redirected to the configured screen when we try to the subflow delete confirmation screen
     mockMvc.perform(get("/flow/testFlow/testSubflow/" + uuidString + "/deleteConfirmation")
             .session(session))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
   }
-  
+
   @Test
   void shouldRedirectWhenAttemptingToDeleteASubflowIterationFromAFlowThatIsLocked() throws Exception {
     // Make an initial post to create the submission and give it some data
@@ -369,14 +382,14 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     List<Map<String, Object>> subflowIterationsBeforeSubmit = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
         .get("testSubflow");
     String uuidString = (String) subflowIterationsBeforeSubmit.get(0).get("uuid");
-    
+
     // Complete the subflow so we get a completed iteration
     ResultActions iterationResult = mockMvc.perform(post("/flow/testFlow/subflowAddItemPage2/" + uuidString)
         .session(session)
         .params(new LinkedMultiValueMap<>(Map.of(
             "textInputSubflowPage2", List.of("newValue"),
             "moneyInputSubflowPage2", List.of("444")))));
-    
+
     // We need to hit the navigation endpoint because that is where we set the iterationIsComplete flag
     String screenAfterSubflow = "/flow/testFlow/subflowAddItemPage2/navigation?uuid=" + uuidString;
     iterationResult.andExpect(redirectedUrl(screenAfterSubflow));
@@ -389,7 +402,6 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
           .getRedirectedUrl();
     }
     assertThat(screenAfterSubflow).isEqualTo("/flow/testFlow/test");
-    
 
     // Assert that the submissions submittedAt value is null before submitting
     Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
@@ -397,14 +409,14 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
     // Assert the subflow iteration is complete
-    List<Map<String, Object>> subflowIterationsBeforeSubmitting = (List<Map<String, Object>>) testFlowSubmission.get().getInputData()
+    List<Map<String, Object>> subflowIterationsBeforeSubmitting = (List<Map<String, Object>>) testFlowSubmission.get()
+        .getInputData()
         .get("testSubflow");
     Map<String, Object> subflowIteration = subflowIterationsBeforeSubmitting.get(0);
     assertThat(subflowIteration.get("iterationIsComplete")).isEqualTo(true);
-    
+
     // Submit the flow, assert we reach the success page
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -424,14 +436,15 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
-    
+
     // Assert that we are redirected when attempting to delete a subflow
     mockMvc.perform(post("/flow/testFlow/testSubflow/" + uuidString + "/delete")
             .session(session))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirect -> assertEquals("/flow/testFlow/success", Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
+        .andExpect(redirect -> assertEquals("/flow/testFlow/success",
+            Objects.requireNonNull(redirect.getResponse().getRedirectedUrl())));
   }
-  
+
   @Test
   void shouldErrorWhenAttemptingToUploadFilesToAFlowWithALockedSubmission() throws Exception {
     // Make an initial post to create the submission and give it some data
@@ -448,8 +461,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(testFlowSubmission.isPresent()).isTrue();
     assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
 
-    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton")
-        .session(session));
+    ResultActions result = mockMvc.perform(post("/flow/testFlow/pageWithCustomSubmitButton/submit").session(session));
     String nextScreenUrl = "/flow/testFlow/pageWithCustomSubmitButton/navigation";
     result.andExpect(redirectedUrl(nextScreenUrl));
 
@@ -465,10 +477,11 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
     assertThat(nextScreen.getTitle()).isEqualTo("Success");
 
     // Assert that the submissions submittedAt value is not null after submitting
-    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(submissionMap.get("testFlow"));
+    Optional<Submission> testFlowSubmissionAfterBeingSubmitted = submissionRepositoryService.findById(
+        submissionMap.get("testFlow"));
     assertThat(testFlowSubmissionAfterBeingSubmitted.isPresent()).isTrue();
     assertThat(testFlowSubmissionAfterBeingSubmitted.get().getSubmittedAt()).isNotNull();
-    
+
     UUID fileId = UUID.randomUUID();
 
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
@@ -489,7 +502,8 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-    
-    assertThat(resultAfterSubmit.andReturn().getResponse().getContentAsString()).contains("You've already submitted this application. You can no longer upload documents at this time.");
+
+    assertThat(resultAfterSubmit.andReturn().getResponse().getContentAsString()).contains(
+        "You've already submitted this application. You can no longer upload documents at this time.");
   }
 }
