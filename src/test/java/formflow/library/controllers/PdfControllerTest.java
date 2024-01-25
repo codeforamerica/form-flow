@@ -1,7 +1,7 @@
 package formflow.library.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,12 +17,15 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.pdf.PdfService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.config.FormFlowConfigurationProperties;
+import jakarta.servlet.ServletException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,23 +37,28 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
   private Submission submission;
   private MockMvc mockMvc;
-  private final PdfService pdfService = mock(PdfService.class);
+
+  @SpyBean
+  private PdfService pdfService;
 
   @MockBean
   private SubmissionRepositoryService submissionRepositoryService;
 
   @MockBean
   private UserFileRepositoryService userFileRepositoryService;
-  
+
   @MockBean
   private FormFlowConfigurationProperties formFlowConfigurationProperties;
-  
+
   private byte[] filledPdfByteArray;
 
   private final String flowName = "testFlow";
   private final String otherFlowName = "otherTestFlow";
 
   private final UUID submissionId = UUID.randomUUID();
+
+  @Autowired
+  private PdfController pdfController;
 
   @Override
   @BeforeEach
@@ -59,12 +67,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
     FlowConfiguration flowConfigurationOther = new FlowConfiguration();
     flowConfiguration.setName(flowName);
     flowConfigurationOther.setName(otherFlowName);
-    List<FlowConfiguration> flowConfigurations = List.of(
-        flowConfiguration, flowConfigurationOther
-    );
 
-    PdfController pdfController = new PdfController(messageSource, pdfService, submissionRepositoryService,
-        userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties);
     mockMvc = MockMvcBuilders.standaloneSetup(pdfController).build();
 
     submission = Submission.builder()
@@ -77,7 +80,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
         flowName, submission.getId()
     );
 
-    when(pdfService.getFilledOutPDF(submission)).thenReturn(filledPdfByteArray);
+    doReturn(filledPdfByteArray).when(pdfService).getFilledOutPDF(submission);
     when(submissionRepositoryService.findById(submissionId)).thenReturn(Optional.of(submission));
     super.setUp();
   }
@@ -106,6 +109,22 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   }
 
   @Test
+  public void shouldFileWhenSubmissionIdIsNotCorrectlyFormattedUUID() {
+    setFlowInfoInSession(session, flowName, UUID.randomUUID());
+    try {
+      mockMvc.perform(
+          get("/download/" + flowName + "/123-abc-xyz")
+              .session(session)
+      );
+    } catch (Exception e) {
+      assertThat(e instanceof ServletException).isTrue();
+      assertThat(e.getMessage()).contains(
+          "downloadPdf.submissionId: must match \"[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}\""
+      );
+    }
+  }
+
+  @Test
   public void shouldReturnCorrectFileWhenMultipleFlowsExist() throws Exception {
     UUID otherSubmissionId = UUID.randomUUID();
     Submission otherSubmission = Submission.builder()
@@ -119,7 +138,7 @@ public class PdfControllerTest extends AbstractMockMvcTest {
         otherFlowName, otherSubmission.getId()
     );
 
-    when(pdfService.getFilledOutPDF(otherSubmission)).thenReturn(otherByteArray);
+    doReturn(otherByteArray).when(pdfService).getFilledOutPDF(otherSubmission);
     when(submissionRepositoryService.findById(otherSubmissionId)).thenReturn(Optional.of(otherSubmission));
 
     MvcResult result = getPdfFile(submission, flowName, status().is2xxSuccessful(), true);

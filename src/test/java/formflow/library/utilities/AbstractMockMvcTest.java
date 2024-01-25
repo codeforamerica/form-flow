@@ -84,6 +84,19 @@ public abstract class AbstractMockMvcTest {
         .build();
   }
 
+  /**
+   * This sets flow information in the session. The flowInfo parameter is a list of matched pairs of flow -> submission id.  A
+   * call to this method might look like this:<br>
+   * <code>
+   * &nbsp;&nbsp;UUID flowAUUID = UUID.fromString("0f045de7-0b7a-4799-ba62-9958755dc78c");<br>&nbsp;&nbsp;UUID flowBUUID =
+   * UUID.fromString("923e25b7-c60b-49e9-8686-210a41bd4a6d");<br>&nbsp;&nbsp;UUID flowCUUID =
+   * UUID.fromString("af543def-1fc4-40c6-9284-4277f598ee8b");<br>&nbsp;&nbsp;setFlowInfoSession(session, "flowA", flowAUUID,
+   * "flowB", flowBUUID, "flowC", flowCUUID);
+   * </code>
+   *
+   * @param mockHttpSession the session to set the data in
+   * @param flowInfo        objects that are pairs of flow->submission id. There can be many, as long as they are paired up.
+   */
   protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
     if (flowInfo.length % 2 != 0) {
       throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
@@ -137,10 +150,10 @@ public abstract class AbstractMockMvcTest {
   protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
       Map<String, List<String>> params) throws Exception {
     return mockMvc.perform(post(postUrl)
-            .with(csrf())
-            .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(params))
+        .with(csrf())
+        .session(session)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrl(redirectUrl));
   }
 
@@ -148,10 +161,10 @@ public abstract class AbstractMockMvcTest {
   protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
       Map<String, List<String>> params) throws Exception {
     return mockMvc.perform(post(postUrl)
-            .with(csrf())
-            .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(params))
+        .with(csrf())
+        .session(session)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        .params(new LinkedMultiValueMap<>(params))
     ).andExpect(redirectedUrlPattern(redirectUrlPattern));
   }
 
@@ -298,9 +311,9 @@ public abstract class AbstractMockMvcTest {
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
       nextPage = mockMvc.perform(get(nextPage).session(session))
-              .andExpect(status().is3xxRedirection()).andReturn()
-              .getResponse()
-              .getRedirectedUrl();
+          .andExpect(status().is3xxRedirection()).andReturn()
+          .getResponse()
+          .getRedirectedUrl();
     }
     return new FormScreen(mockMvc.perform(get(nextPage)));
   }

@@ -23,6 +23,7 @@ import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utils.UserFileMap;
+import jakarta.servlet.ServletException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
@@ -421,6 +422,39 @@ public class FileControllerTest extends AbstractMockMvcTest {
                   .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
                   .session(session))
           .andExpect(status().is(404));
+    }
+
+    @Test
+    void singleFileEndpointShouldReturnErrorIfFileIdNotUUID() {
+      setFlowInfoInSession(session, "testFlow", submission.getId());
+      try {
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                    .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), "aa-bb-cc-dd")
+                    .session(session))
+            .andExpect(status().is(400));
+      } catch (Exception e) {
+        assertThat(e instanceof ServletException).isTrue();
+        assertThat(e.getMessage()).contains(
+            "downloadSingleFile.fileId: must match \"[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}\"");
+      }
+    }
+
+    @Test
+    void singleFileEndpointShouldReturnErrorIfSubmissionIdNotUUID() {
+      setFlowInfoInSession(session, "testFlow", UUID.randomUUID());
+      try {
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                    .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", "123-abc-123-xyz".toString(),
+                        UUID.randomUUID())
+                    .session(session))
+            .andExpect(status().is(400));
+      } catch (Exception e) {
+        assertThat(e instanceof ServletException).isTrue();
+        assertThat(e.getMessage()).contains(
+            "downloadSingleFile.submissionId: must match \"[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}\"");
+      }
     }
 
     @Test

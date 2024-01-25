@@ -1,5 +1,7 @@
 package formflow.library;
 
+import static formflow.library.utils.RegexUtils.UUID_REGEX;
+
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
@@ -8,6 +10,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.pdf.PdfService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +34,7 @@ import java.util.UUID;
 @EnableAutoConfiguration
 @Slf4j
 @RequestMapping("/download")
+@Validated
 public class PdfController extends FormFlowController {
 
   private final PdfService pdfService;
@@ -45,9 +50,9 @@ public class PdfController extends FormFlowController {
   }
 
   @GetMapping("{flow}/{submissionId}")
-  ResponseEntity<?> downloadPdf(
+  public ResponseEntity<?> downloadPdf(
       @PathVariable String flow,
-      @PathVariable String submissionId,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String submissionId,
       HttpSession httpSession,
       HttpServletRequest request,
       Locale locale

@@ -1,5 +1,7 @@
 package formflow.library;
 
+import static formflow.library.utils.RegexUtils.UUID_REGEX;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.lowagie.text.exceptions.BadPasswordException;
@@ -17,6 +19,7 @@ import formflow.library.file.FileVirusScanner;
 import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -31,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +55,7 @@ import java.util.zip.ZipOutputStream;
 @Controller
 @EnableAutoConfiguration
 @Slf4j
+@Validated
 public class FileController extends FormFlowController {
 
   private final CloudFileRepository cloudFileRepository;
@@ -120,12 +125,12 @@ public class FileController extends FormFlowController {
 
       Submission submission = findOrCreateSubmission(httpSession, flow);
 
-      if (shouldRedirectDueToLockedSubmission(screen, submission,flow)) {
+      if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
         log.info("The Submission for flow {} is locked. Cannot upload file.", flow);
         String message = messageSource.getMessage("upload-documents.locked-submission", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
-      
+
       UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
         submission.setFlow(flow);
@@ -295,8 +300,8 @@ public class FileController extends FormFlowController {
    */
   @GetMapping("/file-download/{flow}/{submissionId}/{fileId}")
   public ResponseEntity<StreamingResponseBody> downloadSingleFile(
-      @PathVariable String submissionId,
-      @PathVariable String fileId,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String submissionId,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String fileId,
       @PathVariable String flow,
       HttpSession httpSession,
       HttpServletRequest request
@@ -362,7 +367,7 @@ public class FileController extends FormFlowController {
    */
   @GetMapping("/file-download/{flow}/{submissionId}")
   public ResponseEntity<StreamingResponseBody> downloadAllFiles(
-      @PathVariable String submissionId,
+      @PathVariable @Pattern(regexp = UUID_REGEX) String submissionId,
       @PathVariable String flow,
       HttpSession httpSession,
       HttpServletRequest request
