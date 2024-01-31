@@ -567,11 +567,11 @@ public class ScreenController extends FormFlowController {
       @RequestParam(required = false) String uuid
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
-    log.info(
-        "Current submission ID is: " + httpSession.getAttribute("id") + " and current Session ID is: " + httpSession.getId());
-    // Checks if the screen and flow exist
     var currentScreen = getScreenConfig(flow, screen);
     Submission submission = getSubmissionFromSession(httpSession, flow);
+    log.info(
+        "Current submission ID is: {} and current Session ID is: {}", submission.getId(), httpSession.getId());
+    // Checks if the screen and flow exist
     if (submission == null) {
       throwNotFoundError(flow, screen,
           String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
