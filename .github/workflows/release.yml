@@ -122,7 +122,7 @@ jobs:
           commit_author: CfA Platforms Robot <platforms-robot@codeforamerica.org>
           push_options: --force
       - name: Trigger starter-app snapshot upgrade on newly published version
-        uses: peter-evans/repository-dispatch@v2.1.2
+        uses: peter-evans/repository-dispatch@v3.0.0
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-version-bumped

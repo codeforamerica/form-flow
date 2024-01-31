@@ -38,7 +38,7 @@
              class="text-input text-input--inline form-width--month"
              th:id="${inputName}+'-month'"
              th:name="${inputName}+'Month'"
-             th:placeholder="mm"
+             th:placeholder="#{general.month-format}"
              th:attr="
               aria-describedby=${inputName + '-month-label'},
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
@@ -49,7 +49,7 @@
              class="text-input text-input--inline form-width--day"
              th:id="${inputName}+'-day'"
              th:name="${inputName}+'Day'"
-             th:placeholder="dd"
+             th:placeholder="#{general.day-format}"
              th:attr="
               aria-describedby=${inputName}+'-day-label',
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
@@ -60,7 +60,7 @@
              class="text-input text-input--inline form-width--year"
              th:id="${inputName}+'-year'"
              th:name="${inputName}+ 'Year'"
-             th:placeholder="yyyy"
+             th:placeholder="#{general.year-format}"
              th:attr="
               aria-describedby=${inputName}+'-year-label',
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
