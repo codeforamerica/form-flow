@@ -41,7 +41,7 @@ jobs:
           GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
       - name: Trigger starter-app tests on newly published version
-        uses: peter-evans/repository-dispatch@v2.1.2
+        uses: peter-evans/repository-dispatch@v3.0.0
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-updated
