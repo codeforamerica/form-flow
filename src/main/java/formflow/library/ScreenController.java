@@ -116,6 +116,11 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
 
+    String redirectPath = getRedirectPath(flow, uuid, currentScreen, submission);
+    if (redirectPath != null) {
+      return new ModelAndView(redirectPath);
+    }
+
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
       submission.mergeUrlParamsWithData(query_params);
     } else {
@@ -594,6 +599,27 @@ public class ScreenController extends FormFlowController {
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView(redirectString));
+  }
+
+
+  /**
+   * Get the next path that meets the condition (if it exists). Otherwise, return null (no redirection needed).
+   *
+   * @param flow          the flow containing the screen
+   * @param uuid          current iteration uuid
+   * @param currentScreen screen that we're attempting to view
+   * @param submission    submission
+   * @return Next viewable screen if the current one does not satisfy the condition, otherwise null
+   */
+  private String getRedirectPath(String flow, String uuid, ScreenNavigationConfiguration currentScreen, Submission submission) {
+    if (conditionManager.conditionExists(currentScreen.getCondition())) {
+      boolean skipSubflowScreen = currentScreen.getSubflow() != null && !conditionManager.runCondition(currentScreen.getCondition(), submission, uuid);
+      if (skipSubflowScreen || !conditionManager.runCondition(currentScreen.getCondition(), submission)) {
+        String nextScreen = getNextScreenName(submission, currentScreen, uuid);
+        return getRedirectPath(flow, uuid, getScreenConfig(flow, nextScreen), submission);
+      }
+    }
+    return null;
   }
 
   private String getNextScreenName(Submission submission,

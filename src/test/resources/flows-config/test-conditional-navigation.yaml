@@ -32,3 +32,23 @@ subflows:
     iterationStartScreen: fourth
     deleteConfirmationScreen: other
     reviewScreen: third
+---
+name: conditionsTestFlow
+flow:
+  first:
+    nextScreens:
+      - name: skipFirst
+  skipFirst:
+    condition: FalseCondition
+    nextScreens:
+      - name: skipSecond
+  skipSecond:
+    condition: FalseCondition
+    nextScreens:
+      - name: viewThird
+  viewThird:
+    condition: TrueCondition
+    nextScreens:
+      - name: last
+  last:
+    nextScreens: null

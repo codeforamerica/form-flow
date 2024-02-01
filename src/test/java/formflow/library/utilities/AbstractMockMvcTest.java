@@ -161,13 +161,13 @@ public abstract class AbstractMockMvcTest {
       String nextPageTitle) throws Exception {
     String postUrl = getUrlForPageName(pageName);
     postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, List.of(value)));
-    FormScreen nextPage = followRedirectsForPageName(pageName);
+    FormScreen nextPage = followRedirectsForPageName("testFlow", pageName);
     assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
   }
 
-  protected void continueExpectingNextPageTitle(String currentPageName, String nextPageTitle)
+  protected void continueExpectingNextPageTitle(String flow, String currentPageName, String nextPageTitle)
       throws Exception {
-    var nextPage = followRedirectsForPageName(currentPageName);
+    var nextPage = followRedirectsForPageName(flow, currentPageName);
     assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
   }
 
@@ -293,8 +293,8 @@ public abstract class AbstractMockMvcTest {
    * @param currentPageName the page
    * @return a form page that can be asserted against
    */
-  protected FormScreen followRedirectsForPageName(String currentPageName) throws Exception {
-    var nextPage = "/flow/testFlow/" + currentPageName + "/navigation";
+  protected FormScreen followRedirectsForPageName(String flow, String currentPageName) throws Exception {
+    var nextPage = "/flow/%s/%s/navigation".formatted(flow, currentPageName);
     while (Objects.requireNonNull(nextPage).contains("/navigation")) {
       // follow redirects
       nextPage = mockMvc.perform(get(nextPage).session(session))
@@ -319,7 +319,7 @@ public abstract class AbstractMockMvcTest {
 
   protected FormScreen postAndFollowRedirect(String pageName, Map<String, List<String>> params) throws Exception {
     postExpectingSuccess(pageName, params);
-    return followRedirectsForPageName(pageName);
+    return followRedirectsForPageName("testFlow", pageName);
   }
 
   protected Map<String, Object> getMostRecentlyCreatedIterationData(MockHttpSession session, String flow, String subflow) {

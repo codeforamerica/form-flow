@@ -1,19 +1,19 @@
 package formflow.library.framework;
 
-import static formflow.library.controllers.ScreenControllerTest.UUID_PATTERN_STRING;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import formflow.library.data.Submission;
 import formflow.library.utilities.AbstractMockMvcTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+
+import static formflow.library.controllers.ScreenControllerTest.UUID_PATTERN_STRING;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-conditional-navigation.yaml"})
 public class ConditionalNavigationTest extends AbstractMockMvcTest {
@@ -33,22 +33,22 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldGoToPageWhoseConditionIsSatisfied() throws Exception {
-    continueExpectingNextPageTitle("first", "Second Page");
+    continueExpectingNextPageTitle("testFlow", "first", "Second Page");
   }
 
   @Test
   void shouldNotGoToPageWhoseConditionIsNotSatisfied() throws Exception {
-    continueExpectingNextPageTitle("second", "Last Page");
+    continueExpectingNextPageTitle("testFlow", "second", "Last Page");
   }
 
   @Test
   void shouldGoToTheFirstPageInNextPagesIfThereAreTwoPagesWithNoConditions() throws Exception {
-    continueExpectingNextPageTitle("third", "First Page");
+    continueExpectingNextPageTitle("testFlow", "third", "First Page");
   }
 
   @Test
   void shouldGoToOtherScreenIfOneHasNonExistentCondition() throws Exception {
-    continueExpectingNextPageTitle("other", "Last Page");
+    continueExpectingNextPageTitle("testFlow", "other", "Last Page");
   }
 
   @Test
@@ -60,5 +60,11 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
     Map<String, Object> iterationData = getMostRecentlyCreatedIterationData(session, "testFlow", "testSubflow");
     assertThat(followRedirectsForUrl("/flow/testFlow/fourth/navigation?uuid=" + iterationData.get("uuid")))
         .isEqualTo("/flow/testFlow/last");
+  }
+
+  @Test
+  void shouldSkipScreensUntilConditionIsTrue() throws Exception {
+    setFlowInfoInSession(session, "conditionsTestFlow", submission.getId());
+    continueExpectingNextPageTitle("conditionsTestFlow", "first", "Third conditional screen");
   }
 }
