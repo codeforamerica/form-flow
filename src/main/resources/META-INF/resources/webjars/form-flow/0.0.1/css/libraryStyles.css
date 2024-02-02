@@ -731,3 +731,8 @@ body,
     display: block;
   }
 }
+
+.required-input {
+  color: #a72f10;
+  margin-left: 0.5rem;
+}

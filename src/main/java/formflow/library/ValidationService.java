@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,8 +39,8 @@ public class ValidationService {
 
   private final Validator validator;
   private final ActionManager actionManager;
-  private final String inputConfigPath;
-  private final List<String> requiredAnnotationsList = List.of(
+  private static String inputConfigPath;
+  private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
       NotEmpty.class.getName(),
       NotBlank.class.getName()
@@ -56,7 +57,7 @@ public class ValidationService {
       @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
     this.validator = validator;
     this.actionManager = actionManager;
-    this.inputConfigPath = inputConfigPath;
+    ValidationService.inputConfigPath = inputConfigPath;
   }
 
   /**
@@ -157,5 +158,25 @@ public class ValidationService {
     });
 
     return validationMessages;
+  }
+
+  public static List<String> getRequiredInputs(String flowName) {
+    Class<?> flowClass;
+    List<String> requiredInputs = new ArrayList<>();
+
+    try {
+      flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+
+    Field[] declaredFields = flowClass.getDeclaredFields();
+    for (Field field : declaredFields) {
+      if (Arrays.stream(field.getAnnotations())
+          .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
+        requiredInputs.add(field.getName());
+      }
+    }
+    return requiredInputs;
   }
 }
