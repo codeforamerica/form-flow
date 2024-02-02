@@ -1778,7 +1778,7 @@ from user input. In order to begin generating PDFs from your user responses, you
 create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
 inputs to PDF fields.
 
-#### yaml properties
+#### application.yaml properties
 
 | Name                            | Description                                                                                                                        | Example                                 |
 |---------------------------------|------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
