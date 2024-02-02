@@ -1778,6 +1778,14 @@ from user input. In order to begin generating PDFs from your user responses, you
 create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
 inputs to PDF fields.
 
+#### yaml properties
+
+| Name                            | Description                                                                                                                        | Example                                 |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `pdf`                           | The path to the pdf template file the FFB library should use when generating your PDF. The path should begin with a forward slash. | `pdf: /pdfs/ubi/Multipage-UBI-Form.pdf` |
+| `map-file`                      | The name of the flow that this `pdf-map.yaml` file corresponds to.                                                                 | `map-file: pdf-map.yaml`                |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`.                                | `generate-flattened: false`             |
+
 ### Creating a Template PDF File
 
 The first step in generating PDFs is to create a template PDF file. This file will be used by the
@@ -1825,13 +1833,26 @@ added to your application's `resources` folder.
 
 The following sections describe the expected keys in the `pdf-map.yaml` file.
 
-#### yaml properties
+#### flow
 
-| Name                            | Description                                                                                                                        | Example                                 |
-|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| `pdf`                           | The path to the pdf template file the FFB library should use when generating your PDF. The path should begin with a forward slash. | `pdf: /pdfs/ubi/Multipage-UBI-Form.pdf` |
-| `map-file`                      | The name of the flow that this `pdf-map.yaml` file corresponds to.                                                                 | `map-file: pdf-map.yaml`                |
-| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`.                                | `generate-flattened: false`             |
+The name of the flow that this `pdf-map.yaml` file corresponds to.
+
+For example:
+
+```yaml
+flow: ubi
+```
+
+#### pdf
+
+The path to the pdf template file the FFB library should use when generating your PDF.
+The path should begin with a forward slash. For example `/pdfs/exampleFlow/Example-PDF-File.pdf`.
+
+For example:
+
+```yaml 
+pdf: /pdfs/ubi/Multipage-UBI-Form.pdf
+```
 
 #### inputFields
 
