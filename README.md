@@ -226,12 +226,12 @@ flow:
   docsEntry:
     # Does not include subflow because it is technically not inside the subflow
     nextScreens:
-        - name: docsStart
+      - name: docsStart
   docsStart:
     # Uses subflow because this screen is inside the docs subflow
     subflow: docs
-    nextScreens: 
-    - name: docsReview
+    nextScreens:
+      - name: docsReview
   # ... other screens ...
 subflow:
   docs:
@@ -1825,26 +1825,13 @@ added to your application's `resources` folder.
 
 The following sections describe the expected keys in the `pdf-map.yaml` file.
 
-#### flow
+#### yaml properties
 
-The name of the flow that this `pdf-map.yaml` file corresponds to.
-
-For example:
-
-```yaml
-flow: ubi
-```
-
-#### pdf
-
-The path to the pdf template file the FFB library should use when generating your PDF.
-The path should begin with a forward slash. For example `/pdfs/exampleFlow/Example-PDF-File.pdf`.
-
-For example:
-
-```yaml 
-pdf: /pdfs/ubi/Multipage-UBI-Form.pdf
-```
+| Name                            | Description                                                                                                                        | Example                                 |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `pdf`                           | The path to the pdf template file the FFB library should use when generating your PDF. The path should begin with a forward slash. | `pdf: /pdfs/ubi/Multipage-UBI-Form.pdf` |
+| `map-file`                      | The name of the flow that this `pdf-map.yaml` file corresponds to.                                                                 | `map-file: pdf-map.yaml`                |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`.                                | `generate-flattened: false`             |
 
 #### inputFields
 
