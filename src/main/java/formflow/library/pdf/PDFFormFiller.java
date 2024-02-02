@@ -30,6 +30,9 @@ public class PDFFormFiller {
   @Value("${form-flow.pdf.fontDirectory:file:/opt/pdf-fonts}")
   private String pdfFontDirectoryPath;
 
+  @Value("${form-flow.pdf.generate-flattened:true}")
+  private boolean generateFlattened;
+
   private final ApplicationContext applicationContext;
 
   /**
@@ -73,7 +76,7 @@ public class PDFFormFiller {
    * @return `File` object for the filled PDF file
    */
   public File fill(String pdfTemplatePath, Collection<PdfField> fields) {
-    return fill(pdfTemplatePath, fields, true);
+    return fill(pdfTemplatePath, fields, generateFlattened);
   }
 
   /**
