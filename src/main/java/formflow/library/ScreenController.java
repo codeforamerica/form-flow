@@ -868,6 +868,8 @@ public class ScreenController extends FormFlowController {
     if (RequestContextUtils.getInputFlashMap(request) != null) {
       model.put("lockedSubmissionMessage", RequestContextUtils.getInputFlashMap(request).get("lockedSubmissionMessage"));
     }
+    
+    model.put("requiredInputs", ValidationService.getRequiredInputs(flow));
 
     return model;
   }

@@ -741,3 +741,8 @@ body,
   display: inline-flex;
   align-items: center;
 }
+
+.required-input {
+  color: #a72f10;
+  margin-left: 0.5rem;
+}
