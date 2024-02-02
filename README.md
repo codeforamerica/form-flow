@@ -1780,11 +1780,10 @@ inputs to PDF fields.
 
 #### application.yaml properties
 
-| Name                            | Description                                                                                                                        | Example                                 |
-|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| `pdf`                           | The path to the pdf template file the FFB library should use when generating your PDF. The path should begin with a forward slash. | `pdf: /pdfs/ubi/Multipage-UBI-Form.pdf` |
-| `map-file`                      | The name of the flow that this `pdf-map.yaml` file corresponds to.                                                                 | `map-file: pdf-map.yaml`                |
-| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`.                                | `generate-flattened: false`             |
+| Name                            | Description                                                                                                                                                                                                                    | Example                                 |
+|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default.                                                                                                                                     | `map-file: pdf-map.yaml`                |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited.  | `generate-flattened: false`             |
 
 ### Creating a Template PDF File
 
