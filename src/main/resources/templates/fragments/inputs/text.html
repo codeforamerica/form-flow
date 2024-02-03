@@ -19,6 +19,8 @@
        th:if="${hasHelpText}"
        th:id="${inputName + '-help-text'}"
        th:text="${helpText}"></p>
+    <th:block
+        th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
     <input type="text" class="text-input"
            th:id="${inputName}"
            th:name="${inputName}"
@@ -26,10 +28,8 @@
            th:attr="
             aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
             aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-            aria-required=${isRequiredInput},
-            aria-invalid=${hasError}"
+            aria-invalid=${hasError},
+            aria-required=${isRequiredInput}"
            th:value="${fieldData.getOrDefault(inputName, '')}">
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
   </div>
 </th:block>

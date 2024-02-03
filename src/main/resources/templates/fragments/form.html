@@ -3,6 +3,7 @@
       th:action="@{${action}}"
       th:enctype="${enctype}"
       th:id="${formId}"
+      novalidate="true"
       autocomplete="off"
       method="post">
   <th:block th:replace="${content}"/>
