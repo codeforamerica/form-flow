@@ -5,7 +5,7 @@
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
       isRequiredInput=${requiredInputs.contains(inputName)},
-    hasError=${
+      hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
         (#arrays.length(errorMessages.get(inputName)) > 0) }"
