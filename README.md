@@ -226,12 +226,12 @@ flow:
   docsEntry:
     # Does not include subflow because it is technically not inside the subflow
     nextScreens:
-        - name: docsStart
+      - name: docsStart
   docsStart:
     # Uses subflow because this screen is inside the docs subflow
     subflow: docs
-    nextScreens: 
-    - name: docsReview
+    nextScreens:
+      - name: docsReview
   # ... other screens ...
 subflow:
   docs:
@@ -1777,6 +1777,22 @@ PDFs
 from user input. In order to begin generating PDFs from your user responses, you will need to first
 create a template PDF file with prepared fields and a `pdf-map.yaml` file that will act as a map of
 inputs to PDF fields.
+
+#### application.yaml properties
+
+| Name                            | Description                                                                                                                                                                                                                   | Example                                 |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                       | `map-file: pdf-map.yaml`                |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited. | `generate-flattened: false`             |
+
+For example:
+
+```yaml
+form-flow:
+  pdf:
+    map-file: pdf-map.yaml
+    generate-flattened: false
+```
 
 ### Creating a Template PDF File
 
