@@ -603,13 +603,13 @@ public class ScreenController extends FormFlowController {
 
 
   /**
-   * Get the next path that meets the condition (if it exists). Otherwise, return null (no redirection needed).
+   * Get the next screen (including current screen) that doesn't have a condition or meets its condition.
    *
    * @param flow       the flow containing the screen
    * @param screen     the current screen
    * @param uuid       current iteration uuid
    * @param submission submission
-   * @return Next viewable screen if the current one does not satisfy the condition, otherwise null
+   * @return Next viewable screen if the current one does not satisfy the condition, otherwise the current screen
    */
   private String checkForNextViewableScreen(String flow, String screen, String uuid, Submission submission) {
     var currentScreen = getScreenConfig(flow, screen);
