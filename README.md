@@ -364,7 +364,7 @@ More examples of conditions can be found in our
 [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/conditions)
 .
 
-### Using Conditions in `flow-config.yaml`
+### Using Conditions in `flows-config.yaml`
 
 Conditions can be configured at the screen level as a pre-condition or at the next screen level as a post-condition.
 Depending on the scenario, it may be better to configure it in one way vs the other. In either case, the application
