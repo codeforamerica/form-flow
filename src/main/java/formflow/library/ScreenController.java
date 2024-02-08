@@ -118,7 +118,11 @@ public class ScreenController extends FormFlowController {
 
     String nextViewableScreen = checkForNextViewableScreen(flow, screen, uuid, submission);
     if (!nextViewableScreen.equals(screen)) {
-      return new ModelAndView(nextViewableScreen);
+      if (uuid == null) {
+        return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, nextViewableScreen));
+      } else {
+        return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, nextViewableScreen, uuid));
+      }
     }
 
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
