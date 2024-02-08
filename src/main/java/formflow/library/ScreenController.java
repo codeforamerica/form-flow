@@ -118,6 +118,7 @@ public class ScreenController extends FormFlowController {
 
     if (shouldRedirectToNextScreen(uuid, currentScreen, submission)) {
       String nextViewableScreen = getNextViewableScreen(flow, screen, uuid, submission);
+      log.info("%s is not viewable, redirecting to %s".formatted(screen, nextViewableScreen));
       if (uuid == null) {
         return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, nextViewableScreen));
       } else {
@@ -165,8 +166,11 @@ public class ScreenController extends FormFlowController {
    */
   private boolean shouldRedirectToNextScreen(String uuid, ScreenNavigationConfiguration currentScreen, Submission submission) {
     if (conditionManager.conditionExists(currentScreen.getCondition())) {
-      boolean skipSubflowScreen = currentScreen.getSubflow() != null && !conditionManager.runCondition(currentScreen.getCondition(), submission, uuid);
-      return skipSubflowScreen || !conditionManager.runCondition(currentScreen.getCondition(), submission);
+      if (currentScreen.getSubflow() != null) {
+        return !conditionManager.runCondition(currentScreen.getCondition(), submission, uuid);
+      } else {
+        return !conditionManager.runCondition(currentScreen.getCondition(), submission);
+      }
     }
     return false;
   }
