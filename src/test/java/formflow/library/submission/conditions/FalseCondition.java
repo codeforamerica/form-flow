@@ -12,4 +12,9 @@ public class FalseCondition implements Condition {
   public Boolean run(Submission submission) {
     return false;
   }
+
+  @Override
+  public Boolean run(Submission submission, String uuid) {
+    return false;
+  }
 }

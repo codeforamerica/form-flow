@@ -155,6 +155,13 @@ public abstract class AbstractMockMvcTest {
     ).andExpect(redirectedUrlPattern(redirectUrlPattern));
   }
 
+  protected String getUrlExpectingSuccessRedirectPattern(String getUrl) throws Exception {
+    return mockMvc.perform(get(getUrl).session(session))
+        .andExpect(status().is3xxRedirection()).andReturn()
+        .getResponse()
+        .getRedirectedUrl();
+  }
+
   protected void postExpectingNextPageTitle(String pageName,
       String inputName,
       String value,
