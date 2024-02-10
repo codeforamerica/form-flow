@@ -1,5 +1,6 @@
 <th:block
     th:fragment="radio"
+    th:with="hasHelpText=${!#strings.isEmpty(radioHelpText)}"
     th:assert="
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},
@@ -19,5 +20,9 @@
             aria-invalid=${hasError},
             data-follow-up=${followUpId}">
     <span th:text="${label}"></span>
+    <p th:if="${hasHelpText}"
+       th:id="${inputName} + '-' + ${value} + '-help-text'"
+       th:utext="${radioHelpText}"
+       class="text--help" style="margin-bottom: 0px"></p>
   </label>
 </th:block>

@@ -1261,7 +1261,7 @@ An example of a radio input:
     <th:block
         th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
     <th:block
-        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow')}"/>
+        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', radioHelpText='This help text will appear next to the radio description.')})}"/>
   </th:block>
 </th:block>
 ```
