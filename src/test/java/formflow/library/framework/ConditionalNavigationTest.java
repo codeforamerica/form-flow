@@ -63,10 +63,17 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
   }
 
   @Test
-  void shouldSkipScreensUntilConditionIsTrue() throws Exception {
+  void shouldSkipScreensUntilScreenConditionIsTrue() throws Exception {
     setFlowInfoInSession(session, "conditionsTestFlow", submission.getId());
     String actualNextPage = getUrlExpectingSuccessRedirectPattern("/flow/conditionsTestFlow/skipFirst");
     assertThat(actualNextPage).isEqualTo("/flow/conditionsTestFlow/viewThird");
+  }
+
+  @Test
+  void shouldSkipScreensUntilScreenAndNextConditionsAreTrue() throws Exception {
+    setFlowInfoInSession(session, "conditionsTestFlow", submission.getId());
+    String actualNextPage = getUrlExpectingSuccessRedirectPattern("/flow/conditionsTestFlow/sixth");
+    assertThat(actualNextPage).isEqualTo("/flow/conditionsTestFlow/other");
   }
 
   @Test

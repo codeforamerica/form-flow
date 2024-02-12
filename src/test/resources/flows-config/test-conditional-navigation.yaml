@@ -58,7 +58,15 @@ flow:
     condition: FalseCondition
     subflow: testSubflow
     nextScreens:
+      - name: sixth
+  sixth:
+    condition: FalseCondition
+    nextScreens:
+      - name: seventh
+        condition: FalseCondition
       - name: other
+        condition: TrueCondition
+      - name: last
   other:
     nextScreens:
       - name: last
