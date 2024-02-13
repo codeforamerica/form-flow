@@ -484,7 +484,7 @@ public class ScreenController extends FormFlowController {
       entryToDelete.ifPresent(entry -> httpSession.setAttribute("entryToDelete", entry));
     }
 
-    return new ModelAndView(new RedirectView(String.format("/flow/%s/" + deleteConfirmationScreen + "?uuid=" + uuid, flow)));
+    return new ModelAndView(new RedirectView(String.format("/flow/%s/%s?uuid=%s", flow, deleteConfirmationScreen, uuid)));
   }
 
   /**
