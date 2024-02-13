@@ -18,6 +18,7 @@
            th:aria-disabled="${disabled}"
            th:attr="
             aria-invalid=${hasError},
+            aria-required=${isRequiredInput},
             data-follow-up=${followUpId}">
     <span th:text="${label}"></span>
     <p th:if="${hasHelpText}"
