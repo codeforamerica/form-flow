@@ -40,6 +40,9 @@ public class ValidationService {
   private final Validator validator;
   private final ActionManager actionManager;
   private static String inputConfigPath;
+  
+  public static List<String> requiredInputs = new ArrayList<>();
+  
   private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
       NotEmpty.class.getName(),
@@ -161,20 +164,21 @@ public class ValidationService {
   }
 
   public static List<String> getRequiredInputs(String flowName) {
-    Class<?> flowClass;
-    List<String> requiredInputs = new ArrayList<>();
+    if (requiredInputs.isEmpty()) {
+      Class<?> flowClass;
 
-    try {
-      flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
+      try {
+        flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+      } catch (ReflectiveOperationException e) {
+        throw new RuntimeException(e);
+      }
 
-    Field[] declaredFields = flowClass.getDeclaredFields();
-    for (Field field : declaredFields) {
-      if (Arrays.stream(field.getAnnotations())
-          .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
-        requiredInputs.add(field.getName());
+      Field[] declaredFields = flowClass.getDeclaredFields();
+      for (Field field : declaredFields) {
+        if (Arrays.stream(field.getAnnotations())
+            .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
+          requiredInputs.add(field.getName());
+        }
       }
     }
     return requiredInputs;
