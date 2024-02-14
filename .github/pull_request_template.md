@@ -1,22 +1,26 @@
-## Description of change
+### 🔗 Issue tracking number
 
-Fixes issue #:
+<!-- add Pivotal Tracker link here -->
 
-### Priority
+### ✍️ Description of change
 
-How quickly do you need this change to show up in the SNAPSHOT?
-How quickly do you need this change to show up in a formal release?
+<!-- brief summary of changes -->
 
-### Effect on other applications using FFB
+#### Priority
 
-Are there breaking changes in this PR? Will other projects need to update their code after this
-change? If so, how?
+<!-- How quickly do you need this change to show up in the SNAPSHOT? -->
+<!-- How quickly do you need this change to show up in a formal release? -->
 
-### Testing
+#### Effect on other applications using FFB
 
-If it's not obvious, please describe how we can test this PR.
+<!-- Are there breaking changes in this PR? Will other projects need to update their code after this
+change? If so, how? -->
 
-## Checklist before requesting a review
+#### Testing
+
+<!-- If it's not obvious, please describe how we can test this PR. -->
+
+### ✅ Checklist before requesting a review
 
 - [ ] Does the new code follow [our preferred coding
   style](/intellij-settings/PlatformFlavoredGoogleStyle.xml)?
