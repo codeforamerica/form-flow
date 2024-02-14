@@ -16,6 +16,14 @@
         <span th:text="${label}"></span>
         <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" aria-hidden="true">*</span>
       </legend>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
       <p class="text--help">
         <label th:for="${inputName}+'-month'"
                th:id="${inputName}+'-month-label'"
@@ -29,14 +37,6 @@
                th:id="${inputName}+'-year-label'"
                th:text="#{general.year}"></label>
       </p>
-      <th:block
-          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
-      <th:block
-          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
-      <th:block
-          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
-      <th:block
-          th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
       <input type="text" inputmode="numeric" maxlength="2"
              class="text-input text-input--inline form-width--month"
              th:id="${inputName}+'-month'"

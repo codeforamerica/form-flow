@@ -34,8 +34,9 @@ public class FormScreen {
   }
 
   public boolean hasDateInputError() {
-    Element element = html.select("fieldset ~ p.text--error").first();
-    return element != null;
+    // Selects span elements with class containing Day-error, Month-error, or Year-error
+    Elements elements = html.select("p[id*='Month-error'], p[id*='Day-error'], p[id*='Year-error']");
+    return !elements.isEmpty();
   }
 
   public Elements getInputErrors(String inputName) {
