@@ -14,7 +14,7 @@
       <legend th:if="${hasLabel}" th:for="${inputName}"
              class="form-question">
         <span th:text="${label}"></span>
-        <span th:if="${isRequiredInput}" class="required-input" aria-hidden="true">*</span>
+        <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" aria-hidden="true">*</span>
       </legend>
       <p class="text--help">
         <label th:for="${inputName}+'-month'"
