@@ -9,8 +9,8 @@ How quickly do you need this change to show up in a formal release?
 
 ### Effect on other applications using FFB
 
-Are there breaking changes in this PR? Are there breaking changes in this PR? Are there breaking
-changes in this PR? Will other projects need to update their code after this change? If so, how?
+Are there breaking changes in this PR? Will other projects need to update their code after this
+change? If so, how?
 
 ### Testing
 
