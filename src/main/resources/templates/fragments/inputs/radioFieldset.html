@@ -27,6 +27,7 @@
            th:id="${inputName + '-help-text'}"
            th:text="${fieldsetHelpText}"></p>
         <th:block
+            th:if="${hasError}"
             th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
       </legend>
       <input type="hidden" th:id="${inputName} + 'Hidden'" th:name="${inputName}" value="">

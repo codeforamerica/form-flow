@@ -6,29 +6,35 @@
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
       rows=${!#strings.isEmpty(rows)} ? ${rows} : '6',
       maxLength=${!#strings.isEmpty(maxLength)} ? ${maxLength} : '500',
+      isRequiredInput=${requiredInputs.contains(inputName)},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
         (#arrays.length(errorMessages.get(inputName)) > 0) }"
     th:assert="${!#strings.isEmpty(inputName)}, ${hasLabel || hasAriaLabel}">
   <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
-    <label th:if="${hasLabel}" th:for="${inputName}" th:text="${label}" class="form-question"/>
+    <label th:if="${hasLabel}" th:for="${inputName}" class="form-question">
+      <span th:text="${label}"></span>
+      <span th:if="${isRequiredInput}" class="required-input" aria-hidden="true">*</span>
+    </label>
     <p class="text--help"
        th:if="${hasHelpText}"
        th:id="${inputName + '-help-text'}"
        th:text="${helpText}"></p>
+    <th:block
+        th:if="${hasError}"
+        th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
     <textarea th:fragment="textArea"
               type="textarea"
               class="textarea spacing-below-0"
               th:attr="
                 aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
                 aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+                aria-required=${isRequiredInput},
                 rows=${rows},
                 maxlength=${maxLength},
                 aria-invalid=${hasError}"
               th:id="${inputName}"
               th:name="${inputName}">[[${fieldData.getOrDefault(inputName, '')}]]</textarea>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
   </div>
 </th:block>
