@@ -1,6 +1,5 @@
 ![Code for America, Form Flow Library](readme-assets/FFB-Version-1-Gift.png)
 
-
 # Form Flow Library  (FFB)
 
 A Spring Boot based Java library that provides a framework for developing **form flow** based
@@ -17,7 +16,9 @@ The library includes tooling for:
 - Input Validations
     - Using [JPA Validation](https://www.baeldung.com/spring-boot-bean-validation)
 - Address Validation using [Smarty](https://smarty.com/)
-- A set of [Thymeleaf fragments](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/fragments) that create a library of reusable HTML components for Inputs, Screens, Forms, etc.
+- A set
+  of [Thymeleaf fragments](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/templates/fragments)
+  that create a library of reusable HTML components for Inputs, Screens, Forms, etc.
 - Data Persistence using [Hibernate](https://hibernate.org/)
 - File Uploads
 - PDF Generation based on user input
@@ -148,25 +149,31 @@ Table of Contents
 
 # What Is a Flow?
 
-A flow is a series of screens that collect input from a user using HTML forms and inputs. Some of these
-screens may be purely informational, while others may collect data from the user. A flow may include 
-one or more subflows which are repeating sections of one or more screens within a regular flow. 
-Examples of subflows include household builders that ask a repeating set of questions about members 
+A flow is a series of screens that collect input from a user using HTML forms and inputs. Some of
+these
+screens may be purely informational, while others may collect data from the user. A flow may include
+one or more subflows which are repeating sections of one or more screens within a regular flow.
+Examples of subflows include household builders that ask a repeating set of questions about members
 of a household or job builders that ask an individual to enter information about each job they have.
 
-A flow dictates the order in which screens are shown to the user, and the `Conditions` under which different
-screens may or may not be shown as well as any `Actions` that should be run during, before or after data persistence
+A flow dictates the order in which screens are shown to the user, and the `Conditions` under which
+different
+screens may or may not be shown as well as any `Actions` that should be run during, before or after
+data persistence
 for individual screens.
 
-Flows are defined in a YAML file called `flows-config.yaml` which is located in the `resources` folder of your
+Flows are defined in a YAML file called `flows-config.yaml` which is located in the `resources`
+folder of your
 application.
 
-All data from form inputs within a given flow is stored in a `Submission` object. This data is persisted
+All data from form inputs within a given flow is stored in a `Submission` object. This data is
+persisted
 to the database as JSON.
 
 ## Defining Screens
 
-All screens must have an entry in the `flows-config.yaml` in order to be rendered. Additionally, each
+All screens must have an entry in the `flows-config.yaml` in order to be rendered. Additionally,
+each
 screen should have its own template defined in a folder respective to the flow that screen is
 contained within. Example `/src/main/resources/templates/<flowName>/<templateName>`.
 
@@ -326,7 +333,8 @@ database for error resolution and debugging.
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
-form flow configuration file. They are generally used to determine the flow of pages in a `flows-config.yaml` file
+form flow configuration file. They are generally used to determine the flow of pages in
+a `flows-config.yaml` file
 or conditionally showing or hiding elements in a thymeleaf template.
 
 Conditions are Java objects that implement the `Condition`
@@ -342,9 +350,9 @@ Google address.
 @Component
 public class CheckGmailUser implements Condition {
 
-  public boolean run(Submission submission) {
-    return submission.getInputData().get("emailAddress").contains("gmail.com");
-  }
+    public boolean run(Submission submission) {
+        return submission.getInputData().get("emailAddress").contains("gmail.com");
+    }
 } 
 ```
 
@@ -362,6 +370,7 @@ We have created a Java object named `ConditionManager` that's part of the model 
 Thymeleaf templates. Template code can run conditions via this object, like so:
 
 ```html
+
 <div
     th:with="showCondition=${conditionManager.runCondition('ConditionName', submission, 'data')}">
   <h1 th:if="showCondition">Conditionally show this element</h1>
@@ -403,11 +412,11 @@ Here is an example of a `beforeSaveAction` Action class:
 ```java
 public class CalculateBeforeSave implements Action {
 
-  public void run(Submission submission) {
-    float rate = 0.59;
-    int mileage = submission.getInputData().get("mileage");
-    submission.getInputData().put("reimbursement", mileage * rate);
-  }
+    public void run(Submission submission) {
+        float rate = 0.59;
+        int mileage = submission.getInputData().get("mileage");
+        submission.getInputData().put("reimbursement", mileage * rate);
+    }
 } 
 ```
 
@@ -453,50 +462,52 @@ An example `Submission` object can be seen below:
 ```java
 class Submission {
 
-  @Id
-  @GeneratedValue
-  private UUID id;
+    @Id
+    @GeneratedValue
+    private UUID id;
 
-  @Column(name = "flow")
-  private String flow;
+    @Column(name = "flow")
+    private String flow;
 
-  @Type(JsonType.class)
-  @Column(name = "input_data", columnDefinition = "jsonb")
-  private Map<String, Object> inputData;
+    @Type(JsonType.class)
+    @Column(name = "input_data", columnDefinition = "jsonb")
+    private Map<String, Object> inputData;
 
-  @Type(JsonType.class)
-  @Column(name = "url_params", columnDefinition = "jsonb")
-  private Map<String, String> urlParams;
+    @Type(JsonType.class)
+    @Column(name = "url_params", columnDefinition = "jsonb")
+    private Map<String, String> urlParams;
 
-  @CreationTimestamp
-  @Temporal(TIMESTAMP)
-  @Column(name = "created_at")
-  private Date createdAt;
+    @CreationTimestamp
+    @Temporal(TIMESTAMP)
+    @Column(name = "created_at")
+    private Date createdAt;
 
-  @UpdateTimestamp
-  @Temporal(TIMESTAMP)
-  @Column(name = "updated_at")
-  private Date updatedAt;
+    @UpdateTimestamp
+    @Temporal(TIMESTAMP)
+    @Column(name = "updated_at")
+    private Date updatedAt;
 
-  @Temporal(TIMESTAMP)
-  @Column(name = "submitted_at")
-  private Date submittedAt;
+    @Temporal(TIMESTAMP)
+    @Column(name = "submitted_at")
+    private Date submittedAt;
 
-  public Submission() {
-    inputData = new HashMap<>();
-    urlParams = new HashMap<>();
-  }
+    public Submission() {
+        inputData = new HashMap<>();
+        urlParams = new HashMap<>();
+    }
 }
 ```
 
-Note that the `inputData` field is a JSON object that stores data from the user's input as a given flow
-progresses. This field is placed in the model handed to the Thymeleaf templates, so each screen should
+Note that the `inputData` field is a JSON object that stores data from the user's input as a given
+flow
+progresses. This field is placed in the model handed to the Thymeleaf templates, so each screen
+should
 have access to it.
 
 ## Inputs Class
 
 The inputs class's location is defined by the application using this library. Applications will need
-a field in its `application.yaml` that shows the location of the input class(es). 
+a field in its `application.yaml` that shows the location of the input class(es).
 It should look like this:
 
 ```yaml
@@ -509,7 +520,8 @@ defined in the application's `flows-config.yaml` configuration, is `ubi` we will
 the name of `Ubi` to be located at the specified input path.
 
 An example inputs class can be seen below, with example validations. Note that all inputs classes
-should extend the class `FlowInputs` which provides [CSRF](https://owasp.org/www-community/attacks/csrf) 
+should extend the class `FlowInputs` which
+provides [CSRF](https://owasp.org/www-community/attacks/csrf)
 functionality for security.
 
 Also note that for single value inputs the type when defining the input is String. However, for
@@ -521,18 +533,18 @@ can also be used as a field name in your inputs class**. Java will require that 
 ```java
 class ApplicationInformation extends FlowInputs {
 
-  @NotBlank(message = "{personal-info.provide-first-name}")
-  String firstName;
+    @NotBlank(message = "{personal-info.provide-first-name}")
+    String firstName;
 
-  @NotBlank(message = "{personal-info.provide-last-name}")
-  String lastName;
+    @NotBlank(message = "{personal-info.provide-last-name}")
+    String lastName;
 
-  String emailAddress;
+    String emailAddress;
 
-  String phoneNumber;
+    String phoneNumber;
 
-  @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
-  ArrayList<String> gender;
+    @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
+    ArrayList<String> gender;
 }
 ```
 
@@ -551,7 +563,8 @@ blank value needs to be a validly formatted email address due to `@Email`.
 
 ## Dynamic Input Fields
 
-A field is dynamic if it is unknown exactly how many of them will be submitted on a given form screen.
+A field is dynamic if it is unknown exactly how many of them will be submitted on a given form
+screen.
 
 For example, if a user uploads a number of files on one screen, and you need to attach data to
 each file on another screen, the exact number of files is unknown to the template generating
@@ -576,14 +589,14 @@ what type of document it is (license, birth certificate, etc.).
 ```java
 class ApplicationInformation extends FlowInputs {
 
-  MultipartFile documents;
+    MultipartFile documents;
 
-  @NotBlank
-  @DynamicField
-  String docTypeLabel;
+    @NotBlank
+    @DynamicField
+    String docTypeLabel;
 
-  @NotBlank(message = "{personal-info.provide-first-name}")
-  String someOtherField;
+    @NotBlank(message = "{personal-info.provide-first-name}")
+    String someOtherField;
 }
 ```
 
@@ -813,6 +826,7 @@ An example of using the T operator can be found in the `incomeAmounts` template 
 app.
 
 ```html
+
 <main id="content" role="main" class="form-card spacing-above-35"
       th:with="
             selectedSelf=${conditionManager.runCondition('IncomeSelectedSelf', submission, uuid)},
@@ -1232,19 +1246,19 @@ checkbox option fragment
 as many times as you like to create the necessary number of checkbox options.
 
 Note that when working with multi-value checkboxes (read: checkboxInSet) in tests, the name of your
-checkbox needs to include a `[]` at the end. For example, if your checkbox name is `gender`, then 
-in test it would be `gender[]`. This is done so that we can differentiate between single value checkboxes
-and multi-value in test. 
+checkbox needs to include a `[]` at the end. For example, if your checkbox name is `gender`, then
+in test it would be `gender[]`. This is done so that we can differentiate between single value
+checkboxes
+and multi-value in test.
 
 #### Radio
 
 Radio inputs are used to gather a single selection from a set of options. They are used in unison
-with
-a `radioFieldset` fragment to create a group of radio inputs that are all related to each other.
+with a `radioFieldset` fragment to create a group of radio inputs that are all related to each
+other.
 
 A radio uses the `value` field to indicate what value should be submitted to the server if that
-radio
-is selected.
+radio is selected.
 
 An example of a radio input:
 
@@ -1253,33 +1267,40 @@ An example of a radio input:
 <th:block th:replace="~{fragments/inputs/radioFieldset ::
                           radioFieldset(inputName='favoriteColor',
                           label='What\'s your favorite color?',
-                          fieldsetHelpText='The only true answer is blue',
+                          fieldsetHelpText='This help text will appear under the legend',
                           content=~{::favoriteColorContent})}">
   <th:block th:ref="favoriteColorContent">
     <th:block
-        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='BLUE', label='Blue')}"/>
+        th:replace="~{fragments/inputs/radio :: radio(
+            inputName='favoriteColor',
+            value='BLUE',
+            label='Blue'
+            radioHelpText='This help text will appear under this radio\'s label')}"/>
     <th:block
-        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='RED', label='Red')}"/>
+        th:replace="~{fragments/inputs/radio :: radio(
+            inputName='favoriteColor',
+            value='RED',
+            label='Red')}"/>
     <th:block
-        th:replace="~{fragments/inputs/radio :: radio(inputName='favoriteColor',value='YELLOW', label='Yellow', radioHelpText='This help text will appear next to the radio description.')})}"/>
+        th:replace="~{fragments/inputs/radio :: radio(
+            inputName='favoriteColor',
+            value='YELLOW', label='Yellow',
+            radioHelpText='This help text will appear under the radio\'s label.')})}"/>
   </th:block>
 </th:block>
 ```
 
 Notice how the `radioFieldset` fragment wraps multiple `radio` fragments, where both the fieldset
-and
-the radio use the same input name. This is how you create a group of radio inputs that are all
-associated
-with each other.
+and the radio use the same input name. This is how you create a group of radio inputs that are all
+associated with each other.
 
-Note that similar to `checkboxFieldset`, `radioFieldset` also has an optional `radioHelpText` field
-which will appear under the fieldsets legend.
+The `radioFieldset` has an optional `radioHelpText` field which will appear under the
+fieldset's legend. `radio`, too, has an optional `radioHelpText` field which will appear
+under the label's description text.
 
 For convenience, we have provided a `cfa:inputFieldsetWithRadio` live template which can be used to
-quickly
-create groupings of radio inputs. Not that when using this template, you can copy the inner radio
-option fragment
-as many times as you like to create the necessary number of radio options.
+quickly create groupings of radio inputs. Not that when using this template, you can copy the inner
+radio option fragment as many times as you like to create the necessary number of radio options.
 
 #### Select
 
@@ -1477,9 +1498,9 @@ submission it is a part of, like so:
    `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
 ```
 
-The `flow_name` is the flow the user was in when they uploaded the file and the `input_name` is the 
-name of the file upload widget that uploaded the file. If there are multiple files uploaded via the 
-same widget, then there will be many files with the same `flow_name` and `input_name`, though the 
+The `flow_name` is the flow the user was in when they uploaded the file and the `input_name` is the
+name of the file upload widget that uploaded the file. If there are multiple files uploaded via the
+same widget, then there will be many files with the same `flow_name` and `input_name`, though the
 UUID will be unique for each file.
 
 Here is an example of what two files uploaded via the same input will look like in S3 (flow name
@@ -1780,10 +1801,10 @@ inputs to PDF fields.
 
 #### application.yaml properties
 
-| Name                            | Description                                                                                                                                                                                                                   | Example                                 |
-|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                       | `map-file: pdf-map.yaml`                |
-| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited. | `generate-flattened: false`             |
+| Name                            | Description                                                                                                                                                                                                                   | Example                     |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                       | `map-file: pdf-map.yaml`    |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited. | `generate-flattened: false` |
 
 For example:
 
@@ -2019,7 +2040,8 @@ using [custom preparers](#custom-preparers).
 ### SubmissionField
 
 SubmissionField is an interface that represents a mapping between your applications inputs and their
-values. SubmissionField's are used by the FFB library during PDF generation to map your application's
+values. SubmissionField's are used by the FFB library during PDF generation to map your application'
+s
 input values to the correct PDF Fields. There are 3 types of SubmissionFields:
 <table>
     <tr>
@@ -2098,20 +2120,20 @@ maps them to a single PDF field.
 ```java
 public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
 
-  @Override
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-      PdfMap pdfMap) {
-    Map<String, SubmissionField> submissionFields = new HashMap<>();
+    @Override
+    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+            PdfMap pdfMap) {
+        Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-    String month = submission.getInputData().get("applicantBirthMonth").toString();
-    String day = submission.getInputData().get("applicantBirthDay").toString();
-    String year = submission.getInputData().get("applicantBirthYear").toString();
+        String month = submission.getInputData().get("applicantBirthMonth").toString();
+        String day = submission.getInputData().get("applicantBirthDay").toString();
+        String year = submission.getInputData().get("applicantBirthYear").toString();
 
-    submissionFields.put("applicantDateOfBirth",
-        new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
+        submissionFields.put("applicantDateOfBirth",
+                new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
 
-    return submissionFields;
-  }
+        return submissionFields;
+    }
 }
 ```
 
@@ -2149,31 +2171,31 @@ we would update the above custom preparer example to this:
 ```java
 public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
-  @Override
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-      PdfMap pdfMap) {
-    Map<String, SubmissionField> submissionFields = new HashMap<>();
+    @Override
+    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+            PdfMap pdfMap) {
+        Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-    ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
-        .get("household");
+        ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+                .get("household");
 
-    // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
-    int maxIterations = Math.min(houseHoldSubflow.size(),
-        pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
+        // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
+        int maxIterations = Math.min(houseHoldSubflow.size(),
+                pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
 
-    for (int i = 0; i < maxIterations; i++) {
-      String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
-      String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
-      String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
-      // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
-      int iterationNumber = i + 1;
+        for (int i = 0; i < maxIterations; i++) {
+            String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
+            String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
+            String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
+            // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
+            int iterationNumber = i + 1;
 
-      submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
-          new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
-              iterationNumber));
+            submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
+                    new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
+                            iterationNumber));
+        }
+        return submissionFields;
     }
-    return submissionFields;
-  }
 }
 ```
 
@@ -2209,7 +2231,8 @@ the [starter app's Dockefile](https://github.com/codeforamerica/form-flow-starte
 
 ## Sending Email
 
-Form flow library(FFL) is using [Mailgun](https://www.mailgun.com/) as its default email service provider. If you
+Form flow library(FFL) is using [Mailgun](https://www.mailgun.com/) as its default email service
+provider. If you
 would like to use an alternative email service, then you have two choices:
 
 1. Build a custom email client service that does not implement the EmailClient interface.
@@ -2360,25 +2383,26 @@ Below is an example of a sendEmail() call being made by an application using the
 Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
-MessageResponse response = mailgunEmailClient.sendEmail(
-    emailSubject,
-    recipientEmail,
-    emailToCc,
-    emailToBcc,
-    emailBody,
-    pdfs,
-    requireTls
-);
+MessageResponse response=mailgunEmailClient.sendEmail(
+        emailSubject,
+        recipientEmail,
+        emailToCc,
+        emailToBcc,
+        emailBody,
+        pdfs,
+        requireTls
+        );
 ```
 
 The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
-mailgun as JSON. The message response should mirror the JSON found below if a message has been successfully
+mailgun as JSON. The message response should mirror the JSON found below if a message has been
+successfully
 queued by Mailgun.
 
 ```json
 {
-    "message":"Queued. Thank you.",
-    "id":"<20111114174239.25659.5817@samples.mailgun.org>"
+  "message": "Queued. Thank you.",
+  "id": "<20111114174239.25659.5817@samples.mailgun.org>"
 }
 ```
 
@@ -2435,7 +2459,8 @@ application.
 
 ### Using Transifex
 
-[Transifex](https://www.transifex.com/) is a translation management platform that allows you to easily
+[Transifex](https://www.transifex.com/) is a translation management platform that allows you to
+easily
 maintain translations between your application and translators. You can integrate it directly
 with GitHub to automatically create pull requests when new translations have been added.
 
@@ -2524,7 +2549,7 @@ the steps below:
 1. In the `application.yaml`, set the `session-continuity-interceptor.enabled` field
    to `true`/`false` to enable
    or disable the interceptor
-2. Set the `flows-config.yaml` with the `landmarks.firstScreen` yaml field for each flow in your 
+2. Set the `flows-config.yaml` with the `landmarks.firstScreen` yaml field for each flow in your
    application.
 
 If this interceptor is enabled, but the `landmarks.firstScreen` is not set correctly, an error will
@@ -2699,17 +2724,20 @@ form-flow:
 
 ### Locking the Submission for a Flow Once It Has Been Submitted
 
-The form flow library provides a configuration mechanism to lock a Submission object once it has been submitted.
-This will prevent users from being able to edit a Submission object once it has been submitted. If 
-configured, the user will be redirected to a configured screen if they attempt to GET or POST a page 
-within a locked flow. 
+The form flow library provides a configuration mechanism to lock a Submission object once it has
+been submitted.
+This will prevent users from being able to edit a Submission object once it has been submitted. If
+configured, the user will be redirected to a configured screen if they attempt to GET or POST a page
+within a locked flow.
 
-Note that this does not actually lock the Submission object, but rather prevents the user from accessing
+Note that this does not actually lock the Submission object, but rather prevents the user from
+accessing
 any endpoints that would update the Submission object.
 
 When enabled, the form flow library will check if a Submission object has been submitted by looking
-for a non-null `submittedAt` value. If the `submittedAt` value is not null, and a user attempts 
-to access a screen within the flow that is not part of a list of allowed pages, the library will redirect
+for a non-null `submittedAt` value. If the `submittedAt` value is not null, and a user attempts
+to access a screen within the flow that is not part of a list of allowed pages, the library will
+redirect
 the user to the configured screen. See below for more on the list of allowed pages.
 
 To enable submission locking for a given flow, add the following to your `application.yaml` file:
@@ -2723,9 +2751,12 @@ form-flow:
       redirect: docUploadSuccess
 ```
 
-If you enable submission locking for a flow, you **must** provide a list of allowed pages that can be 
-accessed after given flows Submission object has been submitted. This list of allowed pages is configured
-within your `flows-config.yaml` files `landmarks` section. See below for an example of how to configure 
+If you enable submission locking for a flow, you **must** provide a list of allowed pages that can
+be
+accessed after given flows Submission object has been submitted. This list of allowed pages is
+configured
+within your `flows-config.yaml` files `landmarks` section. See below for an example of how to
+configure
 the list of allowed pages for a given flow.
 
 ```yaml
@@ -2735,26 +2766,31 @@ landmarks:
     - success
 ```
 
-Note that most of the time you will only want to include static pages in the list of allowed pages. 
+Note that most of the time you will only want to include static pages in the list of allowed pages.
 This is because any data that is submitted after the submission object has been submitted will not
-be included in the PDF that is generated or in any other processes that are triggered upon submitting.
+be included in the PDF that is generated or in any other processes that are triggered upon
+submitting.
 
 An example of a time you might include a non-static page in the list of allowed pages is if you have
-a page that is used to collect feedback from the user after they have submitted their application. In
-this scenario you can include the feedback page in the list of allowed pages so that the user can 
+a page that is used to collect feedback from the user after they have submitted their application.
+In
+this scenario you can include the feedback page in the list of allowed pages so that the user can
 submit their feedback after they have submitted their application. The data would be saved
-in the Submission object, but would not be included in the PDF or any other processes that are triggered
+in the Submission object, but would not be included in the PDF or any other processes that are
+triggered
 upon submitting.
 
 #### Accessing the Submission Locked Redirect Message in Thymeleaf
 
 For convenience the form flow library inserts a message into the Thymeleaf model when a user has
 been redirected due to submission locking. This message can be accessed in your Thymeleaf templates
-via the field `lockedSubmissionMessage`. 
+via the field `lockedSubmissionMessage`.
 
-For an example see the [starter-apps success screen](https://github.com/codeforamerica/form-flow-starter-app/blob/8c3ec600bcbccdae47b25e9943af1fc747a18dd6/src/main/resources/templates/ubi/success.html#L13).
+For an example see
+the [starter-apps success screen](https://github.com/codeforamerica/form-flow-starter-app/blob/8c3ec600bcbccdae47b25e9943af1fc747a18dd6/src/main/resources/templates/ubi/success.html#L13).
 
-The default message can be overwritten by placing a message string with the key `general.locked-submission`
+The default message can be overwritten by placing a message string with the
+key `general.locked-submission`
 and your desired value in your application's `messages.properties` file.
 
 ### Design System
@@ -2838,7 +2874,7 @@ called [`spring-boot-starter-actuator`](https://docs.spring.io/spring-boot/docs/
 that will expose endpoints that will allow you to monitor and interact with your application.
 
 **⚠️ While these are very powerful, they can also reveal sensitive information about your
-application. They are a huge security concern. It's best to disable them in production and demo 
+application. They are a huge security concern. It's best to disable them in production and demo
 environments, or just leave the `health` and `info` endpoints exposed. ⚠️**
 
 In our starter application, we have left all endpoints open in the `dev` environment, while we close
@@ -2919,7 +2955,7 @@ flow:
     nextScreens: null
 landmarks:
   firstScreen: firstScreen
-___
+  ___
 name: someOtherFlow
 flow:
   otherFlowScreen:
@@ -3048,10 +3084,14 @@ types we pass and when they are available.
 | `entryScreen`        | String                  | On `deleteConfirmationScreen` screens if no entries in a subflow exist           | Name of the entry screen for the subflow that the `deleteConfirmationScreen` belongs to.                                                                                                                         |
 
 There are spots in the templates where the `T` operator is used. The T operator allows us to call
-static methods as well as fields from Java classes directly in our Thymeleaf templates. For an example, 
-see our [checkbox template where it is used](https://github.com/codeforamerica/form-flow/blob/315eadbf09a3e7c516184274c582039a30ba27d2/src/main/resources/templates/fragments/inputs/checkbox.html#L24) to see if the current form data contains a value for the checkbox
+static methods as well as fields from Java classes directly in our Thymeleaf templates. For an
+example,
+see
+our [checkbox template where it is used](https://github.com/codeforamerica/form-flow/blob/315eadbf09a3e7c516184274c582039a30ba27d2/src/main/resources/templates/fragments/inputs/checkbox.html#L24)
+to see if the current form data contains a value for the checkbox
 element to decide whether to check the box.
-[For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html) section 6.5.8 Types.
+[For more information on the T Operator see Spring's documentation.](https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html)
+section 6.5.8 Types.
 
 Also remember that conditions can be accessed in Thymeleaf templates. Fore more information on using
 conditions in your templates see: [Using Conditions in Templates](#conditions).
@@ -3110,11 +3150,13 @@ we use in the Form Flow library.
 The `dev` profile allows for some information to be accessible to developers more easily. The
 profile should only be used in a developer's environment.
 
-Note that the `dev` profile is set to include all actuator endpoints which provide useful information
-about your application. Most of these endpoints except for `health` and `info` are disabled by default
+Note that the `dev` profile is set to include all actuator endpoints which provide useful
+information
+about your application. Most of these endpoints except for `health` and `info` are disabled by
+default
 in all other profiles.
 
-**⚠️ For Security purposes, make absolutely certain that you do not enable other actuator endpoints 
+**⚠️ For Security purposes, make absolutely certain that you do not enable other actuator endpoints
 outside the `dev` profile unless you fully understand what you are doing. ⚠️**
 
 For more information on actuator endpoints see: [Actuator Endpoints](#actuator-endpoints)
@@ -3277,7 +3319,8 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew checkForNpm
   ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system
+  application
   property is set.
 
 ## npmInstall
@@ -3287,7 +3330,8 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew npmInstall
   ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system
+  application
   property is set.
 
 ## moveNodeModulesToGenerated
@@ -3307,7 +3351,8 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew moveUSWDSImagesToGenerated
   ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system
+  application
   property is set.
 
 ## compileSass
@@ -3317,7 +3362,8 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew compileSass
   ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system
+  application
   property is set.
 
 ## compileJs
@@ -3327,7 +3373,8 @@ the [Starter Application's `build.gradle`](https://github.com/codeforamerica/for
   ```
   ./gradlew compileJs
   ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system application
+  This task will automatically run in the `build` process if the `cfa-uswds` design system
+  application
   property is set.
 
 ## watchCompileSass
