@@ -20,6 +20,7 @@
        th:id="${inputName + '-help-text'}"
        th:text="${helpText}"></p>
     <th:block
+        th:if="${hasError}"
         th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
     <input type="tel" class="text-input form-width--med phone-input"
            th:id="${inputName}"
