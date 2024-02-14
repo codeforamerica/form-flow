@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +42,7 @@ public class ValidationService {
   private final ActionManager actionManager;
   private static String inputConfigPath;
   
-  public static List<String> requiredInputs = new ArrayList<>();
+  private static final Map<String, Boolean> requiredInputs = new HashMap<>();
   
   private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
@@ -163,7 +164,7 @@ public class ValidationService {
     return validationMessages;
   }
 
-  public static List<String> getRequiredInputs(String flowName) {
+  public static Map<String, Boolean> getRequiredInputs(String flowName) {
     if (requiredInputs.isEmpty()) {
       Class<?> flowClass;
 
@@ -177,7 +178,7 @@ public class ValidationService {
       for (Field field : declaredFields) {
         if (Arrays.stream(field.getAnnotations())
             .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
-          requiredInputs.add(field.getName());
+          requiredInputs.put(field.getName(), true);
         }
       }
     }
