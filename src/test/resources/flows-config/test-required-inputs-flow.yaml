@@ -1,0 +1,5 @@
+name: requiredInputs
+flow:
+  inputs:
+    nextScreens:
+      - name: null
