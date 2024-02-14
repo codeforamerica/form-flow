@@ -1,17 +1,17 @@
-### 🔗 Issue tracking number
+#### Issue tracking number 🔗
 
 <!-- add Pivotal Tracker link here -->
 
-### ✍️ Description of change
+#### Description of change ✍️
 
 <!-- brief summary of changes -->
 
-#### Priority
+#### Priority 🥇
 
 <!-- How quickly do you need this change to show up in the SNAPSHOT? -->
 <!-- How quickly do you need this change to show up in a formal release? -->
 
-#### Effect on other applications using FFB
+#### Effect on other applications using FFB 🌊
 
 <!-- Are there breaking changes in this PR? Will other projects need to update their code after this
 change? If so, how? -->
@@ -20,7 +20,7 @@ change? If so, how? -->
 
 <!-- If it's not obvious, please describe how we can test this PR. -->
 
-### ✅ Checklist before requesting a review
+#### ✅ Checklist before requesting a review
 
 - [ ] Does the new code follow [our preferred coding
   style](/intellij-settings/PlatformFlavoredGoogleStyle.xml)?
