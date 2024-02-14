@@ -4,6 +4,7 @@
       hasHelpText=${!#strings.isEmpty(fieldsetHelpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
+      isRequiredInput=${requiredInputs.contains(inputName)},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
@@ -14,13 +15,15 @@
       ${content != null}">
   <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
     <fieldset th:attr="
+      aria-required=${isRequiredInput},
       aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
       aria-labelledby=${hasAriaLabel ? ariaLabel : ''}">
       <legend class="form-question"
               th:if="${hasLabel}"
               th:id="${inputName + '-legend'}"
               th:inline="text">
-        [[${label}]]
+        <span th:text="${label}"></span>
+        <span th:if="${isRequiredInput}" class="required-input" aria-hidden="true">*</span>
         <p class="text--help spacing-below-0 text--normal"
            th:if="${hasHelpText}"
            th:id="${inputName + '-help-text'}"
