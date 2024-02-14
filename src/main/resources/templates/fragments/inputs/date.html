@@ -3,7 +3,7 @@
     th:with="
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      isRequiredInput=${requiredInputs.contains(inputName + 'Month') || requiredInputs.contains(inputName + 'Day') || requiredInputs.contains(inputName + 'Year')},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName + 'Month', false) || requiredInputs.getOrDefault(inputName + 'Day', false) || requiredInputs.getOrDefault(inputName + 'Year', false)},
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},
       hasErrorYear=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Year'))},
@@ -45,7 +45,7 @@
              th:attr="
               aria-describedby=${inputName + '-month-label'},
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-required=${requiredInputs.contains(inputName + 'Month')},
+              aria-required=${requiredInputs.getOrDefault(inputName + 'Month', false)},
               aria-invalid=${hasErrorMonth}"
              th:value="${fieldData.getOrDefault(inputName + 'Month', '')}"/>
       /
@@ -57,7 +57,7 @@
              th:attr="
               aria-describedby=${inputName}+'-day-label',
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-required=${requiredInputs.contains(inputName + 'Day')},
+              aria-required=${requiredInputs.getOrDefault(inputName + 'Day', false)},
               aria-invalid=${hasErrorDay}"
              th:value="${fieldData.getOrDefault(inputName + 'Day', '')}"/>
       /
@@ -69,7 +69,7 @@
              th:attr="
               aria-describedby=${inputName}+'-year-label',
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-required=${requiredInputs.contains(inputName + 'Year')},
+              aria-required=${requiredInputs.getOrDefault(inputName + 'Year', false)},
               aria-invalid=${hasErrorYear}"
              th:value="${fieldData.getOrDefault(inputName + 'Year', '')}"/>
     </fieldset>
