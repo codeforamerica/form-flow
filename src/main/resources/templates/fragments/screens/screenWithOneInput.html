@@ -43,3 +43,20 @@
   </body>
   </html>
 </th:block>
+
+<th:block
+  th:replace="~{fragments/screens/screenWithOneInput ::
+  screenWithOneInput(
+    title=#{},
+    header=#{},
+    inputName='',
+    subtext=#{},
+    formAction=${formAction},
+    inputContent=~{::inputContent})}">
+  <th:block th:ref="inputContent">
+    <!-- Be sure to have `ariaLabel='header'` to label the input with the header -->
+    <th:block th:replace="~{fragments/inputs/text ::
+      text(inputName='',
+      ariaLabel='header')}"/>
+  </th:block>
+</th:block>
