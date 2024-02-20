@@ -1,8 +1,8 @@
 <th:block
     th:fragment="screenWithOneInput"
     th:with="
-      hasIconName=${!#strings.isEmpty(iconName)},
-      hasIconFragment=${!#strings.isEmpty(iconFragment)}"
+      hasIconFragment=${!#strings.isEmpty(iconFragment)},
+      hasIconName=${!#strings.isEmpty(iconName)}"
     th:assert="
       ${!#strings.isEmpty(title)},
       ${!#strings.isEmpty(header)},
