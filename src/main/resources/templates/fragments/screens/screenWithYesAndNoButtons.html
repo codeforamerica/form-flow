@@ -3,7 +3,8 @@
     th:with="
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasAriaDescribe=${!#strings.isEmpty(ariaDescribe)},
-      hasIconName=${!#strings.isEmpty(iconName)}"
+      hasIconName=${!#strings.isEmpty(iconName)},
+      hasIconFragment=${!#strings.isEmpty(iconFragment)}"
     th:assert="
       ${!#strings.isEmpty(title)},
       ${!#strings.isEmpty(header)},
@@ -21,6 +22,7 @@
         <div th:replace="~{fragments/goBack :: goBackLink}"></div>
         <main id="content" role="main" class="form-card spacing-above-35">
           <th:block th:replace="${hasIconName} ? ~{'fragments/icons' :: ${iconName}} : _"/>
+          <th:block th:replace="${hasIconFragment} ? ${iconFragment} : _" />
           <th:block
               th:replace="~{fragments/cardHeader :: cardHeader(header=${header})}"/>
           <th:block
