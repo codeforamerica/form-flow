@@ -18,4 +18,5 @@ public class ScreenNavigationConfiguration {
   private String beforeSaveAction;
   private String beforeDisplayAction;
   private String afterSaveAction;
+  private String condition;
 }

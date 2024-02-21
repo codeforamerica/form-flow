@@ -57,6 +57,10 @@
               "type": "string",
               "description": "For screens within a subflow, they need the name of the subflow defined."
             },
+            "condition": {
+              "type": "string",
+              "description": "The name of a Condition whose run method will be executed to determine if this screen should be shown."
+            },
             "callback": {
               "type": "string",
               "description": "A method name to run on callback."

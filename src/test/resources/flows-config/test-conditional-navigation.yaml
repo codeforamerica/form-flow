@@ -32,3 +32,48 @@ subflows:
     iterationStartScreen: fourth
     deleteConfirmationScreen: other
     reviewScreen: third
+---
+name: conditionsTestFlow
+flow:
+  first:
+    nextScreens:
+      - name: skipFirst
+  skipFirst:
+    condition: FalseCondition
+    nextScreens:
+      - name: skipSecond
+  skipSecond:
+    condition: FalseCondition
+    nextScreens:
+      - name: viewThird
+  viewThird:
+    condition: TrueCondition
+    nextScreens:
+      - name: last
+  fourth:
+    subflow: testSubflow
+    nextScreens:
+      - name: fifth
+  fifth:
+    condition: FalseCondition
+    subflow: testSubflow
+    nextScreens:
+      - name: sixth
+  sixth:
+    condition: FalseCondition
+    nextScreens:
+      - name: seventh
+        condition: FalseCondition
+      - name: other
+        condition: TrueCondition
+      - name: last
+  other:
+    nextScreens:
+      - name: last
+  last:
+    nextScreens: null
+subflows:
+  testSubflow:
+    iterationStartScreen: fourth
+    deleteConfirmationScreen: delete
+    reviewScreen: last

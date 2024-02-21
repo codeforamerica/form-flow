@@ -116,6 +116,16 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
 
+    if (shouldRedirectToNextScreen(uuid, currentScreen, submission)) {
+      String nextViewableScreen = getNextViewableScreen(flow, screen, uuid, submission);
+      log.info("%s is not viewable, redirecting to %s".formatted(screen, nextViewableScreen));
+      if (uuid == null) {
+        return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, nextViewableScreen));
+      } else {
+        return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, nextViewableScreen, uuid));
+      }
+    }
+
     if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
       submission.mergeUrlParamsWithData(query_params);
     } else {
@@ -144,6 +154,25 @@ public class ScreenController extends FormFlowController {
     }
 
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
+  }
+
+  /**
+   * Checks if current screen condition is met.
+   *
+   * @param uuid          The uuid of a subflow entry
+   * @param currentScreen The current screen to check
+   * @param submission    submission
+   * @return True - current screen does not meet the condition; False - otherwise
+   */
+  private boolean shouldRedirectToNextScreen(String uuid, ScreenNavigationConfiguration currentScreen, Submission submission) {
+    if (conditionManager.conditionExists(currentScreen.getCondition())) {
+      if (currentScreen.getSubflow() != null) {
+        return !conditionManager.runCondition(currentScreen.getCondition(), submission, uuid);
+      } else {
+        return !conditionManager.runCondition(currentScreen.getCondition(), submission);
+      }
+    }
+    return false;
   }
 
   /**
@@ -319,6 +348,11 @@ public class ScreenController extends FormFlowController {
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
+    }
+
+    String nextViewableScreen = getNextViewableScreen(flow, screen, uuid, submission);
+    if (!nextViewableScreen.equals(screen)) {
+      return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, nextViewableScreen, uuid));
     }
 
     if (submission == null) {
@@ -576,7 +610,7 @@ public class ScreenController extends FormFlowController {
       throwNotFoundError(flow, screen,
           String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
     }
-    String nextScreen = getNextScreenName(submission, currentScreen, uuid);
+    String nextScreen = getNextViewableScreen(flow, getNextScreenName(submission, currentScreen, uuid), uuid, submission);
 
     boolean isCurrentScreenLastInSubflow = getScreenConfig(flow, nextScreen).getSubflow() == null;
     String redirectString;
@@ -594,6 +628,25 @@ public class ScreenController extends FormFlowController {
 
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView(redirectString));
+  }
+
+
+  /**
+   * Get the current viewable screen that doesn't have a condition or meets its condition.
+   *
+   * @param flow       the flow containing the screen
+   * @param screen     the current screen
+   * @param uuid       current iteration uuid
+   * @param submission submission
+   * @return Next viewable screen if the current one does not satisfy the condition, otherwise the current screen
+   */
+  private String getNextViewableScreen(String flow, String screen, String uuid, Submission submission) {
+    var currentScreen = getScreenConfig(flow, screen);
+    if (shouldRedirectToNextScreen(uuid, currentScreen, submission)) {
+      String nextScreen = getNextScreenName(submission, currentScreen, uuid);
+      return getNextViewableScreen(flow, nextScreen, uuid, submission);
+    }
+    return screen;
   }
 
   private String getNextScreenName(Submission submission,

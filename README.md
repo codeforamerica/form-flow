@@ -364,6 +364,38 @@ More examples of conditions can be found in our
 [starter application](https://github.com/codeforamerica/form-flow-starter-app/tree/main/src/main/java/org/formflowstartertemplate/app/submission/conditions)
 .
 
+### Using Conditions in `flows-config.yaml`
+
+Conditions can be configured at the screen level as a pre-condition or at the next screen level as a post-condition.
+Depending on the scenario, it may be better to configure it in one way vs the other. In either case, the application
+flow will behave the same way. The difference is that pre-conditions prevent the page from being viewed at all - the
+ScreenController will look for the next viewable page.
+
+The following 2 examples of condition configuration result in the same flow behavior.
+
+``` yaml
+flow: ubi
+  incomeQuestion:
+    nextScreens:
+    - name: incomeDetails
+  incomeDetails:
+    condition: HasIncome # pre-condition
+    nextScreens:
+      - name: expensesQuestion
+```
+
+``` yaml
+flow: ubi
+  incomeQuestion:
+    nextScreens:
+    - name: incomeDetails
+      condition: HasIncome # post-condition
+    - name: expensesQuestion
+  incomeDetails:
+    nextScreens:
+      - name: expensesQuestion
+```
+
 ### Using Conditions in Templates
 
 We have created a Java object named `ConditionManager` that's part of the model data handed to the
