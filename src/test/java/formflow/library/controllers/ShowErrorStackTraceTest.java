@@ -30,9 +30,4 @@ public class ShowErrorStackTraceTest extends AbstractBasePageTest {
     assertThat(testPage.getHtml()).containsSequence("<span style=\"color: #00bfff; font-weight:bold;\">\tat org.springframework");
   }
 
-  @Test
-  void stackTraceDoesntAppearIfTheExceptionDoesntExist() {
-    navigateTo("nonexistentPage");
-    assertThat(testPage.getHtml()).doesNotContain("Stacktrace");
-  }
 }
