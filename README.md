@@ -350,9 +350,9 @@ Google address.
 @Component
 public class CheckGmailUser implements Condition {
 
-    public boolean run(Submission submission) {
-        return submission.getInputData().get("emailAddress").contains("gmail.com");
-    }
+  public boolean run(Submission submission) {
+    return submission.getInputData().get("emailAddress").contains("gmail.com");
+  }
 } 
 ```
 
@@ -366,9 +366,12 @@ More examples of conditions can be found in our
 
 ### Using Conditions in `flows-config.yaml`
 
-Conditions can be configured at the screen level as a pre-condition or at the next screen level as a post-condition.
-Depending on the scenario, it may be better to configure it in one way vs the other. In either case, the application
-flow will behave the same way. The difference is that pre-conditions prevent the page from being viewed at all - the
+Conditions can be configured at the screen level as a pre-condition or at the next screen level as a
+post-condition.
+Depending on the scenario, it may be better to configure it in one way vs the other. In either case,
+the application
+flow will behave the same way. The difference is that pre-conditions prevent the page from being
+viewed at all - the
 ScreenController will look for the next viewable page.
 
 The following 2 examples of condition configuration result in the same flow behavior.
@@ -444,11 +447,11 @@ Here is an example of a `beforeSaveAction` Action class:
 ```java
 public class CalculateBeforeSave implements Action {
 
-    public void run(Submission submission) {
-        float rate = 0.59;
-        int mileage = submission.getInputData().get("mileage");
-        submission.getInputData().put("reimbursement", mileage * rate);
-    }
+  public void run(Submission submission) {
+    float rate = 0.59;
+    int mileage = submission.getInputData().get("mileage");
+    submission.getInputData().put("reimbursement", mileage * rate);
+  }
 } 
 ```
 
@@ -494,39 +497,39 @@ An example `Submission` object can be seen below:
 ```java
 class Submission {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+  @Id
+  @GeneratedValue
+  private UUID id;
 
-    @Column(name = "flow")
-    private String flow;
+  @Column(name = "flow")
+  private String flow;
 
-    @Type(JsonType.class)
-    @Column(name = "input_data", columnDefinition = "jsonb")
-    private Map<String, Object> inputData;
+  @Type(JsonType.class)
+  @Column(name = "input_data", columnDefinition = "jsonb")
+  private Map<String, Object> inputData;
 
-    @Type(JsonType.class)
-    @Column(name = "url_params", columnDefinition = "jsonb")
-    private Map<String, String> urlParams;
+  @Type(JsonType.class)
+  @Column(name = "url_params", columnDefinition = "jsonb")
+  private Map<String, String> urlParams;
 
-    @CreationTimestamp
-    @Temporal(TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
+  @CreationTimestamp
+  @Temporal(TIMESTAMP)
+  @Column(name = "created_at")
+  private Date createdAt;
 
-    @UpdateTimestamp
-    @Temporal(TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
+  @UpdateTimestamp
+  @Temporal(TIMESTAMP)
+  @Column(name = "updated_at")
+  private Date updatedAt;
 
-    @Temporal(TIMESTAMP)
-    @Column(name = "submitted_at")
-    private Date submittedAt;
+  @Temporal(TIMESTAMP)
+  @Column(name = "submitted_at")
+  private Date submittedAt;
 
-    public Submission() {
-        inputData = new HashMap<>();
-        urlParams = new HashMap<>();
-    }
+  public Submission() {
+    inputData = new HashMap<>();
+    urlParams = new HashMap<>();
+  }
 }
 ```
 
@@ -565,18 +568,18 @@ can also be used as a field name in your inputs class**. Java will require that 
 ```java
 class ApplicationInformation extends FlowInputs {
 
-    @NotBlank(message = "{personal-info.provide-first-name}")
-    String firstName;
+  @NotBlank(message = "{personal-info.provide-first-name}")
+  String firstName;
 
-    @NotBlank(message = "{personal-info.provide-last-name}")
-    String lastName;
+  @NotBlank(message = "{personal-info.provide-last-name}")
+  String lastName;
 
-    String emailAddress;
+  String emailAddress;
 
-    String phoneNumber;
+  String phoneNumber;
 
-    @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
-    ArrayList<String> gender;
+  @NotEmpty(message = "{personal-info.please-make-a-gender-selection}")
+  ArrayList<String> gender;
 }
 ```
 
@@ -621,14 +624,14 @@ what type of document it is (license, birth certificate, etc.).
 ```java
 class ApplicationInformation extends FlowInputs {
 
-    MultipartFile documents;
+  MultipartFile documents;
 
-    @NotBlank
-    @DynamicField
-    String docTypeLabel;
+  @NotBlank
+  @DynamicField
+  String docTypeLabel;
 
-    @NotBlank(message = "{personal-info.provide-first-name}")
-    String someOtherField;
+  @NotBlank(message = "{personal-info.provide-first-name}")
+  String someOtherField;
 }
 ```
 
@@ -684,6 +687,7 @@ Use them the same way you would any other JavaX validator.
 #### @Money
 
 ```java
+
 @Money(message = "Please make sure to enter a valid dollar amount.")
 private String income;
 ```
@@ -712,6 +716,7 @@ Does not accept values such as:
 Used to validate 10-digit phone numbers.
 
 ```java
+
 @Phone(message = "{contact-info.invalid-phone-number}")
 private String phoneNumber;
 ```
@@ -753,6 +758,7 @@ not have any validation associated with them; they may simply mark the field for
 #### @Encrypted
 
 ```java
+
 @Encrypted
 private String socialSecurityNumber;
 ```
@@ -2152,20 +2158,20 @@ maps them to a single PDF field.
 ```java
 public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
 
-    @Override
-    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-            PdfMap pdfMap) {
-        Map<String, SubmissionField> submissionFields = new HashMap<>();
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-        String month = submission.getInputData().get("applicantBirthMonth").toString();
-        String day = submission.getInputData().get("applicantBirthDay").toString();
-        String year = submission.getInputData().get("applicantBirthYear").toString();
+    String month = submission.getInputData().get("applicantBirthMonth").toString();
+    String day = submission.getInputData().get("applicantBirthDay").toString();
+    String year = submission.getInputData().get("applicantBirthYear").toString();
 
-        submissionFields.put("applicantDateOfBirth",
-                new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
+    submissionFields.put("applicantDateOfBirth",
+        new SingleField("applicantDateOfBirth", month + "/" + day + "/" + year, null));
 
-        return submissionFields;
-    }
+    return submissionFields;
+  }
 }
 ```
 
@@ -2203,31 +2209,31 @@ we would update the above custom preparer example to this:
 ```java
 public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
-    @Override
-    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-            PdfMap pdfMap) {
-        Map<String, SubmissionField> submissionFields = new HashMap<>();
+  @Override
+  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
+      PdfMap pdfMap) {
+    Map<String, SubmissionField> submissionFields = new HashMap<>();
 
-        ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
-                .get("household");
+    ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
+        .get("household");
 
-        // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
-        int maxIterations = Math.min(houseHoldSubflow.size(),
-                pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
+    // Note that we want to iterate up to the max number of iterations or the total iterations in the subflow, whichever is smaller
+    int maxIterations = Math.min(houseHoldSubflow.size(),
+        pdfMap.getSubflowInfo().get("householdAndIncome").getTotalIterations());
 
-        for (int i = 0; i < maxIterations; i++) {
-            String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
-            String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
-            String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
-            // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
-            int iterationNumber = i + 1;
+    for (int i = 0; i < maxIterations; i++) {
+      String month = houseHoldSubflow.get(i).get("applicantBirthMonth").toString();
+      String day = houseHoldSubflow.get(i).get("applicantBirthDay").toString();
+      String year = houseHoldSubflow.get(i).get("applicantBirthYear").toString();
+      // Note that current iteration number is not 0 indexed, so we add 1 to the index from our for loop
+      int iterationNumber = i + 1;
 
-            submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
-                    new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
-                            iterationNumber));
-        }
-        return submissionFields;
+      submissionFields.put("householdMemberDateOfBirth_" + iterationNumber,
+          new SingleField("householdMemberDateOfBirth", month + "/" + day + "/" + year,
+              iterationNumber));
     }
+    return submissionFields;
+  }
 }
 ```
 
@@ -2393,6 +2399,7 @@ It’s recommended that developers pass a list of strings representing email add
 and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
 
 ```java
+
 @Value("${form-flow.flow.ubi.email.confirmation.cc:}")
 private List<String> emailToCc;
 
@@ -2415,15 +2422,15 @@ Below is an example of a sendEmail() call being made by an application using the
 Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
-MessageResponse response=mailgunEmailClient.sendEmail(
-        emailSubject,
-        recipientEmail,
-        emailToCc,
-        emailToBcc,
-        emailBody,
-        pdfs,
-        requireTls
-        );
+MessageResponse response = mailgunEmailClient.sendEmail(
+    emailSubject,
+    recipientEmail,
+    emailToCc,
+    emailToBcc,
+    emailBody,
+    pdfs,
+    requireTls
+);
 ```
 
 The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
@@ -2891,7 +2898,7 @@ server:
 
 | Property                                | Default    | Description                                                                                                        |
 |-----------------------------------------|------------|--------------------------------------------------------------------------------------------------------------------|
-| `form-flow.error.show-stack-trace`      | `true`     | Show full the full stack trace and error codes on our '/error' template (on your local or staging env for example) |
+| `form-flow.error.show-stack-trace`      | `false`    | Show full the full stack trace and error codes on our '/error' template (on your local or staging env for example) |
 | `form-flow.error.pretty-print-packages` | `formflow` | A comma seperated list of packages that will be highlighted on the stacktrace for easier identification.           |
 
 We've chosen to use a yaml version of the application file, but you could also store this as a
