@@ -32,10 +32,12 @@ public class FormFlowErrorController implements ErrorController {
 
   /**
    * Constructor for the {@link FormFlowErrorController} class
-   * @param showStackTrace The {@link Boolean} variable for determining an endpoint
-   * @param errorPath A {@link String} endpoint to a generic error screen
-   * @param prettyPrintPackages {@link String} a comma-separated list
-   * @param errorAttributes An {@link ErrorAttributes} object
+   *
+   * @param showStackTrace      The {@link Boolean} variable for determining an endpoint. Default value is {@code false}.
+   * @param errorPath           A {@link String} endpoint to a generic error screen. Default value is
+   *                            {@code "errors/genericError"}.
+   * @param prettyPrintPackages {@link String} a comma-separated list. Default value is {@code "formflow"}.
+   * @param errorAttributes     An {@link ErrorAttributes} object
    */
   public FormFlowErrorController(
       @Value("${form-flow.error.show-stack-trace:false}") boolean showStackTrace,
@@ -50,6 +52,7 @@ public class FormFlowErrorController implements ErrorController {
 
   /**
    * Displays errors in a {@link WebRequest}
+   *
    * @param webRequest Malformed {@link WebRequest}
    * @return a {@link ModelAndView} class object
    */
@@ -71,6 +74,7 @@ public class FormFlowErrorController implements ErrorController {
 
   /**
    * Method takes a {@link Throwable} object returns a {@link String} stacktrace with HTML formatting
+   *
    * @param e {@link Throwable} error
    * @return A formatted stack trace as a {@link String}
    */
