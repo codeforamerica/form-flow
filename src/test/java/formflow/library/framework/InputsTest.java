@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import formflow.library.address_validation.AddressValidationService;
 import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.inputs.TestOption;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
@@ -39,8 +40,10 @@ public class InputsTest extends AbstractMockMvcTest {
     String numberInput = "123";
     // First "" value is from hidden input that a screen would submit
     List<String> checkboxSet = List.of("", "Checkbox-A", "Checkbox-B");
+    List<String> checkboxEnumSet = List.of("MANGO", "OTHER");
     List<String> checkboxInput = List.of("", "checkbox-value");
     String radioInput = "Radio B";
+    String radioInputEnum = TestOption.MANGO.getValue();
     String selectInput = "Select B";
     String moneyInput = "100";
     String phoneInput = "(555) 555-1234";
@@ -57,9 +60,11 @@ public class InputsTest extends AbstractMockMvcTest {
             Map.entry("numberInput", List.of(numberInput)),
             // CheckboxSet's need to have the [] in their name for POST actions
             Map.entry("checkboxSet[]", checkboxSet),
+            Map.entry("checkboxEnumSet[]", checkboxEnumSet),
             // Checkboxes need to have the [] in their name for POST actions
             Map.entry("checkboxInput[]", checkboxInput),
             Map.entry("radioInput", List.of(radioInput)),
+            Map.entry("radioInputEnum", List.of(radioInputEnum)),
             Map.entry("selectInput", List.of(selectInput)),
             Map.entry("moneyInput", List.of(moneyInput)),
             Map.entry("phoneInput", List.of(phoneInput)),
@@ -81,8 +86,10 @@ public class InputsTest extends AbstractMockMvcTest {
     assertThat(inputsScreen.getInputValue("dateYear")).isEqualTo(dateYear);
     assertThat(inputsScreen.getInputValue("numberInput")).isEqualTo(numberInput);
     assertThat(inputsScreen.getCheckboxSetValues("checkboxSet")).isEqualTo(removedHiddenCheckboxSet);
+    assertThat(inputsScreen.getCheckboxSetValues("checkboxEnumSet")).isEqualTo(checkboxEnumSet);
     assertThat(inputsScreen.getCheckboxSetValues("checkboxInput")).isEqualTo(removedHiddenCheckboxInput);
     assertThat(inputsScreen.getRadioValue("radioInput")).isEqualTo(radioInput);
+    assertThat(inputsScreen.getRadioValue("radioInputEnum")).isEqualTo(radioInputEnum);
     assertThat(inputsScreen.getSelectValue("selectInput")).isEqualTo(selectInput);
     assertThat(inputsScreen.getInputValue("moneyInput")).isEqualTo(moneyInput);
     assertThat(inputsScreen.getInputValue("phoneInput")).isEqualTo(phoneInput);

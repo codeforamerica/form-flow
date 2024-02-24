@@ -36,8 +36,10 @@ public class TestFlow extends FlowInputs {
 
   String numberInput;
   ArrayList<String> checkboxSet;
+  ArrayList<String> checkboxEnumSet;
   ArrayList<String> checkboxInput;
   String radioInput;
+  String radioInputEnum;
   String selectInput;
   String moneyInput;
   String phoneInput;
