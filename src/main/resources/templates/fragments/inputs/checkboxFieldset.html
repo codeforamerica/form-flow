@@ -41,9 +41,10 @@
               label=${#strings.isEmpty(option.getLabel()) ? null : #messages.msg(option.getLabel())},
               checkboxHelpText=${#strings.isEmpty(option.getHelpText()) ? null : #messages.msg(option.getHelpText())})}"/>
         </th:block>
-        <th:block th:if="${hasNoneOfTheAboveOption}"
-                  th:replace="~{fragments/inputs/checkboxInSet ::
-                    checkboxInSet(inputName=${inputName}, label=${noneOfTheAboveLabel}, noneOfTheAbove=true)}"/>
+        <th:block th:if="${hasNoneOfTheAboveOption}">
+          <th:block th:replace="~{fragments/inputs/checkboxInSet ::
+            checkboxInSet(inputName=${inputName}, value='NONE', label=${noneOfTheAboveLabel}, noneOfTheAbove=true)}"/>
+        </th:block>
       </th:block>
       <th:block
           th:replace="~{fragments/inputError :: validationError(inputName=${inputName})}"></th:block>
