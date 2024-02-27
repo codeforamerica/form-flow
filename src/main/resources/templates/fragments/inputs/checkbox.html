@@ -25,7 +25,8 @@
              th:checked="${checked}"
              th:attr="
               aria-invalid=${hasError},
-              data-follow-up=${followUpId}">
+              data-follow-up=${followUpId},
+              sonchange=|toggleVisibility(this, '${toggleVisibility}');|">
       <div th:if="${hasIcon}">
         <i th:class="${'icon-' + checkboxIcon}" style="margin-right: 0.5rem"></i>
       </div>
