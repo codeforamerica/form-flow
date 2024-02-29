@@ -731,3 +731,11 @@ body,
     display: block;
   }
 }
+
+.required-input {
+  color: #a72f10;
+}
+
+.form-group .text--help+.text--error {
+  margin-top: -2.5rem;
+}

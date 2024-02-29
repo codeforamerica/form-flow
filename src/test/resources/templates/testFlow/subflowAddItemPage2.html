@@ -72,6 +72,10 @@
               th:replace="~{fragments/inputs/phone :: phone(
                                   inputName='phoneInputSubflowPage2',
                                   label='phoneInput')}"/>
+          <th:block th:replace="~{fragments/inputs/date ::
+            date(inputName='dateSubflowPage2Day',
+            label='dateInputSubflowPage2',
+            groupName='dateInputSubflowPage2')}"/>
         </div>
         <div class="form-card__footer">
           <th:block th:replace="~{fragments/continueButton :: continue}"/>

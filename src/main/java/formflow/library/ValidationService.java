@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -38,8 +40,11 @@ public class ValidationService {
 
   private final Validator validator;
   private final ActionManager actionManager;
-  private final String inputConfigPath;
-  private final List<String> requiredAnnotationsList = List.of(
+  private static String inputConfigPath;
+  
+  private static final Map<String, Boolean> requiredInputs = new HashMap<>();
+  
+  private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
       NotEmpty.class.getName(),
       NotBlank.class.getName()
@@ -56,7 +61,7 @@ public class ValidationService {
       @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
     this.validator = validator;
     this.actionManager = actionManager;
-    this.inputConfigPath = inputConfigPath;
+    ValidationService.inputConfigPath = inputConfigPath;
   }
 
   /**
@@ -157,5 +162,26 @@ public class ValidationService {
     });
 
     return validationMessages;
+  }
+
+  public static Map<String, Boolean> getRequiredInputs(String flowName) {
+    if (requiredInputs.isEmpty()) {
+      Class<?> flowClass;
+
+      try {
+        flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+      } catch (ReflectiveOperationException e) {
+        throw new RuntimeException(e);
+      }
+
+      Field[] declaredFields = flowClass.getDeclaredFields();
+      for (Field field : declaredFields) {
+        if (Arrays.stream(field.getAnnotations())
+            .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
+          requiredInputs.put(field.getName(), true);
+        }
+      }
+    }
+    return requiredInputs;
   }
 }

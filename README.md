@@ -47,6 +47,7 @@ Table of Contents
     * [Submission Object](#submission-object)
     * [Inputs Class](#inputs-class)
         * [Validating Inputs](#validating-inputs)
+        * [Required Inputs](#required-inputs)
     * [Dynamic Input Fields](#dynamic-input-fields)
     * [Custom Annotations](#custom-annotations)
         * [Validation Annotations](#validation-annotations)
@@ -596,6 +597,13 @@ use `@Email` and `@NotBlank` together, that causes both validations to run even 
 enter a value, validating both that they need to enter a value due to `@NotBlank` and because the
 blank value needs to be a validly formatted email address due to `@Email`.
 
+### Required Inputs
+
+As mentioned above in the [Validating Inputs](#validating-inputs) section, the annotations `@NotEmpty`,
+`@NotBlank`, and `@NotNull` are used to make a field required. The library will automatically
+add the necessary `aria-required` attribute to the input field in your HTML and add a red asterisk to 
+labels for required inputs where applicable.
+
 ## Dynamic Input Fields
 
 A field is dynamic if it is unknown exactly how many of them will be submitted on a given form
@@ -1034,7 +1042,7 @@ page is labeled by the page header. In this case we recommend using the `cfa:scr
 live
 template which we have provided. This template makes use of an `aria-label` referencing the header
 of
-the page instead of a traditional label.
+the page instead of a traditional label. For more information on see [Screen with One Input](#screen-with-one-input).
 
 #### Text
 
@@ -1504,6 +1512,40 @@ and one with the secondary button CSS classes (`button button--secondary`):
 There is an optional field called `isHidden` available on both buttons. If set to `true`,
 the `display-none` class will be added to the widget's classes resulting in the button being hidden
 when the page loads.
+
+### Screen with One Input
+
+Screens with a single input are tricky because all inputs need a label, but for this screen pattern
+the label is the header of the page. To handle this, we have a special fragment called `screenWithOneInput`.
+You can use the `cfa:screenWithOneInput` live template to quickly create a screen with a single input
+that utilizes this fragment.
+
+Note that the live template will ask you for a `title`, `header`, and `inputName`. This input name should
+match the input name you give the actual input you use. There is also an optional `subtext` which can
+display optional text below the header.
+
+The live template looks like this:
+```html
+<th:block
+  th:replace="~{fragments/screens/screenWithOneInput ::
+  screenWithOneInput(
+    title=#{},
+    header=#{},
+    inputName='',
+    subtext=#{},
+    formAction=${formAction},
+    inputContent=~{::inputContent})}">
+  <th:block th:ref="inputContent">
+    <!-- Be sure to have `ariaLabel='header'` to label the input with the header -->
+    <th:block th:replace="~{fragments/inputs/text ::
+      text(inputName='',
+      ariaLabel='header')}"/>
+  </th:block>
+</th:block>
+```
+
+Note in this example we use a text input, but you can use any input type you like. Just make sure the
+input name matches the `inputName` you give the `screenWithOneInput` fragment.
 
 ## Document Upload
 

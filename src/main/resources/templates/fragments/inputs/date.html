@@ -3,6 +3,7 @@
     th:with="
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName + 'Month', false) || requiredInputs.getOrDefault(inputName + 'Day', false) || requiredInputs.getOrDefault(inputName + 'Year', false)},
       hasErrorMonth=${
         errorMessages != null &&
         errorMessages.get(inputName + 'Month') != null &&
@@ -19,8 +20,19 @@
   <div
       th:class="'form-group' + ${((hasErrorMonth || hasErrorDay || hasErrorYear) ? ' form-group--error' : '')}">
     <fieldset th:id="${groupName}" class="input-group input-group--inline">
-      <legend th:if="${hasLabel}" th:for="${inputName}" th:text="${label}"
-             class="form-question"/>
+      <legend th:if="${hasLabel}" th:for="${inputName}"
+             class="form-question">
+        <span th:text="${label}"></span>
+        <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" aria-hidden="true">*</span>
+      </legend>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
+      <th:block
+          th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
       <p class="text--help">
         <label th:for="${inputName}+'-month'"
                th:id="${inputName}+'-month-label'"
@@ -42,6 +54,7 @@
              th:attr="
               aria-describedby=${inputName + '-month-label'},
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+              aria-required=${requiredInputs.getOrDefault(inputName + 'Month', false)},
               aria-invalid=${hasErrorMonth}"
              th:value="${fieldData.getOrDefault(inputName + 'Month', '')}"/>
       /
@@ -53,6 +66,7 @@
              th:attr="
               aria-describedby=${inputName}+'-day-label',
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+              aria-required=${requiredInputs.getOrDefault(inputName + 'Day', false)},
               aria-invalid=${hasErrorDay}"
              th:value="${fieldData.getOrDefault(inputName + 'Day', '')}"/>
       /
@@ -64,16 +78,9 @@
              th:attr="
               aria-describedby=${inputName}+'-year-label',
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+              aria-required=${requiredInputs.getOrDefault(inputName + 'Year', false)},
               aria-invalid=${hasErrorYear}"
              th:value="${fieldData.getOrDefault(inputName + 'Year', '')}"/>
     </fieldset>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
   </div>
 </th:block>
