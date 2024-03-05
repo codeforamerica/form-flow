@@ -49,6 +49,8 @@ public class TestFlow extends FlowInputs {
   @NotEmpty(message = "Please select at least one")
   List<String> favoriteFruitCheckbox;
 
+  List<String> favoriteVeggieCheckbox;
+
   @NotBlank(message = "Don't leave this blank")
   @Size(min = 2, message = "You must enter a value 2 characters or longer")
   String inputWithMultipleValidations;

@@ -5,7 +5,7 @@
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
       name=${inputName} + '[]',
       checked=${T(formflow.library.utils.InputUtils).arrayOrStringContains(fieldData.getOrDefault(name, ''), value)},
-      id=${#bools.isTrue(noneOfTheAbove) ? 'none__checkbox' : inputName + '-' + value}"
+      id=${#bools.isTrue(noneOfTheAbove) ? 'none__checkbox-' + inputName : inputName + '-' + value}"
     th:assert="
       ${!#strings.isEmpty(inputName)},
       ${!#strings.isEmpty(value)},

@@ -25,10 +25,30 @@
                     th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteFruitCheckbox',value='Orange', label='Orange')}"/>
                 <th:block
                     th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteFruitCheckbox',value='Banana', label='Banana')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteFruitCheckbox',value='None', label='None', noneOfTheAbove=true)}"/>
+              </th:block>
+            </th:block>
+
+            <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
+                checkboxFieldset(inputName='favoriteVeggieCheckbox',
+                label='favoriteVeggie',
+                fieldsetHelpText='favoriteVeggieGoesHere',
+                content=~{::favoriteVeggie})}">
+              <th:block th:ref="favoriteVeggie">
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='Apple', label='Carrot')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='Orange', label='Kale')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='Banana', label='Tomato')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='None', label='None', noneOfTheAbove=true)}"/>
               </th:block>
             </th:block>
             <div class="form-card__footer">
-              <th:block th:replace="~{fragments/continueButton :: continue}"/>
+              <th:block
+                  th:replace="~{fragments/inputs/submitButton :: submitButton(text=#{general.inputs.continue})}"/>
             </div>
           </th:block>
         </th:block>
