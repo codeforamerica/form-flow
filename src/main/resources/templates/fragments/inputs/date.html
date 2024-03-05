@@ -6,7 +6,7 @@
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},
       hasErrorYear=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Year'))},
-      hasErrorGroup=${hasErrorYear || hasErrorMonth || hasErrorDay || !#arrays.isEmpty(errorMessages.get(groupName))}"
+      hasErrorGroup=${hasErrorYear || hasErrorMonth || hasErrorDay || (errorMessages != null && !#arrays.isEmpty(errorMessages.get(groupName)))}"
     th:assert="${hasLabel || hasAriaLabel}">
   <div th:class="'form-group' + ${hasErrorGroup ? ' form-group--error' : ''}">
     <fieldset th:id="${groupName}" class="input-group input-group--inline">
