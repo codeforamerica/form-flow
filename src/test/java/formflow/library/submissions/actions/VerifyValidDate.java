@@ -25,6 +25,10 @@ public class VerifyValidDate implements Action {
         inputData.get("dateDay"),
         inputData.get("dateYear"));
 
+    if (parentDate.equals("null/null/null")) {
+      return Collections.emptyMap();
+    }
+
     if (!isDateValid(parentDate)) {
       return Map.of("dateFull", List.of("Please enter a valid date"));
     }
