@@ -43,8 +43,7 @@ public class FormScreen {
   }
 
   public List<String> getInputErrorMessages(String inputName) {
-    return html.select("[id^=\"%s-error-message\"]".formatted(inputName)).stream()
-        .map(Element::text).toList();
+    return getInputErrors(inputName).stream().map(Element::text).toList();
   }
 
   public Element getInputError(String inputName) {
