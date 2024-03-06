@@ -119,6 +119,7 @@ public class InputsTest extends AbstractMockMvcTest {
     postExpectingFailure("inputs", params);
 
     var screen = new FormScreen(getPage("inputs"));
+    assertThat(screen.getElementsByClassName("form-group--error")).isNotNull();
     assertThat(screen.getInputErrorMessages("dateFull")).containsExactly("Make sure you enter a date between 01/01/1901 and now");
   }
 
