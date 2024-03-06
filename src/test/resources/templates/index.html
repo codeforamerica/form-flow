@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html th:lang="${#locale.language}">
-<head th:replace="fragments/head :: head(title='Test index page')"></head>
+<head th:replace="~{fragments/head :: head(title='Test index page')}"></head>
 <body>
 <div class="page-wrapper">
-  <th:block th:replace="fragments/toolbar :: toolbar" />
-  <th:block th:replace="fragments/demoBanner :: demoBanner" />
+  <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
+  <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
   <section class="slab">
     <div class="grid">
       <div class="grid__item">
@@ -16,6 +16,6 @@
     <a class="button" href="/flow/testLandmarkFlow/first">Start the test flow</a>
   </main>
 </div>
-<th:block th:replace="fragments/footer :: footer" />
+<th:block th:replace="~{fragments/footer :: footer}"/>
 </body>
 </html>
