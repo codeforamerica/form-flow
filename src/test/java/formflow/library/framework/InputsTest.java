@@ -109,6 +109,20 @@ public class InputsTest extends AbstractMockMvcTest {
         List.of("You must enter a value 2 characters or longer", "Don't leave this blank"));
   }
 
+  @Test
+  void shouldCrossValidateDateInput() throws Exception {
+    Map<String, List<String>> params = Map.of(
+        "dateMonth", List.of("1"),
+        "dateDay", List.of("1"),
+        "dateYear", List.of("1111")
+    );
+    postExpectingFailure("inputs", params);
+
+    var screen = new FormScreen(getPage("inputs"));
+    assertThat(screen.getElementsByClassName("form-group--error")).isNotNull();
+    assertThat(screen.getInputErrorMessages("dateFull")).containsExactly("Make sure you enter a date between 01/01/1901 and now");
+  }
+
   @Nested
   public class CheckboxFieldset {
 

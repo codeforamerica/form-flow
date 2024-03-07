@@ -1,6 +1,7 @@
 name: testFlow
 flow:
   inputs:
+    crossFieldValidationAction: VerifyValidDate
     nextScreens:
       - name: test
   testAddressValidation:
