@@ -5,10 +5,10 @@
       ${!#strings.isEmpty(linkLabel)},
       ${!#strings.isEmpty(content)}">
   <div class="reveal reveal-adjacent reveal__border" th:classappend="${forceShowContent}">
-    <a href="#" class="reveal__link reveal__link__header-adjacent" aria-expanded="false"
+    <button class="reveal__button reveal__link__header-adjacent" aria-expanded="false"
        aria-controls="reveal-content">
       <th:block th:replace="${linkLabel}"></th:block>
-    </a>
+    </button>
     <div class="reveal__content reveal__content-adjacent" id="controlId">
       <th:block th:replace="${content}"/>
     </div>

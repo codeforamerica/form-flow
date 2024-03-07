@@ -436,8 +436,8 @@ body,
   height: auto;
 }
 
-.slab a:not(.button):not(.reveal__link):not(.text--red),
-.slab a:not(.button):not(.reveal__link):not(.text--red):focus,
+.slab a:not(.button):not(.reveal__button):not(.text--red),
+.slab a:not(.button):not(.reveal__button):not(.text--red):focus,
 .button--link, .button--link:focus {
   color: #003865;
 }
@@ -526,7 +526,7 @@ body,
   border-radius: 10px;
 }
 
-.reveal__link {
+.reveal__button {
   border: none;
   width: 100%;
 }
@@ -579,7 +579,7 @@ body,
   margin-bottom: 0;
 }
 
-.reveal .reveal__link {
+.reveal .reveal__button {
   color: #000;
   background-color: #F7F5F4;
 }

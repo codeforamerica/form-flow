@@ -124,6 +124,18 @@ public class InputsTest extends AbstractMockMvcTest {
   }
 
   @Nested
+  public class CheckboxFieldset {
+
+    @Test
+    void multipleCheckboxSetsWithNoneOptionsAreUnique() throws Exception {
+      var screen = new FormScreen(getPage("pageWithCheckboxSetInput"));
+
+      assertThat(screen.getElementById("none__checkbox-favoriteFruitCheckbox")).isNotNull();
+      assertThat(screen.getElementById("none__checkbox-favoriteVeggieCheckbox")).isNotNull();
+    }
+  }
+
+  @Nested
   public class Address {
 
     String streetAddress1 = "1111 N State St";

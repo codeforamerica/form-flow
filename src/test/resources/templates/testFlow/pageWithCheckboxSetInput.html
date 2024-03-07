@@ -12,6 +12,21 @@
         <th:block
             th:replace="~{fragments/form :: form(action='/flow/testFlow/pageWithCheckboxSetInput', content=~{::formContent})}">
           <th:block th:ref="formContent">
+            <th:block th:replace="~{'fragments/honeycrisp/reveal' :: reveal(
+                controlId='r1',
+                linkLabel=~{::revealLabel1},
+                content=~{::revealContent1})}">
+              <th:block th:ref="revealLabel1">
+            <span class="clipboard-icon">
+              <i class="icon-">&#xE862;</i>
+            </span>
+                <span>Reveal content</span>
+              </th:block>
+              <th:block th:ref="revealContent1">
+                <span>This content has been revealed</span>
+              </th:block>
+            </th:block>
+
             <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
                 checkboxFieldset(inputName='favoriteFruitCheckbox',
                 label='favoriteFruit',
@@ -25,10 +40,30 @@
                     th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteFruitCheckbox',value='Orange', label='Orange')}"/>
                 <th:block
                     th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteFruitCheckbox',value='Banana', label='Banana')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteFruitCheckbox',value='None', label='None', noneOfTheAbove=true)}"/>
+              </th:block>
+            </th:block>
+
+            <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
+                checkboxFieldset(inputName='favoriteVeggieCheckbox',
+                label='favoriteVeggie',
+                fieldsetHelpText='favoriteVeggieGoesHere',
+                content=~{::favoriteVeggie})}">
+              <th:block th:ref="favoriteVeggie">
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='Apple', label='Carrot')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='Orange', label='Kale')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='Banana', label='Tomato')}"/>
+                <th:block
+                    th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='favoriteVeggieCheckbox',value='None', label='None', noneOfTheAbove=true)}"/>
               </th:block>
             </th:block>
             <div class="form-card__footer">
-              <th:block th:replace="~{fragments/continueButton :: continue}"/>
+              <th:block
+                  th:replace="~{fragments/inputs/submitButton :: submitButton(text=#{general.inputs.continue})}"/>
             </div>
           </th:block>
         </th:block>

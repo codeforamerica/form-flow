@@ -33,6 +33,9 @@ flow:
   testUpload:
     nextScreens:
       - name: pageWithCustomSubmitButton
+  pageWithCheckboxSetInput:
+    nextScreens:
+      - name: success
   pageWithOptionalValidation:
     nextScreens:
       - name: success
