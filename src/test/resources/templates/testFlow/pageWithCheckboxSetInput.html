@@ -12,6 +12,21 @@
         <th:block
             th:replace="~{fragments/form :: form(action='/flow/testFlow/pageWithCheckboxSetInput', content=~{::formContent})}">
           <th:block th:ref="formContent">
+            <th:block th:replace="~{'fragments/honeycrisp/reveal' :: reveal(
+                controlId='r1',
+                linkLabel=~{::revealLabel1},
+                content=~{::revealContent1})}">
+              <th:block th:ref="revealLabel1">
+            <span class="clipboard-icon">
+              <i class="icon-">&#xE862;</i>
+            </span>
+                <span>Reveal content</span>
+              </th:block>
+              <th:block th:ref="revealContent1">
+                <span>This content has been revealed</span>
+              </th:block>
+            </th:block>
+
             <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
                 checkboxFieldset(inputName='favoriteFruitCheckbox',
                 label='favoriteFruit',
