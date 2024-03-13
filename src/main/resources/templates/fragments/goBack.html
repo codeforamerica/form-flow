@@ -1,7 +1,7 @@
-<div th:fragment="goBackLink" class="form-width">
-  <a th:text="'&lt; ' + #{general.go-back}"
-     id="back-link"
-     class="toolbar__left"
-     href="#"
-     onclick="window.history.back(); return false;"></a>
-</div>
+<nav th:fragment="goBackLink" class="form-width" th:aria-label="#{general.go-back-region}">
+  <a id="back-link" class="toolbar__left go-back-link" href="#"
+     onclick="window.history.back(); return false;">
+    <i class="icon-navigate_before" aria-hidden="true"></i>
+    <span class="underline" th:text="#{general.go-back}"></span>
+  </a>
+</nav>
