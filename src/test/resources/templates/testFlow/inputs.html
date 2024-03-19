@@ -38,6 +38,13 @@
                       th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='checkboxSet', value='Checkbox-B', label='Checkbox B')}"/>
                 </th:block>
               </th:block>
+              <th:block th:with="checkboxOptions=${T(formflow.library.inputs.TestOption).values()}">
+                <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
+                          checkboxFieldset(inputName='checkboxEnumSet',
+                          label='checkboxEnumSet',
+                          options=${checkboxOptions})}">
+                </th:block>
+              </th:block>
               <th:block
                   th:replace="~{fragments/inputs/checkbox :: checkbox(inputName='checkboxInput', value='checkbox-value', label='Single checkbox')}"/>
               <th:block th:replace="~{fragments/inputs/radioFieldset ::
@@ -51,6 +58,13 @@
                       th:replace="~{fragments/inputs/radio :: radio(inputName='radioInput',value='Radio B', label='Radio B')}"/>
                   <th:block
                       th:replace="~{fragments/inputs/radio :: radio(inputName='radioInput',value='Radio C', label='Radio C', radioHelpText='Radio C')}"/>
+                </th:block>
+              </th:block>
+              <th:block th:with="radioOptions=${T(formflow.library.inputs.TestOption).values()}">
+                <th:block th:replace="~{fragments/inputs/radioFieldset ::
+                          radioFieldset(inputName='radioInputEnum',
+                          label='radioInputEnum',
+                          options=${radioOptions})}">
                 </th:block>
               </th:block>
               <th:block

@@ -1263,6 +1263,39 @@ Honeycrisp contains JavaScript logic that deselects the other checkboxes when "N
 selected. To enable it, you'll need to add `noneOfTheAbove.init()` to your JavaScript that runs
 after page load.
 
+The `content` parameter provides flexibility for the checkboxes list in the checkbox set and might be a better option
+for dynamic values (like household member names).
+
+The `options` parameter provides some convenience for static checkbox sets. A collection of objects that
+implement `InputOption` can be passed into `checkboxFieldset`.
+
+```java
+enum ProgramOption implements InputOption {
+  SNAP("programs.SNAP", "programs-desc.SNAP"),
+  CCAP("programs.CCAP", "programs-desc.CCAP"),
+  GRH("programs.GRH", "programs-desc.GRH"),
+  CASH("programs.CASH", "programs-desc.CASH"),
+  OTHER("programs.Other", null);
+
+  // Should be defined by their message properties
+  final String label;
+  final String helpText;
+
+  // ... constructor and getters
+}
+```
+
+```html
+
+<th:block
+    th:with="programOptions=${T(ProgramOption).values()}"
+    th:replace="~{fragments/inputs/checkboxFieldset ::
+          checkboxFieldset(inputName='programs',
+              label='Select the programs',
+              noneOfTheAboveLabel='None of the above', 
+              options=${programOptions})}"/>
+```
+
 ##### Checkbox
 
 ```html
@@ -1335,6 +1368,34 @@ associated with each other.
 The `radioFieldset` has an optional `radioHelpText` field which will appear under the
 fieldset's legend. `radio`, too, has an optional `radioHelpText` field which will appear
 under the label's description text.
+
+This fragment also supports passing a collection of `options` instead of using `content`.
+The `options` parameter provides some convenience for static radio sets. A collection of objects that
+implement `InputOption` can be passed into `radioFieldset`.
+
+```java
+enum ColorOption implements InputOption {
+  BLUE("color.blue", "color-desc.blue"),
+  RED("color.red", "color-desc.red"),
+  YELLOW("color.yellow", null);
+
+  // Should be defined by their message properties
+  final String label;
+  final String helpText;
+
+  // ... constructor and getters
+}
+```
+
+```html
+
+<th:block
+    th:with="colorOptions=${T(ColorOption).values()}"
+    th:replace="~{fragments/inputs/radioFieldset ::
+          radioFieldset(inputName='favoriteColor',
+              label='What is your favorite color?',
+              options=${colorOptions})}"/>
+```
 
 For convenience, we have provided a `cfa:inputFieldsetWithRadio` live template which can be used to
 quickly create groupings of radio inputs. Not that when using this template, you can copy the inner
@@ -2160,7 +2221,7 @@ public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
 
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-      PdfMap pdfMap) {
+                                                              PdfMap pdfMap) {
     Map<String, SubmissionField> submissionFields = new HashMap<>();
 
     String month = submission.getInputData().get("applicantBirthMonth").toString();
@@ -2211,7 +2272,7 @@ public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-      PdfMap pdfMap) {
+                                                              PdfMap pdfMap) {
     Map<String, SubmissionField> submissionFields = new HashMap<>();
 
     ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
@@ -2422,7 +2483,7 @@ Below is an example of a sendEmail() call being made by an application using the
 Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
-MessageResponse response = mailgunEmailClient.sendEmail(
+MessageResponse response=mailgunEmailClient.sendEmail(
     emailSubject,
     recipientEmail,
     emailToCc,
@@ -2430,7 +2491,7 @@ MessageResponse response = mailgunEmailClient.sendEmail(
     emailBody,
     pdfs,
     requireTls
-);
+    );
 ```
 
 The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
