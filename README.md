@@ -1996,10 +1996,11 @@ inputs to PDF fields.
 
 #### application.yaml properties
 
-| Name                            | Description                                                                                                                                                                                                                   | Example                     |
-|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                       | `map-file: pdf-map.yaml`    |
-| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited. | `generate-flattened: false` |
+| Name                            | Description                                                                                                                                                                                                                                                                        | Example                     |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                                                                            | `map-file: pdf-map.yaml`    |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited.                                                      | `generate-flattened: false` |
+| `read-only` (optional)          | Boolean flag for whether to make all fields in the PDF read only (`true`) or not (`false`). Defaults to `false`. Note that this may be a better option for PDF accessibility when used in place of flattening (`generate-flattened` set to `false` and `read-only` set to `true`). | `ready-only: true`          |
 
 For example:
 
@@ -2008,6 +2009,7 @@ form-flow:
   pdf:
     map-file: pdf-map.yaml
     generate-flattened: false
+    read-only: true
 ```
 
 ### Creating a Template PDF File
