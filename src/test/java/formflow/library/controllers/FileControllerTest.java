@@ -23,6 +23,7 @@ import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utils.UserFileMap;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -171,7 +173,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
             .session(session)
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
         .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
-        .andExpect(content().string("We are unable to process this file because a virus was detected. Please try another file."));
+        .andExpect(content().string(
+            "We are unable to process this file because a virus was detected. Please try another file."));
   }
 
   @Test
@@ -352,7 +355,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(),
+                      fileId)
                   .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -368,7 +372,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(),
+                      fileId)
                   .session(session))
           .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -418,7 +423,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.empty());
       mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(),
+                      fileId)
                   .session(session))
           .andExpect(status().is(404));
     }
@@ -428,7 +434,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       setFlowInfoInSession(session, "testFlow", submission.getId());
       byte[] testFileBytes = "foo".getBytes();
       long fileSize = testFileBytes.length;
-      CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes);
+      CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes, null);
       UserFile testUserFile = UserFile.builder()
           .originalName("testFileName")
           .mimeType("image/jpeg")
@@ -441,7 +447,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders
-                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(), fileId)
+                  .get("/file-download/{flow}/{submissionId}/{fileId}", "testFlow", submission.getId().toString(),
+                      fileId)
                   .session(session))
           .andExpect(MockMvcResultMatchers.request().asyncStarted())
           .andReturn();
@@ -461,8 +468,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
       byte[] secondTestFileBytes = Files.readAllBytes(Paths.get("src/test/resources/test-platypus.gif"));
       long firstTestFileSize = firstTestFileBytes.length;
       long secondTestFileSize = secondTestFileBytes.length;
-      CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes);
-      CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes);
+      CloudFile firstTestcloudFile = new CloudFile(firstTestFileSize, firstTestFileBytes, null);
+      CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes, null);
 
       UserFile firstTestUserFile = UserFile.builder()
           .originalName("test.png")
