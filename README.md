@@ -191,26 +191,26 @@ example using our [live templates for a form screen](#applying-live-templates-to
 
 <th:block th:replace="~{fragments/icons :: clipboardWithEnvelope}"/>
 <th:block
-    th:replace="~{fragments/cardHeader :: cardHeader(header='Tell us about yourself')}"/>
+        th:replace="~{fragments/cardHeader :: cardHeader(header='Tell us about yourself')}"/>
 <th:block
-    th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
-  <th:block th:ref="formContent">
-    <div class="form-card__content">
-      <th:block th:replace="~{fragments/inputs/text ::
+        th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
+    <th:block th:ref="formContent">
+        <div class="form-card__content">
+            <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='firstName',
                   label='What\'s your first name?')}"/>
-      <th:block th:replace="~{fragments/inputs/text ::
+            <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='lastName',
                   label='What\'s your last name?')}"/>
-      <th:block th:replace="~{fragments/inputs/text ::
+            <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName='emailAddress',
                   label='What\'s your email address?')}"/>
-      <div class="form-card__footer">
-        <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+            <div class="form-card__footer">
+                <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
                   text='Continue')}"/>
-      </div>
-    </div>
-  </th:block>
+            </div>
+        </div>
+    </th:block>
 </th:block>
 ```
 
@@ -407,8 +407,8 @@ Thymeleaf templates. Template code can run conditions via this object, like so:
 ```html
 
 <div
-    th:with="showCondition=${conditionManager.runCondition('ConditionName', submission, 'data')}">
-  <h1 th:if="showCondition">Conditionally show this element</h1>
+        th:with="showCondition=${conditionManager.runCondition('ConditionName', submission, 'data')}">
+    <h1 th:if="showCondition">Conditionally show this element</h1>
 </div>
 ```
 
@@ -925,18 +925,18 @@ The template HTML can look like:
 <head th:replace="~{fragments/head :: head(title='')}"></head>
 <body>
 <div class="page-wrapper">
-  <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
-  <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
-  <section class="slab">
-    <div class="grid">
-      <div class="grid__item">
-        <h1 class="spacing-below-35"></h1>
-      </div>
-    </div>
-  </section>
-  <main id="content" role="main" class="slab slab--white">
+    <th:block th:replace="~{fragments/toolbar :: toolbar}"/>
+    <th:block th:replace="~{fragments/demoBanner :: demoBanner}"/>
+    <section class="slab">
+        <div class="grid">
+            <div class="grid__item">
+                <h1 class="spacing-below-35"></h1>
+            </div>
+        </div>
+    </section>
+    <main id="content" role="main" class="slab slab--white">
 
-  </main>
+    </main>
 </div>
 <th:block th:replace="~{fragments/footer :: footer}"/>
 </body>
@@ -979,15 +979,15 @@ Example form fragment:
 ```html
 
 <th:block
-    th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
-  <th:block th:ref="exampleForm">
-    <div class="form-card__content">
-      INPUTS GO HERE
-    </div>
-    <div class="form-card__footer">
-      SUBMIT BUTTON GOES HERE
-    </div>
-  </th:block>
+        th:replace="~{fragments/form :: form(action=${formAction}, content=~{::exampleForm}, formId='exampleID')}">
+    <th:block th:ref="exampleForm">
+        <div class="form-card__content">
+            INPUTS GO HERE
+        </div>
+        <div class="form-card__footer">
+            SUBMIT BUTTON GOES HERE
+        </div>
+    </th:block>
 </th:block>
 ```
 
@@ -1236,12 +1236,12 @@ Below are examples of both types of checkboxes:
                           label='This label is actually a legend for the checkbox fieldset',
                           fieldsetHelpText='This help text will appear below the legend',
                           content=~{::vehiclesOwnedContent})}">
-  <th:block th:ref="vehiclesOwnedContent">
-    <th:block
-        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
-    <th:block
-        th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
-  </th:block>
+    <th:block th:ref="vehiclesOwnedContent">
+        <th:block
+                th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='CAR', label='Car', checkboxHelpText='This help text will appear next to the checkbox.')}"/>
+        <th:block
+                th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='vehiclesOwned',value='BIKE', label='Bike')}"/>
+    </th:block>
 </th:block>
 ```
 
@@ -1256,7 +1256,7 @@ to `checkboxInSet()`:
 ```html
 
 <th:block
-    th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
+        th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
 ```
 
 Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is
@@ -1307,24 +1307,24 @@ An example of a radio input:
                           label='What\'s your favorite color?',
                           fieldsetHelpText='This help text will appear under the legend',
                           content=~{::favoriteColorContent})}">
-  <th:block th:ref="favoriteColorContent">
-    <th:block
-        th:replace="~{fragments/inputs/radio :: radio(
+    <th:block th:ref="favoriteColorContent">
+        <th:block
+                th:replace="~{fragments/inputs/radio :: radio(
             inputName='favoriteColor',
             value='BLUE',
             label='Blue'
             radioHelpText='This help text will appear under this radio\'s label')}"/>
-    <th:block
-        th:replace="~{fragments/inputs/radio :: radio(
+        <th:block
+                th:replace="~{fragments/inputs/radio :: radio(
             inputName='favoriteColor',
             value='RED',
             label='Red')}"/>
-    <th:block
-        th:replace="~{fragments/inputs/radio :: radio(
+        <th:block
+                th:replace="~{fragments/inputs/radio :: radio(
             inputName='favoriteColor',
             value='YELLOW', label='Yellow',
             radioHelpText='This help text will appear under the radio\'s label.')})}"/>
-  </th:block>
+    </th:block>
 </th:block>
 ```
 
@@ -1353,17 +1353,17 @@ An example select input:
 ```html
 
 <th:block
-    th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
-  <th:block th:ref="favoriteFruitContent">
-    <th:block
-        th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
-    <th:block
-        th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
-    <th:block
-        th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
-    <th:block
-        th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
-  </th:block>
+        th:replace="~{fragments/inputs/select :: select(inputName='favoriteFruit', label='What\'s your favorite fruit?', helpText='Mine is banana', content=~{::favoriteFruitContent})}">
+    <th:block th:ref="favoriteFruitContent">
+        <th:block
+                th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
+        <th:block
+                th:replace="~{fragments/inputs/selectOption :: selectOption(value='APPLE', optionText='Apple')}"/>
+        <th:block
+                th:replace="~{fragments/inputs/selectOption :: selectOption(value='BANANA', optionText='Banana')}"/>
+        <th:block
+                th:replace="~{fragments/inputs/selectOption :: selectOption(value='KIWI', optionText='Kiwi')}"/>
+    </th:block>
 </th:block>
 ```
 
@@ -1468,9 +1468,9 @@ Here is an example of using the `reveal` fragment:
                 linkLabel=~{::revealLabel2},
                 content=~{::revealContent2},
                 forceShowContent='true')}">
-  <th:block th:ref="revealContent2">
-    <p th:text="#{ssn-faqs.accordion2.expanded}"></p>
-  </th:block>
+    <th:block th:ref="revealContent2">
+        <p th:text="#{ssn-faqs.accordion2.expanded}"></p>
+    </th:block>
 </th:block>
 ```
 
@@ -1511,12 +1511,35 @@ The library provides a file upload feature using the client side JavaScript
 library [Dropzone JS](https://www.dropzone.dev/). File uploads need a configured AWS S3 Bucket to
 upload to and provide functionality for uploading, retrieving and deleting files.
 
+### Cloud File Repository
+
+The library provides a method for integrating with cloud file repositories, like S3.
+Right now the library has only implemented an integration with S3.
+
+#### CloudFile
+
+As part of this cloud file repository integration, we provide a generic `CloudFile` path to
+hold the file information coming back from the could file repository.
+
+The `CloudFile` class has three fields:
+
+```java
+    Long fileSize;
+    byte[]fileBytes;
+    Map<String, Object> metadata;
+```
+
+The first two represent the file and file size information. The `metadata` field could
+be anything the implementation would like to store in this field.
+
+For example, the AWS S3 Cloud File Repository will put the S3 file's `tag` information
+in this metadata field, under the `tags` key.
+
 ### AWS S3
 
 You will need a registered AWS account to set up an S3 bucket. Once you have registered your AWS
 account you
-can [follow the instructions here to create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
-.
+can [follow the instructions here to create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html).
 
 Make sure to note your bucket's name and region as well as your AWS access and secret keys as you
 will need these for configuring file uploads in the library. The bucket and region are configured in
@@ -1533,7 +1556,7 @@ input field the file was uploaded from, and a UUID. We then store it in S3, orga
 submission it is a part of, like so:
 
 ```
-   `{{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…} `
+    {{submission_id}}/{{flow_name}}_{{input_name}}_UUID.{jpg, png, docx…}
 ```
 
 The `flow_name` is the flow the user was in when they uploaded the file and the `input_name` is the
@@ -1648,6 +1671,8 @@ permits.
 
 ### Virus Scanning
 
+#### ClamAV Server
+
 File uploads made through form flow can be scanned for viruses. We provide a way to pass
 files to a ClamAV server.
 
@@ -1669,6 +1694,29 @@ There is a field `virus_scanned` in the `user_files` table with `Boolean` as its
 
 > ⚠️ If virus scanning is enabled and a virus is detected in a file, it is rejected and not saved in
 > our systems.
+
+#### Cloud Storage Security in AWS
+
+Some projects have chosen to
+use [Cloud Storage Security](https://aws.amazon.com/marketplace/pp/prodview-q7oc4shdnpc4w?ref_=aws-mp-console-subscription-detail)
+right in AWS. It will allow a file to be scanned once it has been uploaded to AWS.
+
+When this option is used, the scanner will add a few tags directly to the files once they are scanned. By default
+configuration, if a virus is found the file is moved to a quarantine bucket. Please
+read the Cloud Storage Security information for more details about that.
+
+The tags added to the files are:
+
+* `scan-result` - this is generally set to `Clean` unless there was a virus
+* `date-scanned` - a date and time stamp; for example: `2024-03-27 12:38:35Z`
+
+If this virus scanning tool is used, these (and any other tags on the file) can be
+retrieved via the `CloudFile` object's `metadata` field. The key that this data is stored
+under is `tags`. The data type is `List<com.amazonaws.services.s3.model.Tag>`.
+
+Because of the asynchronous nature of this method of virus scanning, the `user_files` table
+is **not** updated with the virus scanning information and is **not** a reliable source for determining if a file has
+been scanned or not.
 
 ## Document Download
 
@@ -2160,7 +2208,7 @@ public class ApplicantDateOfBirthPreparer implements SubmissionFieldPreparer {
 
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-      PdfMap pdfMap) {
+                                                              PdfMap pdfMap) {
     Map<String, SubmissionField> submissionFields = new HashMap<>();
 
     String month = submission.getInputData().get("applicantBirthMonth").toString();
@@ -2211,7 +2259,7 @@ public class DataBaseFieldPreparer implements SubmissionFieldPreparer {
 
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission,
-      PdfMap pdfMap) {
+                                                              PdfMap pdfMap) {
     Map<String, SubmissionField> submissionFields = new HashMap<>();
 
     ArrayList<Map<String, Object>> houseHoldSubflow = (ArrayList<Map<String, Object>>) submission.getInputData()
@@ -2422,7 +2470,7 @@ Below is an example of a sendEmail() call being made by an application using the
 Please note that pdfs is a list of files to be passed as attachments with the email.
 
 ```java
-MessageResponse response = mailgunEmailClient.sendEmail(
+MessageResponse response=mailgunEmailClient.sendEmail(
     emailSubject,
     recipientEmail,
     emailToCc,
@@ -2430,7 +2478,7 @@ MessageResponse response = mailgunEmailClient.sendEmail(
     emailBody,
     pdfs,
     requireTls
-);
+    );
 ```
 
 The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
