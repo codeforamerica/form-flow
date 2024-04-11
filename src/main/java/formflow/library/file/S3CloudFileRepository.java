@@ -85,6 +85,12 @@ public class S3CloudFileRepository implements CloudFileRepository {
         }
     }
 
+    /**
+     * Retrieves a file from S3.
+     *
+     * @param filepath The path of the file
+     * @return CloudFile containing file, file size, and metadata about the file.
+     */
     public CloudFile get(String filepath) {
         try {
             log.info("Getting file at filepath {} from S3", filepath);
@@ -110,6 +116,12 @@ public class S3CloudFileRepository implements CloudFileRepository {
         }
     }
 
+    /**
+     * Deletes a file from S3 storage.
+     *
+     * @param filepath The path of the file to delete
+     * @throws SdkClientException
+     */
     public void delete(String filepath) throws SdkClientException {
         log.info("Deleting file at filepath {} from S3", filepath);
         s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
