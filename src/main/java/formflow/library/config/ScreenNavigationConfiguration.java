@@ -2,6 +2,7 @@ package formflow.library.config;
 
 import java.util.Collections;
 import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -9,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class ScreenNavigationConfiguration {
+
+  private String name;
 
   private List<NextScreen> nextScreens = Collections.emptyList();
   private String subflow;

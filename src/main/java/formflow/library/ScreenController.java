@@ -94,7 +94,6 @@ public class ScreenController extends FormFlowController {
   @Getter
   private class ScreenConfig {
     String flowName;
-    String screenName;
     ScreenNavigationConfiguration screenNavigationConfiguration;
   }
 
@@ -123,7 +122,7 @@ public class ScreenController extends FormFlowController {
     ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
-    String screen = screenConfig.getScreenName();
+    String screen = currentScreen.getName();
 
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
@@ -266,8 +265,8 @@ public class ScreenController extends FormFlowController {
    * both.
    *
    * @param formData           The input data from current screen, can be null
-   * @param flow               The current flow name, not null
-   * @param screen             The current screen name in the flow, not null
+   * @param requestFlow        The current flow name, not null
+   * @param requestScreen      The current screen name in the flow, not null
    * @param httpSession        The HTTP session if it exists, can be null
    * @param request            The HttpServletRequest
    * @param redirectAttributes The attributes used/modified in the case of a redirect happening
@@ -289,9 +288,9 @@ public class ScreenController extends FormFlowController {
     log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
     // Checks if screen and flow exist. If getScreenConfig runs successfully, then the flow and screen exist.
     ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
-    String flow = screenConfig.getFlowName();
-    String screen = screenConfig.getScreenName();
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+    String flow = screenConfig.getFlowName();
+    String screen = currentScreen.getName();
 
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
@@ -370,7 +369,7 @@ public class ScreenController extends FormFlowController {
     ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
-    String screen = screenConfig.getScreenName();
+    String screen = currentScreen.getName();
 
     Submission submission = getSubmissionFromSession(httpSession, flow);
 
@@ -436,7 +435,7 @@ public class ScreenController extends FormFlowController {
     ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
-    String screen = screenConfig.getScreenName();
+    String screen = currentScreen.getName();
 
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
     String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
@@ -637,7 +636,7 @@ public class ScreenController extends FormFlowController {
     ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
-    String screen = screenConfig.getScreenName();
+    String screen = currentScreen.getName();
 
     Submission submission = getSubmissionFromSession(httpSession, flow);
     log.info(
@@ -718,7 +717,7 @@ public class ScreenController extends FormFlowController {
     if (currentScreen == null) {
       throwNotFoundError(flow, screen, "Screen could not be found in flow configuration for flow " + flow + ".");
     }
-    return new ScreenConfig(currentFlowConfiguration.getName(), screen, currentScreen);
+    return new ScreenConfig(currentFlowConfiguration.getName(), currentScreen);
   }
 
   private Boolean isConditionalNavigation(ScreenNavigationConfiguration currentScreen) {
@@ -754,7 +753,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Boolean isIterationStartScreen(String flow, String screen) {
-    HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+    Map<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     if (subflows == null) {
       return false;
     }
@@ -783,7 +782,7 @@ public class ScreenController extends FormFlowController {
     }
 
     // Put subflow on model if on subflow delete confirmation screen
-    HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+    Map<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     if (subflows != null) {
       List<String> subflowFromDeleteConfirmationConfig = subflows.entrySet().stream()
           .filter(entry ->
@@ -854,7 +853,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Boolean isDeleteConfirmationScreen(String flow, String screen) {
-    HashMap<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+    Map<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
     if (subflows == null) {
       return false;
     }
