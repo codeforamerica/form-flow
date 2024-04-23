@@ -718,7 +718,7 @@ public class ScreenController extends FormFlowController {
     if (currentScreen == null) {
       throwNotFoundError(flow, screen, "Screen could not be found in flow configuration for flow " + flow + ".");
     }
-    return new ScreenConfig(flow, screen, currentScreen);
+    return new ScreenConfig(currentFlowConfiguration.getName(), screen, currentScreen);
   }
 
   private Boolean isConditionalNavigation(ScreenNavigationConfiguration currentScreen) {
