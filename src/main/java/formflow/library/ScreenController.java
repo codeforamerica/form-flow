@@ -175,11 +175,6 @@ public class ScreenController extends FormFlowController {
    * Checks if current screen condition is met.
    *
    * @param uuid          The uuid of a subflow entry
-   *                      }
-   *                      <p>
-   *                      /**
-   *                      Checks if current screen condition is met.
-   * @param uuid          The uuid of a subflow entry
    * @param currentScreen The current screen to check
    * @param submission    submission
    * @return True - current screen does not meet the condition; False - otherwise
