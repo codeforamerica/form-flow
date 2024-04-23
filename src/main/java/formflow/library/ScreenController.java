@@ -19,6 +19,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.FileValidationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -29,6 +30,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -86,19 +90,27 @@ public class ScreenController extends FormFlowController {
     log.info("Screen Controller Created!");
   }
 
+  @AllArgsConstructor
+  @Getter
+  private class ScreenConfig {
+    String flowName;
+    String screenName;
+    ScreenNavigationConfiguration screenNavigationConfiguration;
+  }
+
   /**
    * Chooses which screen template and model data to render.
    *
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param uuid        The uuid of a subflow entry, can be null
-   * @param httpSession The current httpSession, not null
+   * @param requestFlow   The current flow name, not null
+   * @param requestScreen The current screen name in the flow, not null
+   * @param uuid          The uuid of a subflow entry, can be null
+   * @param httpSession   The current httpSession, not null
    * @return the screen template with model data
    */
   @GetMapping(FLOW_SCREEN_PATH)
   ModelAndView getScreen(
-      @PathVariable String flow,
-      @PathVariable String screen,
+      @PathVariable(name = "flow") String requestFlow,
+      @PathVariable(name = "screen") String requestScreen,
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String uuid,
       RedirectAttributes redirectAttributes,
@@ -106,9 +118,13 @@ public class ScreenController extends FormFlowController {
       HttpServletRequest request,
       Locale locale
   ) {
-    log.info("GET getScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
-    // this will ensure that the screen and flow actually exist
-    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
+    log.info("GET getScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
+    // getScreenConfig() will ensure that the screen and flow actually exist
+    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+    String flow = screenConfig.getFlowName();
+    String screen = screenConfig.getScreenName();
+
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
@@ -159,6 +175,11 @@ public class ScreenController extends FormFlowController {
   /**
    * Checks if current screen condition is met.
    *
+   * @param uuid          The uuid of a subflow entry
+   *                      }
+   *                      <p>
+   *                      /**
+   *                      Checks if current screen condition is met.
    * @param uuid          The uuid of a subflow entry
    * @param currentScreen The current screen to check
    * @param submission    submission
@@ -256,8 +277,8 @@ public class ScreenController extends FormFlowController {
    */
   private ModelAndView handlePost(
       MultiValueMap<String, String> formData,
-      String flow,
-      String screen,
+      String requestFlow,
+      String requestScreen,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -265,9 +286,13 @@ public class ScreenController extends FormFlowController {
       boolean submitSubmission
   ) throws SmartyException, IOException, InterruptedException {
 
-    log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
-    // Checks if screen and flow exist
-    var currentScreen = getScreenConfig(flow, screen);
+    log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
+    // Checks if screen and flow exist. If getScreenConfig runs successfully, then the flow and screen exist.
+    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    String flow = screenConfig.getFlowName();
+    String screen = screenConfig.getScreenName();
+    ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
@@ -319,16 +344,16 @@ public class ScreenController extends FormFlowController {
   /**
    * Chooses which screen template and model data to render in a subflow.
    *
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the subflow, not null
-   * @param uuid        The uuid of a subflow entry, not null
-   * @param httpSession The current httpSession, not null
+   * @param requestFlow   The current flow name, not null
+   * @param requestScreen The current screen name in the subflow, not null
+   * @param uuid          The uuid of a subflow entry, not null
+   * @param httpSession   The current httpSession, not null
    * @return the screen template with model data
    */
   @GetMapping({FLOW_SCREEN_PATH + "/{uuid}", FLOW_SCREEN_PATH + "/{uuid}/edit"})
   ModelAndView getSubflowScreen(
-      @PathVariable String flow,
-      @PathVariable String screen,
+      @PathVariable(name = "flow") String requestFlow,
+      @PathVariable(name = "screen") String requestScreen,
       @PathVariable String uuid,
       HttpSession httpSession,
       HttpServletRequest request,
@@ -338,11 +363,15 @@ public class ScreenController extends FormFlowController {
     log.info(
         "GET getSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
         request.getRequestURI().toLowerCase(),
-        flow,
-        screen,
+        requestFlow,
+        requestScreen,
         uuid);
     // Checks if screen and flow exist
-    var currentScreen = getScreenConfig(flow, screen);
+    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+    String flow = screenConfig.getFlowName();
+    String screen = screenConfig.getScreenName();
+
     Submission submission = getSubmissionFromSession(httpSession, flow);
 
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
@@ -378,18 +407,18 @@ public class ScreenController extends FormFlowController {
    * If validation of input data fails this will redirect the client to the same subflow screen so they can fix the data.
    * </p>
    *
-   * @param formData    The input data from current screen, can be null
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param uuid        Unique id associated with the subflow's data, or `new` if it is a new iteration of the subflow. Not null.
-   * @param httpSession The HTTP session if it exists, not null
+   * @param formData      The input data from current screen, can be null
+   * @param requestFlow   The current flow name, not null
+   * @param requestScreen The current screen name in the flow, not null
+   * @param uuid          Unique id associated with the subflow's data, or `new` if it is a new iteration of the subflow. Not null.
+   * @param httpSession   The HTTP session if it exists, not null
    * @return a redirect to next screen
    */
   @PostMapping({FLOW_SCREEN_PATH + "/{uuid}", FLOW_SCREEN_PATH + "/{uuid}/edit"})
   RedirectView postSubflowScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
-      @PathVariable String flow,
-      @PathVariable String screen,
+      @PathVariable(name = "flow") String requestFlow,
+      @PathVariable(name = "screen") String requestScreen,
       @PathVariable String uuid,
       HttpSession httpSession,
       HttpServletRequest request,
@@ -399,12 +428,16 @@ public class ScreenController extends FormFlowController {
     log.info(
         "POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}",
         request.getRequestURI().toLowerCase(),
-        flow,
-        screen,
+        requestFlow,
+        requestScreen,
         uuid);
 
-    // Checks to see if flow and screen exist
-    ScreenNavigationConfiguration currentScreen = getScreenConfig(flow, screen);
+    // Checks to see if flow and screen exist; If they do not, then this will throw an error
+    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+    String flow = screenConfig.getFlowName();
+    String screen = screenConfig.getScreenName();
+
     boolean isNewIteration = uuid.equalsIgnoreCase("new");
     String iterationUuid = isNewIteration ? UUID.randomUUID().toString() : uuid;
     FormSubmission formSubmission = new FormSubmission(formData);
@@ -587,21 +620,25 @@ public class ScreenController extends FormFlowController {
   /**
    * Chooses the next screen template and model to render based on what is next in the flow.
    *
-   * @param flow        The current flow name, not null
-   * @param screen      The current screen name in the flow, not null
-   * @param httpSession The current httpSession, not null
+   * @param requestFlow   The current flow name, not null
+   * @param requestScreen The current screen name in the flow, not null
+   * @param httpSession   The current httpSession, not null
    * @return the screen template with model data, returns error page on error
    */
   @GetMapping(FLOW_SCREEN_PATH + "/navigation")
   ModelAndView navigation(
-      @PathVariable String flow,
-      @PathVariable String screen,
+      @PathVariable(name = "flow") String requestFlow,
+      @PathVariable(name = "screen") String requestScreen,
       HttpSession httpSession,
       HttpServletRequest request,
       @RequestParam(required = false) String uuid
   ) {
-    log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), flow, screen);
-    var currentScreen = getScreenConfig(flow, screen);
+    log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
+    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+    String flow = screenConfig.getFlowName();
+    String screen = screenConfig.getScreenName();
+
     Submission submission = getSubmissionFromSession(httpSession, flow);
     log.info(
         "Current submission ID is: {} and current Session ID is: {}", submission.getId(), httpSession.getId());
@@ -612,7 +649,7 @@ public class ScreenController extends FormFlowController {
     }
     String nextScreen = getNextViewableScreen(flow, getNextScreenName(submission, currentScreen, uuid), uuid, submission);
 
-    boolean isCurrentScreenLastInSubflow = getScreenConfig(flow, nextScreen).getSubflow() == null;
+    boolean isCurrentScreenLastInSubflow = getScreenConfig(flow, nextScreen).getScreenNavigationConfiguration().getSubflow() == null;
     String redirectString;
     if (uuid != null) {
       if (isCurrentScreenLastInSubflow) {
@@ -641,16 +678,19 @@ public class ScreenController extends FormFlowController {
    * @return Next viewable screen if the current one does not satisfy the condition, otherwise the current screen
    */
   private String getNextViewableScreen(String flow, String screen, String uuid, Submission submission) {
-    var currentScreen = getScreenConfig(flow, screen);
+    ScreenConfig screenConfig = getScreenConfig(flow, screen);
+    ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
+
     if (shouldRedirectToNextScreen(uuid, currentScreen, submission)) {
       String nextScreen = getNextScreenName(submission, currentScreen, uuid);
       return getNextViewableScreen(flow, nextScreen, uuid, submission);
     }
+
     return screen;
   }
 
   private String getNextScreenName(Submission submission,
-      ScreenNavigationConfiguration currentScreen, String subflowUuid) {
+                                   ScreenNavigationConfiguration currentScreen, String subflowUuid) {
     NextScreen nextScreen;
 
     List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, submission, subflowUuid);
@@ -672,13 +712,13 @@ public class ScreenController extends FormFlowController {
    * @param screen the screen that configuration is wanted for
    * @return navigation configuration for the screen
    */
-  private ScreenNavigationConfiguration getScreenConfig(String flow, String screen) {
+  private ScreenConfig getScreenConfig(String flow, String screen) {
     FlowConfiguration currentFlowConfiguration = getFlowConfigurationByName(flow);
     ScreenNavigationConfiguration currentScreen = currentFlowConfiguration.getScreenNavigation(screen);
     if (currentScreen == null) {
       throwNotFoundError(flow, screen, "Screen could not be found in flow configuration for flow " + flow + ".");
     }
-    return currentFlowConfiguration.getScreenNavigation(screen);
+    return new ScreenConfig(flow, screen, currentScreen);
   }
 
   private Boolean isConditionalNavigation(ScreenNavigationConfiguration currentScreen) {
@@ -695,7 +735,7 @@ public class ScreenController extends FormFlowController {
    * @return List<NextScreen> list of next screens
    */
   private List<NextScreen> getConditionalNextScreen(ScreenNavigationConfiguration currentScreen,
-      Submission submission, String subflowUuid) {
+                                                    Submission submission, String subflowUuid) {
     return currentScreen.getNextScreens().stream()
         .filter(nextScreen -> conditionManager.conditionExists(nextScreen.getCondition()))
         .filter(nextScreen -> {
@@ -728,7 +768,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
-      String uuid, HttpServletRequest request) {
+                                          String uuid, HttpServletRequest request) {
     Map<String, Object> model = new HashMap<>();
     FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
     String subflowName = flowConfig.getFlow().get(screen).getSubflow();
@@ -803,7 +843,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private void handleErrors(HttpSession httpSession, Map<String, List<String>> errorMessages,
-      FormSubmission formSubmission) {
+                            FormSubmission formSubmission) {
     if (!errorMessages.isEmpty()) {
       httpSession.setAttribute("errorMessages", errorMessages);
       httpSession.setAttribute("formDataSubmission", formSubmission.getFormData());
@@ -824,10 +864,9 @@ public class ScreenController extends FormFlowController {
 
   @Nullable
   private ModelAndView handleDeleteBackBehavior(String flow, String screen, String uuid,
-      Submission submission) {
+                                                Submission submission) {
     ModelMap model = new ModelMap();
-    String subflowName = getFlowConfigurationByName(
-        flow).getSubflows().entrySet().stream()
+    String subflowName = getFlowConfigurationByName(flow).getSubflows().entrySet().stream()
         .filter(entry -> entry.getValue().getDeleteConfirmationScreen().equals(screen))
         .toList().get(0).getKey();
     ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
@@ -874,4 +913,5 @@ public class ScreenController extends FormFlowController {
         messageSource.getMessage("general.locked-submission", null, locale));
     return String.format("/flow/%s/%s", flow, lockedSubmissionRedirectPage);
   }
+
 }
