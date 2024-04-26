@@ -929,8 +929,8 @@ public class ScreenController extends FormFlowController {
     Map<String, Object> iteration = submission.getSubflowEntryByUuid(screen.getSubflow(), uuidToVerify);
     if (iteration == null) {
       throwNotFoundError(submission.getFlow(), screen.getName(),
-          String.format("UUID not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-              screen.getSubflow(), submission.getFlow(), screen.getName()));
+          String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+              uuidToVerify, screen.getSubflow(), submission.getFlow(), screen.getName()));
     }
     return (String) iteration.get("uuid");
   }

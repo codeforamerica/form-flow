@@ -19,6 +19,7 @@ import formflow.library.address_validation.ValidatedAddress;
 import formflow.library.data.Submission;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,7 +217,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
           .get("subflowWithAGetAndThenAPost");
       assertThat((Boolean) iterationsAfterSecondPost.get(0).get("iterationIsComplete")).isTrue();
     }
-    
+
     @Test
     public void shouldHandleGoingFromANonSubflowPostScreenIntoASubflow() throws Exception {
       setFlowInfoInSession(session, "testSubflowLogic", submission.getId());
@@ -228,7 +229,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       );
       String nextScreenUrl = "/flow/testSubflowLogic/testEntryScreen/navigation";
       result.andExpect(redirectedUrl(nextScreenUrl));
-      
+
       while (Objects.requireNonNull(nextScreenUrl).contains("/navigation")) {
         // follow redirects
         nextScreenUrl = mockMvc.perform(get(nextScreenUrl).session(session))
@@ -239,6 +240,54 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       assertThat(nextScreenUrl).isEqualTo("/flow/testSubflowLogic/subflowAddItem");
       FormScreen nextScreen = new FormScreen(mockMvc.perform(get(nextScreenUrl)));
       assertThat(nextScreen.getTitle()).isEqualTo("Subflow Page");
+    }
+
+    @Test
+    public void shouldTriggerErrorWhenRequestedIterationUuidForNavigationIsBad() throws Exception {
+      setFlowInfoInSession(session, "yetAnotherTestFlow", submission.getId());
+      mockMvc.perform(post("/flow/yetAnotherTestFlow/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("textInputValue"),
+              "numberInput", List.of("10"))))
+      );
+      UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("yetAnotherTestFlow");
+      Submission submissionAfterFirstPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submissionAfterFirstPost.getInputData()
+          .get("subflowWithAGetAndThenAPost");
+      String uuidString = (String) iterationsAfterFirstPost.get(0).get("uuid");
+
+      mockMvc.perform(get("/flow/yetAnotherTestFlow/getScreen/navigation?uuid=" + "1234-bad-1234").session(session)).andExpect(
+          status().isNotFound());
+
+      mockMvc.perform(get("/flow/yetAnotherTestFlow/getScreen/navigation?uuid=" + uuidString).session(session)).andExpect(
+          status().is3xxRedirection());
+
+      mockMvc.perform(get("/flow/yetAnotherTestFlow/getScreen/navigation").session(session)).andExpect(
+          status().is3xxRedirection());
+    }
+
+    @Test
+    public void shouldTriggerErrorWhenRequestedIterationUuidForGetIsBadInSubflow() throws Exception {
+      setFlowInfoInSession(session, "yetAnotherTestFlow", submission.getId());
+      mockMvc.perform(post("/flow/yetAnotherTestFlow/subflowAddItem/new")
+          .session(session)
+          .params(new LinkedMultiValueMap<>(Map.of(
+              "textInput", List.of("textInputValue"),
+              "firstNameSubflowPage2", List.of("FirstName"),
+              "numberInput", List.of("10"))))
+      );
+      UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("yetAnotherTestFlow");
+      Submission submissionAfterFirstPost = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+      List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submissionAfterFirstPost.getInputData()
+          .get("subflowWithAGetAndThenAPost");
+      String uuidString = (String) iterationsAfterFirstPost.get(0).get("uuid");
+
+      mockMvc.perform(get("/flow/yetAnotherTestFlow/subflowAddItemPage2/" + "1234-bad-1234").session(session)).andExpect(
+          status().isNotFound());
+
+      mockMvc.perform(get("/flow/yetAnotherTestFlow/subflowAddItemPage2/" + uuidString).session(session)).andExpect(
+          status().is2xxSuccessful());
     }
   }
 
