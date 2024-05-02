@@ -4,7 +4,7 @@
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      isRequiredInput=${requiredInputs.getOrDefault(inputName, false)},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || required != null && required},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
@@ -13,7 +13,7 @@
   <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
     <label th:if="${hasLabel}" th:for="${inputName}"  class="form-question">
       <span th:text="${label}"></span>
-      <span th:if="${isRequiredInput  && !hasAriaLabel}" class="required-input" th:text="#{general.required-field}"></span>
+      <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" th:text="#{general.required-field}"></span>
     </label>
     <p class="text--help"
        th:if="${hasHelpText}"

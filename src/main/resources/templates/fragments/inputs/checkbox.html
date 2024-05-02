@@ -3,6 +3,7 @@
     th:with="
       hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || required != null && required},
       name=${inputName} + '[]',
       hasError=${
         errorMessages != null &&
@@ -31,6 +32,7 @@
       </div>
       <div>
         <span th:text="${label}"></span>
+        <span th:if="${isRequiredInput}" class="required-input" th:text="#{general.required-field}"></span>
         <p th:if="${hasHelpText}"
            th:id="${name} + '-' + ${value} + '-help-text'"
            th:text="${checkboxHelpText}"
