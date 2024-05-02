@@ -3,7 +3,9 @@
     th:with="
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      isRequiredInput=${requiredInputs.getOrDefault(inputName + 'Month', false) || requiredInputs.getOrDefault(inputName + 'Day', false) || requiredInputs.getOrDefault(inputName + 'Year', false)},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName + 'Month', false) || 
+        requiredInputs.getOrDefault(inputName + 'Day', false) || 
+        requiredInputs.getOrDefault(inputName + 'Year', false)},
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},
       hasErrorYear=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Year'))},
@@ -14,7 +16,7 @@
       <legend th:if="${hasLabel}" th:for="${inputName}"
              class="form-question">
         <span th:text="${label}"></span>
-        <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" aria-hidden="true">*</span>
+        <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" th:text="#{general.required-field}"></span>
       </legend>
       <th:block
           th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>

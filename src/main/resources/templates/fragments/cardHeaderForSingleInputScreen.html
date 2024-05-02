@@ -7,7 +7,7 @@
     class="form-card__header">
   <h1 id="header" class="h2" >
     <span th:text="${header}"></span>
-    <span th:if="${isRequiredInput}" class="required-input" aria-hidden="true">*</span>
+    <span th:if="${isRequiredInput}" class="required-input" th:text="#{general.required-field}"></span>
   </h1>
   <p id="header-help-message"
      th:if="${hasSubtext}"

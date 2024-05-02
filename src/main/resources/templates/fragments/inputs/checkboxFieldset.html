@@ -23,7 +23,7 @@
               th:id="${inputName + '-legend'}"
               th:inline="text">
         <span th:text="${label}"></span>
-        <span th:if="${isRequiredInput}" class="required-input" aria-hidden="true">*</span>
+        <span th:if="${isRequiredInput}" class="required-input" th:text="#{general.required-field}"></span>
         <p class="text--help spacing-below-0 text--normal"
            th:if="${hasHelpText}"
            th:id="${inputName + '-help-text'}"
