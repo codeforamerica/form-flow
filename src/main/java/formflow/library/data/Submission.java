@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -108,15 +111,11 @@ public class Submission {
     }
 
     List<Map<String, Object>> subflow = (List<Map<String, Object>>) inputData.get(subflowName);
-    List<Map<String, Object>> iteration = subflow.stream()
+    Optional<Map<String, Object>> iteration = subflow.stream()
         .filter(entry -> entry.get("uuid").equals(uuid))
-        .toList();
+        .findFirst();
 
-    if (!iteration.isEmpty()) {
-      return iteration.get(0);
-    } else {
-      return null;
-    }
+    return iteration.isPresent() ? iteration.get() : null;
   }
 
   /**
@@ -150,7 +149,7 @@ public class Submission {
    * @param formDataSubmission new data for a particular iteration of a subflow, not null
    */
   public void mergeFormDataWithSubflowIterationData(String subflowName, Map<String, Object> iterationToUpdate,
-      Map<String, Object> formDataSubmission) {
+                                                    Map<String, Object> formDataSubmission) {
 
     iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
     var subflowArr = (List<Map<String, Object>>) inputData.get(subflowName);

@@ -102,7 +102,7 @@ public class ScreenController extends FormFlowController {
    *
    * @param requestFlow   The current flow name, not null
    * @param requestScreen The current screen name in the flow, not null
-   * @param uuid          The uuid of a subflow entry, can be null
+   * @param requestUuid   The uuid of a subflow entry, can be null
    * @param httpSession   The current httpSession, not null
    * @return the screen template with model data
    */
@@ -128,7 +128,21 @@ public class ScreenController extends FormFlowController {
 
     String uuid = null;
     if (requestUuid != null && !requestUuid.isBlank()) {
-      uuid = getValidatedIterationUuid(submission, currentScreen, requestUuid);
+      uuid = getValidatedIterationUuid(submission, flow, currentScreen, requestUuid);
+      if (uuid == null) {
+        // catch to see if they are trying to go to a delete confirmation screen when the UUID is not present anymore.
+        // If so, redirect.
+        if (isDeleteConfirmationScreen(flow, screen)) {
+          ModelAndView nothingToDeleteModelAndView = handleDeleteBackBehavior(flow, screen, requestUuid, submission);
+          if (nothingToDeleteModelAndView != null) {
+            return nothingToDeleteModelAndView;
+          }
+        } else {
+          throwNotFoundError(submission.getFlow(), currentScreen.getName(),
+              String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                  uuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+        }
+      }
     }
 
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
@@ -142,7 +156,6 @@ public class ScreenController extends FormFlowController {
       if (uuid == null) {
         return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, nextViewableScreen));
       } else {
-
         return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, nextViewableScreen, uuid));
       }
     }
@@ -167,12 +180,7 @@ public class ScreenController extends FormFlowController {
 
     String formAction = createFormActionString(flow, screen);
     model.put("formAction", formAction);
-    if (isDeleteConfirmationScreen(flow, screen)) {
-      ModelAndView nothingToDeleteModelAndView = handleDeleteBackBehavior(flow, screen, uuid, submission);
-      if (nothingToDeleteModelAndView != null) {
-        return nothingToDeleteModelAndView;
-      }
-    }
+
 
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
@@ -373,7 +381,12 @@ public class ScreenController extends FormFlowController {
     String screen = currentScreen.getName();
 
     Submission submission = getSubmissionFromSession(httpSession, flow);
-    String uuid = getValidatedIterationUuid(submission, currentScreen, requestUuid);
+    String uuid = getValidatedIterationUuid(submission, flow, currentScreen, requestUuid);
+    if (uuid == null) {
+      throwNotFoundError(submission.getFlow(), currentScreen.getName(),
+          String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+              uuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+    }
 
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
@@ -546,10 +559,11 @@ public class ScreenController extends FormFlowController {
     }
 
     if (submission != null) {
-      var existingInputData = submission.getInputData();
-      var subflowArr = (ArrayList<Map<String, Object>>) existingInputData.get(subflow);
-      var entryToDelete = subflowArr.stream().filter(entry -> entry.get("uuid").equals(uuid)).findFirst();
-      entryToDelete.ifPresent(entry -> httpSession.setAttribute("entryToDelete", entry));
+      Map<Object, String> entryToDelete = (Map) submission.getSubflowEntryByUuid(subflow, uuid);
+
+      if (entryToDelete != null) {
+        httpSession.setAttribute("entryToDelete", entryToDelete);
+      }
     }
 
     return new ModelAndView(new RedirectView(String.format("/flow/%s/%s?uuid=%s", flow, deleteConfirmationScreen, uuid)));
@@ -654,7 +668,12 @@ public class ScreenController extends FormFlowController {
 
     String uuid = null;
     if (requestUuid != null && !requestUuid.isBlank()) {
-      uuid = getValidatedIterationUuid(submission, currentScreen, requestUuid);
+      uuid = getValidatedIterationUuid(submission, flow, currentScreen, requestUuid);
+      if (uuid == null) {
+        throwNotFoundError(submission.getFlow(), currentScreen.getName(),
+            String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                uuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+      }
     }
 
     String nextScreen = getNextViewableScreen(flow, getNextScreenName(submission, currentScreen, uuid), uuid, submission);
@@ -925,13 +944,39 @@ public class ScreenController extends FormFlowController {
     return String.format("/flow/%s/%s", flow, lockedSubmissionRedirectPage);
   }
 
-  private String getValidatedIterationUuid(Submission submission, ScreenNavigationConfiguration screen, String uuidToVerify) {
-    Map<String, Object> iteration = submission.getSubflowEntryByUuid(screen.getSubflow(), uuidToVerify);
-    if (iteration == null) {
-      throwNotFoundError(submission.getFlow(), screen.getName(),
-          String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-              uuidToVerify, screen.getSubflow(), submission.getFlow(), screen.getName()));
+  /**
+   * Return the validated UUID in String for, or returns null if not found.
+   *
+   * @param submission    The submission to search in
+   * @param flow          The current flow we are working in
+   * @param currentScreen The current screen we are going to
+   * @param uuidToVerify  The String UUID to validate
+   * @return Validated UUID as String, or returns null if not found
+   */
+  private String getValidatedIterationUuid(Submission submission, String flow, ScreenNavigationConfiguration currentScreen, String uuidToVerify) {
+    FlowConfiguration flowConfiguration = getFlowConfigurationByName(flow);
+    if (flowConfiguration == null) {
+      return null;
     }
-    return (String) iteration.get("uuid");
+
+    Map<String, Object> iteration = null;
+    List<String> subflowNameList = new ArrayList<>();
+
+    // see if we have a specific subflow to look in
+    if (currentScreen.getSubflow() != null) {
+      subflowNameList.add(currentScreen.getSubflow());
+    } else {
+      // we don't know the subflow, so check them all
+      subflowNameList.addAll(flowConfiguration.getSubflows().keySet().stream().toList());
+    }
+
+    for (String subflowName : subflowNameList) {
+      iteration = submission.getSubflowEntryByUuid(subflowName, uuidToVerify);
+      if (iteration != null) {
+        break;
+      }
+    }
+
+    return iteration != null ? (String) iteration.get("uuid") : null;
   }
 }

@@ -3,84 +3,90 @@
 <head th:replace="~{fragments/head :: head(title='Subflow Page')}"></head>
 <body>
 <div class="page-wrapper">
-  <div th:replace="~{fragments/toolbar :: toolbar}"></div>
-  <section class="slab">
-    <div class="grid">
-      <main id="content" role="main" class="form-card spacing-above-35">
-        <th:block
-            th:replace="~{fragments/cardHeader :: cardHeader(header='Subflow Page', subtext='This is a page within a subflow')}"/>
-        <div>
-          <th:block
-              th:replace="~{fragments/inputs/text ::
-                                  text(inputName='textInputSubflow',
-                                  label='textInput')}"/>
-          <th:block th:replace="~{fragments/inputs/textArea ::
-                                textArea(inputName='areaInputSubflow',
-                                label='areaInput')}"/>
-          <th:block th:replace="~{fragments/inputs/date ::
-                                date(inputName='dateSubflow',
-                                label='dateInput',
-                                groupName='dateSubflowFull')}"/>
-          <th:block th:replace="~{fragments/inputs/number ::
-                                number(inputName='numberInputSubflow',
-                                label='numberInput')}"/>
-          <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
-                                checkboxFieldset(inputName='checkboxSetSubflow',
-                                label='checkboxSet',
-                                content=~{::checkboxContent})}">
-            <th:block th:ref="checkboxContent">
-              <th:block
-                  th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='checkboxSetSubflow', value='Checkbox-A', label='Checkbox A')}"/>
-              <th:block
-                  th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='checkboxSetSubflow', value='Checkbox-B', label='Checkbox B')}"/>
-            </th:block>
-          </th:block>
-          <th:block
-              th:replace="~{fragments/inputs/checkbox :: checkbox(inputName='checkboxInputSubflow', value='checkbox-value', label='Single checkbox')}"/>
-          <th:block th:replace="~{fragments/inputs/radioFieldset ::
-                                radioFieldset(inputName='radioInputSubflow',
-                                label='radioInput',
-                                content=~{::radioContent})}">
-            <th:block th:ref="radioContent">
-              <th:block
-                  th:replace="~{fragments/inputs/radio :: radio(inputName='radioInputSubflow',value='Radio A', label='Radio A')}"/>
-              <th:block
-                  th:replace="~{fragments/inputs/radio :: radio(inputName='radioInputSubflow',value='Radio B', label='Radio B')}"/>
-              <th:block
-                  th:replace="~{fragments/inputs/radio :: radio(inputName='radioInputSubflow',value='Radio C', label='Radio C')}"/>
-            </th:block>
-          </th:block>
-          <th:block
-              th:replace="~{fragments/inputs/select ::
-                                select(inputName='selectInputSubflow',
-                                       label='selectInput',
-                                       content=~{::selectContent})}">
-            <th:block th:ref="selectContent">
-              <th:block
-                  th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
-              <th:block
-                  th:replace="~{fragments/inputs/selectOption :: selectOption(value='Select A', optionText='Select A')}"/>
-              <th:block
-                  th:replace="~{fragments/inputs/selectOption :: selectOption(value='Select B', optionText='Select B')}"/>
-              <th:block
-                  th:replace="~{fragments/inputs/selectOption :: selectOption(value='Select C', optionText='Select C')}"/>
-            </th:block>
-          </th:block>
-          <th:block
-              th:replace="~{fragments/inputs/money :: money(
-                                  inputName='moneyInputSubflow',
-                                  label='moneyInput')}"/>
-          <th:block
-              th:replace="~{fragments/inputs/phone :: phone(
-                                  inputName='phoneInputSubflow',
-                                  label='phoneInput')}"/>
+    <div th:replace="~{fragments/toolbar :: toolbar}"></div>
+    <section class="slab">
+        <div class="grid">
+            <main id="content" role="main" class="form-card spacing-above-35">
+                <th:block
+                        th:replace="~{fragments/cardHeader :: cardHeader(header='Subflow Page', subtext='This is a page within a subflow')}"/>
+                <th:block
+                        th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formDetails})}">
+                    <th:block th:ref="formDetails">
+                        <div class="form-card__content">
+                            <th:block
+                                    th:replace="~{fragments/inputs/text ::
+                                      text(inputName='textInputSubflow',
+                                      label='textInput')}"/>
+                            <th:block th:replace="~{fragments/inputs/textArea ::
+                                    textArea(inputName='areaInputSubflow',
+                                    label='areaInput')}"/>
+                            <th:block th:replace="~{fragments/inputs/date ::
+                                    date(inputName='dateSubflow',
+                                    label='dateInput',
+                                    groupName='dateSubflowFull')}"/>
+                            <th:block th:replace="~{fragments/inputs/number ::
+                                    number(inputName='numberInputSubflow',
+                                    label='numberInput')}"/>
+                            <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
+                                    checkboxFieldset(inputName='checkboxSetSubflow',
+                                    label='checkboxSet',
+                                    content=~{::checkboxContent})}">
+                                <th:block th:ref="checkboxContent">
+                                    <th:block
+                                            th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='checkboxSetSubflow', value='Checkbox-A', label='Checkbox A')}"/>
+                                    <th:block
+                                            th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='checkboxSetSubflow', value='Checkbox-B', label='Checkbox B')}"/>
+                                </th:block>
+                            </th:block>
+                            <th:block
+                                    th:replace="~{fragments/inputs/checkbox :: checkbox(inputName='checkboxInputSubflow', value='checkbox-value', label='Single checkbox')}"/>
+                            <th:block th:replace="~{fragments/inputs/radioFieldset ::
+                                    radioFieldset(inputName='radioInputSubflow',
+                                    label='radioInput',
+                                    content=~{::radioContent})}">
+                                <th:block th:ref="radioContent">
+                                    <th:block
+                                            th:replace="~{fragments/inputs/radio :: radio(inputName='radioInputSubflow',value='Radio A', label='Radio A')}"/>
+                                    <th:block
+                                            th:replace="~{fragments/inputs/radio :: radio(inputName='radioInputSubflow',value='Radio B', label='Radio B')}"/>
+                                    <th:block
+                                            th:replace="~{fragments/inputs/radio :: radio(inputName='radioInputSubflow',value='Radio C', label='Radio C')}"/>
+                                </th:block>
+                            </th:block>
+                            <th:block
+                                    th:replace="~{fragments/inputs/select ::
+                                    select(inputName='selectInputSubflow',
+                                           label='selectInput',
+                                           content=~{::selectContent})}">
+                                <th:block th:ref="selectContent">
+                                    <th:block
+                                            th:replace="~{fragments/inputs/selectOption :: selectOption(value='', optionText='Choose one')}"/>
+                                    <th:block
+                                            th:replace="~{fragments/inputs/selectOption :: selectOption(value='Select A', optionText='Select A')}"/>
+                                    <th:block
+                                            th:replace="~{fragments/inputs/selectOption :: selectOption(value='Select B', optionText='Select B')}"/>
+                                    <th:block
+                                            th:replace="~{fragments/inputs/selectOption :: selectOption(value='Select C', optionText='Select C')}"/>
+                                </th:block>
+                            </th:block>
+                            <th:block
+                                    th:replace="~{fragments/inputs/money :: money(
+                                      inputName='moneyInputSubflow',
+                                      label='moneyInput')}"/>
+                            <th:block
+                                    th:replace="~{fragments/inputs/phone :: phone(
+                                      inputName='phoneInputSubflow',
+                                      label='phoneInput')}"/>
+                        </div>
+                        <div class="form-card__footer">
+                            <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+                    text='Continue')}"/>
+                        </div>
+                    </th:block>
+                </th:block>
+            </main>
         </div>
-        <div class="form-card__footer">
-          <th:block th:replace="~{fragments/continueButton :: continue}"/>
-        </div>
-      </main>
-    </div>
-  </section>
+    </section>
 </div>
 <th:block th:replace="~{fragments/footer :: footer}"/>
 </body>
