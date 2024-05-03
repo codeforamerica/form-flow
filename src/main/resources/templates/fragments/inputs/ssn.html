@@ -4,8 +4,7 @@
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      isRequiredInput=${      isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || required != null && required},
-.getOrDefault(inputName, false)},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || required != null && required},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&

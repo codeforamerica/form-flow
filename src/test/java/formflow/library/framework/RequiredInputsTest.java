@@ -34,35 +34,35 @@ public class RequiredInputsTest extends AbstractMockMvcTest {
   void shouldIndicateRequiredFields() throws Exception {
     FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs").session(session)));
     assertThat(inputsScreen.getElementByCssSelector("label[for=textInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("textInput").attr("aria-required"))
         .isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("label[for=areaInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("areaInput").attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("legend[for=date]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("date-day").attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("label[for=numberInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("numberInput").attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementById("checkboxSet-legend").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(Objects.requireNonNull(inputsScreen.getElementById("checkboxSet-legend").parent()).attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementById("radioInput-legend").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(Objects.requireNonNull(inputsScreen.getElementById("radioInput-legend").parent()).attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("label[for=selectInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("selectInput").attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("label[for=moneyInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("moneyInput").attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("label[for=phoneInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("phoneInput").attr("aria-required")).isEqualTo("true");
     assertThat(inputsScreen.getElementByCssSelector("label[for=ssnInput]").text())
-        .contains("*");
+        .contains("(required)");
     assertThat(inputsScreen.getElementById("ssnInput").attr("aria-required")).isEqualTo("true");
   }
 }

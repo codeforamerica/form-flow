@@ -22,7 +22,7 @@
           <th:block th:replace="${hasIconFragment} ? ${iconFragment} : _"/>
           <th:block
               th:replace="~{fragments/cardHeaderForSingleInputScreen :: 
-              cardHeaderForSingleInputScreen(header=${header}, subtext=${subtext}, inputName=${inputName})}"/>
+              cardHeaderForSingleInputScreen(header=${header}, subtext=${subtext}, inputName=${inputName}, required=${required})}"/>
           <th:block
               th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formContent})}">
             <th:block th:ref="formContent">
