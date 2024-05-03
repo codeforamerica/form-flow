@@ -601,8 +601,73 @@ blank value needs to be a validly formatted email address due to `@Email`.
 
 As mentioned above in the [Validating Inputs](#validating-inputs) section, the annotations `@NotEmpty`,
 `@NotBlank`, and `@NotNull` are used to make a field required. The library will automatically
-add the necessary `aria-required` attribute to the input field in your HTML and add a red asterisk to 
-labels for required inputs where applicable.
+append a red '(required)' to the end of your input labels.
+
+#### Special Required Field Situations
+
+Sometimes you may have a field that is required, but not through an annotation such as those mentioned above.
+Specific scenarios where this might be the case include:
+- A field is validated through an action in the flows-config file and that validation makes it required
+- A field uses cross validtation int he flows-config file and that validation makes it required
+
+In these cases, we have provided an attribute which can be added to inputs `required` which is a boolean
+that defaults to false. If set to true, the library will treat the field as required and append the 
+red `(required)`. 
+
+For example:
+```html
+<th:block th:replace="~{fragments/inputs/text ::
+      text(inputName='firstName',
+      label=#{personal-info.first-name-label},
+      required=true,
+      helpText=#{personal-info.first-name-help})}"/>
+```
+
+Note that this attribute is optional and intended to be used in these special situations.
+
+#### Required Fields on Single Input Screens
+The library provides a convenience template fragment for single input screens that will make such 
+screens accessible to screen readers. 
+
+When using this template and you want a field to be indicated as required, you need to provide the 
+input name when defining the fragment so that Thymeleaf can access the field name when checking required
+field annotations.
+
+Example:
+```html
+<th:block>
+  <th:block
+      th:replace="~{fragments/screens/screenWithOneInput ::
+  screenWithOneInput(
+    title=#{economic-hardship.title},
+    header=#{economic-hardship.header},
+    subtext=#{economic-hardship.subheader},
+    formAction=${formAction},
+    inputName='economicHardshipTypes',
+    inputContent=~{::inputContent})}">
+... more content
+```
+Note the `inputName='economicHardshipTypes'` attribute. This is the name of the input field in the
+which will appear below `more content` above. This name is used to check for required field annotations
+so that the template will know the field is required.
+
+We've also provided the same `required` attribute for this template fragment as well. Again this is
+an optional attribute for situations where the field is required but not through an annotation.
+Here is an example of using it with the `screenWithOneInput` fragment:
+```html
+<th:block
+    th:replace="~{fragments/screens/screenWithOneInput ::
+    screenWithOneInput(
+    title=#{economic-hardship.title},
+    required=true,
+    header=#{economic-hardship.header},
+    subtext=#{economic-hardship.subheader},
+    formAction=${formAction},
+    inputName='economicHardshipTypes',
+    inputContent=~{::inputContent})}">
+```
+
+Note that passing `required=true` here will append the red `(required)` to the label.
 
 ## Dynamic Input Fields
 
