@@ -24,7 +24,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-required-inputs-flow.yaml"})
-@DirtiesContext()
 public class RequiredInputsTest extends AbstractMockMvcTest {
 
   @MockBean
