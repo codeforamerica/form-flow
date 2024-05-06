@@ -25,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-required-inputs-flow.yaml"})
+@DirtiesContext
 public class RequiredInputsTest extends AbstractMockMvcTest {
   
   @BeforeEach
@@ -34,7 +35,7 @@ public class RequiredInputsTest extends AbstractMockMvcTest {
   
   @Test
   void shouldIndicateRequiredFields() throws Exception {
-    FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs").session(session)));
+    FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs")));
     
     assertThat(inputsScreen.getElementByCssSelector("label[for=textInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
