@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,12 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-required-inputs-flow.yaml"})
 public class RequiredInputsTest extends AbstractMockMvcTest {
+  
+  @BeforeEach
+    public void setUp() throws Exception {
+        super.setUp();
+    }
+  
   @Test
   void shouldIndicateRequiredFields() throws Exception {
     FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs").session(session)));
