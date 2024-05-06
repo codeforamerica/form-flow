@@ -25,13 +25,10 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-required-inputs-flow.yaml"})
 public class RequiredInputsTest extends AbstractMockMvcTest {
-
-  @MockBean
-  AddressValidationService addressValidationService;
-
   @Test
   void shouldIndicateRequiredFields() throws Exception {
     FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs").session(session)));
+    
     assertThat(inputsScreen.getElementByCssSelector("label[for=textInput]").text())
         .contains("(required)");
     assertThat(inputsScreen.getElementByCssSelector("label[for=areaInput]").text())
