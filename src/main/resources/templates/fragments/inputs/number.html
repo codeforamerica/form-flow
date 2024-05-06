@@ -35,8 +35,7 @@
               pattern=${hasPattern ? pattern : '^\d*(\.\d{0,2})?$'},
               aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-invalid=${hasError},
-              aria-required=${isRequiredInput}"
+              aria-invalid=${hasError}"
              th:value="${fieldData.getOrDefault(inputName, '')}">
       <div th:if="${postfix != null}" th:text="${postfix}" class="text-input-group__postfix"></div>
     </div>

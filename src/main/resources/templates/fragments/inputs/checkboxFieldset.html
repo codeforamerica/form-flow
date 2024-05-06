@@ -15,7 +15,6 @@
       ${content != null}">
   <div th:class="'form-group' + ${(hasError ? ' form-group--error' : '')}">
     <fieldset th:attr="
-      aria-required=${isRequiredInput},
       aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
       aria-labelledby=${hasAriaLabel ? ariaLabel : ''}">
       <legend class="form-question"

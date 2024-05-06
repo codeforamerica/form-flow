@@ -177,6 +177,9 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
       assertThat(testPage.getTitle()).isEqualTo("Subflow Page2");
       testPage.enter("textInputSubflowPage2", "testFlow: textInput");
       testPage.enter("areaInputSubflowPage2", "testFlow: areaInput");
+      testPage.enter("dateSubflowPage2Day", "10");
+      testPage.enter("dateSubflowPage2Month", "10");
+      testPage.enter("dateSubflowPage2Year", "2010");
       testPage.enter("numberInputSubflowPage2", "10");
       testPage.clickElementById("checkboxSetSubflowPage2-Checkbox-A-label");
       testPage.clickElementById("checkboxInputSubflowPage2-checkbox-value");

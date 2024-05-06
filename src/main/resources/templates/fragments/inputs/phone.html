@@ -29,8 +29,7 @@
            th:attr="
             aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
             aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-            aria-invalid=${hasError},
-            aria-required=${isRequiredInput}"
+            aria-invalid=${hasError}"
            th:value="${fieldData.getOrDefault(inputName, '')}">
   </div>
 </th:block>

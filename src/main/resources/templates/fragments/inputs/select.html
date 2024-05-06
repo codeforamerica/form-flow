@@ -32,7 +32,6 @@
               th:attr="
                 aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
                 aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-                aria-required=${isRequiredInput},
                 aria-invalid=${hasError}">
         <th:block th:replace="${content}"/>
       </select>
