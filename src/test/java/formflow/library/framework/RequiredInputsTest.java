@@ -29,25 +29,25 @@ public class RequiredInputsTest extends AbstractMockMvcTest {
   void shouldIndicateRequiredFields() throws Exception {
     FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs").session(session)));
     
-    assertThat(inputsScreen.getElementByCssSelector("label[for=textInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=textInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=areaInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=areaInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("legend[for=date]").text())
+    assertThat(inputsScreen.getElementByCssSelector("legend[for=date]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=numberInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=numberInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementById("checkboxSet-legend").text())
+    assertThat(inputsScreen.getElementById("checkboxSet-legend").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementById("radioInput-legend").text())
+    assertThat(inputsScreen.getElementById("radioInput-legend").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=selectInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=selectInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=moneyInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=moneyInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=phoneInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=phoneInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=ssnInput]").text())
+    assertThat(inputsScreen.getElementByCssSelector("label[for=ssnInput]").getElementsByClass("required-input").get(0).text())
         .contains("(required)");
   }
 }
