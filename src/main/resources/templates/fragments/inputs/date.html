@@ -76,13 +76,5 @@
               aria-invalid=${hasErrorYear}"
              th:value="${fieldData.getOrDefault(inputName + 'Year', '')}"/>
     </fieldset>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Day')}"></th:block>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Year')}"></th:block>
-    <th:block
-        th:replace="~{fragments/inputError :: validationError(inputName=${groupName})}"></th:block>
   </div>
 </th:block>
