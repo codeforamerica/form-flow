@@ -2,6 +2,7 @@ package formflow.library.framework;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -37,25 +39,25 @@ public class RequiredInputsTest extends AbstractMockMvcTest {
   void shouldIndicateRequiredFields() throws Exception {
     FormScreen inputsScreen = new FormScreen(mockMvc.perform(get("/flow/requiredInputs/inputs")));
     
-    assertThat(inputsScreen.getElementByCssSelector("label[for=textInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=areaInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("legend[for=date]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=numberInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementById("checkboxSet-legend").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementById("radioInput-legend").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=selectInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=moneyInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=phoneInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
-    assertThat(inputsScreen.getElementByCssSelector("label[for=ssnInput]").getElementsByClass("required-input").get(0).text())
-        .contains("(required)");
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=textInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=areaInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("legend[for=date]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=numberInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementById("checkboxSet-legend").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementById("radioInput-legend").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=selectInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=moneyInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=phoneInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
+    await().atMost(2, TimeUnit.SECONDS).until(() -> inputsScreen.getElementByCssSelector("label[for=ssnInput]").getElementsByClass("required-input").get(0).text()
+        .contains("(required)"));
   }
 }
