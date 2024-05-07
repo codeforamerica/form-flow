@@ -3,9 +3,9 @@
     th:with="
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      isRequiredInput=${requiredInputs.getOrDefault(inputName + 'Month', false) || 
-        requiredInputs.getOrDefault(inputName + 'Day', false) || 
-        requiredInputs.getOrDefault(inputName + 'Year', false) ||
+      isRequiredInput=${requiredInputs.get(flow).getOrDefault(inputName + 'Month', false) || 
+        requiredInputs.get(flow).getOrDefault(inputName + 'Day', false) || 
+        requiredInputs.get(flow).getOrDefault(inputName + 'Year', false) ||
         (required != null && required)},
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},

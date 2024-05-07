@@ -41,7 +41,7 @@ public class ValidationService {
   private final ActionManager actionManager;
   private static String inputConfigPath;
   
-  private static final Map<String, Boolean> requiredInputs = new HashMap<>();
+  private static final Map<String, Map<String, Boolean>> requiredInputs = new HashMap<>();
   
   private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
@@ -163,7 +163,7 @@ public class ValidationService {
     return validationMessages;
   }
 
-  public static Map<String, Boolean> getRequiredInputs(String flowName) {
+  public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
     if (requiredInputs.isEmpty()) {
       Class<?> flowClass;
 
@@ -180,7 +180,11 @@ public class ValidationService {
       for (Field field : declaredFields) {
         if (Arrays.stream(field.getAnnotations())
             .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
-          requiredInputs.put(field.getName(), true);
+          if (requiredInputs.containsKey(flowName)) {
+            requiredInputs.get(flowName).put(field.getName(), true);
+          } else {
+            requiredInputs.put(flowName, new HashMap<>(Map.of(field.getName(), true)));
+          }
         }
       }
     }
