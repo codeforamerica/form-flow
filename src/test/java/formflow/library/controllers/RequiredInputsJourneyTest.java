@@ -9,9 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-required-inputs-flow.yaml"},
     webEnvironment = RANDOM_PORT)
+@ActiveProfiles("test")
 public class RequiredInputsJourneyTest extends AbstractBasePageTest {
 
 

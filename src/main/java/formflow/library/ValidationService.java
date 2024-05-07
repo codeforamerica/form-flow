@@ -169,12 +169,14 @@ public class ValidationService {
 
       try {
         flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+        log.info("flowClass: {} instantiated.", flowClass.getName());
       } catch (ReflectiveOperationException e) {
         log.error("Error while trying to get the inputs class for flow {}. Does the inputs file for your application use the same name as it's flow?", flowName, e);
         throw new RuntimeException(e);
       }
 
       Field[] declaredFields = flowClass.getDeclaredFields();
+      log.info("Declared fields: {}", Arrays.toString(declaredFields));
       for (Field field : declaredFields) {
         if (Arrays.stream(field.getAnnotations())
             .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
@@ -182,6 +184,7 @@ public class ValidationService {
         }
       }
     }
+    log.info("Required inputs: {}", requiredInputs);
     return requiredInputs;
   }
 }
