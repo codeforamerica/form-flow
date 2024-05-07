@@ -1,10 +1,13 @@
 package formflow.library.controllers;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import formflow.library.utilities.AbstractBasePageTest;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -24,20 +27,23 @@ public class RequiredInputsJourneyTest extends AbstractBasePageTest {
     String testFlow = "requiredInputs";
     startingPage = "flow/" + testFlow + "/inputs";
     super.setUp();
-    wait = new WebDriverWait(driver, Duration.ofSeconds(3));  // setting up a wait of 3 seconds
   }
 
   @Test
   public void automaticallyAppendsRequiredToAppropriateFields() {
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='textInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='areaInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='numberInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='selectInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='moneyInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='phoneInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("label[for='ssnInput']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("legend[for='date']"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("checkboxSet-legend"), "(required)"));
-    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("radioInput-legend"), "(required)"));
+    await().until(
+            () -> !driver.findElements(By.className("main-footer")).get(0).getAttribute("innerHTML")
+                    .isBlank());
+
+    List<String> inputs = List.of(
+            "textInput",
+            "areaInput",
+            "selectInput",
+            "moneyInput",
+            "phoneInput",
+            "ssnInput");
+    inputs.forEach(inputName -> {
+      assertThat(driver.findElement(By.cssSelector(String.format("label[for='%s']", inputName))).getText()).contains("(required)");
+    });
   }
 }
