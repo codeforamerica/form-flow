@@ -6,7 +6,7 @@
       isRequiredInput=${requiredInputs.getOrDefault(inputName + 'Month', false) || 
         requiredInputs.getOrDefault(inputName + 'Day', false) || 
         requiredInputs.getOrDefault(inputName + 'Year', false) ||
-        required != null && required},
+        (required != null && required)},
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},
       hasErrorYear=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Year'))},

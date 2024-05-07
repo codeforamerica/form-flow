@@ -606,11 +606,10 @@ append a red '(required)' to the end of your input labels.
 #### Special Required Field Situations
 
 Sometimes you may have a field that is required, but not through an annotation such as those mentioned above.
-Specific scenarios where this might be the case include:
-- A field is validated through an action in the flows-config file and that validation makes it required
-- A field uses cross validtation int he flows-config file and that validation makes it required
+The specific scenario where this might be the case include is when A field uses cross validation in 
+the flows-config file and that validation makes it required.
 
-In these cases, we have provided an attribute which can be added to inputs `required` which is a boolean
+For this situation, we have provided an attribute which can be added to inputs, `required` which is a boolean
 that defaults to false. If set to true, the library will treat the field as required and append the 
 red `(required)`. 
 
@@ -623,7 +622,8 @@ For example:
       helpText=#{personal-info.first-name-help})}"/>
 ```
 
-Note that this attribute is optional and intended to be used in these special situations.
+Note that this attribute is optional and intended to be used in these special situations. It will only
+add append the red `(required)` to the appropriate place but will not actually validate the field as required.
 
 #### Required Fields on Single Input Screens
 The library provides a convenience template fragment for single input screens that will make such 

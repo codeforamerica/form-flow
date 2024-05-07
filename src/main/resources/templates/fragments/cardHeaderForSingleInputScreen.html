@@ -2,7 +2,7 @@
     th:fragment="cardHeaderForSingleInputScreen"
     th:with="
     hasSubtext=${!#strings.isEmpty(subtext)},
-    isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || required != null && required}"
+    isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || (required != null && required)}"
     th:assert="${!#strings.isEmpty(header)}"
     class="form-card__header">
   <h1 id="header" class="h2" >

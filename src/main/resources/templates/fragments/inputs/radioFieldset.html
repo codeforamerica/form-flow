@@ -4,7 +4,7 @@
       hasHelpText=${!#strings.isEmpty(fieldsetHelpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || required != null && required},
+      isRequiredInput=${requiredInputs.getOrDefault(inputName, false) || (required != null && required)},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&

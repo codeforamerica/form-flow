@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -171,6 +170,7 @@ public class ValidationService {
       try {
         flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
       } catch (ReflectiveOperationException e) {
+        log.error("Error while trying to get the inputs class for flow {}. Does the inputs file for your application use the same name as it's flow?", flowName, e);
         throw new RuntimeException(e);
       }
 
