@@ -27,16 +27,15 @@ public class RequiredInputsJourneyTest extends AbstractBasePageTest {
 
   @Test
   public void automaticallyAppendsRequiredToAppropriateFields() {
-    assertThat(driver.findElement(By.cssSelector("label[for='textInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("label[for='areaInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("label[for='numberInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("label[for='selectInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("label[for='moneyInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("label[for='phoneInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("label[for='ssnInput']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.cssSelector("legend[for='date']")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.id("checkboxSet-legend")).findElement(By.className("required-input")).getText()).contains("(required)");
-    assertThat(driver.findElement(By.id("radioInput-legend")).findElement(By.className("required-input")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='textInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='areaInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='numberInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='selectInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='moneyInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='phoneInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("label[for='ssnInput']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.ByCssSelector.cssSelector("legend[for='date']")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.id("checkboxSet-legend")).getText()).contains("(required)");
+    assertThat(driver.findElement(By.id("radioInput-legend")).getText()).contains("(required)");
   }
-
 }
