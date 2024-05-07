@@ -2,7 +2,8 @@
     th:fragment="cardHeaderForSingleInputScreen"
     th:with="
     hasSubtext=${!#strings.isEmpty(subtext)},
-    isRequiredInput=${requiredInputs.get(flow).getOrDefault(inputName, false) || (required != null && required)}"
+    requiredInputsForFlow=${requiredInputs.get(flow)},
+      isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName, false)) || (required != null && required)}"
     th:assert="${!#strings.isEmpty(header)}"
     class="form-card__header">
   <h1 id="header" class="h2" >

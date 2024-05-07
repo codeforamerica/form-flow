@@ -6,7 +6,8 @@
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
       rows=${!#strings.isEmpty(rows)} ? ${rows} : '6',
       maxLength=${!#strings.isEmpty(maxLength)} ? ${maxLength} : '500',
-      isRequiredInput=${requiredInputs.get(flow).getOrDefault(inputName, false) || (required != null && required)},
+      requiredInputsForFlow=${requiredInputs.get(flow)},
+      isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName, false)) || (required != null && required)},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&

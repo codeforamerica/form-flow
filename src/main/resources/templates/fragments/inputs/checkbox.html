@@ -3,7 +3,8 @@
     th:with="
       hasHelpText=${!#strings.isEmpty(checkboxHelpText)},
       hasIcon=${!#strings.isEmpty(checkboxIcon)},
-      isRequiredInput=${requiredInputs.get(flow).getOrDefault(inputName, false) || (required != null && required)},
+      requiredInputsForFlow=${requiredInputs.get(flow)},
+      isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName, false)) || (required != null && required)},
       name=${inputName} + '[]',
       hasError=${
         errorMessages != null &&
