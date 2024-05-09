@@ -606,12 +606,12 @@ append a red '(required)' to the end of your input labels.
 #### Special Required Field Situations
 
 Sometimes you may have a field that is required, but not through an annotation such as those mentioned above.
-The specific scenario where this might be the case include is when A field uses cross validation in 
+The specific scenario where this might be the case is when a field uses cross validation in 
 the flows-config file and that validation makes it required.
 
 For this situation, we have provided an attribute which can be added to inputs, `required` which is a boolean
-that defaults to false. If set to true, the library will treat the field as required and append the 
-red `(required)`. 
+that defaults to false. If set to true, the field will be marked as required in the UI and append the 
+red `(required)` text.
 
 For example:
 ```html
@@ -623,7 +623,7 @@ For example:
 ```
 
 Note that this attribute is optional and intended to be used in these special situations. It will only
-add append the red `(required)` to the appropriate place but will not actually validate the field as required.
+append the red `(required)` to the appropriate place but will not actually validate the field as required.
 
 #### Required Fields on Single Input Screens
 The library provides a convenience template fragment for single input screens that will make such 
@@ -647,7 +647,7 @@ Example:
     inputContent=~{::inputContent})}">
 ... more content
 ```
-Note the `inputName='economicHardshipTypes'` attribute. This is the name of the input field in the
+Note the `inputName='economicHardshipTypes'` attribute. This is the name of the input field
 which will appear below `more content` above. This name is used to check for required field annotations
 so that the template will know the field is required.
 
@@ -1580,8 +1580,10 @@ when the page loads.
 
 ### Screen with One Input
 
-Screens with a single input are tricky because all inputs need a label, but for this screen pattern
-the label is the header of the page. To handle this, we have a special fragment called `screenWithOneInput`.
+Screens with a single input are tricky because all inputs need a label associated with them so that
+screen readers and other assistive technologies can identify those elements on a screen that label an input.
+For this screen pattern the label is the header of the page, which needs to be programmatically 
+associated with the input. To handle this, we have a special fragment called `screenWithOneInput`.
 You can use the `cfa:screenWithOneInput` live template to quickly create a screen with a single input
 that utilizes this fragment.
 
