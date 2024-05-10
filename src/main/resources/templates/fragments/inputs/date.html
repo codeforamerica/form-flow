@@ -4,9 +4,9 @@
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
       requiredInputsForFlow=${requiredInputs.get(flow)},
-      isRequiredInput=${(requiredInputs != null && requiredInputs.getOrDefault(inputName + 'Month', false)) || 
-        (requiredInputs != null && requiredInputs.getOrDefault(inputName + 'Day', false)) || 
-        (requiredInputs != null && requiredInputs.getOrDefault(inputName + 'Year', false)) ||
+      isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Month', false)) || 
+        (requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Day', false)) || 
+        (requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Year', false)) ||
         (required != null && required)},
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},
