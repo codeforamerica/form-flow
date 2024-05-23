@@ -6,15 +6,19 @@ import formflow.library.config.FlowConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -28,7 +32,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
   public static final String FLOW_PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
   public static final String NAVIGATION_FLOW_PATH_FORMAT = FLOW_PATH_FORMAT + "/navigation";
 
-  private static final String REDIRECT_URL = "/";
+  private final String REDIRECT_URL = "/?sessionBad=true";
 
   public List<FlowConfiguration> flowConfigurations;
 
@@ -42,8 +46,8 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
    * @param handler  chosen handler to execute, for type and/or instance evaluation
    * @return Boolean True - allows the request to proceed to the ScreenController, False - stops the request from reaching the
    * Screen Controller.
-   * @throws IOException             - thrown in the event that an input or output exception occurs when this method does a
-   *                                 redirect.
+   * @throws IOException - thrown in the event that an input or output exception occurs when this method does a
+   *                     redirect.
    */
   @Override
   public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
@@ -73,11 +77,25 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       return false;
     }
 
-    if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&
-        !parsedUrl.get("screen").equals(firstScreen)) {
+    UUID submissionId;
+    try {
+      submissionId = FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow"));
+    } catch (ResponseStatusException e) {
+      submissionId = null;
+    }
+
+    if (submissionId == null && !parsedUrl.get("screen").equals(firstScreen)) {
       log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());
       response.sendRedirect(REDIRECT_URL);
+      return false;
+    }
+
+    if (submissionId == null && !parsedUrl.get("screen").equals(firstScreen)) {
+      //if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&
+      //   !parsedUrl.get("screen").equals(firstScreen)) {
+      log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
+          request.getRequestURI());
       return false;
     }
 
