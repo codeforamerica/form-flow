@@ -22,22 +22,20 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * This interceptor prevents users from jumping to random pages in a flow.
+ * This interceptor prevents users with an invalid session from jumping to random pages in a flow.
  */
-@Component
 @Slf4j
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
 public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered {
 
   public static final String FLOW_PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
   public static final String NAVIGATION_FLOW_PATH_FORMAT = FLOW_PATH_FORMAT + "/navigation";
-
-  private final String REDIRECT_URL = "/?sessionBad=true";
-
+  private final String redirectUrl;
   public List<FlowConfiguration> flowConfigurations;
 
-  public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
+  public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations, String redirectUrl) {
     this.flowConfigurations = flowConfigurations;
+    this.redirectUrl = redirectUrl;
   }
 
   /**
@@ -73,7 +71,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
         return true;
       }
       log.error("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
-      response.sendRedirect(REDIRECT_URL);
+      response.sendRedirect(redirectUrl);
       return false;
     }
 
@@ -87,7 +85,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
     if (submissionId == null && !parsedUrl.get("screen").equals(firstScreen)) {
       log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());
-      response.sendRedirect(REDIRECT_URL);
+      response.sendRedirect(redirectUrl);
       return false;
     }
 
