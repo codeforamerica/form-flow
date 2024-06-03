@@ -686,24 +686,6 @@ that can be passed when calling the address input fragment like so:
 This will apply the red `(required)` to the address fields in the UI. Note it will not do so for the 
 street address line 2 as these are typically considered optional.
 
-#### Special situation for requiring date fields
-
-Sometimes you may want to apply custom validations to date fields through actions that effectively make
-the date fields required. In these situations because you are not using annotations to make the date
-fields required, the library won't pick up on the fact that the fields should be marked as required.
-
-For these situations we have provided a special attribute `requireDateFields` which is a boolean that
-can be passed when calling the date input fragment like so:
-```html
-<th:block th:replace="~{fragments/inputs/date ::
-    date(inputName='birth',
-    requireDateFields=true,
-    label=#{personal-info.birth-label},
-    groupName='birthDate')}"/>
-```
-
-This will apply the red `(required)` to the date fields in the UI.
-
 ## Dynamic Input Fields
 
 A field is dynamic if it is unknown exactly how many of them will be submitted on a given form
