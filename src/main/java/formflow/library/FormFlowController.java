@@ -6,11 +6,13 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import jakarta.servlet.http.HttpSession;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -36,8 +38,8 @@ public abstract class FormFlowController {
   public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
   FormFlowController(SubmissionRepositoryService submissionRepositoryService, UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations, FormFlowConfigurationProperties formFlowConfigurationProperties,
-      MessageSource messageSource) {
+                     List<FlowConfiguration> flowConfigurations, FormFlowConfigurationProperties formFlowConfigurationProperties,
+                     MessageSource messageSource) {
     this.submissionRepositoryService = submissionRepositoryService;
     this.userFileRepositoryService = userFileRepositoryService;
     this.flowConfigurations = flowConfigurations;
@@ -72,10 +74,10 @@ public abstract class FormFlowController {
 
   /**
    * Gets the {@link FlowConfiguration} object for a given flow
-   * @throws ResponseStatusException when FlowConfigurations are not found.
    *
    * @param flow {@link String} of a flow name.
    * @return Returns a {@link FlowConfiguration} object.
+   * @throws ResponseStatusException when FlowConfigurations are not found.
    */
   protected FlowConfiguration getFlowConfigurationByName(String flow) {
     List<FlowConfiguration> flowConfigurationList = flowConfigurations.stream().filter(
@@ -103,17 +105,15 @@ public abstract class FormFlowController {
   /**
    * Throws a {@link ResponseStatusException} when called that includes the status, {@code HttpStatus.NOT_FOUND}, and an error message.
    *
-   * @param flow {@link String} of the flow name.
-   * @param screen Screen name of a flow
+   * @param flow    {@link String} of the flow name.
+   * @param screen  Screen name of a flow
    * @param message Message about the request issue
-   *
    * @throws ResponseStatusException Throws a {@link ResponseStatusException} when called.
    */
   protected static void throwNotFoundError(String flow, String screen, String message) {
     throw new ResponseStatusException(HttpStatus.NOT_FOUND,
         String.format("There was a problem with the request (flow: %s, screen: %s): %s",
             flow, screen, message));
-
   }
 
   /**
@@ -143,8 +143,8 @@ public abstract class FormFlowController {
    *
    * @param session The {@link HttpSession} the user is in
    * @param flow    The flow to look up the submission ID for
-   * @throws ResponseStatusException if {@code throwNotFoundError()} is called.
    * @return The submission id if it exists for the given flow, else null
+   * @throws ResponseStatusException if {@code throwNotFoundError()} is called.
    */
   public static UUID getSubmissionIdForFlow(HttpSession session, String flow) {
     if (session == null) {

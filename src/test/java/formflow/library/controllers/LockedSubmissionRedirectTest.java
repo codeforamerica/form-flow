@@ -16,12 +16,14 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -401,7 +403,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
           .getResponse()
           .getRedirectedUrl();
     }
-    assertThat(screenAfterSubflow).isEqualTo("/flow/testFlow/test");
+    assertThat(screenAfterSubflow).isEqualTo("/flow/testFlow/testReviewScreen");
 
     // Assert that the submissions submittedAt value is null before submitting
     Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);

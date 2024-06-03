@@ -3,15 +3,17 @@
 <head th:replace="~{fragments/head :: head(title='Subflow Page2')}"></head>
 <body>
 <div class="page-wrapper">
-  <div th:replace="~{fragments/toolbar :: toolbar}"></div>
-  <section class="slab">
-    <div class="grid">
-      <main id="content" role="main" class="form-card spacing-above-35">
-        <th:block
-            th:replace="~{fragments/cardHeader :: cardHeader(header='Subflow Page', subtext='This is a page within a subflow')}"/>
-        <!-- Test that the currentSubflowItem is passed in by the controller: -->
-        <div th:text="${currentSubflowItem.firstNameSubflowPage2}"></div>
-        <div>
+    <div th:replace="~{fragments/toolbar :: toolbar}"></div>
+    <section class="slab">
+        <div class="grid">
+            <main id="content" role="main" class="form-card spacing-above-35">
+                <th:block
+                        th:replace="~{fragments/cardHeader :: cardHeader(header='Subflow Page', subtext='This is a page within a subflow')}"/>
+                <!-- Test that the currentSubflowItem is passed in by the controller: -->
+                <th:block
+                        th:replace="~{fragments/form :: form(action=${formAction}, content=~{::formDetails})}">
+                    <th:block th:ref="formDetails">
+                        <div class="form-card__content">
           <th:block
               th:replace="~{fragments/inputs/text ::
                                   text(inputName='textInputSubflowPage2',
@@ -72,13 +74,20 @@
               th:replace="~{fragments/inputs/phone :: phone(
                                   inputName='phoneInputSubflowPage2',
                                   label='phoneInput')}"/>
+          <th:block th:replace="~{fragments/inputs/date ::
+            date(inputName='dateSubflowPage2',
+            label='dateInputSubflowPage2',
+            groupName='dateInputSubflowPage2')}"/>
         </div>
-        <div class="form-card__footer">
-          <th:block th:replace="~{fragments/continueButton :: continue}"/>
+                        <div class="form-card__footer">
+                            <th:block th:replace="~{fragments/inputs/submitButton :: submitButton(
+                    text='Continue')}"/>
+                        </div>
+                    </th:block>
+                </th:block>
+            </main>
         </div>
-      </main>
-    </div>
-  </section>
+    </section>
 </div>
 <th:block th:replace="~{fragments/footer :: footer}"/>
 </body>

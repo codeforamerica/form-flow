@@ -47,6 +47,7 @@ Table of Contents
     * [Submission Object](#submission-object)
     * [Inputs Class](#inputs-class)
         * [Validating Inputs](#validating-inputs)
+        * [Required Inputs](#required-inputs)
     * [Dynamic Input Fields](#dynamic-input-fields)
     * [Custom Annotations](#custom-annotations)
         * [Validation Annotations](#validation-annotations)
@@ -596,6 +597,78 @@ use `@Email` and `@NotBlank` together, that causes both validations to run even 
 enter a value, validating both that they need to enter a value due to `@NotBlank` and because the
 blank value needs to be a validly formatted email address due to `@Email`.
 
+### Required Inputs
+
+As mentioned above in the [Validating Inputs](#validating-inputs) section, the annotations `@NotEmpty`,
+`@NotBlank`, and `@NotNull` are used to make a field required. The library will automatically
+append a red '(required)' to the end of your input labels.
+
+#### Special Required Field Situations
+
+Sometimes you may have a field that is required, but not through an annotation such as those mentioned above.
+The specific scenario where this might be the case is when a field uses cross validation in 
+the flows-config file and that validation makes it required.
+
+For this situation, we have provided an attribute which can be added to inputs, `required` which is a boolean
+that defaults to false. If set to true, the field will be marked as required in the UI and append the 
+red `(required)` text.
+
+For example:
+```html
+<th:block th:replace="~{fragments/inputs/text ::
+      text(inputName='firstName',
+      label=#{personal-info.first-name-label},
+      required=true,
+      helpText=#{personal-info.first-name-help})}"/>
+```
+
+Note that this attribute is optional and intended to be used in these special situations. It will only
+append the red `(required)` to the appropriate place but will not actually validate the field as required.
+
+#### Required Fields on Single Input Screens
+The library provides a convenience template fragment for single input screens that will make such 
+screens accessible to screen readers. 
+
+When using this template and you want a field to be indicated as required, you need to provide the 
+input name when defining the fragment so that Thymeleaf can access the field name when checking required
+field annotations.
+
+Example:
+```html
+<th:block>
+  <th:block
+      th:replace="~{fragments/screens/screenWithOneInput ::
+  screenWithOneInput(
+    title=#{economic-hardship.title},
+    header=#{economic-hardship.header},
+    subtext=#{economic-hardship.subheader},
+    formAction=${formAction},
+    inputName='economicHardshipTypes',
+    inputContent=~{::inputContent})}">
+... more content
+```
+Note the `inputName='economicHardshipTypes'` attribute. This is the name of the input field
+which will appear below `more content` above. This name is used to check for required field annotations
+so that the template will know the field is required.
+
+We've also provided the same `required` attribute for this template fragment as well. Again this is
+an optional attribute for situations where the field is required but not through an annotation.
+Here is an example of using it with the `screenWithOneInput` fragment:
+```html
+<th:block
+    th:replace="~{fragments/screens/screenWithOneInput ::
+    screenWithOneInput(
+    title=#{economic-hardship.title},
+    required=true,
+    header=#{economic-hardship.header},
+    subtext=#{economic-hardship.subheader},
+    formAction=${formAction},
+    inputName='economicHardshipTypes',
+    inputContent=~{::inputContent})}">
+```
+
+Note that passing `required=true` here will append the red `(required)` to the label.
+
 ## Dynamic Input Fields
 
 A field is dynamic if it is unknown exactly how many of them will be submitted on a given form
@@ -1034,7 +1107,7 @@ page is labeled by the page header. In this case we recommend using the `cfa:scr
 live
 template which we have provided. This template makes use of an `aria-label` referencing the header
 of
-the page instead of a traditional label.
+the page instead of a traditional label. For more information on see [Screen with One Input](#screen-with-one-input).
 
 #### Text
 
@@ -1505,6 +1578,42 @@ There is an optional field called `isHidden` available on both buttons. If set t
 the `display-none` class will be added to the widget's classes resulting in the button being hidden
 when the page loads.
 
+### Screen with One Input
+
+Screens with a single input are tricky because all inputs need a label associated with them so that
+screen readers and other assistive technologies can identify those elements on a screen that label an input.
+For this screen pattern the label is the header of the page, which needs to be programmatically 
+associated with the input. To handle this, we have a special fragment called `screenWithOneInput`.
+You can use the `cfa:screenWithOneInput` live template to quickly create a screen with a single input
+that utilizes this fragment.
+
+Note that the live template will ask you for a `title`, `header`, and `inputName`. This input name should
+match the input name you give the actual input you use. There is also an optional `subtext` which can
+display optional text below the header.
+
+The live template looks like this:
+```html
+<th:block
+  th:replace="~{fragments/screens/screenWithOneInput ::
+  screenWithOneInput(
+    title=#{},
+    header=#{},
+    inputName='',
+    subtext=#{},
+    formAction=${formAction},
+    inputContent=~{::inputContent})}">
+  <th:block th:ref="inputContent">
+    <!-- Be sure to have `ariaLabel='header'` to label the input with the header -->
+    <th:block th:replace="~{fragments/inputs/text ::
+      text(inputName='',
+      ariaLabel='header')}"/>
+  </th:block>
+</th:block>
+```
+
+Note in this example we use a text input, but you can use any input type you like. Just make sure the
+input name matches the `inputName` you give the `screenWithOneInput` fragment.
+
 ## Document Upload
 
 The library provides a file upload feature using the client side JavaScript
@@ -1887,10 +1996,11 @@ inputs to PDF fields.
 
 #### application.yaml properties
 
-| Name                            | Description                                                                                                                                                                                                                   | Example                     |
-|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                       | `map-file: pdf-map.yaml`    |
-| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited. | `generate-flattened: false` |
+| Name                            | Description                                                                                                                                                                                                                                                                        | Example                     |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `map-file`                      | The name of the yaml file where your pdf mappings live. This is `pdf-map.yaml` by default. The library will look for this file by default in the `resources` directory.                                                                                                            | `map-file: pdf-map.yaml`    |
+| `generate-flattened` (optional) | Boolean flag for whether to generate a flattened pdf (`true`) or not (`false`). Defaults to `true`. Note that this is useful for tests but in production environments PDFs should be flattened so that they cannot be edited.                                                      | `generate-flattened: false` |
+| `read-only` (optional)          | Boolean flag for whether to make all fields in the PDF read only (`true`) or not (`false`). Defaults to `false`. Note that this may be a better option for PDF accessibility when used in place of flattening (`generate-flattened` set to `false` and `read-only` set to `true`). | `ready-only: true`          |
 
 For example:
 
@@ -1899,6 +2009,7 @@ form-flow:
   pdf:
     map-file: pdf-map.yaml
     generate-flattened: false
+    read-only: true
 ```
 
 ### Creating a Template PDF File

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,8 +39,11 @@ public class ValidationService {
 
   private final Validator validator;
   private final ActionManager actionManager;
-  private final String inputConfigPath;
-  private final List<String> requiredAnnotationsList = List.of(
+  private static String inputConfigPath;
+  
+  private static final Map<String, Map<String, Boolean>> requiredInputs = new HashMap<>();
+  
+  private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
       NotEmpty.class.getName(),
       NotBlank.class.getName()
@@ -56,7 +60,7 @@ public class ValidationService {
       @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
     this.validator = validator;
     this.actionManager = actionManager;
-    this.inputConfigPath = inputConfigPath;
+    ValidationService.inputConfigPath = inputConfigPath;
   }
 
   /**
@@ -157,5 +161,31 @@ public class ValidationService {
     });
 
     return validationMessages;
+  }
+
+  public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
+    if (requiredInputs.isEmpty()) {
+      Class<?> flowClass;
+
+      try {
+        flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+      } catch (ReflectiveOperationException e) {
+        log.error("Error while trying to get the inputs class for flow {}. Make sure the inputs file for your application uses the same name as it's flow.", flowName, e);
+        throw new RuntimeException(e);
+      }
+
+      Field[] declaredFields = flowClass.getDeclaredFields();
+      for (Field field : declaredFields) {
+        if (Arrays.stream(field.getAnnotations())
+            .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
+          if (requiredInputs.containsKey(flowName)) {
+            requiredInputs.get(flowName).put(field.getName(), true);
+          } else {
+            requiredInputs.put(flowName, new HashMap<>(Map.of(field.getName(), true)));
+          }
+        }
+      }
+    }
+    return requiredInputs;
   }
 }

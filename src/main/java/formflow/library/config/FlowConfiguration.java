@@ -1,6 +1,7 @@
 package formflow.library.config;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.Data;
 import lombok.Getter;
@@ -14,9 +15,9 @@ public class FlowConfiguration {
 
   private String name;
 
-  private HashMap<String, ScreenNavigationConfiguration> flow;
+  private Map<String, ScreenNavigationConfiguration> flow;
 
-  private HashMap<String, SubflowConfiguration> subflows;
+  private Map<String, SubflowConfiguration> subflows;
 
   private LandmarkConfiguration landmarks;
 
@@ -28,5 +29,14 @@ public class FlowConfiguration {
    */
   public ScreenNavigationConfiguration getScreenNavigation(String screenName) {
     return flow.get(screenName);
+  }
+
+  public void setFlow(Map<String, ScreenNavigationConfiguration> screenMap) {
+    flow = screenMap.entrySet().stream()
+        .map(entry -> {
+          entry.getValue().setName(entry.getKey());
+          return entry;
+        })
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 }

@@ -741,3 +741,12 @@ body,
   display: inline-flex;
   align-items: center;
 }
+
+.required-input {
+  color: #a72f10;
+  font-weight: normal;
+}
+
+.form-group .text--help+.text--error {
+  margin-top: -2.5rem;
+}

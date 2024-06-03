@@ -2,6 +2,7 @@ package formflow.library.pdf;
 
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfFormField;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,9 @@ public class PDFFormFiller {
 
   @Value("${form-flow.pdf.generate-flattened:true}")
   private boolean generateFlattened;
+  
+  @Value("${form-flow.pdf.read-only:false}")
+  private boolean readOnly;
 
   private final ApplicationContext applicationContext;
 
@@ -56,9 +60,20 @@ public class PDFFormFiller {
       PdfStamper pdfStamper = new PdfStamper(reader, new FileOutputStream(outputFile));
       AcroFields acroFields = pdfStamper.getAcroFields();
       configureSubstitutionFonts(acroFields);
+      
+      // Populate fields
       for (PdfField pdfField : fields) {
         acroFields.setField(pdfField.name(), pdfField.value());
       }
+      
+      if (readOnly) {
+        // Set all fields in the document to read-only
+        Set<String> allFieldNames = acroFields.getAllFields().keySet();
+        for (String fieldName : allFieldNames) {
+          acroFields.setFieldProperty(fieldName, "setfflags", PdfFormField.FF_READ_ONLY, null);
+        }
+      }
+      
       pdfStamper.setFormFlattening(flatten);
       pdfStamper.close();
       return outputFile;

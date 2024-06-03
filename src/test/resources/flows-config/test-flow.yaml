@@ -19,6 +19,9 @@ flow:
   testAddressVerification:
     nextScreens:
       - name: test
+  testEntryScreen:
+    nextScreens:
+      - name: subflowAddItem
   subflowAddItem:
     subflow: testSubflow
     nextScreens:
@@ -26,7 +29,11 @@ flow:
   subflowAddItemPage2:
     subflow: testSubflow
     nextScreens:
-      - name: test
+      - name: testReviewScreen
+  testReviewScreen:
+    nextScreens: null
+  testDeleteConfirmationScreen:
+    nextScreens: null
   test:
     nextScreens:
       - name: success

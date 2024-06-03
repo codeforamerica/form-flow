@@ -20,6 +20,15 @@
   <option name="HTML" value="true" />
 </context>
 </template>
+<template name="cfa:checkbox" value="&lt;th:block th:replace=&quot;~{fragments/inputs/checkbox ::&#10;  checkbox(inputName='$INPUT_NAME$',&#10;  label=#{$LABEL$},&#10; value=#{$VALUE$},&#10; helpText=#{$CHECKBOX_HELP_TEXT$})}&quot;/&gt;" description="A field checkbox with label, name, optional help text and optional icon" toReformat="false" toShortenFQNames="true">
+<variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+<variable name="CHECKBOX_HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
+<context>
+  <option name="HTML" value="true" />
+</context>
+</template>
 <template name="cfa:conditionMethod" value="public static Boolean $METHOD_NAME$(Submission submission) {&#10;  if (submission.getInputData().containsKey(&quot;$FIELD_NAME$&quot;)) {&#10;    // Change logic to suit your needs&#10;    return submission.getInputData().get(&quot;$FIELD_NAME$&quot;)$CURSOR$;&#10;  }&#10;  return false;&#10;}" description="Create a condition method that first check for db field existance then your conditional logic" toReformat="false" toShortenFQNames="true">
 <variable name="METHOD_NAME" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="FIELD_NAME" expression="" defaultValue="" alwaysStopAt="true" />
@@ -104,15 +113,6 @@
 <variable name="REF_CONTENT" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="CHECKBOX_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
-<context>
-  <option name="HTML" value="true" />
-</context>
-</template>
-<template name="cfa:checkbox" value="&lt;th:block th:replace=&quot;~{fragments/inputs/checkbox ::&#10;  checkbox(inputName='$INPUT_NAME$',&#10;  label=#{$LABEL$},&#10; value=#{$VALUE$},&#10; helpText=#{$CHECKBOX_HELP_TEXT$})}&quot;/&gt;" description="A field checkbox with label, name, optional help text and optional icon" toReformat="false" toShortenFQNames="true">
-<variable name="INPUT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
-<variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
-<variable name="LABEL" expression="" defaultValue="" alwaysStopAt="true" />
-<variable name="CHECKBOX_HELP_TEXT" expression="" defaultValue="" alwaysStopAt="true" />
 <context>
   <option name="HTML" value="true" />
 </context>
@@ -241,7 +241,7 @@
   <option name="HTML" value="true" />
 </context>
 </template>
-<template name="cfa:screenWithOneInput" value="&lt;th:block&#10;  th:replace=&quot;~{fragments/screens/screenWithOneInput ::&#10;  screenWithOneInput(&#10;    title=#{$TITLE$},&#10;    iconFragment=~{fragments/icons :: $ICON_NAME$},&#10;    header=#{$HEADER$},&#10;    subtext=#{$SUBTEXT$},&#10;    formAction=${formAction},&#10;    inputContent=~{::inputContent})}&quot;&gt;&#10;  &lt;th:block th:ref=&quot;inputContent&quot;&gt;&#10;    &lt;!-- Be sure to have `ariaLabel='header'` to label the input with the header --&gt;&#10;    &lt;th:block th:replace=&quot;~{fragments/inputs/text ::&#10;      text(inputName='$INPUT_NAME$',&#10;      ariaLabel='header')}&quot;/&gt;&#10;  &lt;/th:block&gt;&#10;&lt;/th:block&gt;" description="An entire screen that has one input and is labelled by the page header." toReformat="false" toShortenFQNames="true">
+<template name="cfa:screenWithOneInput" value="&lt;th:block&#10;  th:replace=&quot;~{fragments/screens/screenWithOneInput ::&#10;  screenWithOneInput(&#10;    title=#{$TITLE$},&#10;    iconFragment=~{fragments/icons :: $ICON_NAME$},&#10;    header=#{$HEADER$},&#10;    subtext=#{$SUBTEXT$},&#10;    inputName='$INPUT_NAME$',&#10;    formAction=${formAction},&#10;    inputContent=~{::inputContent})}&quot;&gt;&#10;  &lt;th:block th:ref=&quot;inputContent&quot;&gt;&#10;    &lt;!-- Be sure to have `ariaLabel='header'` to label the input with the header --&gt;&#10;    &lt;th:block th:replace=&quot;~{fragments/inputs/text ::&#10;      text(inputName='$INPUT_NAME$',&#10;      ariaLabel='header')}&quot;/&gt;&#10;  &lt;/th:block&gt;&#10;&lt;/th:block&gt;" description="An entire screen that has one input and is labelled by the page header." toReformat="false" toShortenFQNames="true">
 <variable name="TITLE" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="ICON_NAME" expression="" defaultValue="" alwaysStopAt="true" />
 <variable name="HEADER" expression="" defaultValue="" alwaysStopAt="true" />
