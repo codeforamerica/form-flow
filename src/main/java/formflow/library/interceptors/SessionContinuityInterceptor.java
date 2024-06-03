@@ -70,7 +70,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       if (parsedUrl.get("screen").equals(firstScreen)) {
         return true;
       }
-      log.error("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
+      log.warn("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
       response.sendRedirect(redirectUrl);
       return false;
     }
@@ -82,7 +82,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
     }
 
     if (submissionId == null && !parsedUrl.get("screen").equals(firstScreen)) {
-      log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
+      log.warn("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());
       response.sendRedirect(redirectUrl);
       return false;
