@@ -75,25 +75,16 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       return false;
     }
 
-    UUID submissionId;
+    UUID submissionId = null;
     try {
       submissionId = FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow"));
-    } catch (ResponseStatusException e) {
-      submissionId = null;
+    } catch (ResponseStatusException ignored) {
     }
 
     if (submissionId == null && !parsedUrl.get("screen").equals(firstScreen)) {
       log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
           request.getRequestURI());
       response.sendRedirect(redirectUrl);
-      return false;
-    }
-
-    if (submissionId == null && !parsedUrl.get("screen").equals(firstScreen)) {
-      //if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&
-      //   !parsedUrl.get("screen").equals(firstScreen)) {
-      log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
-          request.getRequestURI());
       return false;
     }
 
