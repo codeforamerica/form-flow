@@ -3,7 +3,6 @@
     th:with="
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
-      requireDateFields=${requireDateFields ?: false},
       requiredInputsForFlow=${requiredInputs.get(flow)},
       isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Month', false)) || 
         (requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Day', false)) || 
@@ -19,7 +18,7 @@
       <legend th:if="${hasLabel}" th:for="${inputName}"
              class="form-question">
         <span th:text="${label}"></span>
-        <span th:if="${(isRequiredInput || requireDateFields) && !hasAriaLabel}" class="required-input" th:text="#{general.required-field}"></span>
+        <span th:if="${isRequiredInput && !hasAriaLabel}" class="required-input" th:text="#{general.required-field}"></span>
       </legend>
       <th:block
           th:replace="~{fragments/inputError :: validationError(inputName=${inputName} + 'Month')}"></th:block>
