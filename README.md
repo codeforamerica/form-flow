@@ -671,7 +671,7 @@ Note that passing `required=true` here will append the red `(required)` to the l
 
 #### Special situation for requiring address fields
 
-Sometimes you may want to apply custom validations to address fields through actions that effectively
+Sometimes you may want to apply custom validations to address fields through [Actions](#actions) that effectively
 make the address field required. In these situations because you are not using annotations to make the
 address fields required, the library won't pick up on the fact that the fields should be marked as required.
 
