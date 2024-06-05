@@ -1,25 +1,22 @@
 package formflow.library.listeners;
 
-import jakarta.servlet.http.HttpSessionEvent;
-import jakarta.servlet.http.HttpSessionListener;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.security.web.session.HttpSessionCreatedEvent;
+import org.springframework.security.web.session.HttpSessionDestroyedEvent;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class SessionListenerLogger implements HttpSessionListener {
+public class SessionListenerLogger {
 
-    public SessionListenerLogger() {
-        log.info("SessionListenerLogger initialized");
+    @EventListener
+    public void onSessionCreated(HttpSessionCreatedEvent event) {
+        log.info("Session created: ID={}", event.getSession().getId());
     }
 
-    @Override
-    public void sessionCreated(HttpSessionEvent se) {
-        log.info("Session created: ID={}", se.getSession().getId());
-    }
-
-    @Override
-    public void sessionDestroyed(HttpSessionEvent se) {
-        log.info("Session destroyed: ID={}", se.getSession().getId());
+    @EventListener
+    public void onSessionDestroyed(HttpSessionDestroyedEvent event) {
+        log.info("Session destroyed: ID={}", event.getId());
     }
 }
