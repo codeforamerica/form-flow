@@ -1,6 +1,7 @@
 <th:block
     th:fragment="address(validate, inputName)"
     th:with="
+    requireAddressFields=${requireAddressFields ?: false},
     streetAddressLabelDefault=#{address.street-address-1},
     streetAddress2LabelDefault=#{address.street-address-2},
     cityLabelDefault=#{address.city},
@@ -20,6 +21,7 @@
 >
   <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName=${streetAddressInputName},
+                  required=${requireAddressFields},
                   label=${streetAddressLabel},
                   helpText=${streetAddressHelpText})}"/>
   <th:block th:replace="~{fragments/inputs/text ::
@@ -28,14 +30,17 @@
                   helpText=${streetAddress2HelpText})}"/>
   <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName=${cityInputName},
+                  required=${requireAddressFields},
                   label=${cityLabel},
                   helpText=${cityHelpText})}"/>
   <th:block th:replace="~{fragments/inputs/state ::
                   state(inputName=${stateInputName},
+                  required=${requireAddressFields},
                   label=${stateLabel},
                   helpText=${stateHelpText})}"/>
   <th:block th:replace="~{fragments/inputs/text ::
                   text(inputName=${zipCodeInputName},
+                  required=${requireAddressFields},
                   label=${zipCodeLabel},
                   helpText=${zipCodeHelpText})}"/>
   <input type="hidden"

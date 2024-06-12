@@ -669,6 +669,23 @@ Here is an example of using it with the `screenWithOneInput` fragment:
 
 Note that passing `required=true` here will append the red `(required)` to the label.
 
+#### Special situation for requiring address fields
+
+Sometimes you may want to apply custom validations to address fields through [Actions](#actions) that effectively
+make the address field required. In these situations because you are not using annotations to make the
+address fields required, the library won't pick up on the fact that the fields should be marked as required.
+
+To handle this situation, we have provided a special attribute `requireAddressFields` which is a boolean
+that can be passed when calling the address input fragment like so:
+```html
+<th:block th:replace="~{fragments/inputs/address ::
+    address(requireAddressFields=true,
+    inputName='residentialAddress')}"/>
+
+```
+This will apply the red `(required)` to the address fields in the UI. Note it will not do so for the 
+street address line 2 as these are typically considered optional.
+
 ## Dynamic Input Fields
 
 A field is dynamic if it is unknown exactly how many of them will be submitted on a given form
