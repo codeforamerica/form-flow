@@ -78,7 +78,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:[9.+,10.+['
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
-    implementation 'com.smartystreets.api:smartystreets-java-sdk:3.17.0'
+    implementation 'com.smartystreets.api:smartystreets-java-sdk:3.17.3'
     implementation 'com.github.librepdf:openpdf:2.0.2'
     implementation 'org.yaml:snakeyaml:2.2'
     implementation 'com.mailgun:mailgun-java:1.1.3'
