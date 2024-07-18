@@ -104,7 +104,7 @@ dependencies {
     // we should take a look at this dependency and see if it's really testing things correctly and
     // monitor the dependencies.
     testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.1'
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
