@@ -17,8 +17,8 @@ else
 fi
 
 echo 'Installing brew packages'
-brew tap homebrew/cask-versions
-brew install temurin17 jenv gradle postgresql@14
+brew install --cask temurin@17
+brew install jenv gradle postgresql@14
 
 # Install jenv in either the .bashrc or zshrc, whichever is present
 if [ -f ~/.bashrc ]; then
