@@ -109,7 +109,7 @@ dependencies {
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
-    testImplementation 'org.projectlombok:lombok:1.18.32'
+    testImplementation 'org.projectlombok:lombok:1.18.34'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
 }
 
