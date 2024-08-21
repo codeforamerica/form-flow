@@ -2,14 +2,17 @@ package formflow.library.file;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 class FileValidationServiceTest {
 
@@ -38,7 +41,7 @@ class FileValidationServiceTest {
 
   @ParameterizedTest
   @MethodSource("provideMultiPartFiles")
-  void isAcceptedMimeTypeReturnsTrueIfAccepted(String contentType, boolean assertion) {
+  void isAcceptedMimeTypeReturnsTrueIfAccepted(String contentType, boolean assertion) throws IOException {
     FileValidationService fileValidationService = new FileValidationService(".jpeg,.bmp", 1);
     MockMultipartFile testFile = new MockMultipartFile("test", "test", contentType, new byte[]{});
 
@@ -46,6 +49,14 @@ class FileValidationServiceTest {
   }
 
 
+  @Test
+  void detectsFalseMimeTypes() throws IOException {
+    ClassPathResource resource = new ClassPathResource("I-am-not-a-png.txt.png");
+    MultipartFile file = new MockMultipartFile("file", "I-am-not-a-png.txt.png", MediaType.IMAGE_PNG_VALUE, resource.getInputStream());
+    FileValidationService fileValidationService = new FileValidationService(".jpeg,.bmp", 1);
+    assertThat(fileValidationService.isAcceptedMimeType(file)).isFalse();
+  }
+  
   @Test
   void isTooLargeReturnsTrueIfSizeExceedsMax() {
     FileValidationService fileValidationService = new FileValidationService(".jpeg,.bmp", 1);
