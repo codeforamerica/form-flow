@@ -70,10 +70,11 @@ jobs:
           echo "signing.gnupg.keyName=${{ secrets.PLATFORM_ROBOT_GPG_ID }}" >> ~/.gradle/gradle.properties
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
-      - name: Publish package
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
+      - name: Publish package to Sonatype
+        run: |
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           SONATYPE_USERNAME: ${{ inputs.sonatypeUsername }}
           SONATYPE_PASSWORD: ${{ inputs.sonatypePassword }}
@@ -98,6 +99,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
   post_release_success:
     name: Clean up after release
     needs: release
@@ -128,6 +130,7 @@ jobs:
           event-type: form-flow-snapshot-version-bumped
           client-payload: '{"version": "${{env.NEW_SNAPSHOT_VERSION}}"}'
           token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
+
   release_announcement:
     name: Announce release
     if: ${{ always() }}
