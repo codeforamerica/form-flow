@@ -53,7 +53,7 @@ class FileValidationServiceTest {
 
   @Test
   void detectsFalseMimeTypes() throws IOException {
-    ClassPathResource resource = new ClassPathResource("I-am-not-a-png.txt.png");
+    ClassPathResource resource = new ClassPathResource("i-am-not-a-png.txt.png");
     MultipartFile file = new MockMultipartFile("file", "I-am-not-a-png.txt.png", MediaType.IMAGE_PNG_VALUE, resource.getInputStream());
     FileValidationService fileValidationService = new FileValidationService(".jpeg,.bmp", 1);
     assertThat(fileValidationService.isAcceptedMimeType(file)).isFalse();
