@@ -21,6 +21,7 @@ import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
+import formflow.library.file.FileValidationService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utils.UserFileMap;
 
@@ -75,6 +76,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
   private FileController fileController;
   @MockBean
   private ClammitVirusScanner clammitVirusScanner;
+  @SpyBean
+  private FileValidationService fileValidationService;
   @Captor
   private ArgumentCaptor<UserFile> userFileArgumentCaptor;
   private final UUID fileId = UUID.randomUUID();
@@ -122,7 +125,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     // the "name" param has to match what the endpoint expects: "file"
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
+    
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")
@@ -163,6 +167,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
         "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
     when(clammitVirusScanner.virusDetected(testVirusFile)).thenReturn(true);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(fileValidationService.isAcceptedMimeType(testVirusFile)).thenReturn(true);
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testVirusFile)
@@ -186,7 +191,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
         new WebClientResponseException(500, "Failed!", null, null, null));
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
-
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
+    
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")
@@ -208,7 +214,8 @@ public class FileControllerTest extends AbstractMockMvcTest {
     when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
         new WebClientResponseException(500, "Failed!", null, null, null));
     doNothing().when(cloudFileRepository).upload(any(), any());
-
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
+    
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")
@@ -227,6 +234,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
   void shouldReturn413IfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, new byte[(int) (FileUtils.ONE_MB + 1)]);
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
 
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
@@ -242,11 +250,15 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
   @Test
   void shouldReturn4xxIfUploadFileViolatesMaxFilesConstraint() throws Exception {
+    MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
+            MediaType.IMAGE_JPEG_VALUE, new byte[10]);
+    
     when(userFileRepositoryService.countBySubmission(submission)).thenReturn(10L);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
+    
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-            .file(new MockMultipartFile("file", "testFileSizeImage.jpg",
-                MediaType.IMAGE_JPEG_VALUE, new byte[10]))
+            .file(testImage)
             .param("flow", "testFlow")
             .param("inputName", "dropZoneTestInstance")
             .param("thumbDataURL", "base64string")
