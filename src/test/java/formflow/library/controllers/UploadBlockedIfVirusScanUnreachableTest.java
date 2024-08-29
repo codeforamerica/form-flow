@@ -10,6 +10,7 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.ClammitVirusScanner;
+import formflow.library.file.FileValidationService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.Locale;
 import java.util.UUID;
@@ -33,22 +34,19 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 public class UploadBlockedIfVirusScanUnreachableTest extends AbstractMockMvcTest {
 
   private MockMvc mockMvc;
-  @MockBean
-  private SubmissionRepositoryService submissionRepositoryService;
   @Autowired
   UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
   @MockBean
   private ClammitVirusScanner clammitVirusScanner;
+  @MockBean
+  FileValidationService fileValidationService;
 
   @Override
   @BeforeEach
   public void setUp() throws Exception {
-    UUID submissionUUID = UUID.randomUUID();
     mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
-    Submission submission = Submission.builder().id(submissionUUID).build();
-    //when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
     super.setUp();
   }
 
@@ -58,6 +56,7 @@ public class UploadBlockedIfVirusScanUnreachableTest extends AbstractMockMvcTest
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
     when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
         new WebClientResponseException(500, "Failed!", null, null, null));
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")

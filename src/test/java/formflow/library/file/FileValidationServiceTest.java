@@ -3,6 +3,8 @@ package formflow.library.file;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -32,20 +34,20 @@ class FileValidationServiceTest {
 
   private static Stream<Arguments> provideMultiPartFiles() {
     return Stream.of(
-        Arguments.of("image/jpeg", true),
-        Arguments.of("fake/nonsense", false),
-        Arguments.of(null, false),
-        Arguments.of("", false)
+        Arguments.of("test.jpeg", true),
+        Arguments.of("test-archive.zip", false),
+        Arguments.of("i-am-not-a-png.txt.png", false)
     );
   }
 
   @ParameterizedTest
   @MethodSource("provideMultiPartFiles")
-  void isAcceptedMimeTypeReturnsTrueIfAccepted(String contentType, boolean assertion) throws IOException {
+  void isAcceptedMimeTypeReturnsTrueIfAccepted(String contentName, boolean assertion) throws IOException {
     FileValidationService fileValidationService = new FileValidationService(".jpeg,.bmp", 1);
-    MockMultipartFile testFile = new MockMultipartFile("test", "test", contentType, new byte[]{});
+    ClassPathResource resource = new ClassPathResource(contentName);
+    MultipartFile file = new MockMultipartFile("file", contentName, Files.probeContentType(Path.of(contentName)), resource.getInputStream());
 
-    assertThat(fileValidationService.isAcceptedMimeType(testFile)).isEqualTo(assertion);
+    assertThat(fileValidationService.isAcceptedMimeType(file)).isEqualTo(assertion);
   }
 
 
