@@ -11,6 +11,7 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
+import formflow.library.file.FileValidationService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -42,7 +44,9 @@ public class NoOpVirusScannerTest extends AbstractMockMvcTest {
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
-
+  @SpyBean
+  FileValidationService fileValidationService;
+  
   @Override
   @BeforeEach
   public void setUp() throws Exception {
@@ -72,6 +76,7 @@ public class NoOpVirusScannerTest extends AbstractMockMvcTest {
   void shouldBypassRealVirusScanningIfDisabled() throws Exception {
     MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
         MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
+    when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
     mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
             .file(testImage)
             .param("flow", "testFlow")

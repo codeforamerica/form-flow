@@ -3,12 +3,14 @@ package formflow.library.utilities;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByTagName;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Page {
 
@@ -20,6 +22,8 @@ public class Page {
   }
 
   public String getTitle() {
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    wait.until(webDriver -> !driver.getTitle().isBlank());
     return driver.getTitle();
   }
 
