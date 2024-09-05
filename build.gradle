@@ -85,6 +85,8 @@ dependencies {
     implementation 'com.mailgun:mailgun-java:1.1.3'
     implementation 'com.google.crypto.tink:tink:1.14.1'
     implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'org.apache.tika:tika-core:2.9.2'
+
 
     // For M1 issue?
     //runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.97.Final:osx-aarch_64'

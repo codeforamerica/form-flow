@@ -2,9 +2,11 @@ package formflow.library.file;
 
 import static java.util.Arrays.stream;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -99,11 +101,12 @@ public class FileValidationService {
    * @param file the file to check the mime type of
    * @return Boolean True if the mimetype is one of the ones the system accepts, False otherwise.
    */
-  public Boolean isAcceptedMimeType(MultipartFile file) {
+  public Boolean isAcceptedMimeType(MultipartFile file) throws IOException {
+    Tika tikaFileValidator = new Tika();
     if (file.getContentType() == null || file.getContentType().isBlank()) {
       return false;
     }
-    return ACCEPTED_MIME_TYPES.contains(MimeType.valueOf(file.getContentType()));
+    return ACCEPTED_MIME_TYPES.contains(MimeType.valueOf(tikaFileValidator.detect(file.getInputStream())));
   }
 
   /**
