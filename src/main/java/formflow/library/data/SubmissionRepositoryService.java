@@ -53,6 +53,11 @@ public class SubmissionRepositoryService {
     return submission.map(value -> encryptionService.decrypt(value));
   }
 
+  public Optional<Submission> findByShortCode(String shortCode) {
+    Optional<Submission> submission = repository.findSubmissionByShortCode(shortCode);
+    return submission.map(value -> encryptionService.decrypt(value));
+  }
+
   /**
    * Removes the CSRF from the Submission's input data, if found.
    *

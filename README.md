@@ -555,6 +555,9 @@ On creation of the short code, uniqueness is guaranteed. Because of that, it is 
 be sure the configuration allows for enough possible permutations in your data set. A minimum of 6
 characters is recommended. 
 
+The `SubmissionRepositoryService` allows for reverse lookup of the Submission by the Short Code using 
+`findByShortCode`.
+
 ## Inputs Class
 
 The inputs class's location is defined by the application using this library. Applications will need

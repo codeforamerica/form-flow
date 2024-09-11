@@ -76,6 +76,30 @@ class SubmissionRepositoryServiceTest {
   }
 
   @Test
+  void testFindByShortCode() {
+    Submission submission = new Submission();
+    submission.setFlow("testFlow");
+    assertThat(submission.getShortCode()).isNull();
+
+    submission = saveAndReload(submission);
+    assertThat(submission.getId()).isInstanceOf(UUID.class);
+    assertThat(submission.getShortCode()).isNotNull();
+
+    // application-test.yaml sets this to 8, to override the default behavior
+    // this just tests that the config is indeed working and the default of 6 is not used
+    assertThat(submission.getShortCode().length()).isEqualTo(8);
+    assertThat(submission.getShortCode().matches("[A-Za-z0-9]+")).isEqualTo(true);
+
+    Optional<Submission> reloadedSubmission = submissionRepositoryService.findByShortCode(submission.getShortCode());
+    if (reloadedSubmission.isPresent()) {
+      assertThat(submission).isEqualTo(reloadedSubmission.get());
+      assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
+    } else {
+      Assertions.fail();
+    }
+  }
+
+  @Test
   void shouldSaveSubmission() {
     var inputData = Map.of(
         "testKey", "this is a test value",
