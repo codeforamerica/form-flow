@@ -272,7 +272,17 @@ public class Submission {
     return result;
   }
 
-  public String getShortCode() {
+  /**
+   * getShortCode returns a read-only unique code for the submission after the submission has been saved to the database initially.
+   * The short code generation is configurable via @ShortCodeConfig. The length, characterset (alphanumeric, numeric, alpha), and
+   * forced uppercasing are available (with the defaults being 6, alphanumeric, and true respectively).
+   *
+   * This method will check if the generated code exists in the database, and keep trying to create a unique code, before
+   * persisting and returning the newly generated code-- therefore it is very important to ensure the configuration allows for a
+   * suitably large set of possible codes for the application.
+   * @return the short code for the Submission
+   */
+  public synchronized String getShortCode() {
 
     if (this.createdAt == null) {
       // If the submission hasn't been saved ever, there should be no concept of a short code

@@ -25,5 +25,3 @@ public class ShortCodeConfig {
     private boolean uppercase;
 
 }
-
-
