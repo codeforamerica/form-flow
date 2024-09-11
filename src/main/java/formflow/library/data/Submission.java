@@ -291,7 +291,17 @@ public class Submission {
 
       // If there is no short code for this submission in the database, generate one
       do {
-        String newCode = RandomStringUtils.randomAlphanumeric(shortCodeConfig.getCodeLength());
+        int codeLength = shortCodeConfig.getCodeLength();
+        String newCode = switch(shortCodeConfig.getCodeType()) {
+          case alphanumeric -> RandomStringUtils.randomAlphanumeric(codeLength);
+          case alpha -> RandomStringUtils.randomAlphabetic(codeLength);
+          case numeric -> RandomStringUtils.randomNumeric(codeLength);
+        };
+
+        if (shortCodeConfig.isUppercase()) {
+          shortCode = shortCode.toUpperCase();
+        }
+
         boolean exists = submissionRepository.existsByShortCode(newCode);
         if (!exists) {
           // If the newly generated code isn't already in the database being used by a prior submission

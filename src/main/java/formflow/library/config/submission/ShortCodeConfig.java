@@ -8,6 +8,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ShortCodeConfig {
 
+    public enum ShortCodeType {
+        alphanumeric,
+        alpha,
+        numeric;
+    }
+
     @Value("${form-flow.short-code.length:6}")
     private int codeLength;
+
+    @Value("${form-flow.short-code.type:alphanumeric}")
+    private ShortCodeType codeType;
+
+    @Value("${form-flow.short-code.uppercase: true}")
+    private boolean uppercase;
+
 }
+
+
