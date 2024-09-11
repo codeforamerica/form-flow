@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +38,31 @@ class SubmissionRepositoryServiceTest {
     firstSubmission = saveAndReload(firstSubmission);
 
     assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
+  }
+
+  @Test
+  void testShortCodePersistsOneTimeOnly() {
+    Submission submission = new Submission();
+    submission.setFlow("testFlow");
+    assertThat(submission.getShortCode()).isNull();
+
+    submission = saveAndReload(submission);
+    assertThat(submission.getId()).isInstanceOf(UUID.class);
+    assertThat(submission.getShortCode()).isNotNull();
+
+    Optional<Submission> reloadedSubmission = submissionRepositoryService.findById(submission.getId());
+    if (reloadedSubmission.isPresent()) {
+      assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
+
+      Optional<Submission> reloadedSubmission2 = submissionRepositoryService.findById(submission.getId());
+      if (reloadedSubmission2.isPresent()) {
+        assertThat(reloadedSubmission2.get().getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
+      } else {
+        Assertions.fail();
+      }
+    } else {
+      Assertions.fail();
+    }
   }
 
   @Test

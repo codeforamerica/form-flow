@@ -2,6 +2,7 @@ package formflow.library.data;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
 
+import formflow.library.config.SpringConfiguration;
 import formflow.library.inputs.AddressParts;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
@@ -19,12 +20,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.Optional;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
@@ -75,6 +78,11 @@ public class Submission {
 
   @Column(name = "submitted_at")
   private OffsetDateTime submittedAt;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @Column(name = "short_code")
+  private String shortCode;
 
   /**
    * The key name for the field in an iteration's data that holds the status of completion for the iteration.
@@ -249,6 +257,32 @@ public class Submission {
       }
     }
     return result;
+  }
+
+  public String getShortCode() {
+
+    if (this.createdAt == null) {
+      // If the submission hasn't been saved ever, there should be no concept of a short code
+      return null;
+    }
+    SubmissionRepository submissionRepository = (SubmissionRepository) SpringConfiguration.contextProvider().getApplicationContext().getBean("submissionRepository");
+    shortCode = submissionRepository.findShortCodeById(this.id);
+    if (shortCode == null) {
+      // If there is no short code for this submission in the database, generate one
+      do {
+        String newCode = RandomStringUtils.randomAlphanumeric(6);
+        boolean exists = submissionRepository.existsByShortCode(newCode);
+        if (!exists) {
+          // If the newly generated code isn't already in the database being used by a prior submission
+          // set this submission's shortcode, and persist it
+          shortCode = newCode;
+          submissionRepository.save(this);
+        } else {
+          log.warn("Confirmation code {} already exists", newCode);
+        }
+      } while (shortCode == null);
+    }
+    return shortCode;
   }
 
   @Override
