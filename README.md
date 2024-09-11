@@ -45,6 +45,7 @@ Table of Contents
     * [Actions](#actions)
 * [Data Persistence and Defining Inputs](#data-persistence-and-defining-inputs)
     * [Submission Object](#submission-object)
+      * [Short Code](#submission-short-code) 
     * [Inputs Class](#inputs-class)
         * [Validating Inputs](#validating-inputs)
         * [Required Inputs](#required-inputs)
@@ -539,6 +540,20 @@ flow
 progresses. This field is placed in the model handed to the Thymeleaf templates, so each screen
 should
 have access to it.
+
+### Submission Short Code
+
+A genericized implementation that can be used, among other things, as a unique confirmation code after 
+completion of the flow. An example of a 6 character, all uppercase, alphanumeric code is 8H7LP2.
+
+The short code is accessible via `getShortCode()`. It is read-only, and is created after the Submission
+object is saved in the database the first time. It is configurable for length (default of 6 characters), 
+forced uppercase (default true), and character sets of alphanumeric (A-z 0-9, the default), alpha (A-z), and 
+numeric (0-9).
+
+On creation of the short code, uniqueness is guaranteed. Because of that, it is incredibly important to
+be sure the configuration allows for enough possible permutations in your data set. A minimum of 6
+characters is recommended. 
 
 ## Inputs Class
 
