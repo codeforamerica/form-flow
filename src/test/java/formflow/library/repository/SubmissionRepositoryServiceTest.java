@@ -50,6 +50,10 @@ class SubmissionRepositoryServiceTest {
     assertThat(submission.getId()).isInstanceOf(UUID.class);
     assertThat(submission.getShortCode()).isNotNull();
 
+    // application-test.yaml sets this to 8, to override the default behavior
+    // this just tests that the config is indeed working and the default of 6 is not used
+    assertThat(submission.getShortCode().length()).isEqualTo(8);
+
     Optional<Submission> reloadedSubmission = submissionRepositoryService.findById(submission.getId());
     if (reloadedSubmission.isPresent()) {
       assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());

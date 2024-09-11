@@ -3,6 +3,7 @@ package formflow.library.data;
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
 
 import formflow.library.config.SpringConfiguration;
+import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.inputs.AddressParts;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
@@ -11,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import jakarta.persistence.Transient;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -83,6 +86,16 @@ public class Submission {
   @Setter(AccessLevel.NONE)
   @Column(name = "short_code")
   private String shortCode;
+
+  @Transient
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  SubmissionRepository submissionRepository;
+
+  @Transient
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private ShortCodeConfig shortCodeConfig;
 
   /**
    * The key name for the field in an iteration's data that holds the status of completion for the iteration.
@@ -265,12 +278,20 @@ public class Submission {
       // If the submission hasn't been saved ever, there should be no concept of a short code
       return null;
     }
-    SubmissionRepository submissionRepository = (SubmissionRepository) SpringConfiguration.contextProvider().getApplicationContext().getBean("submissionRepository");
+
+    if (submissionRepository == null) {
+      submissionRepository = (SubmissionRepository) SpringConfiguration.contextProvider().getApplicationContext().getBean("submissionRepository");
+    }
+
     shortCode = submissionRepository.findShortCodeById(this.id);
     if (shortCode == null) {
+      if (shortCodeConfig == null) {
+        shortCodeConfig = (ShortCodeConfig) SpringConfiguration.contextProvider().getApplicationContext().getBean("shortCodeConfig");
+      }
+
       // If there is no short code for this submission in the database, generate one
       do {
-        String newCode = RandomStringUtils.randomAlphanumeric(6);
+        String newCode = RandomStringUtils.randomAlphanumeric(shortCodeConfig.getCodeLength());
         boolean exists = submissionRepository.existsByShortCode(newCode);
         if (!exists) {
           // If the newly generated code isn't already in the database being used by a prior submission
