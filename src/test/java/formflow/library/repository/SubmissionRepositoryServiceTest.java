@@ -2,6 +2,8 @@ package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.config.submission.ShortCodeConfig;
+import formflow.library.config.submission.ShortCodeConfig.ShortCodeType;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import jakarta.persistence.EntityManager;
@@ -26,6 +28,9 @@ class SubmissionRepositoryServiceTest {
 
   @Autowired
   private SubmissionRepositoryService submissionRepositoryService;
+
+  @Autowired
+  private ShortCodeConfig shortCodeConfig;
 
   @PersistenceContext
   EntityManager entityManager;
@@ -53,6 +58,7 @@ class SubmissionRepositoryServiceTest {
     // application-test.yaml sets this to 8, to override the default behavior
     // this just tests that the config is indeed working and the default of 6 is not used
     assertThat(submission.getShortCode().length()).isEqualTo(8);
+    assertThat(submission.getShortCode().matches("[A-Za-z0-9]+")).isEqualTo(true);
 
     Optional<Submission> reloadedSubmission = submissionRepositoryService.findById(submission.getId());
     if (reloadedSubmission.isPresent()) {

@@ -299,7 +299,7 @@ public class Submission {
         };
 
         if (shortCodeConfig.isUppercase()) {
-          shortCode = shortCode.toUpperCase();
+          newCode = newCode.toUpperCase();
         }
 
         boolean exists = submissionRepository.existsByShortCode(newCode);
