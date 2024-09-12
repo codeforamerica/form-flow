@@ -311,10 +311,6 @@ public class ScreenController extends FormFlowController {
 
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
-    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
-      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
-    }
-
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
@@ -359,6 +355,11 @@ public class ScreenController extends FormFlowController {
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
     submission = saveToRepository(submission);
+
+    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    }
+
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission);
 
