@@ -2,8 +2,6 @@ package formflow.library.data;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
 
-import formflow.library.config.SpringConfiguration;
-import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.inputs.AddressParts;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
@@ -11,17 +9,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-import jakarta.persistence.Transient;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.Optional;
-
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,13 +24,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -82,20 +75,9 @@ public class Submission {
   @Column(name = "submitted_at")
   private OffsetDateTime submittedAt;
 
-  @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   @Column(name = "short_code")
   private String shortCode;
-
-  @Transient
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.NONE)
-  SubmissionRepository submissionRepository;
-
-  @Transient
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.NONE)
-  private ShortCodeConfig shortCodeConfig;
 
   /**
    * The key name for the field in an iteration's data that holds the status of completion for the iteration.
@@ -241,6 +223,8 @@ public class Submission {
     newSubmission.setSubmittedAt(origSubmission.getSubmittedAt());
     newSubmission.setId(origSubmission.getId());
 
+    newSubmission.setShortCode(origSubmission.getShortCode());
+
     // deep copy the subflows and any lists
     newSubmission.setInputData(copyMap(origSubmission.getInputData()));
     return newSubmission;
@@ -272,58 +256,11 @@ public class Submission {
     return result;
   }
 
-  /**
-   * getShortCode returns a read-only unique code for the submission after the submission has been saved to the database initially.
-   * The short code generation is configurable via @ShortCodeConfig. The length, characterset (alphanumeric, numeric, alpha), and
-   * forced uppercasing are available (with the defaults being 6, alphanumeric, and true respectively).
-   *
-   * This method will check if the generated code exists in the database, and keep trying to create a unique code, before
-   * persisting and returning the newly generated code-- therefore it is very important to ensure the configuration allows for a
-   * suitably large set of possible codes for the application.
-   * @return the short code for the Submission
-   */
-  public synchronized String getShortCode() {
-
-    if (this.createdAt == null) {
-      // If the submission hasn't been saved ever, there should be no concept of a short code
-      return null;
+  public void setShortCode(String shortCode) {
+    if (this.shortCode != null) {
+      throw new UnsupportedOperationException("Cannot change shortCode for an existing submission");
     }
-
-    if (submissionRepository == null) {
-      submissionRepository = (SubmissionRepository) SpringConfiguration.contextProvider().getApplicationContext().getBean("submissionRepository");
-    }
-
-    shortCode = submissionRepository.findShortCodeById(this.id);
-    if (shortCode == null) {
-      if (shortCodeConfig == null) {
-        shortCodeConfig = (ShortCodeConfig) SpringConfiguration.contextProvider().getApplicationContext().getBean("shortCodeConfig");
-      }
-
-      // If there is no short code for this submission in the database, generate one
-      do {
-        int codeLength = shortCodeConfig.getCodeLength();
-        String newCode = switch(shortCodeConfig.getCodeType()) {
-          case alphanumeric -> RandomStringUtils.randomAlphanumeric(codeLength);
-          case alpha -> RandomStringUtils.randomAlphabetic(codeLength);
-          case numeric -> RandomStringUtils.randomNumeric(codeLength);
-        };
-
-        if (shortCodeConfig.isUppercase()) {
-          newCode = newCode.toUpperCase();
-        }
-
-        boolean exists = submissionRepository.existsByShortCode(newCode);
-        if (!exists) {
-          // If the newly generated code isn't already in the database being used by a prior submission
-          // set this submission's shortcode, and persist it
-          shortCode = newCode;
-          submissionRepository.save(this);
-        } else {
-          log.warn("Confirmation code {} already exists", newCode);
-        }
-      } while (shortCode == null);
-    }
-    return shortCode;
+    this.shortCode = shortCode;
   }
 
   @Override

@@ -1,9 +1,8 @@
 package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
-import formflow.library.config.submission.ShortCodeConfig;
-import formflow.library.config.submission.ShortCodeConfig.ShortCodeType;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import jakarta.persistence.EntityManager;
@@ -29,9 +28,6 @@ class SubmissionRepositoryServiceTest {
   @Autowired
   private SubmissionRepositoryService submissionRepositoryService;
 
-  @Autowired
-  private ShortCodeConfig shortCodeConfig;
-
   @PersistenceContext
   EntityManager entityManager;
 
@@ -53,37 +49,34 @@ class SubmissionRepositoryServiceTest {
 
     submission = saveAndReload(submission);
     assertThat(submission.getId()).isInstanceOf(UUID.class);
-    assertThat(submission.getShortCode()).isNotNull();
 
-    // application-test.yaml sets this to 8, to override the default behavior
-    // this just tests that the config is indeed working and the default of 6 is not used
-    assertThat(submission.getShortCode().length()).isEqualTo(8);
-    assertThat(submission.getShortCode().matches("[A-Za-z0-9]+")).isEqualTo(true);
+    // Only saved, not submitted via the controller so the short code should be null
+    assertThat(submission.getShortCode()).isNull();
 
-    Optional<Submission> reloadedSubmission = submissionRepositoryService.findById(submission.getId());
-    if (reloadedSubmission.isPresent()) {
-      assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
+    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    Submission reloaded = submissionRepositoryService.findById(submission.getId()).get();
+    assertThat(reloaded.getShortCode()).isNotNull();
 
-      Optional<Submission> reloadedSubmission2 = submissionRepositoryService.findById(submission.getId());
-      if (reloadedSubmission2.isPresent()) {
-        assertThat(reloadedSubmission2.get().getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
-      } else {
-        Assertions.fail();
-      }
-    } else {
+    try {
+      submission.setShortCode("testShortCode");
       Assertions.fail();
+    } catch (UnsupportedOperationException e) {
+      assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
     }
+
+    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    // this should be a no-op, because there already is a Short Code
+    reloaded = submissionRepositoryService.findById(submission.getId()).get();
+    assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
   }
 
   @Test
   void testFindByShortCode() {
     Submission submission = new Submission();
     submission.setFlow("testFlow");
-    assertThat(submission.getShortCode()).isNull();
-
     submission = saveAndReload(submission);
-    assertThat(submission.getId()).isInstanceOf(UUID.class);
-    assertThat(submission.getShortCode()).isNotNull();
+
+    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
 
     // application-test.yaml sets this to 8, to override the default behavior
     // this just tests that the config is indeed working and the default of 6 is not used

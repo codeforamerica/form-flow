@@ -68,6 +68,7 @@ public class ScreenController extends FormFlowController {
   private final ConditionManager conditionManager;
   private final ActionManager actionManager;
   private final FileValidationService fileValidationService;
+  private final SubmissionRepositoryService submissionRepositoryService;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
@@ -87,6 +88,7 @@ public class ScreenController extends FormFlowController {
     this.conditionManager = conditionManager;
     this.actionManager = actionManager;
     this.fileValidationService = fileValidationService;
+    this.submissionRepositoryService = submissionRepositoryService;
     log.info("Screen Controller Created!");
   }
 
@@ -339,6 +341,7 @@ public class ScreenController extends FormFlowController {
           )
       );
       submission.setSubmittedAt(OffsetDateTime.now());
+      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
