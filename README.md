@@ -546,10 +546,23 @@ have access to it.
 A genericized implementation that can be used, among other things, as a unique confirmation code after 
 completion of the flow. An example of a 6 character, all uppercase, alphanumeric code is 8H7LP2.
 
-The short code is accessible via `getShortCode()`. It is read-only, and is created after the Submission
-object is saved in the database the first time. It is configurable for length (default of 6 characters), 
-forced uppercase (default true), and character sets of alphanumeric (A-z 0-9, the default), alpha (A-z), and 
-numeric (0-9).
+The short code is accessible via `getShortCode()`. It is created by default in the `ScreenController` 
+after the Submission has been submitted. This can be changed via `ShortCodeConfig`'s `creationPoint` 
+to be generated and set after the initial creation of the Submission. It is configurable for length, 
+forced uppercase, character set, and creation point.
+
+```yaml
+form-flow:
+  short-code:
+    # default = 8
+    length: 8 
+    # default = alphanumeric | options: alphanumeric (A-z 0-9), alpha (A-z), numeric (0-9)
+    type: alphanumeric
+    # default = true | options: true, false
+    uppercase: false
+    # default = submission | options: submission, creation
+    creation-point: submission
+```
 
 On creation of the short code, uniqueness is guaranteed. Because of that, it is incredibly important to
 be sure the configuration allows for enough possible permutations in your data set. A minimum of 6

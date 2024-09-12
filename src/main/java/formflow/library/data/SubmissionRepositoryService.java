@@ -94,7 +94,7 @@ public class SubmissionRepositoryService {
 
     /**
      * generateAndSetUniqueShortCode generates a read-only unique code for the submission. The short code generation is
-     * configurable via @ShortCodeConfig:
+     * configurable via {@link formflow.library.config.submission.ShortCodeConfig}:
      * <p>
      * length (default = 6)
      * <p>
@@ -102,13 +102,13 @@ public class SubmissionRepositoryService {
      * <p>
      * forced uppercasing (true, false | default = true)
      * <p>
-     * creation point in @ScreenController (creation, submission | default = submission)
+     * creation point in {@link formflow.library.config.submission.ShortCodeConfig} (creation, submission | default = submission)
      * <p>
      * This method will check if the generated code exists in the database, and keep trying to create a unique code, before
      * persisting and returning the newly generated code-- therefore it is very important to ensure the configuration allows for a
      * suitably large set of possible codes for the application.
      *
-     * @param submission the Submission object for which the short code will be generated and saved
+     * @param submission the {@link formflow.library.ScreenController} for which the short code will be generated and saved
      */
     public synchronized void generateAndSetUniqueShortCode(Submission submission) {
 
