@@ -12,6 +12,7 @@ import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
+import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
@@ -69,6 +70,7 @@ public class ScreenController extends FormFlowController {
   private final ActionManager actionManager;
   private final FileValidationService fileValidationService;
   private final SubmissionRepositoryService submissionRepositoryService;
+  private final ShortCodeConfig shortCodeConfig;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
@@ -80,7 +82,9 @@ public class ScreenController extends FormFlowController {
       ConditionManager conditionManager,
       ActionManager actionManager,
       FileValidationService fileValidationService,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      ShortCodeConfig shortCodeConfig
+    ) {
     super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
         messageSource);
     this.validationService = validationService;
@@ -89,6 +93,8 @@ public class ScreenController extends FormFlowController {
     this.actionManager = actionManager;
     this.fileValidationService = fileValidationService;
     this.submissionRepositoryService = submissionRepositoryService;
+    this.shortCodeConfig = shortCodeConfig;
+
     log.info("Screen Controller Created!");
   }
 
@@ -305,6 +311,10 @@ public class ScreenController extends FormFlowController {
 
     Submission submission = findOrCreateSubmission(httpSession, flow);
 
+    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    }
+
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
@@ -341,7 +351,10 @@ public class ScreenController extends FormFlowController {
           )
       );
       submission.setSubmittedAt(OffsetDateTime.now());
-      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+
+      if (shortCodeConfig.isCreateShortCodeAtSubmission()) {
+        submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+      }
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);

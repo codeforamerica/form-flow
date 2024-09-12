@@ -1,7 +1,6 @@
 package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;

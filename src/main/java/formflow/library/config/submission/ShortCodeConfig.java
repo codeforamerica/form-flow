@@ -1,7 +1,6 @@
 package formflow.library.config.submission;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 public class ShortCodeConfig {
 
     public enum ShortCodeType {
-        alphanumeric,
-        alpha,
-        numeric;
+        alphanumeric, alpha, numeric;
+    }
+
+    public enum ShortCodeCreationPoint {
+        creation, submission
     }
 
     @Value("${form-flow.short-code.length:6}")
@@ -24,4 +25,14 @@ public class ShortCodeConfig {
     @Value("${form-flow.short-code.uppercase: true}")
     private boolean uppercase;
 
+    @Value("${form-flow.short-code.creation-point:submission}")
+    private ShortCodeCreationPoint creationPoint;
+
+    public boolean isCreateShortCodeAtCreation() {
+        return ShortCodeCreationPoint.creation.equals(creationPoint);
+    }
+
+    public boolean isCreateShortCodeAtSubmission() {
+        return ShortCodeCreationPoint.submission.equals(creationPoint);
+    }
 }
