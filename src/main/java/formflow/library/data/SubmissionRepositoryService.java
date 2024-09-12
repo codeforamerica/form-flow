@@ -93,15 +93,22 @@ public class SubmissionRepositoryService {
     }
 
     /**
-     * getShortCode returns a read-only unique code for the submission after the submission has been saved to the database
-     * initially. The short code generation is configurable via @ShortCodeConfig. The length, characterset (alphanumeric, numeric,
-     * alpha), and forced uppercasing are available (with the defaults being 6, alphanumeric, and true respectively).
+     * generateAndSetUniqueShortCode generates a read-only unique code for the submission. The short code generation is
+     * configurable via @ShortCodeConfig:
+     * <p>
+     * length (default = 6)
+     * <p>
+     * characterset (alphanumeric, numeric, alpha | default = alphanumeric)
+     * <p>
+     * forced uppercasing (true, false | default = true)
+     * <p>
+     * creation point in @ScreenController (creation, submission | default = submission)
      * <p>
      * This method will check if the generated code exists in the database, and keep trying to create a unique code, before
      * persisting and returning the newly generated code-- therefore it is very important to ensure the configuration allows for a
      * suitably large set of possible codes for the application.
      *
-     * @return the short code for the Submission
+     * @param submission the Submission object for which the short code will be generated and saved
      */
     public synchronized void generateAndSetUniqueShortCode(Submission submission) {
 
