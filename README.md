@@ -562,6 +562,10 @@ form-flow:
     uppercase: false
     # default = submission | options: submission, creation
     creation-point: submission
+    # default = null
+    prefix: IL-
+    # default = null
+    suffix: -APP
 ```
 
 On creation of the short code, uniqueness is guaranteed. Because of that, it is incredibly important to

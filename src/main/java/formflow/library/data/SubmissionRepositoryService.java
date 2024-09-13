@@ -104,6 +104,10 @@ public class SubmissionRepositoryService {
      * <p>
      * creation point in {@link formflow.library.config.submission.ShortCodeConfig} (creation, submission | default = submission)
      * <p>
+     * prefix (default = null)
+     * <p>
+     * suffix (default = null)
+     * <p>
      * This method will check if the generated code exists in the database, and keep trying to create a unique code, before
      * persisting and returning the newly generated code-- therefore it is very important to ensure the configuration allows for a
      * suitably large set of possible codes for the application.
@@ -127,6 +131,14 @@ public class SubmissionRepositoryService {
 
             if (shortCodeConfig.isUppercase()) {
                 newCode = newCode.toUpperCase();
+            }
+
+            if (shortCodeConfig.getPrefix() != null) {
+                newCode = shortCodeConfig.getPrefix() + newCode;
+            }
+
+            if (shortCodeConfig.getSuffix() != null) {
+                newCode = newCode + shortCodeConfig.getSuffix();
             }
 
             boolean exists = repository.existsByShortCode(newCode);

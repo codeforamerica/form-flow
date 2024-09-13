@@ -2,6 +2,7 @@ package formflow.library.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import java.util.Optional;
@@ -22,6 +23,9 @@ class ShortCodeConfigNumericTest {
     @Autowired
     private SubmissionRepositoryService submissionRepositoryService;
 
+    @Autowired
+    private ShortCodeConfig shortCodeConfig;
+
     @Test
     void testShortCodeGeneration_Numeric() {
         Submission submission = new Submission();
@@ -30,8 +34,22 @@ class ShortCodeConfigNumericTest {
 
         submissionRepositoryService.generateAndSetUniqueShortCode(submission);
 
-        assertThat(submission.getShortCode().length()).isEqualTo(7);
-        assertThat(submission.getShortCode().matches("[0-9]+")).isEqualTo(true);
+        int expectedLength = shortCodeConfig.getCodeLength() +
+                (shortCodeConfig.getPrefix() != null ? shortCodeConfig.getPrefix().length() : 0) +
+                (shortCodeConfig.getSuffix() != null ? shortCodeConfig.getSuffix().length() : 0);
+
+        assertThat(submission.getShortCode().length()).isEqualTo(expectedLength);
+
+        String coreOfCode = submission.getShortCode();
+        if (shortCodeConfig.getPrefix() != null) {
+            coreOfCode = submission.getShortCode().substring(shortCodeConfig.getPrefix().length());
+        }
+
+        if (shortCodeConfig.getSuffix() != null) {
+            coreOfCode = coreOfCode.substring(0, coreOfCode.length() - shortCodeConfig.getSuffix().length());
+        }
+
+        assertThat(coreOfCode.matches("[0-9]+")).isEqualTo(true);
 
         Optional<Submission> reloadedSubmission = submissionRepositoryService.findByShortCode(submission.getShortCode());
         if (reloadedSubmission.isPresent()) {

@@ -28,6 +28,12 @@ public class ShortCodeConfig {
     @Value("${form-flow.short-code.creation-point:submission}")
     private ShortCodeCreationPoint creationPoint;
 
+    @Value("${form-flow.short-code.prefix:#{null}}")
+    private String prefix;
+
+    @Value("${form-flow.short-code.suffix:#{null}}")
+    private String suffix;
+
     public boolean isCreateShortCodeAtCreation() {
         return ShortCodeCreationPoint.creation.equals(creationPoint);
     }

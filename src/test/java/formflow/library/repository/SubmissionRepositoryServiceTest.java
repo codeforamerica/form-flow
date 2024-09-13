@@ -2,6 +2,7 @@ package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import jakarta.persistence.EntityManager;
@@ -29,6 +30,9 @@ class SubmissionRepositoryServiceTest {
 
   @PersistenceContext
   EntityManager entityManager;
+
+  @Autowired
+  private ShortCodeConfig shortCodeConfig;
 
   @Test
   void shouldSaveASubmissionWithUUID() {
@@ -77,10 +81,22 @@ class SubmissionRepositoryServiceTest {
 
     submissionRepositoryService.generateAndSetUniqueShortCode(submission);
 
-    // application-test.yaml sets this to 8, to override the default behavior
-    // this just tests that the config is indeed working and the default of 6 is not used
-    assertThat(submission.getShortCode().length()).isEqualTo(8);
-    assertThat(submission.getShortCode().matches("[A-Za-z0-9]+")).isEqualTo(true);
+    int expectedLength = shortCodeConfig.getCodeLength() +
+            (shortCodeConfig.getPrefix() != null ? shortCodeConfig.getPrefix().length() : 0) +
+            (shortCodeConfig.getSuffix() != null ? shortCodeConfig.getSuffix().length() : 0);
+
+    assertThat(submission.getShortCode().length()).isEqualTo(expectedLength);
+
+    String coreOfCode = submission.getShortCode();
+    if (shortCodeConfig.getPrefix() != null) {
+      coreOfCode = submission.getShortCode().substring(shortCodeConfig.getPrefix().length());
+    }
+
+    if (shortCodeConfig.getSuffix() != null) {
+      coreOfCode = coreOfCode.substring(0, coreOfCode.length() - shortCodeConfig.getSuffix().length());
+    }
+
+    assertThat(coreOfCode.matches("[A-Za-z0-9]+")).isEqualTo(true);
 
     Optional<Submission> reloadedSubmission = submissionRepositoryService.findByShortCode(submission.getShortCode());
     if (reloadedSubmission.isPresent()) {
