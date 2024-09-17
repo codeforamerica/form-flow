@@ -539,6 +539,11 @@ public class ScreenController extends FormFlowController {
 
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
     submission = saveToRepository(submission, subflowName);
+
+    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    }
+
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
 

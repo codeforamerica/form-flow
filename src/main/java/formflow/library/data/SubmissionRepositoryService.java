@@ -117,8 +117,11 @@ public class SubmissionRepositoryService {
     public synchronized void generateAndSetUniqueShortCode(Submission submission) {
 
         if (submission.getShortCode() != null) {
+            log.warn("Unable to create short code for submission {}", submission.getId());
             return;
         }
+
+        log.info("Attempting to create short code for submission {}", submission.getId());
 
         // If there is no short code for this submission in the database, generate one
         int codeLength = shortCodeConfig.getCodeLength();
