@@ -2,6 +2,7 @@ package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import jakarta.persistence.EntityManager;
@@ -12,7 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +31,9 @@ class SubmissionRepositoryServiceTest {
   @PersistenceContext
   EntityManager entityManager;
 
+  @Autowired
+  private ShortCodeConfig shortCodeConfig;
+
   @Test
   void shouldSaveASubmissionWithUUID() {
     Submission firstSubmission = new Submission();
@@ -36,6 +42,69 @@ class SubmissionRepositoryServiceTest {
     firstSubmission = saveAndReload(firstSubmission);
 
     assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
+  }
+
+  @Test
+  void testShortCodePersistsOneTimeOnly() {
+    Submission submission = new Submission();
+    submission.setFlow("testFlow");
+    assertThat(submission.getShortCode()).isNull();
+
+    submission = saveAndReload(submission);
+    assertThat(submission.getId()).isInstanceOf(UUID.class);
+
+    // Only saved, not submitted via the controller so the short code should be null
+    assertThat(submission.getShortCode()).isNull();
+
+    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    Submission reloaded = submissionRepositoryService.findById(submission.getId()).get();
+    assertThat(reloaded.getShortCode()).isNotNull();
+
+    try {
+      submission.setShortCode("testShortCode");
+      Assertions.fail();
+    } catch (UnsupportedOperationException e) {
+      assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
+    }
+
+    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    // this should be a no-op, because there already is a Short Code
+    reloaded = submissionRepositoryService.findById(submission.getId()).get();
+    assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
+  }
+
+  @Test
+  void testFindByShortCode() {
+    Submission submission = new Submission();
+    submission.setFlow("testFlow");
+    submission = saveAndReload(submission);
+
+    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+
+    int expectedLength = shortCodeConfig.getCodeLength() +
+            (shortCodeConfig.getPrefix() != null ? shortCodeConfig.getPrefix().length() : 0) +
+            (shortCodeConfig.getSuffix() != null ? shortCodeConfig.getSuffix().length() : 0);
+
+    assertThat(submission.getShortCode().length()).isEqualTo(expectedLength);
+
+    String coreOfCode = submission.getShortCode();
+    if (shortCodeConfig.getPrefix() != null) {
+      coreOfCode = submission.getShortCode().substring(shortCodeConfig.getPrefix().length());
+    }
+
+    if (shortCodeConfig.getSuffix() != null) {
+      coreOfCode = coreOfCode.substring(0, coreOfCode.length() - shortCodeConfig.getSuffix().length());
+    }
+
+    assertThat(coreOfCode.matches("[A-Za-z0-9]+")).isEqualTo(true);
+
+    Optional<Submission> reloadedSubmission = submissionRepositoryService.findByShortCode(submission.getShortCode());
+    if (reloadedSubmission.isPresent()) {
+      assertThat(submission).isEqualTo(reloadedSubmission.get());
+      assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
+    } else {
+      Assertions.fail();
+    }
   }
 
   @Test

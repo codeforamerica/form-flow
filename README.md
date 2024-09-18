@@ -45,6 +45,7 @@ Table of Contents
     * [Actions](#actions)
 * [Data Persistence and Defining Inputs](#data-persistence-and-defining-inputs)
     * [Submission Object](#submission-object)
+      * [Short Code](#submission-short-code) 
     * [Inputs Class](#inputs-class)
         * [Validating Inputs](#validating-inputs)
         * [Required Inputs](#required-inputs)
@@ -539,6 +540,40 @@ flow
 progresses. This field is placed in the model handed to the Thymeleaf templates, so each screen
 should
 have access to it.
+
+### Submission Short Code
+
+A genericized implementation that can be used, among other things, as a unique confirmation code after 
+completion of the flow. An example of a 6 character, all uppercase, alphanumeric code is 8H7LP2.
+
+The short code is accessible via `getShortCode()`. It is created by default in the `ScreenController` 
+after the Submission has been submitted. This can be changed via `ShortCodeConfig`'s `creationPoint` 
+to be generated and set after the initial creation of the Submission. It is configurable for length, 
+forced uppercase, character set, and creation point.
+
+```yaml
+form-flow:
+  short-code:
+    # default = 8
+    length: 8 
+    # default = alphanumeric | options: alphanumeric (A-z 0-9), alpha (A-z), numeric (0-9)
+    type: alphanumeric
+    # default = true | options: true, false
+    uppercase: false
+    # default = submission | options: submission, creation
+    creation-point: submission
+    # default = null
+    prefix: IL-
+    # default = null
+    suffix: -APP
+```
+
+On creation of the short code, uniqueness is guaranteed. Because of that, it is incredibly important to
+be sure the configuration allows for enough possible permutations in your data set. A minimum of 6
+characters is recommended. 
+
+The `SubmissionRepositoryService` allows for reverse lookup of the Submission by the Short Code using 
+`findByShortCode`.
 
 ## Inputs Class
 

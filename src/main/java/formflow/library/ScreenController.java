@@ -12,6 +12,7 @@ import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
+import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
@@ -68,6 +69,8 @@ public class ScreenController extends FormFlowController {
   private final ConditionManager conditionManager;
   private final ActionManager actionManager;
   private final FileValidationService fileValidationService;
+  private final SubmissionRepositoryService submissionRepositoryService;
+  private final ShortCodeConfig shortCodeConfig;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
@@ -79,7 +82,9 @@ public class ScreenController extends FormFlowController {
       ConditionManager conditionManager,
       ActionManager actionManager,
       FileValidationService fileValidationService,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      ShortCodeConfig shortCodeConfig
+    ) {
     super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
         messageSource);
     this.validationService = validationService;
@@ -87,6 +92,9 @@ public class ScreenController extends FormFlowController {
     this.conditionManager = conditionManager;
     this.actionManager = actionManager;
     this.fileValidationService = fileValidationService;
+    this.submissionRepositoryService = submissionRepositoryService;
+    this.shortCodeConfig = shortCodeConfig;
+
     log.info("Screen Controller Created!");
   }
 
@@ -339,10 +347,19 @@ public class ScreenController extends FormFlowController {
           )
       );
       submission.setSubmittedAt(OffsetDateTime.now());
+
+      if (shortCodeConfig.isCreateShortCodeAtSubmission()) {
+        submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+      }
     }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission);
     submission = saveToRepository(submission);
+
+    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    }
+
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission);
 
@@ -522,6 +539,11 @@ public class ScreenController extends FormFlowController {
 
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
     submission = saveToRepository(submission, subflowName);
+
+    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+      submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+    }
+
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
 

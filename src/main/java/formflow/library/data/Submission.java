@@ -9,16 +9,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.Optional;
-
+import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -75,6 +74,10 @@ public class Submission {
 
   @Column(name = "submitted_at")
   private OffsetDateTime submittedAt;
+
+  @Setter(AccessLevel.NONE)
+  @Column(name = "short_code")
+  private String shortCode;
 
   /**
    * The key name for the field in an iteration's data that holds the status of completion for the iteration.
@@ -220,6 +223,8 @@ public class Submission {
     newSubmission.setSubmittedAt(origSubmission.getSubmittedAt());
     newSubmission.setId(origSubmission.getId());
 
+    newSubmission.setShortCode(origSubmission.getShortCode());
+
     // deep copy the subflows and any lists
     newSubmission.setInputData(copyMap(origSubmission.getInputData()));
     return newSubmission;
@@ -249,6 +254,13 @@ public class Submission {
       }
     }
     return result;
+  }
+
+  public void setShortCode(String shortCode) {
+    if (this.shortCode != null) {
+      throw new UnsupportedOperationException("Cannot change shortCode for an existing submission");
+    }
+    this.shortCode = shortCode;
   }
 
   @Override
