@@ -116,6 +116,10 @@ public class SubmissionRepositoryService {
      */
     public synchronized void generateAndSetUniqueShortCode(Submission submission) {
 
+        if (shortCodeConfig.getConfig(submission.getFlow()) == null) {
+            return;
+        }
+
         if (submission.getShortCode() != null) {
             log.warn("Unable to create short code for submission {}", submission.getId());
             return;
@@ -123,25 +127,27 @@ public class SubmissionRepositoryService {
 
         log.info("Attempting to create short code for submission {}", submission.getId());
 
+        ShortCodeConfig.Config config = shortCodeConfig.getConfig(submission.getFlow());
+
         // If there is no short code for this submission in the database, generate one
-        int codeLength = shortCodeConfig.getCodeLength();
+        int codeLength = config.getCodeLength();
         do {
-            String newCode = switch (shortCodeConfig.getCodeType()) {
+            String newCode = switch (config.getCodeType()) {
                 case alphanumeric -> RandomStringUtils.randomAlphanumeric(codeLength);
                 case alpha -> RandomStringUtils.randomAlphabetic(codeLength);
                 case numeric -> RandomStringUtils.randomNumeric(codeLength);
             };
 
-            if (shortCodeConfig.isUppercase()) {
+            if (config.isUppercase()) {
                 newCode = newCode.toUpperCase();
             }
 
-            if (shortCodeConfig.getPrefix() != null) {
-                newCode = shortCodeConfig.getPrefix() + newCode;
+            if (config.getPrefix() != null) {
+                newCode = config.getPrefix() + newCode;
             }
 
-            if (shortCodeConfig.getSuffix() != null) {
-                newCode = newCode + shortCodeConfig.getSuffix();
+            if (config.getSuffix() != null) {
+                newCode = newCode + config.getSuffix();
             }
 
             boolean exists = repository.existsByShortCode(newCode);

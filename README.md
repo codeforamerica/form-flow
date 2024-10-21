@@ -554,18 +554,20 @@ forced uppercase, character set, and creation point.
 ```yaml
 form-flow:
   short-code:
-    # default = 8
-    length: 8 
-    # default = alphanumeric | options: alphanumeric (A-z 0-9), alpha (A-z), numeric (0-9)
-    type: alphanumeric
-    # default = true | options: true, false
-    uppercase: false
-    # default = submission | options: submission, creation
-    creation-point: submission
-    # default = null
-    prefix: IL-
-    # default = null
-    suffix: -APP
+      ourFlowNameHere:
+        short-code-configs:
+        # default = 8
+        length: 8 
+        # default = alphanumeric | options: alphanumeric (A-z 0-9), alpha (A-z), numeric (0-9)
+        type: alphanumeric
+        # default = true | options: true, false
+        uppercase: false
+        # default = submission | options: submission, creation
+        creation-point: submission
+        # default = null
+        prefix: IL-
+        # default = null
+        suffix: -APP
 ```
 
 On creation of the short code, uniqueness is guaranteed. Because of that, it is incredibly important to
