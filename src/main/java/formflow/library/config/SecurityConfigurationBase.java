@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
@@ -40,17 +41,29 @@ public class SecurityConfigurationBase {
    */
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-    httpSecurity.formLogin(AbstractHttpConfigurer::disable);
+    httpSecurity
+            .formLogin(AbstractHttpConfigurer::disable)
+            .sessionManagement(sessionManagementConfigurer -> {
+              sessionManagementConfigurer
+                      .invalidSessionUrl("/?sessionInvalid=true")
+                      .maximumSessions(1)
+                      .expiredUrl("/?sessionExpired=true");
+            });
     return httpSecurity.build();
   }
 
   /**
    * Use X-Forwarded-For / X-Forwarded-Proto headers when generating full link URLs.
-   *
+   *  
    * @return ForwardedHeaderFilter object
    */
   @Bean
   public ForwardedHeaderFilter forwardedHeaderFilter() {
     return new ForwardedHeaderFilter();
+  }
+
+  @Bean
+  public HttpSessionEventPublisher httpSessionEventPublisher() {
+    return new HttpSessionEventPublisher();
   }
 }
