@@ -554,7 +554,7 @@ forced uppercase, character set, and creation point.
 ```yaml
 form-flow:
   short-code:
-      ourFlowNameHere:
+      flowNameHere:
         short-code-configs:
         # default = 8
         length: 8 
