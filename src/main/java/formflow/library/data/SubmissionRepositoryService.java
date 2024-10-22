@@ -116,18 +116,18 @@ public class SubmissionRepositoryService {
      */
     public synchronized void generateAndSetUniqueShortCode(Submission submission) {
 
-        if (shortCodeConfig.getConfig(submission.getFlow()) == null) {
-            return;
-        }
-
         if (submission.getShortCode() != null) {
-            log.warn("Unable to create short code for submission {}", submission.getId());
+            log.warn("Unable to create short code for submission {} because one already exists.", submission.getId());
             return;
         }
 
         log.info("Attempting to create short code for submission {}", submission.getId());
 
         ShortCodeConfig.Config config = shortCodeConfig.getConfig(submission.getFlow());
+        if (config == null) {
+            log.error("Unable to find shortcode configuration for flow {}", submission.getFlow());
+            return;
+        }
 
         // If there is no short code for this submission in the database, generate one
         int codeLength = config.getCodeLength();
