@@ -1,44 +1,56 @@
 package formflow.library.config.submission;
 
+import java.util.Map;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Getter
 @Configuration
+@ConfigurationProperties(prefix = "form-flow.short-code")
 public class ShortCodeConfig {
 
-    public enum ShortCodeType {
-        alphanumeric, alpha, numeric;
+    private Map<String, Config> shortCodeConfigs;
+
+    public Config getConfig(String flowName) {
+        return shortCodeConfigs != null ? shortCodeConfigs.get(flowName) : null;
     }
 
-    public enum ShortCodeCreationPoint {
-        creation, submission
+    public void setShortCodeConfigs(Map<String, Config> shortCodeConfigs) {
+        this.shortCodeConfigs = shortCodeConfigs;
     }
 
-    @Value("${form-flow.short-code.length:6}")
-    private int codeLength;
+    @Setter
+    @Getter
+    public static class Config {
 
-    @Value("${form-flow.short-code.type:alphanumeric}")
-    private ShortCodeType codeType;
+        public enum ShortCodeType {
+            alphanumeric, alpha, numeric;
+        }
 
-    @Value("${form-flow.short-code.uppercase: true}")
-    private boolean uppercase;
+        public enum ShortCodeCreationPoint {
+            creation, submission
+        }
 
-    @Value("${form-flow.short-code.creation-point:submission}")
-    private ShortCodeCreationPoint creationPoint;
+        private int codeLength = 6;
 
-    @Value("${form-flow.short-code.prefix:#{null}}")
-    private String prefix;
+        private ShortCodeType codeType = ShortCodeType.alphanumeric;
 
-    @Value("${form-flow.short-code.suffix:#{null}}")
-    private String suffix;
+        private boolean uppercase = true;
 
-    public boolean isCreateShortCodeAtCreation() {
-        return ShortCodeCreationPoint.creation.equals(creationPoint);
-    }
+        private ShortCodeCreationPoint creationPoint = ShortCodeCreationPoint.submission;
 
-    public boolean isCreateShortCodeAtSubmission() {
-        return ShortCodeCreationPoint.submission.equals(creationPoint);
+        private String prefix = null;
+
+        private String suffix = null;
+
+        public boolean isCreateShortCodeAtCreation() {
+            return ShortCodeCreationPoint.creation.equals(creationPoint);
+        }
+
+        public boolean isCreateShortCodeAtSubmission() {
+            return ShortCodeCreationPoint.submission.equals(creationPoint);
+        }
+
     }
 }

@@ -15,9 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @SpringBootTest(properties = {
         "form-flow.path=flows-config/test-flow.yaml",
-        "form-flow.short-code.length=5",
-        "form-flow.short-code.type=alpha",
-        "form-flow.short-code.suffix=-TEST"
+        "form-flow.short-code.short-code-configs.testFlow.code-length=5",
+        "form-flow.short-code.short-code-configs.testFlow.code-type=alpha",
+        "form-flow.short-code.short-code-configs.testFlow.suffix=-TEST"
 })
 
 class ShortCodeConfigAlphaTest {
@@ -36,19 +36,21 @@ class ShortCodeConfigAlphaTest {
 
         submissionRepositoryService.generateAndSetUniqueShortCode(submission);
 
-        int expectedLength = shortCodeConfig.getCodeLength() +
-                (shortCodeConfig.getPrefix() != null ? shortCodeConfig.getPrefix().length() : 0) +
-                (shortCodeConfig.getSuffix() != null ? shortCodeConfig.getSuffix().length() : 0);
+        ShortCodeConfig.Config config = shortCodeConfig.getConfig(submission.getFlow());
+
+        int expectedLength = config.getCodeLength() +
+                (config.getPrefix() != null ? config.getPrefix().length() : 0) +
+                (config.getSuffix() != null ? config.getSuffix().length() : 0);
 
         assertThat(submission.getShortCode().length()).isEqualTo(expectedLength);
 
         String coreOfCode = submission.getShortCode();
-        if (shortCodeConfig.getPrefix() != null) {
-            coreOfCode = submission.getShortCode().substring(shortCodeConfig.getPrefix().length());
+        if (config.getPrefix() != null) {
+            coreOfCode = submission.getShortCode().substring(config.getPrefix().length());
         }
 
-        if (shortCodeConfig.getSuffix() != null) {
-            coreOfCode = coreOfCode.substring(0, coreOfCode.length() - shortCodeConfig.getSuffix().length());
+        if (config.getSuffix() != null) {
+            coreOfCode = coreOfCode.substring(0, coreOfCode.length() - config.getSuffix().length());
         }
 
         assertThat(coreOfCode.matches("[A-Za-z]+")).isEqualTo(true);

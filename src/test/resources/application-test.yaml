@@ -28,10 +28,12 @@ form-flow:
       domain: 'mail.forms-starter.cfa-platforms.org'
       sender-email: 'Testing <test@mail.forms-starter.cfa-platforms.org>'
   short-code:
-    length: 8
-    type: alphanumeric
-    uppercase: false
-    prefix: "IL-"
+    short-code-configs:
+      testFlow:
+        length: 8
+        type: alphanumeric
+        uppercase: false
+        prefix: "IL-"
 spring:
   main:
     allow-bean-definition-overriding: true

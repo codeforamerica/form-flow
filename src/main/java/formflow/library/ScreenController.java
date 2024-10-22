@@ -338,6 +338,11 @@ public class ScreenController extends FormFlowController {
       submission.setInputData(formSubmission.getFormData());
     }
 
+    ShortCodeConfig.Config config = shortCodeConfig.getConfig(flow);
+    if (config == null) {
+      log.info("No shortcode configuration found for flow {}, no shortcode will be generated.", flow);
+    }
+
     // handle marking the record as submitted, if necessary
     if (submitSubmission) {
       log.info(
@@ -348,7 +353,7 @@ public class ScreenController extends FormFlowController {
       );
       submission.setSubmittedAt(OffsetDateTime.now());
 
-      if (shortCodeConfig.isCreateShortCodeAtSubmission()) {
+      if (config != null && config.isCreateShortCodeAtSubmission()) {
         submissionRepositoryService.generateAndSetUniqueShortCode(submission);
       }
     }
@@ -356,7 +361,7 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeSaveAction(currentScreen, submission);
     submission = saveToRepository(submission);
 
-    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+    if (config != null && config.isCreateShortCodeAtCreation()) {
       submissionRepositoryService.generateAndSetUniqueShortCode(submission);
     }
 
@@ -540,7 +545,7 @@ public class ScreenController extends FormFlowController {
     actionManager.handleBeforeSaveAction(currentScreen, submission, iterationUuid);
     submission = saveToRepository(submission, subflowName);
 
-    if (shortCodeConfig.isCreateShortCodeAtCreation()) {
+    if (shortCodeConfig.getConfig(flow) != null && shortCodeConfig.getConfig(flow).isCreateShortCodeAtCreation()) {
       submissionRepositoryService.generateAndSetUniqueShortCode(submission);
     }
 
