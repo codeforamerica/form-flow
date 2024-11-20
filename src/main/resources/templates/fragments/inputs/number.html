@@ -6,6 +6,7 @@
       hasPattern=${!#strings.isEmpty(pattern)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
+      hasAutoComplete=${!#strings.isEmpty(autoComplete)},
       requiredInputsForFlow=${requiredInputs.get(flow)},
       isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName, false)) || (required != null && required)},
       hasError=${
@@ -32,6 +33,7 @@
              th:name="${inputName}"
              th:placeholder="${placeholder}"
              th:attr="
+              autocomplete=${hasAutoComplete ? autoComplete : null},
               title=${hasTitle ? title : #messages.msg('general.inputs.number')},
               pattern=${hasPattern ? pattern : '^\d*(\.\d{0,2})?$'},
               aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},

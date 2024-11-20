@@ -4,6 +4,7 @@
       hasHelpText=${!#strings.isEmpty(helpText)},
       hasLabel=${!#strings.isEmpty(label)},
       hasAriaLabel=${!#strings.isEmpty(ariaLabel)},
+      hasAutoComplete=${!#strings.isEmpty(autoComplete)},
       rows=${!#strings.isEmpty(rows)} ? ${rows} : '6',
       maxLength=${!#strings.isEmpty(maxLength)} ? ${maxLength} : '500',
       requiredInputsForFlow=${requiredInputs.get(flow)},
@@ -29,6 +30,7 @@
               type="textarea"
               class="textarea spacing-below-0"
               th:attr="
+                autocomplete=${hasAutoComplete ? autoComplete : null},
                 aria-describedby=${hasHelpText ? inputName + '-help-text' : ''},
                 aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
                 rows=${rows},

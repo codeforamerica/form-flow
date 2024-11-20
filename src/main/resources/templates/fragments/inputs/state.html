@@ -1,7 +1,8 @@
 <th:block
     th:fragment="state(inputName, label)"
     th:assert="${!#strings.isEmpty(inputName)}, ${!#strings.isEmpty(label)}"
-    th:replace="~{fragments/inputs/select :: select(label=${label}, inputName=${inputName}, helpText=${helpText}, content=~{::usState})}">
+    th:with="hasAutoComplete=${!#strings.isEmpty(autoComplete)}"
+    th:replace="~{fragments/inputs/select :: select(label=${label}, inputName=${inputName}, helpText=${helpText}, autoComplete=${hasAutoComplete ? autoComplete : null}, content=~{::usState})}">
   <th:block th:ref="usState">
     <th:block
         th:replace="~{fragments/inputs/selectOptionPlaceholder :: selectOptionPlaceholder(optionText=#{state.placeholder})}"/>
