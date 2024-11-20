@@ -1538,6 +1538,11 @@ They are visually displayed as three separate inputs for Month, Day and Year in 
 
 A convenience live template for dates is provided through `cfa:inputDate`.
 
+Additionally, date inputs have a optional autoComplete parameters for each input, Month, Day and year. 
+These are `autoCompleteMonth`, `autoCompleteDay` and `autoCompleteYear` which can be used to pass auto
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
+
+
 #### Address
 
 For convenience, we have provided a `cfa:address` live template to quickly create an address
@@ -1591,6 +1596,12 @@ The address fragment has these optional parameters
   the `address.state` key in the message source file.
 - `zipCodeLabel` - text used for label as this field; if not passed in this will default to
   the `address.zip` key in the message source file.
+- `autoCompleteStreetAddress1` - auto complete token for street address 1
+- `autoCompleteStreetAddress2` - auto complete token for street address 2
+- `autoCompleteCity` - auto complete token for city
+- `autoCompleteState` - auto complete token for state
+- `autoCompleteZipCode` - auto complete token for zip code
+
 
 #### Reveal
 
