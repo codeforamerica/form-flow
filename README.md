@@ -1171,6 +1171,10 @@ names, addresses, and emails, etc.
 Text inputs have an optional placeholder parameter which can be used to display a placeholder within
 the rendered input field.
 
+Additionally, text inputs have an optional autoComplete parameter which can be used to pass auto 
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
+
+
 Example of using a text input:
 
 ```html
@@ -1195,6 +1199,9 @@ allowed to be entered. Both `rows` and `maxlength` are provided as integers. Row
 if no value is passed and maxlength will default to 500 if no value is passed.
 
 A convenience live template for text area inputs is provided through `cfa:inputTextArea`.
+
+Additionally, text area inputs have an optional autoComplete parameter which can be used to pass auto
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
 
 #### Number
 
@@ -1225,6 +1232,9 @@ the end of the number input, like so:
 In this `postfix` example, the string passed in was "hrs". The string will not get submitted with
 the input data and is only shown in the user interface.
 
+Additionally, number inputs have an optional autoComplete parameter which can be used to pass auto
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
+
 A live template for numbers is provided through `cfa:inputNumber`.
 
 #### Social Security Number
@@ -1249,6 +1259,9 @@ state code to state name, like so:
 `MA - Massachusetts`
 
 The value saved from this input is the selected state's code. Example `MA`.
+
+Additionally, state inputs have an optional autoComplete parameter which can be used to pass auto
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
 
 #### Submit Button
 
@@ -1297,6 +1310,9 @@ entered
 values will be stored in the database. Phone inputs also have an optional `placeholder` parameter.
 
 A convenience live template for phone inputs is provided through `cfa:inputPhone`.
+
+Additionally, phone inputs have an optional autoComplete parameter which can be used to pass auto
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
 
 #### YesOrNo
 
@@ -1522,6 +1538,11 @@ They are visually displayed as three separate inputs for Month, Day and Year in 
 
 A convenience live template for dates is provided through `cfa:inputDate`.
 
+Additionally, date inputs have a optional autoComplete parameters for each input, Month, Day and year. 
+These are `autoCompleteMonth`, `autoCompleteDay` and `autoCompleteYear` which can be used to pass auto
+complete tokens. [For more information, see the MDN article on autocomplete.](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
+
+
 #### Address
 
 For convenience, we have provided a `cfa:address` live template to quickly create an address
@@ -1575,6 +1596,12 @@ The address fragment has these optional parameters
   the `address.state` key in the message source file.
 - `zipCodeLabel` - text used for label as this field; if not passed in this will default to
   the `address.zip` key in the message source file.
+- `autoCompleteStreetAddress1` - auto complete token for street address 1
+- `autoCompleteStreetAddress2` - auto complete token for street address 2
+- `autoCompleteCity` - auto complete token for city
+- `autoCompleteState` - auto complete token for state
+- `autoCompleteZipCode` - auto complete token for zip code
+
 
 #### Reveal
 
