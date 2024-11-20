@@ -8,6 +8,9 @@
         (requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Day', false)) || 
         (requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName + 'Year', false)) ||
         (required != null && required)},
+      hasAutoCompleteMonth=${!#strings.isEmpty(autoCompleteMonth)},
+      hasAutoCompleteDay=${!#strings.isEmpty(autoCompleteDay)},
+      hasAutoCompleteYear=${!#strings.isEmpty(autoCompleteYear)},
       hasErrorMonth=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Month'))},
       hasErrorDay=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Day'))},
       hasErrorYear=${errorMessages != null && !#arrays.isEmpty(errorMessages.get(inputName + 'Year'))},
@@ -47,9 +50,10 @@
              th:name="${inputName}+'Month'"
              th:placeholder="#{general.month-format}"
              th:attr="
-              aria-describedby=${inputName + '-month-label'},
-              aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-invalid=${hasErrorMonth}"
+               autocomplete=${hasAutoCompleteMonth ? autoCompleteMonth : null},
+               aria-describedby=${inputName + '-month-label'},
+               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+               aria-invalid=${hasErrorMonth}"
              th:value="${fieldData.getOrDefault(inputName + 'Month', '')}"/>
       /
       <input type="text" inputmode="numeric" maxlength="2"
@@ -58,9 +62,10 @@
              th:name="${inputName}+'Day'"
              th:placeholder="#{general.day-format}"
              th:attr="
-              aria-describedby=${inputName}+'-day-label',
-              aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-invalid=${hasErrorDay}"
+               autocomplete=${hasAutoCompleteDay ? autoCompleteDay : null},
+               aria-describedby=${inputName}+'-day-label',
+               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+               aria-invalid=${hasErrorDay}"
              th:value="${fieldData.getOrDefault(inputName + 'Day', '')}"/>
       /
       <input type="text" inputmode="numeric" maxlength="4"
@@ -69,9 +74,10 @@
              th:name="${inputName}+ 'Year'"
              th:placeholder="#{general.year-format}"
              th:attr="
-              aria-describedby=${inputName}+'-year-label',
-              aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
-              aria-invalid=${hasErrorYear}"
+               autocomplete=${hasAutoCompleteYear ? autoCompleteYear : null},
+               aria-describedby=${inputName}+'-year-label',
+               aria-labelledby=${hasAriaLabel ? ariaLabel : ''},
+               aria-invalid=${hasErrorYear}"
              th:value="${fieldData.getOrDefault(inputName + 'Year', '')}"/>
     </fieldset>
   </div>
