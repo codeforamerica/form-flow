@@ -1,6 +1,6 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
-    id 'org.springframework.boot' version '3.2.2'
+    id 'org.springframework.boot' version '3.4.0'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'java-library'
     id 'maven-publish'
@@ -75,7 +75,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.jetbrains:annotations:26.0.1'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.0'
-    implementation 'javax.persistence:javax.persistence-api:2.2'
+    implementation 'jakarta.persistence:jakarta.persistence-api'
     implementation 'org.flywaydb:flyway-core:[9.+,10.+['
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
@@ -86,6 +86,7 @@ dependencies {
     implementation 'com.google.crypto.tink:tink:1.15.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.0.0'
+    implementation 'commons-codec:commons-codec:1.16.0'
 
 
     // For M1 issue?
@@ -106,7 +107,6 @@ dependencies {
     // aws-java-sdk-s3 uses version httpclient:4.5.13, so if we see any differences in testing going forward
     // we should take a look at this dependency and see if it's really testing things correctly and
     // monitor the dependencies.
-    testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
     testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
