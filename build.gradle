@@ -20,7 +20,7 @@ targetCompatibility = JavaVersion.VERSION_21
 sourceCompatibility = JavaVersion.VERSION_21
 
 group = "org.codeforamerica.platform"
-version = "1.5.1-SNAPSHOT"
+version = "1.5.3-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -101,7 +101,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.jsoup:jsoup:1.18.2'
+    testImplementation 'org.jsoup:jsoup:1.18.3'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
     // bonigarcia seems to need this version of client5, as of version 5.3.2.
     // aws-java-sdk-s3 uses version httpclient:4.5.13, so if we see any differences in testing going forward
