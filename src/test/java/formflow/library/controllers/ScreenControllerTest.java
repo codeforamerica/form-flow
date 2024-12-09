@@ -86,7 +86,9 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     public void passedUrlParametersShouldBeSaved() throws Exception {
       mockMvc.perform(get(getUrlForPageName("test")).queryParam("lang", "en").session(session))
           .andExpect(status().isOk());
-      assert (submission.getUrlParams().equals(Map.of("lang", "en")));
+      submission = submissionRepositoryService.findById(submission.getId()).isPresent() ?
+          submissionRepositoryService.findById(submission.getId()).get() : null;
+      assert (submission != null && submission.getUrlParams().equals(Map.of("lang", "en")));
     }
   }
 
