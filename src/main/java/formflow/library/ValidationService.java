@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class ValidationService {
   private final ActionManager actionManager;
   private static String inputConfigPath;
   
-  private static final Map<String, Map<String, Boolean>> requiredInputs = new HashMap<>();
+  private static final Map<String, Map<String, Boolean>> requiredInputs = new ConcurrentHashMap<>();
   
   private static final List<String> requiredAnnotationsList = List.of(
       NotNull.class.getName(),
@@ -181,7 +182,7 @@ public class ValidationService {
           if (requiredInputs.containsKey(flowName)) {
             requiredInputs.get(flowName).put(field.getName(), true);
           } else {
-            requiredInputs.put(flowName, new HashMap<>(Map.of(field.getName(), true)));
+            requiredInputs.put(flowName, new ConcurrentHashMap<>(Map.of(field.getName(), true)));
           }
         }
       }
