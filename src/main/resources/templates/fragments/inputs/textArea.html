@@ -8,7 +8,7 @@
       rows=${!#strings.isEmpty(rows)} ? ${rows} : '6',
       maxLength=${!#strings.isEmpty(maxLength)} ? ${maxLength} : '500',
       requiredInputsForFlow=${requiredInputs.get(flow)},
-      isRequiredInput=${(requiredInputsForFlow != null && requiredInputsForFlow.getOrDefault(inputName, false)) || (required != null && required)},
+      isRequiredInput=${(requiredInputsForFlow != null && inputName != null && requiredInputsForFlow.getOrDefault(inputName, false)) || (required != null && required)},
       hasError=${
         errorMessages != null &&
         errorMessages.get(inputName) != null &&
