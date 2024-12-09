@@ -16,7 +16,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-before-display-action.yaml"})
@@ -24,7 +24,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
 
   Submission submission;
 
-  @MockBean
+  @MockitoBean
   private SubmissionRepositoryService submissionRepositoryService;
 
   @BeforeEach
