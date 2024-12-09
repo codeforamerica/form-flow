@@ -166,6 +166,7 @@ public class ValidationService {
 
   public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
     if (requiredInputs.isEmpty()) {
+      log.info("getRequiredInputs - requiredInputs is empty");
       Class<?> flowClass;
 
       try {
@@ -180,12 +181,16 @@ public class ValidationService {
         if (Arrays.stream(field.getAnnotations())
             .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
           if (requiredInputs.containsKey(flowName)) {
+            log.info("getRequiredInputs - requiredInputs." + flowName + " exists");
             requiredInputs.get(flowName).put(field.getName(), true);
           } else {
+            log.info("getRequiredInputs - requiredInputs." + flowName + " is empty");
             requiredInputs.put(flowName, new ConcurrentHashMap<>(Map.of(field.getName(), true)));
           }
         }
       }
+    } else {
+      log.info("getRequiredInputs - requiredInputs is not empty");
     }
     return requiredInputs;
   }
