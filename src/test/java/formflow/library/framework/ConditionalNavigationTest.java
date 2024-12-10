@@ -8,12 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 import static formflow.library.controllers.ScreenControllerTest.UUID_PATTERN_STRING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-conditional-navigation.yaml"})
 public class ConditionalNavigationTest extends AbstractMockMvcTest {
@@ -21,38 +18,43 @@ public class ConditionalNavigationTest extends AbstractMockMvcTest {
   @BeforeEach
   public void setup() {
     submission = Submission.builder()
-        .id(UUID.randomUUID())
-        .urlParams(new HashMap<>())
-        .inputData(new HashMap<>())
-        .flow("testFlow")
-        .build();
-    when(submissionRepositoryService.findById(submission.getId()))
-        .thenReturn(Optional.of(submission));
-    setFlowInfoInSession(session, "testFlow", submission.getId());
+            .id(null) // Let Hibernate assign the ID
+            .urlParams(new HashMap<>())
+            .inputData(new HashMap<>())
+            .flow("testFlow")
+            .build();
+
+    // Persist the submission to ensure it's managed
+    submission = submissionRepositoryService.save(submission);
   }
 
   @Test
   void shouldGoToPageWhoseConditionIsSatisfied() throws Exception {
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     continueExpectingNextPageTitle("testFlow", "first", "Second Page");
   }
 
   @Test
   void shouldNotGoToPageWhoseConditionIsNotSatisfied() throws Exception {
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     continueExpectingNextPageTitle("testFlow", "second", "Last Page");
   }
 
   @Test
   void shouldGoToTheFirstPageInNextPagesIfThereAreTwoPagesWithNoConditions() throws Exception {
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     continueExpectingNextPageTitle("testFlow", "third", "First Page");
   }
 
   @Test
   void shouldGoToOtherScreenIfOneHasNonExistentCondition() throws Exception {
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     continueExpectingNextPageTitle("testFlow", "other", "Last Page");
   }
 
   @Test
   void shouldGoToNextConditionalSubflowPage() throws Exception {
+    setFlowInfoInSession(session, "testFlow", submission.getId());
     postToUrlExpectingSuccessRedirectPattern(
         "/flow/testFlow/fourth/new",
         "/flow/testFlow/fourth/navigation?uuid=" + UUID_PATTERN_STRING,

@@ -33,25 +33,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 public class ScreenControllerTest extends AbstractMockMvcTest {
 
-  @MockBean
+  @MockitoBean
   private AddressValidationService addressValidationService;
 
   public static final String UUID_PATTERN_STRING = "{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}}";
 
   @BeforeEach
   public void setUp() throws Exception {
-    UUID submissionUUID = UUID.randomUUID();
-    submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
+    submission = Submission.builder().flow("testFlow").urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
+    submission = submissionRepositoryService.save(submission);
     // this setups flow info in the session to get passed along later on.
     setFlowInfoInSession(session, "testFlow", submission.getId());
-
     super.setUp();
   }
 
@@ -85,10 +84,11 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
-      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       mockMvc.perform(get(getUrlForPageName("test")).queryParam("lang", "en").session(session))
           .andExpect(status().isOk());
-      assert (submission.getUrlParams().equals(Map.of("lang", "en")));
+      submission = submissionRepositoryService.findById(submission.getId()).isPresent() ?
+          submissionRepositoryService.findById(submission.getId()).get() : null;
+      assert (submission != null && submission.getUrlParams().equals(Map.of("lang", "en")));
     }
   }
 
@@ -97,12 +97,12 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void modelIncludesCurrentSubflowItem() throws Exception {
-      when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
       HashMap<String, String> subflowItem = new HashMap<>();
       subflowItem.put("uuid", "aaa-bbb-ccc");
       subflowItem.put("firstNameSubflow", "foo bar baz");
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
+      submissionRepositoryService.save(submission);
       getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
     }
 
