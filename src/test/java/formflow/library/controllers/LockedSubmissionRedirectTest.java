@@ -32,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
@@ -43,7 +44,7 @@ import org.springframework.util.LinkedMultiValueMap;
 })
 public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
 
-    @MockBean
+    @MockitoBean
     private UserFileRepositoryService userFileRepositoryService;
 
     @BeforeEach

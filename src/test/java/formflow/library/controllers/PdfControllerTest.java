@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,13 +36,13 @@ public class PdfControllerTest extends AbstractMockMvcTest {
   private MockMvc mockMvc;
   private final PdfService pdfService = mock(PdfService.class);
 
-  @MockBean
+  @MockitoBean
   private SubmissionRepositoryService submissionRepositoryService;
 
-  @MockBean
+  @MockitoBean
   private UserFileRepositoryService userFileRepositoryService;
   
-  @MockBean
+  @MockitoBean
   private FormFlowConfigurationProperties formFlowConfigurationProperties;
   
   private byte[] filledPdfByteArray;

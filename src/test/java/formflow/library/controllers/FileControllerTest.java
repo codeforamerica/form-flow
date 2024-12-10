@@ -43,13 +43,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -68,13 +68,13 @@ public class FileControllerTest extends AbstractMockMvcTest {
   private MockMvc mockMvc;
   @SpyBean
   private CloudFileRepository cloudFileRepository;
-  @MockBean
+  @MockitoBean
   private SubmissionRepositoryService submissionRepositoryService;
-  @MockBean
+  @MockitoBean
   private UserFileRepositoryService userFileRepositoryService;
   @Autowired
   private FileController fileController;
-  @MockBean
+  @MockitoBean
   private ClammitVirusScanner clammitVirusScanner;
   @SpyBean
   private FileValidationService fileValidationService;

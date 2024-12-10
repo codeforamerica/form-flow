@@ -17,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
@@ -26,7 +26,7 @@ import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_
 @DirtiesContext()
 public class InputsTest extends AbstractMockMvcTest {
 
-  @MockBean
+  @MockitoBean
   AddressValidationService addressValidationService;
 
   @Test

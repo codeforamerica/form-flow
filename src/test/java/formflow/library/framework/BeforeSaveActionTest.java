@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-before-save-action.yaml"})
@@ -26,7 +26,7 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
 
   Submission submission;
 
-  @MockBean
+  @MockitoBean
   private SubmissionRepositoryService submissionRepositoryService;
 
   @Autowired
