@@ -24,7 +24,6 @@ import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utils.UserFileMap;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -43,13 +41,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -66,7 +64,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
 
   Submission submission;
   private MockMvc mockMvc;
-  @SpyBean
+  @MockitoSpyBean
   private CloudFileRepository cloudFileRepository;
   @MockitoBean
   private SubmissionRepositoryService submissionRepositoryService;
@@ -76,7 +74,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
   private FileController fileController;
   @MockitoBean
   private ClammitVirusScanner clammitVirusScanner;
-  @SpyBean
+  @MockitoSpyBean
   private FileValidationService fileValidationService;
   @Captor
   private ArgumentCaptor<UserFile> userFileArgumentCaptor;
