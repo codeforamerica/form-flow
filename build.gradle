@@ -86,7 +86,7 @@ dependencies {
     implementation 'com.google.crypto.tink:tink:1.15.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.0.0'
-    implementation 'commons-codec:commons-codec:1.16.0'
+    implementation 'commons-codec:commons-codec:1.17.1'
 
 
     // For M1 issue?
