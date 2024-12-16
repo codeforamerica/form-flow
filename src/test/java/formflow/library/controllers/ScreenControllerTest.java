@@ -457,7 +457,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     postExpectingFailure(pageName, params, "subflowAddItem");
     var page = new FormScreen(getPage("subflowAddItem"));
 
-    assertTrue(page.hasDateInputError());
+    assertTrue(page.hasDateInputError("dateSubflowFull"));
     assertTrue(page.hasInputError("numberInputSubflow"));
     assertTrue(page.hasInputError("moneyInputSubflow"));
     assertTrue(page.hasInputError("phoneInputSubflow"));
@@ -518,7 +518,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
 
     var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid));
-    assertTrue(page2.hasDateInputError());
+    assertTrue(page2.hasDateInputError("dateInputSubflowPage2"));
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));
     assertFalse(page2.hasInputError("phoneInputSubflow"));

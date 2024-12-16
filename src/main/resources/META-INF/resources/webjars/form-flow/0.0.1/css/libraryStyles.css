@@ -451,6 +451,10 @@ body,
   margin-bottom: 0;
 }
 
+.form-group--error > fieldset > p.text--error {
+  margin-bottom: 2.5rem;
+}
+
 .page-wrapper .form-card {
   max-width: 55rem;
   margin-bottom: 0;

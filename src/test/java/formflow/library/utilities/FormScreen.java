@@ -33,9 +33,9 @@ public class FormScreen {
     return element != null;
   }
 
-  public boolean hasDateInputError() {
-    // Selects span elements with class containing Day-error, Month-error, or Year-error
-    Elements elements = html.select("p[id*='Month-error'], p[id*='Day-error'], p[id*='Year-error']");
+  public boolean hasDateInputError(String groupName) {
+    // Selects p element that has an error for the date field in question
+    Elements elements = html.select("p[id*='" + groupName + "-error-p']");
     return !elements.isEmpty();
   }
 
