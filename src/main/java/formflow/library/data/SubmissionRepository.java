@@ -14,4 +14,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     boolean existsByShortCode(String shortCode);
 
     Optional<Submission> findSubmissionByShortCode(String shortCode);
+
+    Optional<Submission> findProviderSubmissionFromFamilySubmission(Submission familySubmission);
 }

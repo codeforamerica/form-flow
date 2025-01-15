@@ -64,6 +64,15 @@ public class SubmissionRepositoryService {
         return submission.map(value -> encryptionService.decrypt(value));
     }
 
+    public Optional<Submission> findProviderSubmissionFromFamilySubmission(Submission familySubmission) {
+        if (familySubmission.getInputData().containsKey("providerResponseSubmissionId")) {
+            UUID providerId = UUID.fromString(familySubmission.getInputData().get("providerResponseSubmissionId").toString());
+            return this.findById(providerId);
+        }
+
+        return Optional.empty();
+    }
+
     /**
      * Removes the CSRF from the Submission's input data, if found.
      *
