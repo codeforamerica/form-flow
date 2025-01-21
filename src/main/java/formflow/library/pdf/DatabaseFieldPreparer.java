@@ -39,6 +39,6 @@ public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {
   }
 
   private String formatDateWithNoTime(OffsetDateTime offsetDateTime) {
-    return dateTimeFormatter.format(offsetDateTime);
+    return offsetDateTime != null ? dateTimeFormatter.format(offsetDateTime) : "";
   }
 }
