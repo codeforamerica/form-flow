@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.stream.Collectors;
 
 /**
  * This service is intended to help with miscellaneous file things. This service will help with checking mime types, both proper
@@ -43,6 +44,7 @@ public class FileValidationService {
       Map.entry(".bmp", new MimeType("image", "bmp")),
       Map.entry(".pdf", new MimeType("application", "pdf")),
       Map.entry(".doc", new MimeType("application", "msword")),
+//      Map.entry(".doc-tika", new MimeType("application", "x-tika-msoffice")),
       Map.entry(".docx", new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document")),
       Map.entry(".odp", new MimeType("application", "vnd.oasis.opendocument.presentation")),
       Map.entry(".ods", new MimeType("application", "vnd.oasis.opendocument.spreadsheet")),
@@ -75,11 +77,21 @@ public class FileValidationService {
         .sorted()
         .toList();
 
-    ACCEPTED_MIME_TYPES = ACCEPTED_FILE_EXTS.stream()
+    List<MimeType> acceptedMimeTypes = ACCEPTED_FILE_EXTS.stream()
         .filter(FILE_EXT_MIME_TYPE_MAP::containsKey)
         .map(FILE_EXT_MIME_TYPE_MAP::get)
         .sorted()
-        .toList();
+        .collect(Collectors.toList());
+
+    if (ACCEPTED_FILE_EXTS.contains(".doc")) {
+      // It's possible that Tika will return this for an MS Office document instead of the
+      // correct Mime Type, if the version of Office is old or Tika can't quite determine if
+      // it's a Word vs Excel document (for example)
+      // This little workaround will insert Tika's returned value in those cases of ambiguity.
+      acceptedMimeTypes.add(new MimeType("application", "x-tika-msoffice"));
+    }
+
+    ACCEPTED_MIME_TYPES = acceptedMimeTypes;
 
     log.info(String.format("User provided file types: %s", userProvidedFileTypes));
     log.info(String.format("Files accepted by the server: %s", String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS)));
