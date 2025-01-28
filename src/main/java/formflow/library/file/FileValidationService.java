@@ -44,7 +44,6 @@ public class FileValidationService {
       Map.entry(".bmp", new MimeType("image", "bmp")),
       Map.entry(".pdf", new MimeType("application", "pdf")),
       Map.entry(".doc", new MimeType("application", "msword")),
-//      Map.entry(".doc-tika", new MimeType("application", "x-tika-msoffice")),
       Map.entry(".docx", new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document")),
       Map.entry(".odp", new MimeType("application", "vnd.oasis.opendocument.presentation")),
       Map.entry(".ods", new MimeType("application", "vnd.oasis.opendocument.spreadsheet")),
