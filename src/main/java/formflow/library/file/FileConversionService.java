@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileConversionService {
 
-    public enum MIME_TYPE {
+    private enum MIME_TYPE {
         GIF(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
         PNG(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
         JPG(MediaType.IMAGE_JPEG, CONVERSION_TO_PDF_TYPE.IMAGE),
@@ -58,7 +58,7 @@ public class FileConversionService {
         }
     }
 
-    public enum CONVERSION_TO_PDF_TYPE {
+    private enum CONVERSION_TO_PDF_TYPE {
         IMAGE, MS_DOCUMENT, NONE;
     }
 
@@ -75,27 +75,24 @@ public class FileConversionService {
             MIME_TYPE originalMimeType = MIME_TYPE.get(fileMimeType);
 
             if (originalMimeType == null) {
-                log.error("Unable to convert Mime Type to PDF: {}", fileMimeType);
-                throw new UnsupportedFileConversionMimeTypeException("Could not detect MIME type for file {}");
+                log.error("Unable to convert Mime Type to PDF {}", fileMimeType);
+                return null;
             }
 
             switch (originalMimeType.conversionType) {
                 case IMAGE:
                     return convertImageToPDF(file);
                 case MS_DOCUMENT:
-                    break;
-                case NONE:
-                    break;
+                    return null;
                 default:
-                    break;
+                    return null;
             }
 
 
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+            return null;
         }
-
-        return file;
     }
 
     private MultipartFile convertImageToPDF(MultipartFile file) {

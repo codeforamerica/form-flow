@@ -18,13 +18,16 @@ import formflow.library.file.FileVirusScanner;
 import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -44,12 +47,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Controller
 @EnableAutoConfiguration
@@ -223,29 +220,34 @@ public class FileController extends FormFlowController {
         // BEGIN CONVERSION
         MultipartFile convertedMultipartFile = fileConversionService.convertFileToPDF(file);
 
-        String convertedFileExtension = Files.getFileExtension(
-                Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
-        UUID convertedUserFileId = UUID.randomUUID();
-        String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName,
-                convertedUserFileId,
-                convertedFileExtension);
+        if (convertedMultipartFile != null) {
+          log.info("Successfully converting upload {} to PDF, saving to repository", userFileId);
+          String convertedFileExtension = Files.getFileExtension(
+                  Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
+          UUID convertedUserFileId = UUID.randomUUID();
+          String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName,
+                  convertedUserFileId,
+                  convertedFileExtension);
 
-        cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
+          cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
 
-        UserFile uploadedConvertedFile = UserFile.builder()
-                .fileId(convertedUserFileId)
-                .submission(submission)
-                .originalName(convertedMultipartFile.getOriginalFilename())
-                .repositoryPath(convertedFileUploadLocation)
-                .filesize((float) convertedMultipartFile.getSize())
-                .mimeType(convertedMultipartFile.getContentType())
-                .virusScanned(true)
-                .docTypeLabel(defaultDocType)
-                .conversionSourceFileId(userFileId)
-                .build();
+          UserFile uploadedConvertedFile = UserFile.builder()
+                  .fileId(convertedUserFileId)
+                  .submission(submission)
+                  .originalName(convertedMultipartFile.getOriginalFilename())
+                  .repositoryPath(convertedFileUploadLocation)
+                  .filesize((float) convertedMultipartFile.getSize())
+                  .mimeType(convertedMultipartFile.getContentType())
+                  .virusScanned(true)
+                  .docTypeLabel(defaultDocType)
+                  .conversionSourceFileId(userFileId)
+                  .build();
 
-        uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
-        log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), userFileId);
+          uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
+          log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), userFileId);
+        } else {
+          log.info("No conversion of upload {} to PDF", userFileId);
+        }
         // END CONVERSION
       }
 
