@@ -221,7 +221,7 @@ public class FileController extends FormFlowController {
         MultipartFile convertedMultipartFile = fileConversionService.convertFileToPDF(file);
 
         if (convertedMultipartFile != null) {
-          log.info("Successfully converting upload {} to PDF, saving to repository", userFileId);
+          log.info("Successfully converted upload {} to PDF, saving to repository", userFileId);
           String convertedFileExtension = Files.getFileExtension(
                   Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
           UUID convertedUserFileId = UUID.randomUUID();
