@@ -78,4 +78,15 @@ public class UserFileRepositoryService {
   public long countBySubmission(Submission submission) {
     return repository.countBySubmission(submission);
   }
+
+  /**
+   * Gets a count of all the uploaded -- not converted --  {@link UserFile}s associated with
+   * a {@link Submission}}
+   *
+   * @param submission the {@link Submission} for which the count of associated {@link UserFile}s are sought
+   * @return count of {@link UserFile}s
+   */
+  public long countOfUploadedFilesBySubmission(Submission submission) {
+    return repository.countBySubmissionAndConversionSourceFileIdIsNull(submission);
+  }
 }

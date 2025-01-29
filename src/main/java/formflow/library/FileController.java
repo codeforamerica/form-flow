@@ -12,11 +12,14 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
+import formflow.library.file.FileConversionService;
 import formflow.library.file.FileValidationService;
 import formflow.library.file.FileVirusScanner;
 import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -57,14 +60,18 @@ public class FileController extends FormFlowController {
   private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
   private final FileValidationService fileValidationService;
+  private final FileConversionService fileConversionService;
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
 
-  @Value("${form-flow.uploads.default-doc-type-label:#{null}}")
+  @Value("${form-flow.uploads.default-doc-type-label:}")
   private String defaultDocType;
 
   @Value("${form-flow.uploads.virus-scanning.enabled:false}")
   private boolean isVirusScanningEnabled;
+
+  @Value("${form-flow.uploads.convert-to-pdf:false}")
+  private boolean convertUploadToPDF;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -77,12 +84,14 @@ public class FileController extends FormFlowController {
       FormFlowConfigurationProperties formFlowConfigurationProperties,
       MessageSource messageSource,
       FileValidationService fileValidationService,
+      FileConversionService fileConversionService,
       @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
       @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
     super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
         messageSource);
     this.cloudFileRepository = cloudFileRepository;
     this.fileValidationService = fileValidationService;
+    this.fileConversionService = fileConversionService;
     this.maxFiles = maxFiles;
     this.fileVirusScanner = fileVirusScanner;
     this.blockIfClammitUnreachable = blockIfClammitUnreachable;
@@ -175,7 +184,9 @@ public class FileController extends FormFlowController {
         }
       }
 
-      if (userFileRepositoryService.countBySubmission(submission) >= maxFiles) {
+      log.info("Number of files uploaded: {}", userFileRepositoryService.countOfUploadedFilesBySubmission(submission));
+
+      if (userFileRepositoryService.countOfUploadedFilesBySubmission(submission) >= maxFiles) {
         String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
@@ -185,6 +196,7 @@ public class FileController extends FormFlowController {
       cloudFileRepository.upload(uploadLocation, file);
 
       UserFile uploadedFile = UserFile.builder()
+          .fileId(userFileId)
           .submission(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
@@ -207,6 +219,37 @@ public class FileController extends FormFlowController {
 
       userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
       httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
+
+      if (convertUploadToPDF) {
+        log.info("Converting upload {} to PDF", userFileId);
+        // BEGIN CONVERSION
+        MultipartFile convertedMultipartFile = fileConversionService.convertFileToPDF(file);
+
+        String convertedFileExtension = Files.getFileExtension(
+                Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
+        UUID convertedUserFileId = UUID.randomUUID();
+        String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName,
+                convertedUserFileId,
+                convertedFileExtension);
+
+        cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
+
+        UserFile uploadedConvertedFile = UserFile.builder()
+                .fileId(convertedUserFileId)
+                .submission(submission)
+                .originalName(convertedMultipartFile.getOriginalFilename())
+                .repositoryPath(convertedFileUploadLocation)
+                .filesize((float) convertedMultipartFile.getSize())
+                .mimeType(convertedMultipartFile.getContentType())
+                .virusScanned(true)
+                .docTypeLabel(defaultDocType)
+                .conversionSourceFileId(userFileId)
+                .build();
+
+        uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
+        log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), userFileId);
+        // END CONVERSION
+      }
 
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(uploadedFile.getFileId().toString());
     } catch (Exception e) {
