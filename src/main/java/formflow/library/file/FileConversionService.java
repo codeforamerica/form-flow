@@ -81,14 +81,15 @@ public class FileConversionService {
 
             switch (originalMimeType.conversionType) {
                 case IMAGE:
+                    log.info("Converting image of type {} to PDF", originalMimeType.mimeType.toString());
                     return convertImageToPDF(file);
                 case MS_DOCUMENT:
+                    log.info("Converting document of type {} to PDF", originalMimeType.mimeType.toString());
                     return null;
                 default:
+                    log.info("Skipping converting file of type {} to PDF", originalMimeType.mimeType.toString());
                     return null;
             }
-
-
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
