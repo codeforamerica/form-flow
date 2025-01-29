@@ -7,11 +7,15 @@ import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -69,7 +73,6 @@ public class FileConversionService {
     }
 
     public MultipartFile convertFileToPDF(MultipartFile file) {
-
         try {
             MimeType fileMimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
             MIME_TYPE originalMimeType = MIME_TYPE.get(fileMimeType);
@@ -122,11 +125,53 @@ public class FileConversionService {
             return new MockMultipartFile("file", convertedFileName, "application/pdf",
                     new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
         } catch (IOException e) {
+            log.error("Unable to convert Image to PDF", e);
             throw new RuntimeException(e);
         }
     }
 
     private MultipartFile convertOfficeDocumentToPDF(MultipartFile file) {
-        return null;
+        try {
+            // Write to a temp file, so we can have a File from the original MultipartFile
+            // OfficeLibre aka soffice requires a file on disk, not in memory
+            File inputFile = File.createTempFile("upload_", "." + FilenameUtils.getExtension(file.getOriginalFilename()));
+            file.transferTo(inputFile);
+
+            File outputDir = inputFile.getParentFile();
+            String outputFileName = Files.getNameWithoutExtension(inputFile.getName());
+            String outputPdfPath = outputDir.getAbsolutePath() + "/" + outputFileName + ".pdf";
+
+            // Run the soffice command to convert to PDF
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    "soffice",
+                    "--headless",
+                    "--convert-to", "pdf",
+                    "--outdir", outputDir.getAbsolutePath(),
+                    inputFile.getAbsolutePath()
+            );
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+            process.waitFor();
+
+            // Read the converted PDF from disk
+            File pdfFile = new File(outputPdfPath);
+            if (!pdfFile.exists()) {
+                throw new FileNotFoundException("PDF conversion failed, output file not found: " + outputPdfPath);
+            }
+
+            // Convert PDF file on disk into a stream and create a new MultipartFile
+            String convertedFileName = Files.getNameWithoutExtension(Objects.requireNonNull(file.getOriginalFilename())) + "-converted.pdf";
+            MultipartFile pdfMultipartFile = new MockMultipartFile("file", convertedFileName, "application/pdf",
+                    new FileInputStream(pdfFile));
+
+            // Clean up temporary files
+            inputFile.delete();
+            pdfFile.delete();
+
+            return pdfMultipartFile;
+        } catch (IOException | InterruptedException e) {
+            log.error("Unable to convert Office Document to PDF", e);
+            throw new RuntimeException(e);
+        }
     }
 }
