@@ -84,13 +84,13 @@ public class FileConversionService {
 
             switch (originalMimeType.conversionType) {
                 case IMAGE:
-                    log.info("Converting image of type {} to PDF", originalMimeType.mimeType.toString());
+                    log.info("Converting image of type {} to PDF", originalMimeType.mimeType);
                     return convertImageToPDF(file);
                 case OFFICE_DOCUMENT:
-                    log.info("Converting document of type {} to PDF", originalMimeType.mimeType.toString());
+                    log.info("Converting document of type {} to PDF", originalMimeType.mimeType);
                     return convertOfficeDocumentToPDF(file);
                 default:
-                    log.info("Skipping converting file of type {} to PDF", originalMimeType.mimeType.toString());
+                    log.info("Skipping converting file of type {} to PDF", originalMimeType.mimeType);
                     return null;
             }
         } catch (IOException e) {
