@@ -166,7 +166,7 @@ public class FileConversionService {
             }
 
             // Convert PDF file on disk into a stream and create a new MultipartFile
-            String convertedFileName = Files.getNameWithoutExtension(Objects.requireNonNull(file.getOriginalFilename())) + "-converted.pdf";
+            String convertedFileName = Files.getNameWithoutExtension(originalFilename) + "-converted.pdf";
             MultipartFile pdfMultipartFile = new MockMultipartFile("file", convertedFileName, "application/pdf",
                     new FileInputStream(pdfFile));
 
