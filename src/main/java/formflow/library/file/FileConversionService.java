@@ -134,7 +134,13 @@ public class FileConversionService {
         try {
             // Write to a temp file, so we can have a File from the original MultipartFile
             // OfficeLibre aka soffice requires a file on disk, not in memory
-            File inputFile = File.createTempFile("upload_", "." + FilenameUtils.getExtension(file.getOriginalFilename()));
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
+                throw new IllegalArgumentException("Unable to convert Office Document to PDF. Invalid filename.");
+            }
+
+            File safeDir = new File(System.getProperty("java.io.tmpdir"));
+            File inputFile = File.createTempFile("upload_", "." + FilenameUtils.getExtension(originalFilename), safeDir);
             file.transferTo(inputFile);
 
             File outputDir = inputFile.getParentFile();
