@@ -29,13 +29,13 @@ public class FileConversionService {
         JPG(MediaType.IMAGE_JPEG, CONVERSION_TO_PDF_TYPE.IMAGE),
         BMP(new MimeType("image", "bmp"), CONVERSION_TO_PDF_TYPE.IMAGE),
         PDF(new MimeType("application", "pdf"), CONVERSION_TO_PDF_TYPE.NONE),
-        DOC(new MimeType("application", "msword"), CONVERSION_TO_PDF_TYPE.MS_DOCUMENT),
+        DOC(new MimeType("application", "msword"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
         DOCX(new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document"),
-                CONVERSION_TO_PDF_TYPE.MS_DOCUMENT),
-        ODP(new MimeType("application", "vnd.oasis.opendocument.presentation"), CONVERSION_TO_PDF_TYPE.MS_DOCUMENT),
-        ODS(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"), CONVERSION_TO_PDF_TYPE.MS_DOCUMENT),
-        ODT(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.MS_DOCUMENT),
-        TIKA_MS_DOC(new MimeType("application", "x-tika-msoffice"), CONVERSION_TO_PDF_TYPE.MS_DOCUMENT);
+                CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        ODP(new MimeType("application", "vnd.oasis.opendocument.presentation"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        ODS(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        ODT(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        TIKA_OFFICE_DOC(new MimeType("application", "x-tika-msoffice"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT);
 
         private final MimeType mimeType;
         private final CONVERSION_TO_PDF_TYPE conversionType;
@@ -59,7 +59,7 @@ public class FileConversionService {
     }
 
     private enum CONVERSION_TO_PDF_TYPE {
-        IMAGE, MS_DOCUMENT, NONE;
+        IMAGE, OFFICE_DOCUMENT, NONE;
     }
 
     private final Tika tikaFileValidator;
@@ -83,9 +83,9 @@ public class FileConversionService {
                 case IMAGE:
                     log.info("Converting image of type {} to PDF", originalMimeType.mimeType.toString());
                     return convertImageToPDF(file);
-                case MS_DOCUMENT:
+                case OFFICE_DOCUMENT:
                     log.info("Converting document of type {} to PDF", originalMimeType.mimeType.toString());
-                    return null;
+                    return convertOfficeDocumentToPDF(file);
                 default:
                     log.info("Skipping converting file of type {} to PDF", originalMimeType.mimeType.toString());
                     return null;
@@ -97,7 +97,6 @@ public class FileConversionService {
     }
 
     private MultipartFile convertImageToPDF(MultipartFile file) {
-
         try {
             // Create a PDF document
             Document document = new Document(PageSize.LETTER);
@@ -125,5 +124,9 @@ public class FileConversionService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private MultipartFile convertOfficeDocumentToPDF(MultipartFile file) {
+        return null;
     }
 }
