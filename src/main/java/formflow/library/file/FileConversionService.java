@@ -128,45 +128,4 @@ public class FileConversionService {
             throw new RuntimeException(e);
         }
     }
-//    /**
-//     * Returns the list of file extensions the system accepts: ".bmp, .doc"
-//     *
-//     * @return List of strings containing the acceptable file extensions for the system
-//     */
-//    public List<String> getAcceptableFileExts() {
-//        return ACCEPTED_FILE_EXTS;
-//    }
-//
-//    /**
-//     * Returns True if the file is of the appropriate mime type for the system setup. This takes into account the configuration
-//     * set in the application's configuration.
-//     *
-//     * @param file the file to check the mime type of
-//     * @return Boolean True if the mimetype is one of the ones the system accepts, False otherwise.
-//     */
-//    public Boolean isAcceptedMimeType(MultipartFile file) throws IOException {
-//        Tika tikaFileValidator = new Tika();
-//        if (file.getContentType() == null || file.getContentType().isBlank()) {
-//            return false;
-//        }
-//        return ACCEPTED_MIME_TYPES.contains(MimeType.valueOf(tikaFileValidator.detect(file.getInputStream())));
-//    }
-//
-//    /**
-//     * Provides the list of acceptable file types the system accepts in a string form, like so: ".bmp,.jpg"
-//     *
-//     * @return String a string containing a list of acceptable file extensions: ".bmp,.jpg"
-//     */
-//    public String acceptedFileTypes() {
-//        return String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS);
-//    }
-//
-//    public boolean isTooLarge(MultipartFile file) {
-//        return file.getSize() > (maxFileSize * MB_IN_BYTES);
-//    }
-//
-//    public Long getMaxFileSizeInMb() {
-//        return maxFileSize;
-//    }
-
 }

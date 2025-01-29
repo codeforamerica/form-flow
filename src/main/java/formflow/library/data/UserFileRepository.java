@@ -21,14 +21,6 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
   List<UserFile> findAllBySubmission(Submission submission);
 
   /**
-   * Gets a count of all the {@link UserFile}s associated with a {@link Submission}}
-   *
-   * @param submission the {@link Submission} for which the count of associated {@link UserFile}s are sought
-   * @return count of {@link UserFile}s
-   */
-  long countBySubmission(Submission submission);
-
-  /**
    * Gets a count of all the {@link UserFile}s associated with a {@link Submission}} where the
    * file has never been converted
    *

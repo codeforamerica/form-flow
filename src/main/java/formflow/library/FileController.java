@@ -184,8 +184,6 @@ public class FileController extends FormFlowController {
         }
       }
 
-      log.info("Number of files uploaded: {}", userFileRepositoryService.countOfUploadedFilesBySubmission(submission));
-
       if (userFileRepositoryService.countOfUploadedFilesBySubmission(submission) >= maxFiles) {
         String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
