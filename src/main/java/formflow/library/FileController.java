@@ -352,6 +352,13 @@ public class FileController extends FormFlowController {
         return new RedirectView("/error");
       }
 
+      UserFile convertedFile = userFileRepositoryService.findBySubmissionAndConversionSourceFileId(submission, file.getFileId());
+      if (convertedFile != null) {
+        log.info("Delete convertedfile {} from cloud storage", convertedFile.getFileId());
+        cloudFileRepository.delete(convertedFile.getRepositoryPath());
+        userFileRepositoryService.deleteById(convertedFile.getFileId());
+      }
+
       log.info("Delete file {} from cloud storage", fileId);
       cloudFileRepository.delete(file.getRepositoryPath());
       userFileRepositoryService.deleteById(file.getFileId());

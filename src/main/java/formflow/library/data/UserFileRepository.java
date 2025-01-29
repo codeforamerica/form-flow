@@ -28,4 +28,6 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
    * @return count of {@link UserFile}s
    */
   long countBySubmissionAndConversionSourceFileIdIsNull(Submission submission);
+
+  UserFile findBySubmissionAndConversionSourceFileId(Submission submission, UUID conversionSourceFileId);
 }
