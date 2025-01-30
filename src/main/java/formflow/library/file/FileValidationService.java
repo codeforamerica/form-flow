@@ -139,7 +139,7 @@ public class FileValidationService {
       }
     }
 
-    return ACCEPTED_MIME_TYPES.contains(MimeType.valueOf(tikaFileValidator.detect(file.getInputStream())));
+    return ACCEPTED_MIME_TYPES.contains(mimeType);
   }
 
   /**
