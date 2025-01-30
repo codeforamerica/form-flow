@@ -3,8 +3,12 @@ package formflow.library.file;
 import static java.util.Arrays.stream;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.stream.Collectors;
 
 /**
  * This service is intended to help with miscellaneous file things. This service will help with checking mime types, both proper
@@ -49,6 +52,8 @@ public class FileValidationService {
       Map.entry(".ods", new MimeType("application", "vnd.oasis.opendocument.spreadsheet")),
       Map.entry(".odt", new MimeType("application", "vnd.oasis.opendocument.text"))
   );
+
+  private final MimeType ZIP_MIME_TYPE = new MimeType("application", "zip");
 
   private final List<MimeType> ACCEPTED_MIME_TYPES;
 
@@ -118,6 +123,22 @@ public class FileValidationService {
     if (file.getContentType() == null || file.getContentType().isBlank()) {
       return false;
     }
+
+    MimeType mimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
+
+    if (ACCEPTED_MIME_TYPES.contains(FILE_EXT_MIME_TYPE_MAP.get(".docx")) && ZIP_MIME_TYPE.equals(mimeType)) {
+      // docx files are technically just zip files with xml files inside of them. if the mime type is set to be a
+      // zip file, and we accept docx files, we can check if the zip is actually a zip... or if it's a docx and return
+      try (InputStream inputStream = file.getInputStream(); ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+        ZipEntry entry;
+        while ((entry = zipInputStream.getNextEntry()) != null) {
+          if (entry.getName().equals("word/document.xml") || entry.getName().equals("[Content_Types].xml")) {
+            return true;
+          }
+        }
+      }
+    }
+
     return ACCEPTED_MIME_TYPES.contains(MimeType.valueOf(tikaFileValidator.detect(file.getInputStream())));
   }
 
