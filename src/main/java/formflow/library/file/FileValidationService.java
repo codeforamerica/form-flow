@@ -82,12 +82,13 @@ public class FileValidationService {
         .sorted()
         .collect(Collectors.toList());
 
-    if (ACCEPTED_FILE_EXTS.contains(".doc")) {
-      // It's possible that Tika will return this for an MS Office document instead of the
+    if (ACCEPTED_FILE_EXTS.contains(".doc") || ACCEPTED_FILE_EXTS.contains(".docx")) {
+      // It's possible that Tika will return this for an Office document instead of the
       // correct Mime Type, if the version of Office is old or Tika can't quite determine if
       // it's a Word vs Excel document (for example)
       // This little workaround will insert Tika's returned value in those cases of ambiguity.
       acceptedMimeTypes.add(new MimeType("application", "x-tika-msoffice"));
+      acceptedMimeTypes.add(new MimeType("application", "x-tika-ooxml"));
     }
 
     ACCEPTED_MIME_TYPES = acceptedMimeTypes;
