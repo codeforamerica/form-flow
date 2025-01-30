@@ -70,7 +70,7 @@ public class FileController extends FormFlowController {
   @Value("${form-flow.uploads.virus-scanning.enabled:false}")
   private boolean isVirusScanningEnabled;
 
-  @Value("${form-flow.uploads.convert-to-pdf:false}")
+  @Value("${form-flow.uploads.file-conversion.convert-to-pdf:false}")
   private boolean convertUploadToPDF;
 
   private final ObjectMapper objectMapper = new ObjectMapper();

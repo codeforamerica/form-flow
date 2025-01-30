@@ -17,6 +17,7 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 public class FileConversionService {
+
+    @Value("${form-flow.uploads.file-conversion.prefix:}")
+    private String convertedPrefix;
+
+    @Value("${form-flow.uploads.file-conversion.suffix:}")
+    private String convertedSuffix;
 
     private enum MIME_TYPE {
         GIF(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
@@ -120,9 +127,8 @@ public class FileConversionService {
 
             document.close();
 
-            String convertedFileName = Files.getNameWithoutExtension(Objects.requireNonNull(file.getOriginalFilename())) + "-converted.pdf";
             // Convert byte array output stream to MultipartFile
-            return new MockMultipartFile("file", convertedFileName, "application/pdf",
+            return new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
                     new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
         } catch (IOException e) {
             log.error("Unable to convert Image to PDF", e);
@@ -166,8 +172,7 @@ public class FileConversionService {
             }
 
             // Convert PDF file on disk into a stream and create a new MultipartFile
-            String convertedFileName = Files.getNameWithoutExtension(originalFilename) + "-converted.pdf";
-            MultipartFile pdfMultipartFile = new MockMultipartFile("file", convertedFileName, "application/pdf",
+            MultipartFile pdfMultipartFile = new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
                     new FileInputStream(pdfFile));
 
             // Clean up temporary files
@@ -179,5 +184,12 @@ public class FileConversionService {
             log.error("Unable to convert Office Document to PDF", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private String convertFileName(String originalFilename) {
+        String fileExtension = Files.getFileExtension(originalFilename);
+        fileExtension = !fileExtension.isEmpty() ? "-" + fileExtension.toLowerCase() : "";
+
+        return convertedPrefix + Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + fileExtension  + convertedSuffix + ".pdf";
     }
 }
