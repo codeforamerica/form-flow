@@ -2,11 +2,13 @@ package formflow.library.file;
 
 import static java.util.Arrays.stream;
 
+import com.google.common.io.Files;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import lombok.extern.slf4j.Slf4j;
@@ -39,18 +41,18 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileValidationService {
 
   public static final long MB_IN_BYTES = 1024 * 1024;
-  private final Map<String, MimeType> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
-      Map.entry(".gif", MediaType.IMAGE_GIF),
-      Map.entry(".png", MediaType.IMAGE_PNG),
-      Map.entry(".jpg", MediaType.IMAGE_JPEG),
-      Map.entry(".jpeg", MediaType.IMAGE_JPEG),
-      Map.entry(".bmp", new MimeType("image", "bmp")),
-      Map.entry(".pdf", new MimeType("application", "pdf")),
-      Map.entry(".doc", new MimeType("application", "msword")),
-      Map.entry(".docx", new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document")),
-      Map.entry(".odp", new MimeType("application", "vnd.oasis.opendocument.presentation")),
-      Map.entry(".ods", new MimeType("application", "vnd.oasis.opendocument.spreadsheet")),
-      Map.entry(".odt", new MimeType("application", "vnd.oasis.opendocument.text"))
+  private final Map<String, Set<MimeType>> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
+      Map.entry(".gif", Set.of(MediaType.IMAGE_GIF)),
+      Map.entry(".png", Set.of(MediaType.IMAGE_PNG)),
+      Map.entry(".jpg", Set.of(MediaType.IMAGE_JPEG)),
+      Map.entry(".jpeg", Set.of(MediaType.IMAGE_JPEG)),
+      Map.entry(".bmp", Set.of(new MimeType("image", "bmp"))),
+      Map.entry(".pdf", Set.of(new MimeType("application", "pdf"))),
+      Map.entry(".doc", Set.of(new MimeType("application", "msword"), new MimeType("application", "x-tika-msoffice"))),
+      Map.entry(".docx", Set.of(new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document"), new MimeType("application", "x-tika-ooxml"))),
+      Map.entry(".odp", Set.of(new MimeType("application", "vnd.oasis.opendocument.presentation"))),
+      Map.entry(".ods", Set.of(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"))),
+      Map.entry(".odt", Set.of(new MimeType("application", "vnd.oasis.opendocument.text")))
   );
 
   private final MimeType ZIP_MIME_TYPE = new MimeType("application", "zip");
@@ -81,22 +83,10 @@ public class FileValidationService {
         .sorted()
         .toList();
 
-    List<MimeType> acceptedMimeTypes = ACCEPTED_FILE_EXTS.stream()
-        .filter(FILE_EXT_MIME_TYPE_MAP::containsKey)
-        .map(FILE_EXT_MIME_TYPE_MAP::get)
-        .sorted()
-        .collect(Collectors.toList());
-
-    if (ACCEPTED_FILE_EXTS.contains(".doc") || ACCEPTED_FILE_EXTS.contains(".docx")) {
-      // It's possible that Tika will return this for an Office document instead of the
-      // correct Mime Type, if the version of Office is old or Tika can't quite determine if
-      // it's a Word vs Excel document (for example)
-      // This little workaround will insert Tika's returned value in those cases of ambiguity.
-      acceptedMimeTypes.add(new MimeType("application", "x-tika-msoffice"));
-      acceptedMimeTypes.add(new MimeType("application", "x-tika-ooxml"));
-    }
-
-    ACCEPTED_MIME_TYPES = acceptedMimeTypes;
+    ACCEPTED_MIME_TYPES = FILE_EXT_MIME_TYPE_MAP.values().stream()
+            .flatMap(Set::stream)
+            .sorted()
+            .toList();
 
     log.info(String.format("User provided file types: %s", userProvidedFileTypes));
     log.info(String.format("Files accepted by the server: %s", String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS)));
@@ -126,7 +116,8 @@ public class FileValidationService {
 
     MimeType mimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
 
-    if (ACCEPTED_MIME_TYPES.contains(FILE_EXT_MIME_TYPE_MAP.get(".docx")) && ZIP_MIME_TYPE.equals(mimeType)) {
+    if (ZIP_MIME_TYPE.equals(mimeType) && ACCEPTED_FILE_EXTS.contains(".docx") &&
+            Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename())).equalsIgnoreCase("docx")) {
       // docx files are technically just zip files with xml files inside of them. if the mime type is set to be a
       // zip file, and we accept docx files, we can check if the zip is actually a zip... or if it's a docx and return
       try (InputStream inputStream = file.getInputStream(); ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {

@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -34,42 +33,22 @@ public class FileConversionService {
     @Value("${form-flow.uploads.file-conversion.suffix:}")
     private String convertedSuffix;
 
-    private enum MIME_TYPE {
-        GIF(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
-        PNG(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
-        JPG(MediaType.IMAGE_JPEG, CONVERSION_TO_PDF_TYPE.IMAGE),
-        BMP(new MimeType("image", "bmp"), CONVERSION_TO_PDF_TYPE.IMAGE),
-        PDF(new MimeType("application", "pdf"), CONVERSION_TO_PDF_TYPE.NONE),
-        DOC(new MimeType("application", "msword"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        DOCX(new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document"),
+    private final Map<MimeType, CONVERSION_TO_PDF_TYPE> MIME_TYPE_MAP = Map.ofEntries(
+        Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
+        Map.entry(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
+        Map.entry(MediaType.IMAGE_JPEG, CONVERSION_TO_PDF_TYPE.IMAGE),
+        Map.entry(new MimeType("image", "bmp"), CONVERSION_TO_PDF_TYPE.IMAGE),
+        Map.entry(new MimeType("application", "pdf"), CONVERSION_TO_PDF_TYPE.NONE),
+        Map.entry(new MimeType("application", "msword"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        Map.entry(new MimeType("application", "x-tika-msoffice"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        Map.entry(new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document"),
                 CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        ODP(new MimeType("application", "vnd.oasis.opendocument.presentation"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        ODS(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        ODT(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        TIKA_OFFICE_DOC(new MimeType("application", "x-tika-msoffice"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        TIKA_OPENOFFICE_DOC(new MimeType("application", "x-tika-ooxml"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        DOCX_AS_ZIP(new MimeType("application", "zip"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT);
-
-        private final MimeType mimeType;
-        private final CONVERSION_TO_PDF_TYPE conversionType;
-
-        MIME_TYPE(MimeType mimeType, CONVERSION_TO_PDF_TYPE conversionType) {
-            this.mimeType = mimeType;
-            this.conversionType = conversionType;
-        }
-
-        private static final Map<MimeType, MIME_TYPE> LOOKUP_MAP = new HashMap<>();
-
-        static {
-            for (MIME_TYPE type : MIME_TYPE.values()) {
-                LOOKUP_MAP.put(type.mimeType, type);
-            }
-        }
-
-        public static MIME_TYPE get(MimeType mimeType) {
-            return LOOKUP_MAP.get(mimeType);
-        }
-    }
+        Map.entry(new MimeType("application", "x-tika-ooxml"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        Map.entry(new MimeType("application", "vnd.oasis.opendocument.presentation"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        Map.entry(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        Map.entry(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+        Map.entry(new MimeType("application", "zip"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT)
+    );
 
     private enum CONVERSION_TO_PDF_TYPE {
         IMAGE, OFFICE_DOCUMENT, NONE;
@@ -84,24 +63,26 @@ public class FileConversionService {
     public MultipartFile convertFileToPDF(MultipartFile file) {
         try {
             MimeType fileMimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
-            MIME_TYPE originalMimeType = MIME_TYPE.get(fileMimeType);
 
-            if (originalMimeType == null) {
+            if (MIME_TYPE_MAP.get(fileMimeType) == null) {
                 log.error("Unable to convert Mime Type to PDF {}", fileMimeType);
                 return null;
             }
 
-            switch (originalMimeType.conversionType) {
-                case IMAGE:
-                    log.info("Converting image of type {} to PDF", originalMimeType.mimeType);
-                    return convertImageToPDF(file);
-                case OFFICE_DOCUMENT:
-                    log.info("Converting document of type {} to PDF", originalMimeType.mimeType);
-                    return convertOfficeDocumentToPDF(file);
-                default:
-                    log.info("Skipping converting file of type {} to PDF", originalMimeType.mimeType);
-                    return null;
-            }
+            return switch (MIME_TYPE_MAP.get(fileMimeType)) {
+                case IMAGE -> {
+                    log.info("Converting image of type {} to PDF", fileMimeType);
+                    yield convertImageToPDF(file);
+                }
+                case OFFICE_DOCUMENT -> {
+                    log.info("Converting document of type {} to PDF", fileMimeType);
+                    yield convertOfficeDocumentToPDF(file);
+                }
+                default -> {
+                    log.info("Skipping converting file of type {} to PDF", fileMimeType);
+                    yield null;
+                }
+            };
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
