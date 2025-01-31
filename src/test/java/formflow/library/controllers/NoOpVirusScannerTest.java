@@ -55,6 +55,7 @@ public class NoOpVirusScannerTest extends AbstractMockMvcTest {
     setFlowInfoInSession(session, "testFlow", submission.getId());
 
     UserFile userFile = UserFile.builder()
+        .fileId(UUID.randomUUID())
         .submission(submission)
         .fileId(fileUuid)
         .virusScanned(false)

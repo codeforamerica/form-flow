@@ -251,7 +251,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
             MediaType.IMAGE_JPEG_VALUE, new byte[10]);
     
-    when(userFileRepositoryService.countBySubmission(submission)).thenReturn(10L);
+    when(userFileRepositoryService.countOfUploadedFilesBySubmission(submission)).thenReturn(10L);
     when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
     when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
     
@@ -361,7 +361,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
     @Test
     void shouldReturnForbiddenStatusIfSessionIdDoesNotMatchSubmissionIdForSingleFileEndpoint() throws Exception {
       setFlowInfoInSession(session, "testFlow", UUID.randomUUID());
-      UserFile userFile = UserFile.builder().submission(submission).build();
+      UserFile userFile = UserFile.builder().fileId(UUID.randomUUID()).submission(submission).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       mockMvc.perform(
               MockMvcRequestBuilders
@@ -376,7 +376,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       Submission differentSubmissionIdFromUserFile = Submission.builder().id(UUID.randomUUID()).build();
       setFlowInfoInSession(session, "testFlow", submission.getId());
 
-      UserFile userFile = UserFile.builder().submission(differentSubmissionIdFromUserFile)
+      UserFile userFile = UserFile.builder().fileId(UUID.randomUUID()).submission(differentSubmissionIdFromUserFile)
           .fileId(fileId).build();
       when(userFileRepositoryService.findById(fileId)).thenReturn(Optional.ofNullable(userFile));
       when(submissionRepositoryService.findById(submission.getId())).thenReturn(Optional.of(submission));
@@ -446,6 +446,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       long fileSize = testFileBytes.length;
       CloudFile testcloudFile = new CloudFile(fileSize, testFileBytes, null);
       UserFile testUserFile = UserFile.builder()
+          .fileId(UUID.randomUUID())
           .originalName("testFileName")
           .mimeType("image/jpeg")
           .repositoryPath("testPath")
@@ -482,6 +483,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
       CloudFile secondTestcloudFile = new CloudFile(secondTestFileSize, secondTestFileBytes, null);
 
       UserFile firstTestUserFile = UserFile.builder()
+          .fileId(UUID.randomUUID())
           .originalName("test.png")
           .mimeType("image/png")
           .repositoryPath("testPath")
@@ -490,6 +492,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
           .build();
 
       UserFile secondTestUserFile = UserFile.builder()
+          .fileId(UUID.randomUUID())
           .originalName("test-platypus.gif")
           .mimeType("image/gif")
           .repositoryPath("testPath2")

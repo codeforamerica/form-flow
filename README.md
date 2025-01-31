@@ -1859,6 +1859,40 @@ bucket. This will automatically delete files in your bucket that are older than 
 permits.
 [You can read more about configuring a retention policy in S3 here.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html)
 
+### File Conversion
+
+File uploads made through form flow can be converted to PDFs and uploaded in parallel to the original
+files. Images are converted using OpenPDF and no further dependencies are needed. Office documents are
+converted using <a href="https://www.libreoffice.org/" target="_blank">LibreOffice</a> and will require
+installation.
+
+To enable PDF conversion, set the property to true:
+
+```yaml
+form-flow:
+  uploads:
+    file-conversion:
+      convert-to-pdf: true
+```
+
+By default, the converted file will retain the original extension as part of the file name. For example,
+`sample file.doc` will be converted to a new file called `sample file-doc.pdf`
+
+If you wish to set up a prefix and/or suffix for the converted file name, you can do so using the yaml:
+
+```yaml
+form-flow:
+  uploads:
+    file-conversion:
+      convert-to-pdf: true
+      prefix: new-
+      suffix: -converted
+```
+
+With the above example, `sample file.doc` will be converted to `new-sample file-doc-converted.pdf`
+
+Converted documents do not count against the total number of user uploaded files.
+
 ### Virus Scanning
 
 #### ClamAV Server
