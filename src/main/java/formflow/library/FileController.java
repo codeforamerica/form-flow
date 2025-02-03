@@ -267,7 +267,7 @@ public class FileController extends FormFlowController {
       // Need this to be final, for the lambda below
       final Submission finalSubmission = submission;
 
-      fileConversion.thenAccept(convertedMultipartFile -> {
+      fileConversion.thenAcceptAsync(convertedMultipartFile -> {
         // We've waited around for the original conversion call to complete and return from its thread,
         // and now we can save and upload it, if it was converted.
         if (convertedMultipartFile != null) {

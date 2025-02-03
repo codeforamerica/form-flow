@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -120,6 +119,9 @@ public class FileConversionService {
     }
 
     private MultipartFile convertOfficeDocumentToPDF(MultipartFile file) {
+        File inputFile = null;
+        File pdfFile = null;
+
         try {
             // Write to a temp file, so we can have a File from the original MultipartFile
             // OfficeLibre aka soffice requires a file on disk, not in memory
@@ -129,7 +131,7 @@ public class FileConversionService {
             }
 
             File safeDir = new File(System.getProperty("java.io.tmpdir"));
-            File inputFile = File.createTempFile("upload_", "." + FilenameUtils.getExtension(originalFilename), safeDir);
+            inputFile = File.createTempFile("upload_", "." + FilenameUtils.getExtension(originalFilename), safeDir);
             file.transferTo(inputFile);
 
             File outputDir = inputFile.getParentFile();
@@ -146,26 +148,39 @@ public class FileConversionService {
             );
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
-            process.waitFor();
+            int exitCode = process.waitFor();
 
             // Read the converted PDF from disk
-            File pdfFile = new File(outputPdfPath);
+            pdfFile = new File(outputPdfPath);
             if (!pdfFile.exists()) {
-                throw new FileNotFoundException("PDF conversion failed, output file not found: " + outputPdfPath);
+                if (exitCode != 0) {
+                    throw new RuntimeException("PDF conversion failed. Unable to find PDF file " + pdfFile.getAbsolutePath());
+                } else {
+                    // There is a race condition where soffice will say everything is great, but it's not great and there's no
+                    // converted file. We can retry in this situation.
+                    log.warn("Unable to find PDF file {}, will retry.", pdfFile.getAbsolutePath());
+                    return convertOfficeDocumentToPDF(file);
+                }
             }
 
             // Convert PDF file on disk into a stream and create a new MultipartFile
             MultipartFile pdfMultipartFile = new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
                     new FileInputStream(pdfFile));
 
-            // Clean up temporary files
-            inputFile.delete();
-            pdfFile.delete();
-
             return pdfMultipartFile;
         } catch (IOException | InterruptedException e) {
             log.error("Unable to convert Office Document to PDF", e);
             throw new RuntimeException(e);
+        } finally {
+            // Clean up temporary files
+            if (inputFile != null && inputFile.exists()) {
+                inputFile.delete();
+            }
+
+            if (pdfFile != null && pdfFile.exists()) {
+                pdfFile.delete();
+            }
+
         }
     }
 
