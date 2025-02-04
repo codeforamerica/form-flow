@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
@@ -222,7 +223,7 @@ public class FileController extends FormFlowController {
       if (convertUploadToPDF) {
         convertUploadedFileToPDF(file, flow, inputName, userFileId, submission);
       }
-      
+
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(uploadedFile.getFileId().toString());
     } catch (Exception e) {
       if (e instanceof ResponseStatusException) {
@@ -242,7 +243,7 @@ public class FileController extends FormFlowController {
     File tempFile = File.createTempFile("upload_", ".tmp");
     file.transferTo(tempFile);
 
-    CompletableFuture<MultipartFile> fileConversion = CompletableFuture.supplyAsync(() -> {
+    CompletableFuture<Set<MultipartFile>> fileConversion = CompletableFuture.supplyAsync(() -> {
       try {
         // Now we can read the temp file version of the uploaded file off the disk
         // and recreate the Multipart File for conversion.
@@ -269,38 +270,74 @@ public class FileController extends FormFlowController {
     // Need this to be final, for the lambda below
     final Submission finalSubmission = submission;
 
-    fileConversion.thenAccept(convertedMultipartFile -> {
+    fileConversion.thenAccept(convertedMultipartFiles -> {
       // We've waited around for the original conversion call to complete and return from its thread,
-      // and now we can save and upload it, if it was converted.
-      if (convertedMultipartFile != null) {
-        log.info("Successfully converted upload {} to PDF, saving to repository", userFileId);
-        String convertedFileExtension = Files.getFileExtension(
-                Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
-        UUID convertedUserFileId = UUID.randomUUID();
-        String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", finalSubmission.getId(), flow, inputName,
-                convertedUserFileId,
-                convertedFileExtension);
+      // and now we can save and upload the file(s), if the original was converted.
+      if (convertedMultipartFiles != null && !convertedMultipartFiles.isEmpty()) {
 
-        try {
-          cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
+        if (convertedMultipartFiles.size() == 1) {
+          MultipartFile convertedMultipartFile = convertedMultipartFiles.iterator().next();
+          log.info("Successfully converted upload {} to PDF, saving to repository", userFileId);
+          String convertedFileExtension = Files.getFileExtension(
+                  Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
+          UUID convertedUserFileId = UUID.randomUUID();
+          String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", finalSubmission.getId(), flow, inputName,
+                  convertedUserFileId,
+                  convertedFileExtension);
 
-          UserFile uploadedConvertedFile = UserFile.builder()
-                  .fileId(convertedUserFileId)
-                  .submission(finalSubmission)
-                  .originalName(convertedMultipartFile.getOriginalFilename())
-                  .repositoryPath(convertedFileUploadLocation)
-                  .filesize((float) convertedMultipartFile.getSize())
-                  .mimeType(convertedMultipartFile.getContentType())
-                  .virusScanned(true)
-                  .docTypeLabel(defaultDocType)
-                  .conversionSourceFileId(userFileId)
-                  .build();
+          try {
+            cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
 
-          uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
-          log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), userFileId);
-        } catch (IOException | InterruptedException e) {
-          log.error("Unable to create and upload converted file with id {} from original {}", convertedUserFileId,
-                  userFileId);
+            UserFile uploadedConvertedFile = UserFile.builder()
+                    .fileId(convertedUserFileId)
+                    .submission(finalSubmission)
+                    .originalName(convertedMultipartFile.getOriginalFilename())
+                    .repositoryPath(convertedFileUploadLocation)
+                    .filesize((float) convertedMultipartFile.getSize())
+                    .mimeType(convertedMultipartFile.getContentType())
+                    .virusScanned(true)
+                    .docTypeLabel(defaultDocType)
+                    .conversionSourceFileId(userFileId)
+                    .build();
+
+            uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
+            log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), userFileId);
+          } catch (IOException | InterruptedException e) {
+            log.error("Unable to create and upload converted file with id {} from original {}", convertedUserFileId,
+                    userFileId);
+          }
+        } else {
+          log.info("File {} was converted into {} new PDF files.", userFileId, convertedMultipartFiles.size());
+          for (MultipartFile convertedMultipartFile : convertedMultipartFiles) {
+            String convertedFileExtension = Files.getFileExtension(
+                    Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
+            UUID convertedUserFileId = UUID.randomUUID();
+            String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", finalSubmission.getId(), flow, inputName,
+                    convertedUserFileId,
+                    convertedFileExtension);
+
+            try {
+              cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
+
+              UserFile uploadedConvertedFile = UserFile.builder()
+                      .fileId(convertedUserFileId)
+                      .submission(finalSubmission)
+                      .originalName(convertedMultipartFile.getOriginalFilename())
+                      .repositoryPath(convertedFileUploadLocation)
+                      .filesize((float) convertedMultipartFile.getSize())
+                      .mimeType(convertedMultipartFile.getContentType())
+                      .virusScanned(true)
+                      .docTypeLabel(defaultDocType)
+                      .conversionSourceFileId(userFileId)
+                      .build();
+
+              uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
+              log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), userFileId);
+            } catch (IOException | InterruptedException e) {
+              log.error("Unable to create and upload converted file with id {} from original {}", convertedUserFileId,
+                      userFileId);
+            }
+          }
         }
       } else {
         log.info("No conversion of upload {} to PDF", userFileId);

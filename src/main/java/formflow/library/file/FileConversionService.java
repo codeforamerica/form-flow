@@ -4,6 +4,8 @@ import com.google.common.io.Files;
 import com.lowagie.text.Document;
 import com.lowagie.text.Image;
 import com.lowagie.text.PageSize;
+import com.lowagie.text.pdf.PdfCopy;
+import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfWriter;
@@ -13,8 +15,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
@@ -65,7 +69,7 @@ public class FileConversionService {
         this.validationService = validationService;
     }
 
-    public MultipartFile convertFileToPDF(MultipartFile file) {
+    public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
         try {
             MimeType fileMimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
 
@@ -94,7 +98,7 @@ public class FileConversionService {
         }
     }
 
-    private MultipartFile convertImageToPDF(MultipartFile file) {
+    private Set<MultipartFile> convertImageToPDF(MultipartFile file) {
         try {
             // Create a PDF document
             Document document = new Document(PageSize.LETTER);
@@ -116,18 +120,25 @@ public class FileConversionService {
             document.close();
 
             // Convert byte array output stream to MultipartFile
-            return new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
+            MultipartFile convertedPDF = new MockMultipartFile("file", convertFileName(file.getOriginalFilename(), null), "application/pdf",
                     new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+
+            Set<MultipartFile> result = new HashSet<>();
+            result.add(convertedPDF);
+            return result;
+
         } catch (IOException e) {
             log.error("Unable to convert Image to PDF", e);
             throw new RuntimeException(e);
         }
     }
 
-    private MultipartFile convertOfficeDocumentToPDF(MultipartFile file) {
-        File inputFile = null;
-        File pdfFile = null;
-        File compressedPDFFile = null;
+    private Set<MultipartFile> convertOfficeDocumentToPDF(MultipartFile file) {
+        File inputFile;
+        File pdfFile;
+        File compressedPDFFile;
+
+        Set<File> tempFiles = new HashSet<>();
 
         try {
             // Write to a temp file, so we can have a File from the original MultipartFile
@@ -153,6 +164,9 @@ public class FileConversionService {
                     "--outdir", outputDir.getAbsolutePath(),
                     inputFile.getAbsolutePath()
             );
+
+            tempFiles.add(inputFile);
+
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
@@ -170,8 +184,9 @@ public class FileConversionService {
                 }
             }
 
-            String convertedPDFPath = pdfFile.getAbsolutePath();
+            Set<MultipartFile> result = new HashSet<>();
 
+            String convertedPDFPath;
             if (validationService.isTooLarge(pdfFile)) {
                 // If the converted PDF is too large, we can use OpenPDF to further compressed it. This isn't possible
                 // with LibreOffice, so it's another step and only needs to be done if the conversion increased the file
@@ -197,36 +212,82 @@ public class FileConversionService {
                 log.info("Compressed PDF is {} bytes.", compressedPDFFile.length());
 
                 if (validationService.isTooLarge(compressedPDFFile)) {
-                    log.warn("Compressed PDF is still too large!");
+                    log.info("Compressed PDF is still too large. Trying to divide into multiple files.");
+
+                    reader = new PdfReader(compressedPDFFile.getAbsolutePath());
+                    int totalPages = reader.getNumberOfPages();
+                    if (totalPages > 1) {
+                        for (int i = 1; i <= totalPages; i++) {
+                            String outputFilePath = compressedPDFFile.getAbsolutePath() + "_page_" + i + ".pdf";
+                            log.info(outputFilePath);
+                            Document document = new Document();
+                            PdfCopy writer = new PdfCopy(document, new FileOutputStream(outputFilePath));
+                            document.open();
+
+                            PdfImportedPage page = writer.getImportedPage(reader, i);
+                            writer.addPage(page);
+
+                            document.close();
+                            writer.close();
+
+                            File pdfPageFile = new File(outputFilePath);
+                            MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile,"page_" + i);
+
+                            if (validationService.isTooLarge(convertedPDF)) {
+                                log.warn("Converted PDF page {} is too large at {} bytes", i, convertedPDF.getSize());
+                            }
+
+                            tempFiles.add(pdfPageFile);
+                            result.add(convertedPDF);
+                        }
+                    } else {
+                        log.warn("Compressed PDF is still too large and only 1 page.");
+                        MultipartFile convertedPDF = createMultipartFile(file, compressedPDFFile);
+                        result.add(convertedPDF);
+                    }
+
+                } else {
+                    MultipartFile convertedPDF = createMultipartFile(file, compressedPDFFile);
+                    result.add(convertedPDF);
                 }
+
+                tempFiles.add(compressedPDFFile);
+
+            } else {
+                MultipartFile convertedPDF = createMultipartFile(file, pdfFile);
+                result.add(convertedPDF);
             }
 
-            // Convert PDF file on disk into a stream and create a new MultipartFile
-            return new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
-                    new FileInputStream(convertedPDFPath));
+            tempFiles.add(pdfFile);
+
+            return result;
         } catch (IOException | InterruptedException e) {
             log.error("Unable to convert Office Document to PDF", e);
             throw new RuntimeException(e);
         } finally {
             // Clean up temporary files
-            if (inputFile != null && inputFile.exists()) {
-                inputFile.delete();
+            for (File tempFile: tempFiles) {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
             }
-
-            if (pdfFile != null && pdfFile.exists()) {
-                pdfFile.delete();
-            }
-
-            if (compressedPDFFile != null && compressedPDFFile.exists()) {
-                compressedPDFFile.delete();
-            }
-
         }
     }
 
-    private String convertFileName(String originalFilename) {
+    private MultipartFile createMultipartFile(MultipartFile file, File pdf, String page) throws IOException {
+        String convertedFileName = convertFileName(file.getOriginalFilename(), page);
+        return new MockMultipartFile(convertedFileName, convertedFileName, "application/pdf",
+                new FileInputStream(pdf));
+    }
+
+    private MultipartFile createMultipartFile(MultipartFile file, File pdf) throws IOException {
+        return createMultipartFile(file, pdf, null);
+    }
+
+    private String convertFileName(String originalFilename, String page) {
         String fileExtension = Files.getFileExtension(originalFilename);
         fileExtension = !fileExtension.isEmpty() ? "-" + fileExtension.toLowerCase() : "";
+        fileExtension = page != null ? fileExtension + "-" + page : fileExtension;
 
         return convertedPrefix + Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + fileExtension  + convertedSuffix + ".pdf";
     }
