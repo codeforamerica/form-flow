@@ -80,7 +80,7 @@ public class UserFileRepositoryService {
         return repository.countBySubmissionAndConversionSourceFileIdIsNull(submission);
     }
 
-    public UserFile findBySubmissionAndConversionSourceFileId(Submission submission, UUID ConversionSourceFileId) {
-        return repository.findBySubmissionAndConversionSourceFileId(submission, ConversionSourceFileId);
+    public List<UserFile> findAllBySubmissionAndConversionSourceFileId(Submission submission, UUID ConversionSourceFileId) {
+        return repository.findAllBySubmissionAndConversionSourceFileId(submission, ConversionSourceFileId);
     }
 }

@@ -234,6 +234,8 @@ public class FileConversionService {
                             MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile,"page_" + i);
 
                             if (validationService.isTooLarge(convertedPDF)) {
+                                // The compressed pdf page is too big, but there's nothing else to do, so we can save and upload
+                                // Clients should probably set up an alert based on this WARN!
                                 log.warn("Converted PDF page {} is too large at {} bytes", i, convertedPDF.getSize());
                             }
 
@@ -241,12 +243,15 @@ public class FileConversionService {
                             result.add(convertedPDF);
                         }
                     } else {
+                        // The compressed pdf is too big, but it's only 1 page so it's good enough to save and upload
+                        // Clients should probably set up an alert based on this WARN!
                         log.warn("Compressed PDF is still too large and only 1 page.");
                         MultipartFile convertedPDF = createMultipartFile(file, compressedPDFFile);
                         result.add(convertedPDF);
                     }
 
                 } else {
+                    // The compressed pdf is good to save and upload
                     MultipartFile convertedPDF = createMultipartFile(file, compressedPDFFile);
                     result.add(convertedPDF);
                 }
@@ -254,6 +259,7 @@ public class FileConversionService {
                 tempFiles.add(compressedPDFFile);
 
             } else {
+                // The original converted PDF is good to save and upload
                 MultipartFile convertedPDF = createMultipartFile(file, pdfFile);
                 result.add(convertedPDF);
             }

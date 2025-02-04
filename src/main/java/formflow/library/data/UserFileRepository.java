@@ -29,5 +29,5 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
    */
   long countBySubmissionAndConversionSourceFileIdIsNull(Submission submission);
 
-  UserFile findBySubmissionAndConversionSourceFileId(Submission submission, UUID conversionSourceFileId);
+  List<UserFile> findAllBySubmissionAndConversionSourceFileId(Submission submission, UUID conversionSourceFileId);
 }
