@@ -4,11 +4,14 @@ import com.google.common.io.Files;
 import com.lowagie.text.Document;
 import com.lowagie.text.Image;
 import com.lowagie.text.PageSize;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -55,8 +58,11 @@ public class FileConversionService {
 
     private final Tika tikaFileValidator;
 
-    public FileConversionService() {
+    private final FileValidationService validationService;
+
+    public FileConversionService(FileValidationService validationService) {
         tikaFileValidator = new Tika();
+        this.validationService = validationService;
     }
 
     public MultipartFile convertFileToPDF(MultipartFile file) {
@@ -121,6 +127,7 @@ public class FileConversionService {
     private MultipartFile convertOfficeDocumentToPDF(MultipartFile file) {
         File inputFile = null;
         File pdfFile = null;
+        File compressedPDFFile = null;
 
         try {
             // Write to a temp file, so we can have a File from the original MultipartFile
@@ -142,7 +149,7 @@ public class FileConversionService {
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "soffice",
                     "--headless",
-                    "--convert-to", "pdf",
+                    "--convert-to", "pdf:writer_pdf_Export:ReduceImageResolution=true,MaxImageResolution=150,Quality=80",
                     "--outdir", outputDir.getAbsolutePath(),
                     inputFile.getAbsolutePath()
             );
@@ -163,11 +170,40 @@ public class FileConversionService {
                 }
             }
 
-            // Convert PDF file on disk into a stream and create a new MultipartFile
-            MultipartFile pdfMultipartFile = new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
-                    new FileInputStream(pdfFile));
+            String convertedPDFPath = pdfFile.getAbsolutePath();
 
-            return pdfMultipartFile;
+            if (validationService.isTooLarge(pdfFile)) {
+                // If the converted PDF is too large, we can use OpenPDF to further compressed it. This isn't possible
+                // with LibreOffice, so it's another step and only needs to be done if the conversion increased the file
+                // size to an extreme
+                log.info("Converted PDF is too large. Converted file is {} bytes.", pdfFile.length());
+                convertedPDFPath = pdfFile.getAbsolutePath() + "-compressed";
+                PdfReader reader = new PdfReader(pdfFile.getAbsolutePath());
+                FileOutputStream outputStream = new FileOutputStream(convertedPDFPath);
+                PdfStamper stamper = new PdfStamper(reader, outputStream, PdfWriter.VERSION_1_7);
+
+                // Enable full compression
+                stamper.getWriter().setFullCompression();
+                stamper.getWriter().setCompressionLevel(9);  // Max compression
+
+                // Remove unused objects
+                reader.removeUnusedObjects();
+
+                stamper.close();
+                reader.close();
+                outputStream.close();
+
+                compressedPDFFile = new File(convertedPDFPath);
+                log.info("Compressed PDF is {} bytes.", compressedPDFFile.length());
+
+                if (validationService.isTooLarge(compressedPDFFile)) {
+                    log.warn("Compressed PDF is still too large!");
+                }
+            }
+
+            // Convert PDF file on disk into a stream and create a new MultipartFile
+            return new MockMultipartFile("file", convertFileName(file.getOriginalFilename()), "application/pdf",
+                    new FileInputStream(convertedPDFPath));
         } catch (IOException | InterruptedException e) {
             log.error("Unable to convert Office Document to PDF", e);
             throw new RuntimeException(e);
@@ -179,6 +215,10 @@ public class FileConversionService {
 
             if (pdfFile != null && pdfFile.exists()) {
                 pdfFile.delete();
+            }
+
+            if (compressedPDFFile != null && compressedPDFFile.exists()) {
+                compressedPDFFile.delete();
             }
 
         }

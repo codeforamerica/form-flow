@@ -3,6 +3,7 @@ package formflow.library.file;
 import static java.util.Arrays.stream;
 
 import com.google.common.io.Files;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -144,6 +145,10 @@ public class FileValidationService {
 
   public boolean isTooLarge(MultipartFile file) {
     return file.getSize() > (maxFileSize * MB_IN_BYTES);
+  }
+
+  public boolean isTooLarge(File file) {
+    return file.length() > (maxFileSize * MB_IN_BYTES);
   }
 
   public Long getMaxFileSizeInMb() {
