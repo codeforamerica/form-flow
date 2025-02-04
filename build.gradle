@@ -74,7 +74,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.jetbrains:annotations:26.0.2'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.0'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.1'
 //    implementation 'jakarta.persistence:jakarta.persistence-api:3.2.0'
     implementation 'org.flywaydb:flyway-core:[9.+,10.+['
     implementation 'org.webjars.npm:dropzone:5.9.3'
