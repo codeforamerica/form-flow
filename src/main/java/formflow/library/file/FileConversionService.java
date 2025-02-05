@@ -98,12 +98,12 @@ public class FileConversionService {
                 }
                 default -> {
                     log.info("Skipping converting file of type {} to PDF", fileMimeType);
-                    yield null;
+                    yield new HashSet<>();
                 }
             };
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return null;
+            return new HashSet<>();
         }
     }
 

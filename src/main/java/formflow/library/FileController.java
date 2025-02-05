@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -257,14 +258,14 @@ public class FileController extends FormFlowController {
         return fileConversionService.convertFileToPDF(multipartFile);
       } catch (IOException e) {
         log.error("Error converting file {} to PDF", userFileId, e);
-        return null;
+        return new HashSet<MultipartFile>();
       } finally {
         // Always delete the tmp file from disk, on success or error.
         tempFile.delete();
       }
     }).exceptionally(e -> {
       log.error("Error converting file {} to PDF", userFileId, e);
-      return null;
+      return new HashSet<>();
     });
 
     // Need this to be final, for the lambda below
@@ -367,7 +368,7 @@ public class FileController extends FormFlowController {
         return new RedirectView("/error");
       }
 
-      List<UserFile> convertedFiles = userFileRepositoryService.findAllBySubmissionAndConversionSourceFileId(submission, file.getFileId());
+      List<UserFile> convertedFiles = userFileRepositoryService.findAll(submission, file.getFileId());
       if (convertedFiles != null) {
         for (UserFile convertedFile : convertedFiles) {
           log.info("Delete convertedfile {} from cloud storage", convertedFile.getFileId());
