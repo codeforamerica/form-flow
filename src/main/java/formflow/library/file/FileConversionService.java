@@ -9,16 +9,25 @@ import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfWriter;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
@@ -40,20 +49,20 @@ public class FileConversionService {
     private String convertedSuffix;
 
     private final Map<MimeType, CONVERSION_TO_PDF_TYPE> MIME_TYPE_MAP = Map.ofEntries(
-        Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
-        Map.entry(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
-        Map.entry(MediaType.IMAGE_JPEG, CONVERSION_TO_PDF_TYPE.IMAGE),
-        Map.entry(new MimeType("image", "bmp"), CONVERSION_TO_PDF_TYPE.IMAGE),
-        Map.entry(new MimeType("application", "pdf"), CONVERSION_TO_PDF_TYPE.NONE),
-        Map.entry(new MimeType("application", "msword"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "x-tika-msoffice"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document"),
-                CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "x-tika-ooxml"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "vnd.oasis.opendocument.presentation"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
-        Map.entry(new MimeType("application", "zip"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT)
+            Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
+            Map.entry(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
+            Map.entry(MediaType.IMAGE_JPEG, CONVERSION_TO_PDF_TYPE.IMAGE),
+            Map.entry(new MimeType("image", "bmp"), CONVERSION_TO_PDF_TYPE.IMAGE),
+            Map.entry(new MimeType("application", "pdf"), CONVERSION_TO_PDF_TYPE.NONE),
+            Map.entry(new MimeType("application", "msword"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "x-tika-msoffice"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "vnd.openxmlformats-officedocument.wordprocessingml.document"),
+                    CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "x-tika-ooxml"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "vnd.oasis.opendocument.presentation"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "vnd.oasis.opendocument.spreadsheet"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
+            Map.entry(new MimeType("application", "zip"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT)
     );
 
     private enum CONVERSION_TO_PDF_TYPE {
@@ -62,11 +71,11 @@ public class FileConversionService {
 
     private final Tika tikaFileValidator;
 
-    private final FileValidationService validationService;
+    private final FileValidationService fileValidationService;
 
-    public FileConversionService(FileValidationService validationService) {
+    public FileConversionService(FileValidationService fileValidationService) {
         tikaFileValidator = new Tika();
-        this.validationService = validationService;
+        this.fileValidationService = fileValidationService;
     }
 
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
@@ -120,10 +129,32 @@ public class FileConversionService {
             document.close();
 
             // Convert byte array output stream to MultipartFile
-            MultipartFile convertedPDF = new MockMultipartFile("file", convertFileName(file.getOriginalFilename(), null), "application/pdf",
-                    new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            MultipartFile convertedPDF = createMultipartFile(file, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
 
             Set<MultipartFile> result = new HashSet<>();
+
+            if (fileValidationService.isTooLarge(convertedPDF)) {
+                log.info("Converted PDF is too large. Converted image is {} bytes.", convertedPDF.getSize());
+
+                for (float q = 0.80f; q >= 0.0f; q = q - 0.05f) {
+                    float compressionQuality = Math.round(q * 100) / 100.0f;
+                    log.info("Reducing image quality to {}", compressionQuality);
+
+                    // Convert byte array output stream to MultipartFile
+                    convertedPDF = createCompressedAndScaledImagePDF(file, compressionQuality);
+
+                    log.info("Compressed file size {}", convertedPDF.getSize());
+
+                    if (!fileValidationService.isTooLarge(convertedPDF)) {
+                        break;
+                    }
+                }
+            }
+
+            if (fileValidationService.isTooLarge(convertedPDF)) {
+                log.warn("Compressed image PDF is still too large.");
+            }
+
             result.add(convertedPDF);
             return result;
 
@@ -131,6 +162,68 @@ public class FileConversionService {
             log.error("Unable to convert Image to PDF", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private MultipartFile createCompressedAndScaledImagePDF(MultipartFile file, float compressionQuality) throws IOException {
+        byte[] compressedImage = compressAndScaleImage(file.getBytes(), compressionQuality);
+
+        Document document = new Document(PageSize.LETTER);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PdfWriter.getInstance(document, byteArrayOutputStream);
+
+        document.open();
+
+        // Read the image from MultipartFile
+        Image image = Image.getInstance(compressedImage);
+
+        // Scale image to fit the PDF page
+        image.scaleToFit(PageSize.LETTER.getWidth() - 50, PageSize.LETTER.getHeight() - 50);
+        image.setAlignment(Image.ALIGN_CENTER);
+
+        // Add image to PDF
+        document.add(image);
+
+        document.close();
+
+        // Convert byte array output stream to MultipartFile
+        return createMultipartFile(file, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+                "compression-" + compressionQuality);
+    }
+
+
+    private byte[] compressAndScaleImage(byte[] image, float quality) throws IOException {
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(image);
+        BufferedImage originalImage = ImageIO.read(byteArrayInputStream);
+
+        // Resize image
+        BufferedImage resizedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
+                BufferedImage.TYPE_BYTE_GRAY);
+        Graphics2D g2d = resizedImage.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2d.drawImage(originalImage, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
+        g2d.dispose();
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
+        ImageOutputStream ios = ImageIO.createImageOutputStream(byteArrayOutputStream);
+        writer.setOutput(ios);
+
+        // Set compression parameters
+        ImageWriteParam param = writer.getDefaultWriteParam();
+        if (param.canWriteCompressed()) {
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(quality);
+        }
+
+        // Write compressed image
+        writer.write(null, new IIOImage(resizedImage, null, null), param);
+        ios.close();
+        writer.dispose();
+
+        return byteArrayOutputStream.toByteArray();
     }
 
     private Set<MultipartFile> convertOfficeDocumentToPDF(MultipartFile file) {
@@ -144,7 +237,8 @@ public class FileConversionService {
             // Write to a temp file, so we can have a File from the original MultipartFile
             // OfficeLibre aka soffice requires a file on disk, not in memory
             String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null || originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
+            if (originalFilename == null || originalFilename.contains("..") || originalFilename.contains("/")
+                    || originalFilename.contains("\\")) {
                 throw new IllegalArgumentException("Unable to convert Office Document to PDF. Invalid filename.");
             }
 
@@ -187,7 +281,7 @@ public class FileConversionService {
             Set<MultipartFile> result = new HashSet<>();
 
             String convertedPDFPath;
-            if (validationService.isTooLarge(pdfFile)) {
+            if (fileValidationService.isTooLarge(pdfFile)) {
                 // If the converted PDF is too large, we can use OpenPDF to further compressed it. This isn't possible
                 // with LibreOffice, so it's another step and only needs to be done if the conversion increased the file
                 // size to an extreme
@@ -211,7 +305,7 @@ public class FileConversionService {
                 compressedPDFFile = new File(convertedPDFPath);
                 log.info("Compressed PDF is {} bytes.", compressedPDFFile.length());
 
-                if (validationService.isTooLarge(compressedPDFFile)) {
+                if (fileValidationService.isTooLarge(compressedPDFFile)) {
                     log.info("Compressed PDF is still too large. Trying to divide into multiple files.");
 
                     reader = new PdfReader(compressedPDFFile.getAbsolutePath());
@@ -231,9 +325,9 @@ public class FileConversionService {
                             writer.close();
 
                             File pdfPageFile = new File(outputFilePath);
-                            MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile,"page_" + i);
+                            MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile, "page_" + i);
 
-                            if (validationService.isTooLarge(convertedPDF)) {
+                            if (fileValidationService.isTooLarge(convertedPDF)) {
                                 // The compressed pdf page is too big, but there's nothing else to do, so we can save and upload
                                 // Clients should probably set up an alert based on this WARN!
                                 log.warn("Converted PDF page {} is too large at {} bytes", i, convertedPDF.getSize());
@@ -272,7 +366,7 @@ public class FileConversionService {
             throw new RuntimeException(e);
         } finally {
             // Clean up temporary files
-            for (File tempFile: tempFiles) {
+            for (File tempFile : tempFiles) {
                 if (tempFile != null && tempFile.exists()) {
                     tempFile.delete();
                 }
@@ -280,21 +374,30 @@ public class FileConversionService {
         }
     }
 
-    private MultipartFile createMultipartFile(MultipartFile file, File pdf, String page) throws IOException {
-        String convertedFileName = convertFileName(file.getOriginalFilename(), page);
+    private MultipartFile createMultipartFile(MultipartFile file, InputStream pdf, String suffix) throws IOException {
+        String convertedFileName = convertFileName(file.getOriginalFilename(), suffix);
         return new MockMultipartFile(convertedFileName, convertedFileName, "application/pdf",
-                new FileInputStream(pdf));
+                pdf);
     }
 
-    private MultipartFile createMultipartFile(MultipartFile file, File pdf) throws IOException {
+    private MultipartFile createMultipartFile(MultipartFile file, InputStream pdf) throws IOException {
         return createMultipartFile(file, pdf, null);
     }
 
-    private String convertFileName(String originalFilename, String page) {
+    private MultipartFile createMultipartFile(MultipartFile file, File pdf, String suffix) throws IOException {
+        return createMultipartFile(file, new FileInputStream(pdf), suffix);
+    }
+
+    private MultipartFile createMultipartFile(MultipartFile file, File pdf) throws IOException {
+        return createMultipartFile(file, new FileInputStream(pdf), null);
+    }
+
+    private String convertFileName(String originalFilename, String suffix) {
         String fileExtension = Files.getFileExtension(originalFilename);
         fileExtension = !fileExtension.isEmpty() ? "-" + fileExtension.toLowerCase() : "";
-        fileExtension = page != null ? fileExtension + "-" + page : fileExtension;
+        fileExtension = suffix != null ? fileExtension + "-" + suffix : fileExtension;
 
-        return convertedPrefix + Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + fileExtension  + convertedSuffix + ".pdf";
+        return convertedPrefix + Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + fileExtension
+                + convertedSuffix + ".pdf";
     }
 }
