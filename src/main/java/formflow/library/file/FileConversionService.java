@@ -84,7 +84,7 @@ public class FileConversionService {
 
             if (MIME_TYPE_MAP.get(fileMimeType) == null) {
                 log.error("Unable to convert Mime Type to PDF {}", fileMimeType);
-                return null;
+                return new HashSet<>();
             }
 
             return switch (MIME_TYPE_MAP.get(fileMimeType)) {
