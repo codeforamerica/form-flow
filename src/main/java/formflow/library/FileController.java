@@ -12,16 +12,26 @@ import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
+import formflow.library.file.FileConversionService;
 import formflow.library.file.FileValidationService;
 import formflow.library.file.FileVirusScanner;
 import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -30,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,12 +53,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -57,14 +62,18 @@ public class FileController extends FormFlowController {
   private final Boolean blockIfClammitUnreachable;
   private final FileVirusScanner fileVirusScanner;
   private final FileValidationService fileValidationService;
+  private final FileConversionService fileConversionService;
   private final String SESSION_USERFILES_KEY = "userFiles";
   private final Integer maxFiles;
 
-  @Value("${form-flow.uploads.default-doc-type-label:#{null}}")
+  @Value("${form-flow.uploads.default-doc-type-label:}")
   private String defaultDocType;
 
   @Value("${form-flow.uploads.virus-scanning.enabled:false}")
   private boolean isVirusScanningEnabled;
+
+  @Value("${form-flow.uploads.file-conversion.convert-to-pdf:false}")
+  private boolean convertUploadToPDF;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -77,12 +86,14 @@ public class FileController extends FormFlowController {
       FormFlowConfigurationProperties formFlowConfigurationProperties,
       MessageSource messageSource,
       FileValidationService fileValidationService,
+      FileConversionService fileConversionService,
       @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
       @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable) {
     super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
         messageSource);
     this.cloudFileRepository = cloudFileRepository;
     this.fileValidationService = fileValidationService;
+    this.fileConversionService = fileConversionService;
     this.maxFiles = maxFiles;
     this.fileVirusScanner = fileVirusScanner;
     this.blockIfClammitUnreachable = blockIfClammitUnreachable;
@@ -126,7 +137,6 @@ public class FileController extends FormFlowController {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
       
-      UUID userFileId = UUID.randomUUID();
       if (submission.getId() == null) {
         submission.setFlow(flow);
         submission = saveToRepository(submission);
@@ -175,16 +185,19 @@ public class FileController extends FormFlowController {
         }
       }
 
-      if (userFileRepositoryService.countBySubmission(submission) >= maxFiles) {
+      if (userFileRepositoryService.countOfUploadedFilesBySubmission(submission) >= maxFiles) {
         String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, locale);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
       }
+
+      UUID userFileId = UUID.randomUUID();
       String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
           fileExtension);
 
       cloudFileRepository.upload(uploadLocation, file);
 
       UserFile uploadedFile = UserFile.builder()
+          .fileId(userFileId)
           .submission(submission)
           .originalName(file.getOriginalFilename())
           .repositoryPath(uploadLocation)
@@ -208,6 +221,10 @@ public class FileController extends FormFlowController {
       userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
       httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
 
+      if (convertUploadToPDF) {
+        convertUploadedFileToPDF(file, flow, inputName, userFileId, submission);
+      }
+
       return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(uploadedFile.getFileId().toString());
     } catch (Exception e) {
       if (e instanceof ResponseStatusException) {
@@ -216,6 +233,85 @@ public class FileController extends FormFlowController {
       log.error("Error occurred while uploading file: " + e.getLocalizedMessage());
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, locale);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  private void convertUploadedFileToPDF(MultipartFile file, String flow, String inputName, UUID userFileId, Submission submission)
+          throws IOException {
+    log.info("Converting upload {} to PDF", userFileId);
+    // To be able to do safely across threads and asynchronously with potentially large files
+    // we need to save the uploaded multipart file to a temp file on disk.
+    File tempFile = File.createTempFile("upload_", ".tmp");
+    file.transferTo(tempFile);
+
+    CompletableFuture<Set<MultipartFile>> fileConversion = CompletableFuture.supplyAsync(() -> {
+      try {
+        // Now we can read the temp file version of the uploaded file off the disk
+        // and recreate the Multipart File for conversion.
+        byte[] fileContent = java.nio.file.Files.readAllBytes(tempFile.toPath());
+        MultipartFile multipartFile = new MockMultipartFile(
+                file.getName(),
+                file.getOriginalFilename(),
+                file.getContentType(),
+                fileContent
+        );
+        return fileConversionService.convertFileToPDF(multipartFile);
+      } catch (Exception e) {
+        log.error("Error converting file {} to PDF", userFileId, e);
+        return new HashSet<MultipartFile>();
+      } finally {
+        // Always delete the tmp file from disk, on success or error.
+        tempFile.delete();
+      }
+    });
+
+    // Need this to be final, for the lambda below
+    final Submission finalSubmission = submission;
+
+    fileConversion.thenAccept(convertedMultipartFiles -> {
+      // We've waited around for the original conversion call to complete and return from its thread,
+      // and now we can save and upload the file(s), if the original was converted.
+      if (convertedMultipartFiles != null && !convertedMultipartFiles.isEmpty()) {
+        log.info("File {} was converted into {} new PDF files.", userFileId, convertedMultipartFiles.size());
+        for (MultipartFile convertedMultipartFile : convertedMultipartFiles) {
+          uploadConvertedPdf(convertedMultipartFile, userFileId, finalSubmission, flow, inputName);
+        }
+      } else {
+        log.info("No conversion of upload {} to PDF", userFileId);
+      }
+    });
+
+  }
+
+  private void uploadConvertedPdf(MultipartFile convertedMultipartFile, UUID originalUserFileId, Submission submission, String flow, String inputName) {
+    log.info("Successfully converted upload {} to PDF, saving to repository", originalUserFileId);
+    String convertedFileExtension = Files.getFileExtension(
+            Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
+    UUID convertedUserFileId = UUID.randomUUID();
+    String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName,
+            convertedUserFileId,
+            convertedFileExtension);
+
+    try {
+      cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
+
+      UserFile uploadedConvertedFile = UserFile.builder()
+              .fileId(convertedUserFileId)
+              .submission(submission)
+              .originalName(convertedMultipartFile.getOriginalFilename())
+              .repositoryPath(convertedFileUploadLocation)
+              .filesize((float) convertedMultipartFile.getSize())
+              .mimeType(convertedMultipartFile.getContentType())
+              .virusScanned(true)
+              .docTypeLabel(defaultDocType)
+              .conversionSourceFileId(originalUserFileId)
+              .build();
+
+      uploadedConvertedFile = userFileRepositoryService.save(uploadedConvertedFile);
+      log.info("Created new converted file with id {} from original {}", uploadedConvertedFile.getFileId(), originalUserFileId);
+    } catch (IOException | InterruptedException e) {
+      log.error("Unable to create and upload converted file with id {} from original {}", convertedUserFileId,
+              originalUserFileId);
     }
   }
 
@@ -262,6 +358,15 @@ public class FileController extends FormFlowController {
                 fileId,
                 file.getSubmission().getId()));
         return new RedirectView("/error");
+      }
+
+      List<UserFile> convertedFiles = userFileRepositoryService.findAll(submission, file.getFileId());
+      if (convertedFiles != null) {
+        for (UserFile convertedFile : convertedFiles) {
+          log.info("Delete convertedfile {} from cloud storage", convertedFile.getFileId());
+          cloudFileRepository.delete(convertedFile.getRepositoryPath());
+          userFileRepositoryService.deleteById(convertedFile.getFileId());
+        }
       }
 
       log.info("Delete file {} from cloud storage", fileId);

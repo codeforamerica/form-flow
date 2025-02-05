@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 public class UserFile {
 
   @Id
-  @GeneratedValue
   private UUID fileId;
 
   @ManyToOne
@@ -68,6 +67,9 @@ public class UserFile {
 
   @Column(name = "doc_type_label")
   private String docTypeLabel;
+
+  @Column(name = "conversion_source_file_id")
+  private UUID conversionSourceFileId;
 
   @Override
   public boolean equals(Object o) {
