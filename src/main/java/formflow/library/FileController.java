@@ -256,16 +256,13 @@ public class FileController extends FormFlowController {
                 fileContent
         );
         return fileConversionService.convertFileToPDF(multipartFile);
-      } catch (IOException e) {
+      } catch (Exception e) {
         log.error("Error converting file {} to PDF", userFileId, e);
         return new HashSet<MultipartFile>();
       } finally {
         // Always delete the tmp file from disk, on success or error.
         tempFile.delete();
       }
-    }).exceptionally(e -> {
-      log.error("Error converting file {} to PDF", userFileId, e);
-      return new HashSet<>();
     });
 
     // Need this to be final, for the lambda below
@@ -275,14 +272,9 @@ public class FileController extends FormFlowController {
       // We've waited around for the original conversion call to complete and return from its thread,
       // and now we can save and upload the file(s), if the original was converted.
       if (convertedMultipartFiles != null && !convertedMultipartFiles.isEmpty()) {
-
-        if (convertedMultipartFiles.size() == 1) {
-          uploadConvertedPdf(convertedMultipartFiles.iterator().next(), userFileId, finalSubmission, flow, inputName);
-        } else {
-          log.info("File {} was converted into {} new PDF files.", userFileId, convertedMultipartFiles.size());
-          for (MultipartFile convertedMultipartFile : convertedMultipartFiles) {
-            uploadConvertedPdf(convertedMultipartFile, userFileId, finalSubmission, flow, inputName);
-          }
+        log.info("File {} was converted into {} new PDF files.", userFileId, convertedMultipartFiles.size());
+        for (MultipartFile convertedMultipartFile : convertedMultipartFiles) {
+          uploadConvertedPdf(convertedMultipartFile, userFileId, finalSubmission, flow, inputName);
         }
       } else {
         log.info("No conversion of upload {} to PDF", userFileId);
