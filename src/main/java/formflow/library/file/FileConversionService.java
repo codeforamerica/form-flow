@@ -48,8 +48,8 @@ public class FileConversionService {
     @Value("${form-flow.uploads.file-conversion.suffix:}")
     private String convertedSuffix;
 
-    @Value("${form-flow.uploads.max-transfer-size:}")
-    private Integer maxTransferSize;
+    @Value("${form-flow.uploads.file-conversion.max-conversion-size:}")
+    private Integer maxConversionSize;
 
     @Value("${form-flow.uploads.max-file-size}")
     Integer maxFileSize;
@@ -80,7 +80,7 @@ public class FileConversionService {
     public FileConversionService() {
         tikaFileValidator = new Tika();
 
-        maxTransferSize = maxTransferSize == null ? maxFileSize : maxTransferSize;
+        maxConversionSize = maxConversionSize == null ? maxFileSize : maxConversionSize;
     }
 
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
@@ -407,10 +407,10 @@ public class FileConversionService {
     }
 
     public boolean isTooLarge(MultipartFile file) {
-        return file.getSize() > (maxTransferSize * FileValidationService.MB_IN_BYTES);
+        return file.getSize() > (maxConversionSize * FileValidationService.MB_IN_BYTES);
     }
 
     public boolean isTooLarge(File file) {
-        return file.length() > (maxTransferSize * FileValidationService.MB_IN_BYTES);
+        return file.length() > (maxConversionSize * FileValidationService.MB_IN_BYTES);
     }
 }
