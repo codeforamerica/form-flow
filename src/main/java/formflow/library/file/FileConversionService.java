@@ -48,6 +48,12 @@ public class FileConversionService {
     @Value("${form-flow.uploads.file-conversion.suffix:}")
     private String convertedSuffix;
 
+    @Value("${form-flow.uploads.max-transfer-size:}")
+    private Integer maxTransferSize;
+
+    @Value("${form-flow.uploads.max-file-size}")
+    Integer maxFileSize;
+
     private final Map<MimeType, CONVERSION_TO_PDF_TYPE> MIME_TYPE_MAP = Map.ofEntries(
             Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
             Map.entry(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
@@ -71,12 +77,10 @@ public class FileConversionService {
 
     private final Tika tikaFileValidator;
 
-    private final long maxTransferSize;
-
-    public FileConversionService(
-            @Value("${form-flow.uploads.max-transfer-size}") Integer maxTransferSize) {
+    public FileConversionService() {
         tikaFileValidator = new Tika();
-        this.maxTransferSize = maxTransferSize;
+
+        maxTransferSize = maxTransferSize == null ? maxFileSize : maxTransferSize;
     }
 
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
