@@ -74,7 +74,7 @@ public class FileConversionService {
     private final long maxFileSize;
 
     public FileConversionService(@Value("${form-flow.uploads.max-file-size}") Integer maxFileSize,
-            @Value("${form-flow.uploads.max-transfer-size}") Integer maxTransferSize) {
+            @Value("${form-flow.uploads.max-transfer-size:null}") Integer maxTransferSize) {
         tikaFileValidator = new Tika();
         this.maxFileSize = maxTransferSize == null ? maxFileSize : maxTransferSize;
     }
