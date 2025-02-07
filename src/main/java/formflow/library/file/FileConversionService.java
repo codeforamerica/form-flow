@@ -48,6 +48,12 @@ public class FileConversionService {
     @Value("${form-flow.uploads.file-conversion.suffix:}")
     private String convertedSuffix;
 
+    @Value("${form-flow.uploads.file-conversion.max-conversion-size:}")
+    private Integer maxConversionSize;
+
+    @Value("${form-flow.uploads.max-file-size}")
+    Integer maxFileSize;
+
     private final Map<MimeType, CONVERSION_TO_PDF_TYPE> MIME_TYPE_MAP = Map.ofEntries(
             Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
             Map.entry(MediaType.IMAGE_PNG, CONVERSION_TO_PDF_TYPE.IMAGE),
@@ -71,11 +77,10 @@ public class FileConversionService {
 
     private final Tika tikaFileValidator;
 
-    private final FileValidationService fileValidationService;
-
-    public FileConversionService(FileValidationService fileValidationService) {
+    public FileConversionService() {
         tikaFileValidator = new Tika();
-        this.fileValidationService = fileValidationService;
+
+        maxConversionSize = maxConversionSize == null ? maxFileSize : maxConversionSize;
     }
 
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
@@ -133,7 +138,7 @@ public class FileConversionService {
 
             Set<MultipartFile> result = new HashSet<>();
 
-            if (fileValidationService.isTooLarge(convertedPDF)) {
+            if (isTooLarge(convertedPDF)) {
                 log.info("Converted PDF is too large. Converted image is {} bytes.", convertedPDF.getSize());
 
                 for (float q = 0.80f; q >= 0.0f; q = q - 0.05f) {
@@ -145,13 +150,13 @@ public class FileConversionService {
 
                     log.info("Compressed file size {}", convertedPDF.getSize());
 
-                    if (!fileValidationService.isTooLarge(convertedPDF)) {
+                    if (!isTooLarge(convertedPDF)) {
                         break;
                     }
                 }
             }
 
-            if (fileValidationService.isTooLarge(convertedPDF)) {
+            if (isTooLarge(convertedPDF)) {
                 log.warn("Compressed image PDF is still too large.");
             }
 
@@ -281,7 +286,7 @@ public class FileConversionService {
             Set<MultipartFile> result = new HashSet<>();
 
             String convertedPDFPath;
-            if (fileValidationService.isTooLarge(pdfFile)) {
+            if (isTooLarge(pdfFile)) {
                 // If the converted PDF is too large, we can use OpenPDF to further compressed it. This isn't possible
                 // with LibreOffice, so it's another step and only needs to be done if the conversion increased the file
                 // size to an extreme
@@ -305,7 +310,7 @@ public class FileConversionService {
                 compressedPDFFile = new File(convertedPDFPath);
                 log.info("Compressed PDF is {} bytes.", compressedPDFFile.length());
 
-                if (fileValidationService.isTooLarge(compressedPDFFile)) {
+                if (isTooLarge(compressedPDFFile)) {
                     log.info("Compressed PDF is still too large. Trying to divide into multiple files.");
 
                     reader = new PdfReader(compressedPDFFile.getAbsolutePath());
@@ -327,7 +332,7 @@ public class FileConversionService {
                             File pdfPageFile = new File(outputFilePath);
                             MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile, "page_" + i);
 
-                            if (fileValidationService.isTooLarge(convertedPDF)) {
+                            if (isTooLarge(convertedPDF)) {
                                 // The compressed pdf page is too big, but there's nothing else to do, so we can save and upload
                                 // Clients should probably set up an alert based on this WARN!
                                 log.warn("Converted PDF page {} is too large at {} bytes", i, convertedPDF.getSize());
@@ -399,5 +404,13 @@ public class FileConversionService {
 
         return convertedPrefix + Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + fileExtension
                 + convertedSuffix + ".pdf";
+    }
+
+    public boolean isTooLarge(MultipartFile file) {
+        return file.getSize() > (maxConversionSize * FileValidationService.MB_IN_BYTES);
+    }
+
+    public boolean isTooLarge(File file) {
+        return file.length() > (maxConversionSize * FileValidationService.MB_IN_BYTES);
     }
 }
