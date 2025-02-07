@@ -6,6 +6,7 @@ form-flow:
     accepted-file-types: '.jpeg, .fake, .heic, .tif, .tiff, .pdf'
     max-files: '5'
     max-file-size: '17'
+    max-transfer-size: '10'
     thumbnail-width: '100'
     thumbnail-height: '50'
     virus-scanning:
