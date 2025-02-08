@@ -79,8 +79,6 @@ public class FileConversionService {
 
     public FileConversionService() {
         tikaFileValidator = new Tika();
-
-        maxConversionSize = maxConversionSize == null ? maxFileSize : maxConversionSize;
     }
 
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
@@ -318,7 +316,6 @@ public class FileConversionService {
                     if (totalPages > 1) {
                         for (int i = 1; i <= totalPages; i++) {
                             String outputFilePath = compressedPDFFile.getAbsolutePath() + "_page_" + i + ".pdf";
-                            log.info(outputFilePath);
                             Document document = new Document();
                             PdfCopy writer = new PdfCopy(document, new FileOutputStream(outputFilePath));
                             document.open();
@@ -406,11 +403,18 @@ public class FileConversionService {
                 + convertedSuffix + ".pdf";
     }
 
-    public boolean isTooLarge(MultipartFile file) {
-        return file.getSize() > (maxConversionSize * FileValidationService.MB_IN_BYTES);
+    private boolean isTooLarge(MultipartFile file) {
+        return file.getSize() > (getMaxConversionSize() * FileValidationService.MB_IN_BYTES);
     }
 
-    public boolean isTooLarge(File file) {
-        return file.length() > (maxConversionSize * FileValidationService.MB_IN_BYTES);
+    private boolean isTooLarge(File file) {
+        return file.length() > (getMaxConversionSize() * FileValidationService.MB_IN_BYTES);
+    }
+
+    private Integer getMaxConversionSize() {
+        if (maxConversionSize == null) {
+            maxConversionSize = maxFileSize;
+        }
+        return maxConversionSize;
     }
 }
