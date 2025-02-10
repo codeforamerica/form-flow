@@ -51,6 +51,9 @@ public class FileConversionService {
     @Value("${form-flow.uploads.file-conversion.max-conversion-size:}")
     private Integer maxConversionSize;
 
+    @Value("${form-flow.uploads.file-conversion.max-pages:}")
+    private Integer maxPages;
+
     @Value("${form-flow.uploads.max-file-size}")
     Integer maxFileSize;
 
@@ -313,6 +316,12 @@ public class FileConversionService {
 
                     reader = new PdfReader(compressedPDFFile.getAbsolutePath());
                     int totalPages = reader.getNumberOfPages();
+
+                    if (maxPages != null && totalPages > maxPages) {
+                        log.warn("Too many pages found for PDF conversion. Only converting {} of {} pages.", maxPages, totalPages);
+                        totalPages = maxPages;
+                    }
+
                     if (totalPages > 1) {
                         for (int i = 1; i <= totalPages; i++) {
                             String outputFilePath = compressedPDFFile.getAbsolutePath() + "_page_" + i + ".pdf";
