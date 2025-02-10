@@ -324,7 +324,8 @@ public class FileConversionService {
 
                     if (totalPages > 1) {
                         for (int i = 1; i <= totalPages; i++) {
-                            String outputFilePath = compressedPDFFile.getAbsolutePath() + "_page_" + i + ".pdf";
+                            String pageNumber = String.format("%02d", i); // Pads single digits with a 0, so 7 --> 07
+                            String outputFilePath = compressedPDFFile.getAbsolutePath() + "_page_" + pageNumber + ".pdf";
                             Document document = new Document();
                             PdfCopy writer = new PdfCopy(document, new FileOutputStream(outputFilePath));
                             document.open();
@@ -336,7 +337,7 @@ public class FileConversionService {
                             writer.close();
 
                             File pdfPageFile = new File(outputFilePath);
-                            MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile, "page_" + i);
+                            MultipartFile convertedPDF = createMultipartFile(file, pdfPageFile, "page_" + pageNumber);
 
                             if (isTooLarge(convertedPDF)) {
                                 // The compressed pdf page is too big, but there's nothing else to do, so we can save and upload
