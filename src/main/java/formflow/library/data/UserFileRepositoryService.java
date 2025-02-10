@@ -97,7 +97,7 @@ public class UserFileRepositoryService {
      * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
      * @return {@link List} of associated {@link UserFile} objects
      */
-    public List<UserFile> findAllOrderedByOriginalName(Submission submission) {
+    public List<UserFile> findAllOrderByOriginalName(Submission submission) {
         return repository.findAllBySubmissionOrderByOriginalName(submission);
     }
 
@@ -105,7 +105,7 @@ public class UserFileRepositoryService {
      * Finds all the {@link UserFile}s associated with a {@link Submission}} ordered by the OriginalName field
      *
      * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
-     * @param mimeType 
+     * @param mimeType
      * @return {@link List} of associated {@link UserFile} objects
      */
     public List<UserFile> findAllOrderByOriginalName(Submission submission, String mimeType) {
