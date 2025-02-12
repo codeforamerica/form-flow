@@ -100,7 +100,7 @@ public class FileConversionService {
                 }
                 case OFFICE_DOCUMENT -> {
                     log.info("Converting document of type {} to PDF", fileMimeType);
-                    yield convertOfficeDocumentToPDF(file);
+                    yield convertOfficeDocumentToPDF(file, 0);
                 }
                 default -> {
                     log.info("Skipping converting file of type {} to PDF", fileMimeType);
@@ -152,6 +152,7 @@ public class FileConversionService {
                     log.info("Compressed file size {}", convertedPDF.getSize());
 
                     if (!isTooLarge(convertedPDF)) {
+                        log.info("Successfully converted image to PDF with file size: {}", convertedPDF.getSize());
                         break;
                     }
                 }
@@ -232,7 +233,7 @@ public class FileConversionService {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private Set<MultipartFile> convertOfficeDocumentToPDF(MultipartFile file) {
+    private Set<MultipartFile> convertOfficeDocumentToPDF(MultipartFile file, int numberOfRetries) {
         File inputFile;
         File pdfFile;
         File compressedPDFFile;
@@ -274,13 +275,12 @@ public class FileConversionService {
             // Read the converted PDF from disk
             pdfFile = new File(outputPdfPath);
             if (!pdfFile.exists()) {
-                if (exitCode != 0) {
-                    throw new RuntimeException("PDF conversion failed. Unable to find PDF file " + pdfFile.getAbsolutePath());
+                if (numberOfRetries < 10) {
+                    numberOfRetries++;
+                    log.warn("Unable to find PDF file {} with exit code: {}, will retry with attempt {}", pdfFile.getAbsolutePath(), exitCode, numberOfRetries);
+                    return convertOfficeDocumentToPDF(file, numberOfRetries);
                 } else {
-                    // There is a race condition where soffice will say everything is great, but it's not great and there's no
-                    // converted file. We can retry in this situation.
-                    log.warn("Unable to find PDF file {}, will retry.", pdfFile.getAbsolutePath());
-                    return convertOfficeDocumentToPDF(file);
+                    throw new RuntimeException("PDF conversion failed. Unable to find PDF file " + pdfFile.getAbsolutePath() + " after  " + numberOfRetries + " retries. Final exit code: " + exitCode);
                 }
             }
 
