@@ -81,7 +81,7 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.364'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.18.4'
     implementation 'com.github.librepdf:openpdf:2.0.3'
-    implementation 'org.yaml:snakeyaml:2.3'
+    implementation 'org.yaml:snakeyaml:2.4'
     implementation 'com.mailgun:mailgun-java:1.1.4'
     implementation 'com.google.crypto.tink:tink:1.16.0'
     implementation 'org.springframework.session:spring-session-jdbc'
