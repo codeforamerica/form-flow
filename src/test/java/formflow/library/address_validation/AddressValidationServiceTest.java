@@ -45,7 +45,7 @@ class AddressValidationServiceTest {
         authId,
         authToken,
         license,
-        false);
+        true);
     Lookup lookup = mock(Lookup.class);
     Candidate candidate = mock(Candidate.class);
     Components components = mock(Components.class);
@@ -94,7 +94,7 @@ class AddressValidationServiceTest {
         authId,
         authToken,
         license,
-        false);
+        true);
     Lookup lookup = mock(Lookup.class);
 
     Batch batch = new Batch();
@@ -117,7 +117,7 @@ class AddressValidationServiceTest {
         authId,
         authToken,
         license,
-        true);
+        false);
     FormSubmission formSubmission = new FormSubmission(Map.of());
     assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of());
   }
