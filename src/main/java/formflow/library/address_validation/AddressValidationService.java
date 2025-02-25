@@ -23,7 +23,7 @@ public class AddressValidationService {
   private final String authId;
   private final String authToken;
   private final String license;
-  private final boolean isDisabled;
+  private final boolean isEnabled;
 
   /**
    * Constructs an AddressValidationService with dependencies and configuration properties.
@@ -33,7 +33,7 @@ public class AddressValidationService {
    * @param authId                   The authentication ID for the SmartyStreets API.
    * @param authToken                The authentication token for the SmartyStreets API.
    * @param license                  The license key for the SmartyStreets API.
-   * @param isDisabled               Application property indicating if address validation is disabled.
+   * @param isEnabled               Application property indicating if address validation is enabled.
    */
   public AddressValidationService(
       ValidationRequestFactory validationRequestFactory,
@@ -41,13 +41,13 @@ public class AddressValidationService {
       @Value("${form-flow.address-validation.smarty.auth-id:}") String authId,
       @Value("${form-flow.address-validation.smarty.auth-token:}") String authToken,
       @Value("${form-flow.address-validation.smarty.license:}") String license,
-      @Value("${form-flow.address-validation.disabled:false}") boolean isDisabled) {
+      @Value("${form-flow.address-validation.enabled:true}") boolean isEnabled) {
     this.validationRequestFactory = validationRequestFactory;
     this.clientFactory = clientFactory;
     this.authId = authId;
     this.authToken = authToken;
     this.license = license;
-    this.isDisabled = isDisabled;
+    this.isEnabled = isEnabled;
   }
 
   /**
@@ -63,7 +63,7 @@ public class AddressValidationService {
   public Map<String, ValidatedAddress> validate(FormSubmission formSubmission)
       throws SmartyException, IOException, InterruptedException {
 
-    if (isDisabled) {
+    if (!isEnabled) {
       return Map.of();
     }
     Batch smartyBatch = validationRequestFactory.create(formSubmission);
