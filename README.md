@@ -1997,7 +1997,7 @@ can add the following to your `application.yaml` file:
 
 ```yaml
   address-validation:
-    disabled: true
+    enabled: false
 ```
 
 This will globally disable address validation for all address fields in your application.
