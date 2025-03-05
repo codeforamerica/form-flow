@@ -15,7 +15,7 @@ class SSNValidatorTest {
     @Autowired
     private SSNValidator ssnValidator;
 
-    //valid SSNs do not begin with 000, 666, or 900-999, do not have 00 in the group position (middle two digits), or end in 0000.”
+    // valid SSNs do not begin with 000, 666, or 900-999, do not have 00 in the group position (middle two digits), or end in 0000
     @ValueSource(strings = {"123-12-1234", "782-98-5200", "665-01-0001", "899-10-0030"})
     @ParameterizedTest
     void validSSNShouldReturnTrue(String value) {
