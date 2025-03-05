@@ -877,6 +877,53 @@ Does not accept values such as:
 "der"
 ```
 
+#### @SSN
+
+```java
+
+@SSN(message = "Make sure the SSN is valid and 9 digits")
+private String socialSecurityNumber;
+```
+
+Used to validate social security numbers. By default, this is based on the government's rules that the
+value, in ###-##-#### format:
+
+* does not begin with 000, 666, or 900-999
+* does not have 00 in the middle group
+* does not end with 0000
+
+It would accept:
+
+```
+123-12-1234
+782-98-5200
+665-01-0001
+899-10-0030
+```
+
+Does not accept values such as:
+
+```
+111-11
+AB1-123-1234
+000-12-1234
+666-98-5200
+900-01-0001
+934-10-0030
+123-00-0030
+123-10-000
+```
+
+This value can be changed in the yaml using the following property:
+
+``` yaml
+form-flow:
+  validation:
+    ssn-pattern: "\\d{3}-\\d{2}-\\d{4}"
+```
+
+The above example would make the validation less strict, where any ###-##-#### would pass validation.
+
 ### Marker Annotations
 
 Marker annotations are used to mark a field for certain functionality. These annotations may or may
