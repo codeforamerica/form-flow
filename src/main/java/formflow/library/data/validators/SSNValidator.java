@@ -4,7 +4,6 @@ import formflow.library.data.annotations.SSN;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
  * does not end with 0000
  */
 @Component
-@Slf4j
 public class SSNValidator implements ConstraintValidator<SSN, String> {
 
     @Value("${form-flow.validation.ssn-pattern:^(?!000|666|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}$}")
@@ -34,8 +32,6 @@ public class SSNValidator implements ConstraintValidator<SSN, String> {
      */
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        log.info(value + " " + pattern);
-
         if (value != null && !value.isBlank()) {
             return Pattern.matches(pattern, value);
         }
