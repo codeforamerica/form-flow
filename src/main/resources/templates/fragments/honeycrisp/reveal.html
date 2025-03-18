@@ -1,17 +1,26 @@
 <th:block
-    th:fragment="reveal"
-    th:with="controlId=${controlId == null ? 'r1' : controlId}, forceShowContent=${forceShowContent == null ? '' : 'force-show-content'}"
-    th:assert="
+        th:fragment="reveal"
+        th:with="controlId=${controlId == null ? 'r1' : controlId}, forceShowContent=${#bools.isTrue(forceShowContent)}"
+        th:assert="
       ${!#strings.isEmpty(linkLabel)},
       ${!#strings.isEmpty(content)}">
-  <div class="reveal reveal-adjacent reveal__border" th:classappend="${forceShowContent}">
-    <button class="reveal__button reveal__link__header-adjacent" aria-expanded="false"
-       aria-controls="reveal-content">
-      <th:block th:replace="${linkLabel}"></th:block>
-    </button>
-    <div class="reveal__content reveal__content-adjacent" id="controlId">
-      <th:block th:replace="${content}"/>
+    <div th:class="'reveal reveal-adjacent reveal__border reveal-class-control' + (${forceShowContent} ? ' force-show-content' : '')">
+        <button class="reveal__button reveal__link__header-adjacent" aria-expanded="false"
+                aria-controls="reveal-content">
+            <th:block th:replace="${linkLabel}"></th:block>
+        </button>
+        <div class="reveal__content reveal__content-adjacent" id="controlId">
+            <th:block th:replace="${content}"/>
+        </div>
     </div>
-  </div>
-
+    <script th:inline="javascript">
+      window.onload = function () {
+        document.querySelectorAll(".reveal-class-control").forEach(element => {
+          if (element.classList.contains('force-show-content')) {
+            element.classList.remove("is-hiding-content");
+            element.setAttribute("aria-expanded", "true");
+          }
+        });
+      }
+    </script>
 </th:block>
