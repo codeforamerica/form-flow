@@ -107,7 +107,7 @@ dependencies {
     // aws-java-sdk-s3 uses version httpclient:4.5.13, so if we see any differences in testing going forward
     // we should take a look at this dependency and see if it's really testing things correctly and
     // monitor the dependencies.
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.3'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:6.0.0'
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
