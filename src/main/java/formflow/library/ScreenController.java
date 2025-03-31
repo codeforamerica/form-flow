@@ -753,12 +753,12 @@ public class ScreenController extends FormFlowController {
     List<NextScreen> nextScreens = getConditionalNextScreen(currentScreen, submission, subflowUuid);
 
     if (isConditionalNavigation(currentScreen) && !nextScreens.isEmpty()) {
-      nextScreen = nextScreens.get(0);
+      nextScreen = nextScreens.getFirst();
     } else {
       nextScreen = getNonConditionalNextScreen(currentScreen);
     }
 
-    log.info("getNextScreenName: currentScreen:" + currentScreen + ", nextScreen: " + nextScreen.getName());
+    log.info("getNextScreenName: currentScreen: " + currentScreen + ", nextScreen: " + nextScreen.getName());
     return nextScreen.getName();
   }
 
