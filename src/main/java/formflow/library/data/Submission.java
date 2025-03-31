@@ -26,7 +26,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
@@ -64,11 +63,11 @@ public class Submission {
   @Column(name = "url_params", columnDefinition = "jsonb")
   private Map<String, String> urlParams;
 
-  @CreationTimestamp(source = SourceType.DB)
-  @Column(name = "created_at")
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false)
   private OffsetDateTime createdAt;
 
-  @UpdateTimestamp(source = SourceType.DB)
+  @UpdateTimestamp
   @Column(name = "updated_at")
   private OffsetDateTime updatedAt;
 
