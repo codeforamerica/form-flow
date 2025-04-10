@@ -68,7 +68,7 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
       if (parsedUrl.get("screen").equals(firstScreen)) {
         return true;
       }
-      log.error("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
+      log.debug("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
       response.sendRedirect(REDIRECT_URL);
       return false;
     }
