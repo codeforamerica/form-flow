@@ -63,7 +63,7 @@ public class S3CloudFileRepository implements CloudFileRepository {
         try {
             log.info("Inside the S3 File Repository Upload Call");
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(file.getOriginalFilename())
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(filePath)
                     .contentType(file.getContentType()).contentLength(file.getSize()).build();
 
             InputStream inputStream = file.getInputStream();
