@@ -406,7 +406,11 @@
       },
       error: function (file, errorMessage, xhr) {
         if (xhr && xhr.response) {
-          file.previewElement.getElementsByClassName("text--error")[0].innerText = xhr.response;
+          if (xhr.status === 403) {
+            file.previewElement.getElementsByClassName("text--error")[0].innerText = [[#{upload-documents.error-unauthorized}]];
+          } else {
+            file.previewElement.getElementsByClassName("text--error")[0].innerText = xhr.response;
+          }
         } else {
           var message = errorMessage.error ? errorMessage.error : errorMessage;
           file.previewElement.getElementsByClassName("text--error")[0].innerText = message;
