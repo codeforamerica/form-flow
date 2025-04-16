@@ -58,7 +58,8 @@ public class PdfController extends FormFlowController {
     }
 
     Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
-    if (getSubmissionIdForFlow(httpSession, flow).toString().equals(submissionId) && maybeSubmission.isPresent()) {
+    UUID submissionIdForFlow = getSubmissionIdForFlow(httpSession, flow);
+    if (submissionIdForFlow != null && submissionIdForFlow.toString().equals(submissionId) && maybeSubmission.isPresent()) {
       log.info("Downloading PDF with submission_id: " + submissionId);
       Submission submission = maybeSubmission.get();
       HttpHeaders headers = new HttpHeaders();
@@ -72,7 +73,7 @@ public class PdfController extends FormFlowController {
           .headers(headers)
           .body(data);
     } else {
-      log.error(
+      log.warn(
           "Attempted to download PDF with submission_id: " + submissionId + " but session_id was: "
               + httpSession.getAttribute(
               "id"));

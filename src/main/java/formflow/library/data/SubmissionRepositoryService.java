@@ -1,15 +1,14 @@
 package formflow.library.data;
 
 import formflow.library.config.submission.ShortCodeConfig;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service to retrieve and store {@link formflow.library.data.Submission} objects in the database.
@@ -117,7 +116,7 @@ public class SubmissionRepositoryService {
     public synchronized void generateAndSetUniqueShortCode(Submission submission) {
 
         if (submission.getShortCode() != null) {
-            log.warn("Unable to create short code for submission {} because one already exists.", submission.getId());
+            log.debug("Unable to create short code for submission {} because one already exists.", submission.getId());
             return;
         }
 

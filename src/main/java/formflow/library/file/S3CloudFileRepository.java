@@ -1,33 +1,31 @@
 package formflow.library.file;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
-import com.amazonaws.services.s3.model.GetObjectTaggingResult;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
-import com.amazonaws.util.IOUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.Tag;
 
 /**
  * This is an implementation of the <code>CloudFileRepository</code> that uses Amazon S3
@@ -38,21 +36,19 @@ import org.springframework.web.multipart.MultipartFile;
 public class S3CloudFileRepository implements CloudFileRepository {
 
     private final String bucketName;
-    private final AmazonS3 s3Client;
-    private final TransferManager transferManager;
+    private final S3Client s3Client;
 
     public S3CloudFileRepository(@Value("${form-flow.aws.access_key}") String accessKey,
-                                 @Value("${form-flow.aws.secret_key}") String secretKey,
-                                 @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,
-                                 @Value("${form-flow.aws.region}") String region) {
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+            @Value("${form-flow.aws.secret_key}") String secretKey,
+            @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,
+            @Value("${form-flow.aws.region}") String region) {
+
         bucketName = s3BucketName;
-        s3Client = AmazonS3ClientBuilder
-                .standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+
+        s3Client = S3Client.builder().region(Region.of(region)).credentialsProvider(StaticCredentialsProvider.create(awsCreds))
                 .build();
-        transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
     }
 
     /**
@@ -66,21 +62,18 @@ public class S3CloudFileRepository implements CloudFileRepository {
     public void upload(String filePath, MultipartFile file) {
         try {
             log.info("Inside the S3 File Repository Upload Call");
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentType(file.getContentType());
-            objectMetadata.setContentLength(file.getSize());
-            log.info("Upload Metadata Set");
-            Upload upload = transferManager.upload(bucketName, filePath, file.getInputStream(), objectMetadata);
-            log.info("Upload Called");
-            upload.waitForCompletion();
+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(filePath)
+                    .contentType(file.getContentType()).contentLength(file.getSize()).build();
+
+            InputStream inputStream = file.getInputStream();
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, file.getSize()));
+
             log.info("Upload complete");
-        } catch (AmazonServiceException e) {
+        } catch (Exception e) {
             // make some noise, something's wrong with our connection to S3
-            System.err.println(e.getErrorMessage());
-            log.error("AWS S3 exception occurred: " + e.getErrorMessage());
-            throw new RuntimeException(e.getErrorMessage());
-        } catch (InterruptedException | IOException e) {
-            log.error("Exception occurred in S3 code: " + e.getMessage());
+            System.err.println(e.getMessage());
+            log.error("AWS S3 exception occurred: " + e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -94,17 +87,21 @@ public class S3CloudFileRepository implements CloudFileRepository {
     public CloudFile get(String filepath) {
         try {
             log.info("Getting file at filepath {} from S3", filepath);
-            S3Object s3Object = s3Client.getObject(bucketName, filepath);
-            S3ObjectInputStream inputStream = s3Object.getObjectContent();
 
-            GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(bucketName, s3Object.getKey());
-            GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(filepath).build();
+
+            ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
+
+            GetObjectTaggingRequest taggingRequest = GetObjectTaggingRequest.builder().bucket(bucketName).key(filepath).build();
+
+            GetObjectTaggingResponse taggingResponse = s3Client.getObjectTagging(taggingRequest);
+            List<Tag> tagSet = taggingResponse.tagSet();
 
             Map<String, Object> metadata = new HashMap<>();
-            metadata.put("tags", getTagsResult.getTagSet());
+            metadata.put("tags", tagSet);
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            IOUtils.copy(inputStream, outputStream);
+            IOUtils.copy(s3Object, outputStream);
             byte[] fileBytes = outputStream.toByteArray();
             long fileSize = fileBytes.length;
 
@@ -120,10 +117,11 @@ public class S3CloudFileRepository implements CloudFileRepository {
      * Deletes a file from S3 storage.
      *
      * @param filepath The path of the file to delete
-     * @throws SdkClientException
      */
     public void delete(String filepath) throws SdkClientException {
         log.info("Deleting file at filepath {} from S3", filepath);
-        s3Client.deleteObject(new DeleteObjectRequest(bucketName, filepath));
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder().bucket(bucketName).key(filepath).build();
+
+        s3Client.deleteObject(deleteRequest);
     }
 }

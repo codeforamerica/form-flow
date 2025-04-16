@@ -25,72 +25,71 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
 public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered {
 
-  public static final String FLOW_PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
-  public static final String NAVIGATION_FLOW_PATH_FORMAT = FLOW_PATH_FORMAT + "/navigation";
+    public static final String FLOW_PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
+    public static final String NAVIGATION_FLOW_PATH_FORMAT = FLOW_PATH_FORMAT + "/navigation";
 
-  private static final String REDIRECT_URL = "/";
+    private static final String REDIRECT_URL = "/";
 
-  public List<FlowConfiguration> flowConfigurations;
+    public List<FlowConfiguration> flowConfigurations;
 
-  public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
-    this.flowConfigurations = flowConfigurations;
-  }
-
-  /**
-   * @param request  current HTTP request
-   * @param response current HTTP response
-   * @param handler  chosen handler to execute, for type and/or instance evaluation
-   * @return Boolean True - allows the request to proceed to the ScreenController, False - stops the request from reaching the
-   * Screen Controller.
-   * @throws IOException             - thrown in the event that an input or output exception occurs when this method does a
-   *                                 redirect.
-   */
-  @Override
-  public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
-      throws IOException {
-    String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
-    Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
-
-    HttpSession session = request.getSession(false);
-
-    FlowConfiguration flowConfiguration = flowConfigurations.stream()
-        .filter(fc -> fc.getName().equals(parsedUrl.get("flow")))
-        .findFirst()
-        .orElse(null);
-
-    if (flowConfiguration == null) {
-      return true;
+    public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
+        this.flowConfigurations = flowConfigurations;
     }
 
-    String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
+    /**
+     * @param request  current HTTP request
+     * @param response current HTTP response
+     * @param handler  chosen handler to execute, for type and/or instance evaluation
+     * @return Boolean True - allows the request to proceed to the ScreenController, False - stops the request from reaching the
+     * Screen Controller.
+     * @throws IOException - thrown in the event that an input or output exception occurs when this method does a redirect.
+     */
+    @Override
+    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
+            throws IOException {
+        String pathFormat = request.getRequestURI().contains("navigation") ? NAVIGATION_FLOW_PATH_FORMAT : FLOW_PATH_FORMAT;
+        Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(pathFormat, request.getRequestURI());
 
-    if (session == null) {
-      if (parsedUrl.get("screen").equals(firstScreen)) {
+        HttpSession session = request.getSession(false);
+
+        FlowConfiguration flowConfiguration = flowConfigurations.stream()
+                .filter(fc -> fc.getName().equals(parsedUrl.get("flow")))
+                .findFirst()
+                .orElse(null);
+
+        if (flowConfiguration == null) {
+            return true;
+        }
+
+        String firstScreen = flowConfiguration.getLandmarks().getFirstScreen();
+
+        if (session == null) {
+            if (parsedUrl.get("screen").equals(firstScreen)) {
+                return true;
+            }
+            log.debug("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
+            response.sendRedirect(REDIRECT_URL);
+            return false;
+        }
+
+        if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&
+                !parsedUrl.get("screen").equals(firstScreen)) {
+            log.debug("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
+                    request.getRequestURI());
+            response.sendRedirect(REDIRECT_URL);
+            return false;
+        }
+
         return true;
-      }
-      log.debug("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
-      response.sendRedirect(REDIRECT_URL);
-      return false;
     }
 
-    if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&
-        !parsedUrl.get("screen").equals(firstScreen)) {
-      log.error("A submission ID was not found in the session for request to {}. Redirecting to landing page.",
-          request.getRequestURI());
-      response.sendRedirect(REDIRECT_URL);
-      return false;
+    /**
+     * Sets the value of the interceptor to the highest integer value making it the last interceptor executed.
+     *
+     * @return Max Integer value.
+     */
+    @Override
+    public int getOrder() {
+        return Integer.MAX_VALUE;
     }
-
-    return true;
-  }
-
-  /**
-   * Sets the value of the interceptor to the highest integer value making it the last interceptor executed.
-   *
-   * @return Max Integer value.
-   */
-  @Override
-  public int getOrder() {
-    return Integer.MAX_VALUE;
-  }
 }
