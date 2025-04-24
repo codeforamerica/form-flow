@@ -294,7 +294,6 @@ public class FileController extends FormFlowController {
 
     try {
       cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
-
       UserFile uploadedConvertedFile = UserFile.builder()
               .fileId(convertedUserFileId)
               .submission(submission)
@@ -302,7 +301,7 @@ public class FileController extends FormFlowController {
               .repositoryPath(convertedFileUploadLocation)
               .filesize((float) convertedMultipartFile.getSize())
               .mimeType(convertedMultipartFile.getContentType())
-              .virusScanned(true)
+              .virusScanned(isVirusScanningEnabled) // If virus scanning is enabled, we know that a file we just created can't possibly have a virus
               .docTypeLabel(defaultDocType)
               .conversionSourceFileId(originalUserFileId)
               .build();

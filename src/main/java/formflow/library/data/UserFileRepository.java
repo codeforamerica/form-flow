@@ -1,10 +1,14 @@
 package formflow.library.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository interface for UserFile objects
@@ -55,4 +59,8 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
      */
     List<UserFile> findAllBySubmissionAndMimeTypeOrderByOriginalName(Submission submission, String mimeType);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE UserFile uf SET uf.virusScanned = true WHERE uf.fileId IN :ids")
+    void updateVirusScannedTrueByIds(@Param("ids") List<UUID> ids);
 }

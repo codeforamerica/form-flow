@@ -2,6 +2,7 @@ package formflow.library.data;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -112,5 +113,12 @@ public class UserFileRepositoryService {
         return repository.findAllBySubmissionAndMimeTypeOrderByOriginalName(submission, mimeType);
     }
 
-
+    /**
+     * Sets the virus_scanned column to true for all files in the provided list of ids
+     *
+     * @param ids
+     */
+    public void updateVirusScannedTrueByIds(@Param("ids") List<UUID> ids) {
+        repository.updateVirusScannedTrueByIds(ids);
+    }
 }
