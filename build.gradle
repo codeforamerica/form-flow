@@ -78,7 +78,7 @@ dependencies {
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.10'
     implementation 'org.flywaydb:flyway-core:[9.+,10.+['
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.31.30'
+    implementation 'software.amazon.awssdk:s3:2.31.31'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.18.4'
     implementation 'com.github.librepdf:openpdf:2.0.3'
     implementation 'org.yaml:snakeyaml:2.4'
