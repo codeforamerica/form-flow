@@ -82,7 +82,7 @@ dependencies {
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.18.4'
     implementation 'com.github.librepdf:openpdf:2.0.3'
     implementation 'org.yaml:snakeyaml:2.4'
-    implementation 'com.mailgun:mailgun-java:1.1.5'
+    implementation 'com.mailgun:mailgun-java:1.1.6'
     implementation 'com.google.crypto.tink:tink:1.17.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.1.0'
