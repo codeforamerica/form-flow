@@ -340,7 +340,7 @@ public class ScreenController extends FormFlowController {
 
     ShortCodeConfig.Config config = shortCodeConfig.getConfig(flow);
     if (config == null) {
-      log.info("No shortcode configuration found for flow {}, no shortcode will be generated.", flow);
+      log.debug("No shortcode configuration found for flow {}, no shortcode will be generated.", flow);
     }
 
     // handle marking the record as submitted, if necessary
