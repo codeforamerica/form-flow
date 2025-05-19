@@ -4,4 +4,12 @@
     <i class="icon-navigate_before" aria-hidden="true"></i>
     <span class="underline" th:text="#{general.go-back}"></span>
   </a>
+  <script th:inline="javascript">
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        // Page was loaded from bfcache (back/forward navigation)
+        window.location.reload();
+      }
+    });
+  </script>
 </nav>
