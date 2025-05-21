@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class SubflowConfiguration {
 
+  SubflowRelationship relationship;
   String entryScreen;
   String iterationStartScreen;
   String reviewScreen;

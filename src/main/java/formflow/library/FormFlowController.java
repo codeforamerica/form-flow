@@ -73,13 +73,13 @@ public abstract class FormFlowController {
   }
 
   /**
-   * Gets the {@link FlowConfiguration} object for a given flow
+   * Gets the {@link FlowConfiguration} object for a given flow after validating that the flow exists.
    *
    * @param flow {@link String} of a flow name.
    * @return Returns a {@link FlowConfiguration} object.
    * @throws ResponseStatusException when FlowConfigurations are not found.
    */
-  protected FlowConfiguration getFlowConfigurationByName(String flow) {
+  protected FlowConfiguration getValidatedFlowConfigurationByName(String flow) {
     List<FlowConfiguration> flowConfigurationList = flowConfigurations.stream().filter(
         flowConfiguration -> flowConfiguration.getName().equals(flow)).toList();
 
@@ -226,7 +226,7 @@ public abstract class FormFlowController {
    * @return true if the user should be redirected, false otherwise.
    */
   public boolean shouldRedirectDueToLockedSubmission(String screen, Submission submission, String flowName) {
-    FlowConfiguration flowConfig = getFlowConfigurationByName(flowName);
+    FlowConfiguration flowConfig = getValidatedFlowConfigurationByName(flowName);
     boolean submissionIsLocked = this.formFlowConfigurationProperties.isSubmissionLockedForFlow(flowName);
 
     if (submissionIsLocked) {

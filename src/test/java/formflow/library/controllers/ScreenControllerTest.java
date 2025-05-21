@@ -289,6 +289,11 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       mockMvc.perform(get("/flow/yetAnotherTestFlow/subflowAddItemPage2/" + uuidString).session(session)).andExpect(
           status().is2xxSuccessful());
     }
+
+    @Test
+    public void shouldAllowForLoopingOverIterationsOfAnExistingSubflowWhenARelationshipIsDefined() {
+
+    }
   }
 
   @Nested
