@@ -47,6 +47,10 @@ bootJar {
     enabled = false
 }
 
+tasks.jar {
+    enabled = false
+}
+
 task webjar(type: Jar) {
     zip64 = true
     from(fileTree("dist")) {
