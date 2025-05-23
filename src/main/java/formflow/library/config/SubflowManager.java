@@ -36,10 +36,6 @@ public class SubflowManager {
     
     public void addSubflowRelationshipData(ScreenNavigationConfiguration currentScreen, String flow, Submission submission) {
         String subflowName = currentScreen.getSubflow();
-        if (!subflowHasRelationship(flow, subflowName)) {
-            // No relationship so we don't need to do anything
-            return;
-        }
 
         SubflowConfiguration currentSubflow = getSubflowConfiguration(flow, subflowName);
         String relatedSubflowName = currentSubflow.getRelationship().getRelatesTo();
@@ -85,19 +81,6 @@ public class SubflowManager {
         return flowConfiguration.getSubflows().get(subflowName).getIterationStartScreen();
     }
 
-    private FlowConfiguration getFlowConfiguration(String flowName) {
-        FlowConfiguration flowConfiguration = flowConfigurations.stream()
-                .filter(config -> config.getName().equals(flowName))
-                .findFirst()
-                .orElse(null);
-
-        if (flowConfiguration == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Flow %s not found in your flows-config yaml file.", flowName));
-        }
-        return flowConfiguration;
-    }
-
     public String getRelatedSubflowName(String flowName, String currentSubflowName) {
         FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
         
@@ -115,15 +98,6 @@ public class SubflowManager {
         String relatedIterationId = (String) currentSubflowEntry.get(relationKey);
         String relatedSubflowName = getRelatedSubflowName(flowName, subflowName);
         return submission.getSubflowEntryByUuid(relatedSubflowName, relatedIterationId);
-    }
-    
-    private String getRelationKey(String flow, String subflow) {
-        return flowConfigurations.stream()
-                .filter(config -> config.getName().equals(flow))
-                .findFirst()
-                .map(config -> config.getSubflows().get(subflow))
-                .map(SubflowConfiguration::getRelationship)
-                .map(SubflowRelationship::getRelationAlias).orElse("relatedId");
     }
 
     public SubflowConfiguration getSubflowConfiguration(String flow, String subflow) {
@@ -155,6 +129,55 @@ public class SubflowManager {
         return null; // no incomplete iteration found and no referer UUID to fall back on
     }
 
+    public boolean isReferedFromSubflowIteration(String referer) {
+        if (referer == null) return false;
+        // Check if the URL matches pattern /<screenName>/<UUID>
+        Pattern refererPattern = Pattern.compile(
+                ".*/[^/]+/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-" +
+                        "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        );
+
+        return refererPattern.matcher(referer).matches();
+    }
+
+    public String extractUuidFromReferer(String referer) {
+        if (referer == null) return null;
+
+        Pattern uuidPattern = Pattern.compile(
+                ".*/[^/]+/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-" +
+                        "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+        );
+
+        Matcher matcher = uuidPattern.matcher(referer);
+        if (matcher.matches()) {
+            return matcher.group(1); // return the captured UUID
+        }
+
+        return null; // no UUID match found
+    }
+
+    private FlowConfiguration getFlowConfiguration(String flowName) {
+        FlowConfiguration flowConfiguration = flowConfigurations.stream()
+                .filter(config -> config.getName().equals(flowName))
+                .findFirst()
+                .orElse(null);
+
+        if (flowConfiguration == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Flow %s not found in your flows-config yaml file.", flowName));
+        }
+        return flowConfiguration;
+    }
+
+    private String getRelationKey(String flow, String subflow) {
+        return flowConfigurations.stream()
+                .filter(config -> config.getName().equals(flow))
+                .findFirst()
+                .map(config -> config.getSubflows().get(subflow))
+                .map(SubflowConfiguration::getRelationship)
+                .map(SubflowRelationship::getRelationAlias).orElse("relatedId");
+    }
+
     private List<Map<String, Object>> getSubflowData(Submission submission, String subflowName) {
         return (List<Map<String, Object>>) submission.getInputData().getOrDefault(subflowName, new ArrayList<>());
     }
@@ -170,32 +193,5 @@ public class SubflowManager {
         entry.put(relationKey, relatedUuid);
         entry.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
         return entry;
-    }
-
-    public boolean isReferedFromSubflowIteration(String referer) {
-        if (referer == null) return false;
-        // Check if the URL matches pattern /<screenName>/<UUID>
-        Pattern refererPattern = Pattern.compile(
-                ".*/[^/]+/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-" +
-                        "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-        );
-
-        return refererPattern.matcher(referer).matches();
-    }
-
-    public static String extractUuidFromReferer(String referer) {
-        if (referer == null) return null;
-
-        Pattern uuidPattern = Pattern.compile(
-                ".*/[^/]+/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-" +
-                        "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
-        );
-
-        Matcher matcher = uuidPattern.matcher(referer);
-        if (matcher.matches()) {
-            return matcher.group(1); // return the captured UUID
-        }
-
-        return null; // no UUID match found
     }
 }
