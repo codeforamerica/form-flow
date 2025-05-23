@@ -13,6 +13,12 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
+subprojects {
+    tasks.withType(Jar).configureEach {
+        zip64 = true
+    }
+}
+
 jacoco {
     toolVersion = '0.8.10'
 }
@@ -131,6 +137,7 @@ afterEvaluate {
 }
 
 tasks.named('jar').configure {
+    zip64 = true
     enabled = false
 }
 
