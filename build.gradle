@@ -47,7 +47,7 @@ bootJar {
     enabled = false
 }
 
-task webjar(type: Jar, dependsOn: "jar") {
+task webjar(type: Jar) {
     zip64 = true
     from(fileTree("dist")) {
         into "META-INF/resources"
