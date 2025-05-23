@@ -57,6 +57,9 @@ tasks.jar {
     enabled = false
 }
 
+tasks.withType(Jar).configureEach {
+    zip64 = true
+}
 task webjar(type: Jar) {
     zip64 = true
     from(fileTree("dist")) {
