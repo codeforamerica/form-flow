@@ -10,6 +10,7 @@ plugins {
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
     id "org.flywaydb.flyway" version "[9.+,10.0["
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 jacoco {
@@ -29,22 +30,17 @@ if (file(".env").isFile()) {
 def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
 def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
-jar {
+shadowJar {
+    archiveClassifier.set('')
     zip64 = true
-    doFirst {
-        fileTree(dir: "$buildDir/libs", include: '*.jar').each { file ->
-            if (!file.name.contains(version)) {
-                file.delete()
-            }
-        }
-    }
+    mergeServiceFiles()
     manifest {
-        attributes "Main-Class": "formflow.library.ScreenController"
+        attributes 'Main-Class': 'formflow.library.ScreenController'
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+}
+
+jar {
+    enabled = false
 }
 
 bootJar {
