@@ -126,11 +126,27 @@ java {
     withSourcesJar()
 }
 
+afterEvaluate {
+    components.remove(components.findByName("java"))
+}
+
+tasks.named('jar').configure {
+    enabled = false
+}
+
+tasks.named('bootJar').configure {
+    enabled = false
+}
+
 publishing {
     publications {
         pluginMaven(MavenPublication) {
             artifactId = "form-flow"
             artifact shadowJar.archiveFile
+
+            artifact tasks.javadocJar
+            artifact tasks.sourcesJar
+
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
