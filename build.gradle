@@ -13,6 +13,10 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
+tasks.withType(Jar).configureEach {
+    zip64 = true
+}
+
 subprojects {
     tasks.withType(Jar).configureEach {
         zip64 = true
@@ -57,9 +61,6 @@ tasks.jar {
     enabled = false
 }
 
-tasks.withType(Jar).configureEach {
-    zip64 = true
-}
 task webjar(type: Jar) {
     zip64 = true
     from(fileTree("dist")) {
