@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
@@ -124,6 +126,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable(name = "screen") String requestScreen,
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String requestUuid,
+      @RequestHeader(value = "Referer", required = false) String referer,
       RedirectAttributes redirectAttributes,
       HttpSession httpSession,
       HttpServletRequest request,
@@ -188,11 +191,24 @@ public class ScreenController extends FormFlowController {
       actionManager.handleBeforeDisplayAction(currentScreen, submission);
     }
 
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission, null, request);
+    if (currentScreen.getSubflow() != null &&
+            subflowManager.subflowHasRelationship(flow, currentScreen.getSubflow())) {
+      subflowManager.addSubflowRelationshipData(currentScreen, flow, submission);
+      saveToRepository(submission);
+    }
 
-    String formAction = createFormActionString(flow, screen);
+    Map<String, Object> model;
+    String formAction;
+    try {
+      model = createModel(flow, screen, httpSession, submission, null, request, referer);
+      formAction = createFormActionString(flow, screen, submission, referer);
+    } catch (Exception e) {
+      log.warn("There was an error when trying populate the correct data for screen: {} in flow: {}. It's possible the user pressed back in a subflow. Redirecting to subflow review screen.", screen, flow);
+      String subflowName = currentScreen.getSubflow();
+      String subflowReviewScreen = subflowManager.getSubflowConfiguration(flow, subflowName).getReviewScreen();
+      return new ModelAndView("redirect:/flow/" + flow + "/" + subflowReviewScreen);
+    }
     model.put("formAction", formAction);
-
 
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
@@ -389,6 +405,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable(name = "flow") String requestFlow,
       @PathVariable(name = "screen") String requestScreen,
       @PathVariable(name = "uuid") String requestUuid,
+      @RequestHeader(value = "Referer", required = false) String referer,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -431,7 +448,7 @@ public class ScreenController extends FormFlowController {
     }
 
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid, request);
+    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid, request, referer);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
@@ -515,12 +532,10 @@ public class ScreenController extends FormFlowController {
         formSubmission.getFormData().put("uuid", iterationUuid);
         formSubmission.getFormData().putIfAbsent(Submission.ITERATION_IS_COMPLETE_KEY, false);
         subflow.add(formSubmission.getFormData());
-        subflowManager.addSubflowRelationshipData(flow, subflowName, iterationUuid, submission);
       } else {
         var iterationToEdit = submission.getSubflowEntryByUuid(subflowName, iterationUuid);
         if (iterationToEdit != null) {
           submission.mergeFormDataWithSubflowIterationData(subflowName, iterationToEdit, formSubmission.getFormData());
-//          subflowManager.addSubflowRelationshipData(flow, subflowName, iterationUuid, submission);
         }
       }
     } else {
@@ -534,7 +549,6 @@ public class ScreenController extends FormFlowController {
 
         submission.setFlow(flow);
         submission.setInputData(inputData);
-        subflowManager.addSubflowRelationshipData(flow, subflowName, iterationUuid, submission);
       } else {
         // We are not in a current session, so this implies we are on the first page
         // of a flow. If it's not a new iteration, then where _are_ we?
@@ -721,8 +735,7 @@ public class ScreenController extends FormFlowController {
         submission = saveToRepository(submission);
         redirectString = String.format("/flow/%s/%s", flow, nextScreen);
         if (subflowManager.subflowHasRelationship(flow, currentSubflowName)) {
-          if (!subflowManager.hasFinishedIteratingRelatedSubflow(currentSubflowName, submission)) {
-            // TODO Update this after pivoting to Ana's Idea
+          if (!subflowManager.hasFinishedAllSubflowIterations(currentSubflowName, submission)) {
             // If you are in a subflow with a relationship we want you to keep looping until you loop over every iteration in the related subflow
             redirectString = String.format("/flow/%s/%s", flow, subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName));
           }
@@ -834,13 +847,33 @@ public class ScreenController extends FormFlowController {
         subflowConfig.getValue().getIterationStartScreen().equals(screen));
   }
 
-  private String createFormActionString(String flow, String screen) {
-    return isIterationStartScreen(flow, screen) ?
-        "/flow/%s/%s/new".formatted(flow, screen) : "/flow/%s/%s".formatted(flow, screen);
+  private String createFormActionString(String flow, String screen, Submission submission, String referer) {
+    FlowConfiguration flowConfig = getValidatedFlowConfigurationByName(flow);
+    ScreenNavigationConfiguration screenConfig = flowConfig.getScreenNavigation(screen);
+
+    if (!isIterationStartScreen(flow, screen)) {
+      return String.format("/flow/%s/%s", flow, screen);
+    }
+    
+    // If we know we are on an iteration start screen we must be in a subflow so which one?
+    String subflowName = screenConfig.getSubflow();
+
+    if (subflowManager.subflowHasRelationship(flow, subflowName)) {
+      String uuid = subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
+      if (uuid == null) {
+        throwNotFoundError(flow, screen,
+            String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                uuid, subflowName, submission.getFlow(), screen));
+      }
+      return String.format("/flow/%s/%s/%s", flow, screen, uuid);
+    }
+
+    return String.format("/flow/%s/%s/new", flow, screen);
   }
 
+
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
-                                          String uuid, HttpServletRequest request) {
+                                          String uuid, HttpServletRequest request, String referer) {
     Map<String, Object> model = new HashMap<>();
     FlowConfiguration flowConfig = getValidatedFlowConfigurationByName(flow);
     String subflowName = flowConfig.getFlow().get(screen).getSubflow();
@@ -906,9 +939,15 @@ public class ScreenController extends FormFlowController {
       // We keep "currentSubflowItem" for backwards compatability at this point
       model.put("currentSubflowItem", model.get("fieldData"));
       if (subflowManager.subflowHasRelationship(flow, subflowName)) {
-        // TODO Update this after pivoting to Ana's idea
         model.put("relatedSubflow", subflowManager.getRelatedSubflowName(flow, subflowName));
-        model.put("relatedSubflowIteration", subflowManager.getRelatedSubflowIteration(flow, subflowName, screen, submission));
+        String uuidOfIterationToUpdate = (uuid != null && !uuid.isBlank()) ? 
+                uuid : subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
+        if (uuidOfIterationToUpdate == null) {
+          throwNotFoundError(flow, screen,
+              String.format("UUID was null when trying to find iteration for subflow '%s' in flow '%s. It's possible the user hit back in a subflow. Redirecting.'",
+                  uuidOfIterationToUpdate, subflowName, submission.getFlow(), screen));
+        }
+        model.put("relatedSubflowIteration", subflowManager.getRelatedSubflowIteration(flow, subflowName, uuidOfIterationToUpdate, submission));
       }
     }
 
