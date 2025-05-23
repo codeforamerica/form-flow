@@ -58,7 +58,7 @@ jobs:
       - name: Build Gradle
         run: |
           chmod +x gradlew
-          ./gradlew clean shadowJar --info
+          ./gradlew clean jar
       - name: Configure GPG Key
         run: |
           echo -n "${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import --pinentry-mode loopback --passphrase ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}

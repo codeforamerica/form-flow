@@ -10,7 +10,6 @@ plugins {
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
     id "org.flywaydb.flyway" version "[9.+,10.0["
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 tasks.withType(Jar).configureEach {
@@ -18,7 +17,6 @@ tasks.withType(Jar).configureEach {
 }
 
 subprojects {
-    apply plugin: 'com.github.johnrengelman.shadow'
     tasks.withType(Jar).configureEach {
         zip64 = true
     }
@@ -41,23 +39,20 @@ if (file(".env").isFile()) {
 def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
 def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
-tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configureEach {
+jar {
     zip64 = true
-    mergeServiceFiles()
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes 'Main-Class': 'formflow.library.ScreenController'
+        attributes(
+                'Main-Class': 'formflow.library.ScreenController'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
-jar {
-    enabled = false
-}
-
 bootJar {
-    enabled = false
-}
-
-tasks.jar {
     enabled = false
 }
 
@@ -140,11 +135,6 @@ afterEvaluate {
     components.remove(components.findByName("java"))
 }
 
-tasks.named('jar').configure {
-    zip64 = true
-    enabled = false
-}
-
 tasks.named('bootJar').configure {
     enabled = false
 }
@@ -153,7 +143,7 @@ publishing {
     publications {
         pluginMaven(MavenPublication) {
             artifactId = "form-flow"
-            artifact(tasks.named("shadowJar").get().archiveFile)
+            artifact(tasks.named("jar").get().archiveFile)
 
             artifact tasks.javadocJar
             artifact tasks.sourcesJar
