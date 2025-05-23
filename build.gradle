@@ -130,7 +130,7 @@ publishing {
     publications {
         pluginMaven(MavenPublication) {
             artifactId = "form-flow"
-            from components.java
+            artifact shadowJar.archiveFile
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
