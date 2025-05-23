@@ -12,6 +12,7 @@ import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.NextScreen;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
+import formflow.library.config.SubflowManager;
 import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
@@ -32,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
@@ -71,6 +74,7 @@ public class ScreenController extends FormFlowController {
   private final FileValidationService fileValidationService;
   private final SubmissionRepositoryService submissionRepositoryService;
   private final ShortCodeConfig shortCodeConfig;
+  private final SubflowManager subflowManager;
 
   public ScreenController(
       List<FlowConfiguration> flowConfigurations,
@@ -83,8 +87,9 @@ public class ScreenController extends FormFlowController {
       ActionManager actionManager,
       FileValidationService fileValidationService,
       MessageSource messageSource,
-      ShortCodeConfig shortCodeConfig
-    ) {
+      ShortCodeConfig shortCodeConfig, 
+      SubflowManager subflowManager
+  ) {
     super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
         messageSource);
     this.validationService = validationService;
@@ -94,8 +99,9 @@ public class ScreenController extends FormFlowController {
     this.fileValidationService = fileValidationService;
     this.submissionRepositoryService = submissionRepositoryService;
     this.shortCodeConfig = shortCodeConfig;
+    this.subflowManager = subflowManager;
 
-    log.info("Screen Controller Created!");
+      log.info("Screen Controller Created!");
   }
 
   @AllArgsConstructor
@@ -120,6 +126,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable(name = "screen") String requestScreen,
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String requestUuid,
+      @RequestHeader(value = "Referer", required = false) String referer,
       RedirectAttributes redirectAttributes,
       HttpSession httpSession,
       HttpServletRequest request,
@@ -127,7 +134,7 @@ public class ScreenController extends FormFlowController {
   ) {
     log.info("GET getScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
     // getScreenConfig() will ensure that the screen and flow actually exist
-    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenConfig screenConfig = getValidatedScreenConfiguration(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
     String screen = currentScreen.getName();
@@ -184,11 +191,24 @@ public class ScreenController extends FormFlowController {
       actionManager.handleBeforeDisplayAction(currentScreen, submission);
     }
 
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission, null, request);
+    if (currentScreen.getSubflow() != null &&
+            subflowManager.subflowHasRelationship(flow, currentScreen.getSubflow())) {
+      subflowManager.addSubflowRelationshipData(currentScreen, flow, submission);
+      saveToRepository(submission);
+    }
 
-    String formAction = createFormActionString(flow, screen);
+    Map<String, Object> model;
+    String formAction;
+    try {
+      model = createModel(flow, screen, httpSession, submission, null, request, referer);
+      formAction = createFormActionString(flow, screen, submission, referer);
+    } catch (Exception e) {
+      log.warn("There was an error when trying populate the correct data for screen: {} in flow: {}. It's possible the user pressed back in a subflow. Redirecting to subflow review screen.", screen, flow);
+      String subflowName = currentScreen.getSubflow();
+      String subflowReviewScreen = subflowManager.getSubflowConfiguration(flow, subflowName).getReviewScreen();
+      return new ModelAndView("redirect:/flow/" + flow + "/" + subflowReviewScreen);
+    }
     model.put("formAction", formAction);
-
 
     return new ModelAndView("%s/%s".formatted(flow, screen), model);
   }
@@ -304,7 +324,7 @@ public class ScreenController extends FormFlowController {
 
     log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
     // Checks if screen and flow exist. If getScreenConfig runs successfully, then the flow and screen exist.
-    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenConfig screenConfig = getValidatedScreenConfiguration(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
     String screen = currentScreen.getName();
@@ -385,6 +405,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable(name = "flow") String requestFlow,
       @PathVariable(name = "screen") String requestScreen,
       @PathVariable(name = "uuid") String requestUuid,
+      @RequestHeader(value = "Referer", required = false) String referer,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -397,7 +418,7 @@ public class ScreenController extends FormFlowController {
         requestScreen,
         requestUuid);
     // Checks if screen and flow exist
-    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenConfig screenConfig = getValidatedScreenConfiguration(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
     String screen = currentScreen.getName();
@@ -427,7 +448,7 @@ public class ScreenController extends FormFlowController {
     }
 
     actionManager.handleBeforeDisplayAction(currentScreen, submission, uuid);
-    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid, request);
+    Map<String, Object> model = createModel(flow, screen, httpSession, submission, uuid, request, referer);
     model.put("formAction", String.format("/flow/%s/%s/%s", flow, screen, uuid));
     return new ModelAndView(String.format("%s/%s", flow, screen), model);
   }
@@ -469,7 +490,7 @@ public class ScreenController extends FormFlowController {
         uuid);
 
     // Checks to see if flow and screen exist; If they do not, then this will throw an error
-    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenConfig screenConfig = getValidatedScreenConfiguration(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
     String screen = currentScreen.getName();
@@ -576,7 +597,7 @@ public class ScreenController extends FormFlowController {
   ) {
     log.info("GET deleteConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(), flow, uuid);
     // Checks to see if flow exists
-    String deleteConfirmationScreen = getFlowConfigurationByName(flow)
+    String deleteConfirmationScreen = getValidatedFlowConfigurationByName(flow)
         .getSubflows().get(subflow).getDeleteConfirmationScreen();
     Submission submission = getSubmissionFromSession(httpSession, flow);
 
@@ -622,7 +643,7 @@ public class ScreenController extends FormFlowController {
         requestFlow,
         uuid);
     // Checks to make sure flow exists; if it doesn't an error is thrown
-    FlowConfiguration flowConfiguration = getFlowConfigurationByName(requestFlow);
+    FlowConfiguration flowConfiguration = getValidatedFlowConfigurationByName(requestFlow);
     String subflowEntryScreen = flowConfiguration.getSubflows().get(subflow)
         .getEntryScreen();
     String flow = flowConfiguration.getName();
@@ -657,7 +678,7 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
     }
 
-    String reviewScreen = getFlowConfigurationByName(flow).getSubflows().get(subflow)
+    String reviewScreen = getValidatedFlowConfigurationByName(flow).getSubflows().get(subflow)
         .getReviewScreen();
     return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, reviewScreen));
   }
@@ -680,7 +701,7 @@ public class ScreenController extends FormFlowController {
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
     // Checks if the flow and screen exist
-    ScreenConfig screenConfig = getScreenConfig(requestFlow, requestScreen);
+    ScreenConfig screenConfig = getValidatedScreenConfiguration(requestFlow, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
     String screen = currentScreen.getName();
@@ -705,13 +726,20 @@ public class ScreenController extends FormFlowController {
 
     String nextScreen = getNextViewableScreen(flow, getNextScreenName(submission, currentScreen, uuid), uuid, submission);
 
-    boolean isCurrentScreenLastInSubflow = getScreenConfig(flow, nextScreen).getScreenNavigationConfiguration().getSubflow() == null;
+    boolean isCurrentScreenLastInSubflow = getValidatedScreenConfiguration(flow, nextScreen).getScreenNavigationConfiguration().getSubflow() == null;
     String redirectString;
     if (uuid != null) {
+      String currentSubflowName = currentScreen.getSubflow();
       if (isCurrentScreenLastInSubflow) {
-        submission.setIterationIsCompleteToTrue(currentScreen.getSubflow(), uuid);
+        submission.setIterationIsCompleteToTrue(currentSubflowName, uuid);
         submission = saveToRepository(submission);
         redirectString = String.format("/flow/%s/%s", flow, nextScreen);
+        if (subflowManager.subflowHasRelationship(flow, currentSubflowName)) {
+          if (!subflowManager.hasFinishedAllSubflowIterations(currentSubflowName, submission)) {
+            // If you are in a subflow with a relationship we want you to keep looping until you loop over every iteration in the related subflow
+            redirectString = String.format("/flow/%s/%s", flow, subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName));
+          }
+        }
       } else {
         redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
       }
@@ -734,7 +762,7 @@ public class ScreenController extends FormFlowController {
    * @return Next viewable screen if the current one does not satisfy the condition, otherwise the current screen
    */
   private String getNextViewableScreen(String flow, String screen, String uuid, Submission submission) {
-    ScreenConfig screenConfig = getScreenConfig(flow, screen);
+    ScreenConfig screenConfig = getValidatedScreenConfiguration(flow, screen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
 
     if (shouldRedirectToNextScreen(uuid, currentScreen, submission)) {
@@ -763,14 +791,14 @@ public class ScreenController extends FormFlowController {
   }
 
   /**
-   * Fetches the navigation configuration for a particular screen in a particular flow.
+   * Fetches the navigation configuration for a particular screen in a particular flow after validating both the screen and flow exist.
    *
    * @param flow   the flow containing the screen
    * @param screen the screen that configuration is wanted for
    * @return navigation configuration for the screen
    */
-  private ScreenConfig getScreenConfig(String flow, String screen) {
-    FlowConfiguration currentFlowConfiguration = getFlowConfigurationByName(flow);
+  private ScreenConfig getValidatedScreenConfiguration(String flow, String screen) {
+    FlowConfiguration currentFlowConfiguration = getValidatedFlowConfigurationByName(flow);
     ScreenNavigationConfiguration currentScreen = currentFlowConfiguration.getScreenNavigation(screen);
     if (currentScreen == null) {
       throwNotFoundError(flow, screen, "Screen could not be found in flow configuration for flow " + flow + ".");
@@ -811,7 +839,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Boolean isIterationStartScreen(String flow, String screen) {
-    Map<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+    Map<String, SubflowConfiguration> subflows = getValidatedFlowConfigurationByName(flow).getSubflows();
     if (subflows == null) {
       return false;
     }
@@ -819,15 +847,35 @@ public class ScreenController extends FormFlowController {
         subflowConfig.getValue().getIterationStartScreen().equals(screen));
   }
 
-  private String createFormActionString(String flow, String screen) {
-    return isIterationStartScreen(flow, screen) ?
-        "/flow/%s/%s/new".formatted(flow, screen) : "/flow/%s/%s".formatted(flow, screen);
+  private String createFormActionString(String flow, String screen, Submission submission, String referer) {
+    FlowConfiguration flowConfig = getValidatedFlowConfigurationByName(flow);
+    ScreenNavigationConfiguration screenConfig = flowConfig.getScreenNavigation(screen);
+
+    if (!isIterationStartScreen(flow, screen)) {
+      return String.format("/flow/%s/%s", flow, screen);
+    }
+    
+    // If we know we are on an iteration start screen we must be in a subflow so which one?
+    String subflowName = screenConfig.getSubflow();
+
+    if (subflowManager.subflowHasRelationship(flow, subflowName)) {
+      String uuid = subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
+      if (uuid == null) {
+        throwNotFoundError(flow, screen,
+            String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                uuid, subflowName, submission.getFlow(), screen));
+      }
+      return String.format("/flow/%s/%s/%s", flow, screen, uuid);
+    }
+
+    return String.format("/flow/%s/%s/new", flow, screen);
   }
 
+
   private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
-                                          String uuid, HttpServletRequest request) {
+                                          String uuid, HttpServletRequest request, String referer) {
     Map<String, Object> model = new HashMap<>();
-    FlowConfiguration flowConfig = getFlowConfigurationByName(flow);
+    FlowConfiguration flowConfig = getValidatedFlowConfigurationByName(flow);
     String subflowName = flowConfig.getFlow().get(screen).getSubflow();
 
     model.put("flow", flow);
@@ -840,7 +888,7 @@ public class ScreenController extends FormFlowController {
     }
 
     // Put subflow on model if on subflow delete confirmation screen
-    Map<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+    Map<String, SubflowConfiguration> subflows = getValidatedFlowConfigurationByName(flow).getSubflows();
     if (subflows != null) {
       List<String> subflowFromDeleteConfirmationConfig = subflows.entrySet().stream()
           .filter(entry ->
@@ -890,6 +938,17 @@ public class ScreenController extends FormFlowController {
       }
       // We keep "currentSubflowItem" for backwards compatability at this point
       model.put("currentSubflowItem", model.get("fieldData"));
+      if (subflowManager.subflowHasRelationship(flow, subflowName)) {
+        model.put("relatedSubflow", subflowManager.getRelatedSubflowName(flow, subflowName));
+        String uuidOfIterationToUpdate = (uuid != null && !uuid.isBlank()) ? 
+                uuid : subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
+        if (uuidOfIterationToUpdate == null) {
+          throwNotFoundError(flow, screen,
+              String.format("UUID was null when trying to find iteration for subflow '%s' in flow '%s. It's possible the user hit back in a subflow. Redirecting.'",
+                  uuidOfIterationToUpdate, subflowName, submission.getFlow(), screen));
+        }
+        model.put("relatedSubflowIteration", subflowManager.getRelatedSubflowIteration(flow, subflowName, uuidOfIterationToUpdate, submission));
+      }
     }
 
     if (RequestContextUtils.getInputFlashMap(request) != null) {
@@ -913,7 +972,7 @@ public class ScreenController extends FormFlowController {
   }
 
   private Boolean isDeleteConfirmationScreen(String flow, String screen) {
-    Map<String, SubflowConfiguration> subflows = getFlowConfigurationByName(flow).getSubflows();
+    Map<String, SubflowConfiguration> subflows = getValidatedFlowConfigurationByName(flow).getSubflows();
     if (subflows == null) {
       return false;
     }
@@ -925,16 +984,16 @@ public class ScreenController extends FormFlowController {
   private ModelAndView handleDeleteBackBehavior(String flow, String screen, String uuid,
                                                 Submission submission) {
     ModelMap model = new ModelMap();
-    String subflowName = getFlowConfigurationByName(flow).getSubflows().entrySet().stream()
+    String subflowName = getValidatedFlowConfigurationByName(flow).getSubflows().entrySet().stream()
         .filter(entry -> entry.getValue().getDeleteConfirmationScreen().equals(screen))
         .toList().get(0).getKey();
     ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
     if (subflow == null || subflow.stream().noneMatch(entry -> entry.get("uuid").equals(uuid))) {
       model.put("noEntryToDelete", true);
-      model.put("reviewScreen", getFlowConfigurationByName(flow).getSubflows().get(subflowName).getReviewScreen());
+      model.put("reviewScreen", getValidatedFlowConfigurationByName(flow).getSubflows().get(subflowName).getReviewScreen());
       if (subflow == null) {
         model.put("subflowIsEmpty", true);
-        model.put("entryScreen", getFlowConfigurationByName(flow).getSubflows().get(subflowName).getEntryScreen());
+        model.put("entryScreen", getValidatedFlowConfigurationByName(flow).getSubflows().get(subflowName).getEntryScreen());
       }
       return new ModelAndView("%s/%s".formatted(flow, screen), model);
     }
@@ -983,7 +1042,7 @@ public class ScreenController extends FormFlowController {
    * @return Validated UUID as String, or returns null if not found
    */
   private String getValidatedIterationUuid(Submission submission, String flow, ScreenNavigationConfiguration currentScreen, String uuidToVerify) {
-    FlowConfiguration flowConfiguration = getFlowConfigurationByName(flow);
+    FlowConfiguration flowConfiguration = getValidatedFlowConfigurationByName(flow);
     if (flowConfiguration == null) {
       return null;
     }
