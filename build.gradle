@@ -18,6 +18,7 @@ tasks.withType(Jar).configureEach {
 }
 
 subprojects {
+    apply plugin: 'com.github.johnrengelman.shadow'
     tasks.withType(Jar).configureEach {
         zip64 = true
     }
@@ -40,8 +41,7 @@ if (file(".env").isFile()) {
 def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
 def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
-shadowJar {
-    archiveClassifier.set('')
+tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configureEach {
     zip64 = true
     mergeServiceFiles()
     manifest {
@@ -153,7 +153,7 @@ publishing {
     publications {
         pluginMaven(MavenPublication) {
             artifactId = "form-flow"
-            artifact shadowJar.archiveFile
+            artifact(tasks.named("shadowJar").get().archiveFile)
 
             artifact tasks.javadocJar
             artifact tasks.sourcesJar
