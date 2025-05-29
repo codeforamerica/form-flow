@@ -607,7 +607,7 @@ public class ScreenController extends FormFlowController {
     }
 
     if (submission != null) {
-      Map<Object, String> entryToDelete = (Map) submission.getSubflowEntryByUuid(subflow, uuid);
+      Map<String, Object> entryToDelete = submission.getSubflowEntryByUuid(subflow, uuid);
 
       if (entryToDelete != null) {
         httpSession.setAttribute("entryToDelete", entryToDelete);
@@ -892,14 +892,12 @@ public class ScreenController extends FormFlowController {
     if (subflows != null) {
       List<String> subflowFromDeleteConfirmationConfig = subflows.entrySet().stream()
           .filter(entry ->
-              entry.getValue()
-                  .getDeleteConfirmationScreen()
-                  .equals(screen))
+              screen.equals(entry.getValue().getDeleteConfirmationScreen()))
           .map(Entry::getKey)
           .toList();
 
       if (!subflowFromDeleteConfirmationConfig.isEmpty()) {
-        model.put("subflow", subflowFromDeleteConfirmationConfig.get(0));
+        model.put("subflow", subflowFromDeleteConfirmationConfig.getFirst());
       }
 
       // Add the iteration start page to the model if we are on the review page for a subflow so we have it for the edit button
@@ -977,7 +975,7 @@ public class ScreenController extends FormFlowController {
       return false;
     }
     return subflows.entrySet().stream()
-        .anyMatch(subflow -> subflow.getValue().getDeleteConfirmationScreen().equals(screen));
+        .anyMatch(subflow -> screen.equals(subflow.getValue().getDeleteConfirmationScreen()));
   }
 
   @Nullable
@@ -985,8 +983,8 @@ public class ScreenController extends FormFlowController {
                                                 Submission submission) {
     ModelMap model = new ModelMap();
     String subflowName = getValidatedFlowConfigurationByName(flow).getSubflows().entrySet().stream()
-        .filter(entry -> entry.getValue().getDeleteConfirmationScreen().equals(screen))
-        .toList().get(0).getKey();
+        .filter(entry -> screen.equals(entry.getValue().getDeleteConfirmationScreen()))
+        .toList().getFirst().getKey();
     ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
     if (subflow == null || subflow.stream().noneMatch(entry -> entry.get("uuid").equals(uuid))) {
       model.put("noEntryToDelete", true);
