@@ -93,9 +93,8 @@ public class SubflowManager {
 
     }
 
-    public boolean hasFinishedAllSubflowIterations(String currentSubflowName, Submission submission) {
-        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) submission.getInputData()
-                .get(currentSubflowName);
+    public boolean hasFinishedAllIterations(String subflowDataKey, Map<String, Object> subflowIterationData) {
+        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) subflowIterationData.get(subflowDataKey);
 
         return currentSubflowData.stream()
                 .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
@@ -268,5 +267,10 @@ public class SubflowManager {
         entry.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
 
         return entry;
+    }
+
+    public void setRepeatsForIterationIsCompleteToTrue(String flow, String currentSubflowName, Submission submission, String subflowIterationUuid,
+            String repeatForDataKey, String repeatForUuid) {
+
     }
 }
