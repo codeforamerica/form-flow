@@ -75,18 +75,14 @@ public class SubflowManager {
     }
 
     public void addNestedSubflowRelationshipData(Submission submission, String subflowName, String subflowUUID,
-            RepeatFor repeatForConfiguration) {
+            String saveDataAs, List<String> repeatsForInputData) {
         Map<String, Object> currentSubflowData = submission.getSubflowEntryByUuid(subflowName, subflowUUID);
 
-        final String repeatsForInputName = repeatForConfiguration.getInputName();
-        final String repeatsForSaveDataAs = repeatForConfiguration.getSaveDataAs();
-
-
-        // toDo: confirm that the submission actually saves and correctly
-        if(!setSubflowRepeatsOnIterations(currentSubflowData, repeatsForInputName,
-                repeatsForSaveDataAs).isEmpty()) {
-            submission.getSubflowEntryByUuid(subflowName, subflowUUID).put(repeatsForSaveDataAs, setSubflowRepeatsOnIterations(currentSubflowData, repeatsForInputName,
-                    repeatsForSaveDataAs));
+        if(!repeatsForInputData.isEmpty()){
+            submission.getSubflowEntryByUuid(subflowName, subflowUUID).put(saveDataAs, setSubflowRepeatsOnIterations(currentSubflowData, repeatsForInputData,
+                    saveDataAs));
+        } else {
+            submission.getSubflowEntryByUuid(subflowName, subflowUUID).remove(saveDataAs);
         }
 
     }
@@ -239,32 +235,27 @@ public class SubflowManager {
         return entry;
     }
 
-    private List<Map<String, Object>> setSubflowRepeatsOnIterations(Map<String, Object> currentSubflowData, String inputName,
+    private List<Map<String, Object>> setSubflowRepeatsOnIterations(Map<String, Object> currentSubflowData, List<String> inputListToRepeatOn,
             String saveRelationshipAs) {
 
         List<Map<String, Object>> repeatsForIterations = new ArrayList<>();
 
         Boolean repeatRelationHasBeenSet = currentSubflowData.containsKey(saveRelationshipAs);
+        List<Map<String, Object>> relationshipData =  (List<Map<String, Object>>) currentSubflowData.get(saveRelationshipAs);
 
-        if (repeatRelationHasBeenSet) {
+        if (repeatRelationHasBeenSet && !relationshipData.isEmpty()) {
             // this should only trigger when a relationship already exists and someone went back to the inputName screen and changed the list
-            // r
+            //
 //            make sure that is still matches the list
         } else {
-
-
-            List<String> inputListToRepeatOn = (List<String>) currentSubflowData.get(inputName + "[]");
-
             if (!inputListToRepeatOn.isEmpty()) {
                 inputListToRepeatOn.forEach(selectedValue ->
                         repeatsForIterations.add(
                                 createSubflowIterationRepeat(saveRelationshipAs, selectedValue)));
-
             }
         }
 
         return repeatsForIterations;
-
     }
 
 
