@@ -10,6 +10,7 @@ import formflow.library.config.ConditionManager;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.NextScreen;
+import formflow.library.config.RepeatFor;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.SubflowManager;
@@ -330,7 +331,6 @@ public class ScreenController extends FormFlowController {
     String screen = currentScreen.getName();
 
     Submission submission = findOrCreateSubmission(httpSession, flow);
-//        TODO: Let's create the nestedSubflow data here because we can see it in the formData and it's the time to create the iterations.
 
     if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
@@ -522,6 +522,17 @@ public class ScreenController extends FormFlowController {
     }
 
     handleAddressValidation(submission, formSubmission);
+
+    if (subflowManager.subflowHasRelationship(flow, currentScreen.getSubflow()) && subflowManager.subflowRelationshipIsNested(flow,
+            currentScreen.getSubflow())) {
+      RepeatFor repeatForConfiguration = subflowManager.getFlowConfiguration(flow).getSubflows().get(currentScreen.getSubflow()).getRelationship()
+              .getRepeatFor();
+      String inputNameKey = repeatForConfiguration.getInputName();
+      if (formSubmission.getFormData().containsKey(inputNameKey)){
+        subflowManager.addNestedSubflowRelationshipData(submission, currentScreen.getSubflow(),  iterationUuid, repeatForConfiguration);
+      }
+    }
+
 
     if (submission.getId() != null) {
       // if we are not working with a new submission, make sure to update any existing data
@@ -743,7 +754,7 @@ public class ScreenController extends FormFlowController {
 
             // if you are done with inner and outer flow then move to the review screen.
             redirectString = String.format("/flow/%s/%s/%s", flow,
-                    subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName, subflowUUID));
+                    subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName), uuid);
 
             // we send to the next nestedSubflow based on iteration == false.
 
@@ -756,7 +767,8 @@ public class ScreenController extends FormFlowController {
             }
         } else {
             // Are you in a nested? and if you are not, go to the nest UUID screen.
-            redirectString = String.format("/flow/%s/%s/%s/%s", flow, nextScreen, uuid, suuid);
+          String suuid = "sdfksdfkjh";
+            redirectString = String.format("/flow/%s/%s/%s/%s", flow, nextScreen, uuid), suuid);
             // reroute to the corrected nested subflow, otherwise ->
             redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
         }
