@@ -75,7 +75,7 @@
         "^.*$": {
           "type": "object",
           "description": "Configuration for a given subflow. Identifies key screens within the subflow.",
-          "required": ["entryScreen", "iterationStartScreen", "reviewScreen", "deleteConfirmationScreen"],
+          "required": ["entryScreen", "iterationStartScreen", "reviewScreen"],
           "properties": {
             "entryScreen": {
               "type": "string",
