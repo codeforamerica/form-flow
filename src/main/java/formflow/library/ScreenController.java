@@ -750,13 +750,13 @@ public class ScreenController extends FormFlowController {
             submission.setIterationIsCompleteToTrue(currentSubflowName, uuid);
             submission = saveToRepository(submission);
             redirectString = String.format("/flow/%s/%s", flow, nextScreen);
-            // check if we are in the nested and if we are in the nested, then check if we are done with all of the nested or just the individual one.
-
-            // if you are done with inner and outer flow then move to the review screen.
-            redirectString = String.format("/flow/%s/%s/%s", flow,
-                    subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName), uuid);
-
-            // we send to the next nestedSubflow based on iteration == false.
+//            // check if we are in the nested and if we are in the nested, then check if we are done with all of the nested or just the individual one.
+//
+//            // if you are done with inner and outer flow then move to the review screen.
+//            redirectString = String.format("/flow/%s/%s/%s", flow,
+//                    subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName), uuid);
+//
+//            // we send to the next nestedSubflow based on iteration == false.
 
             if (subflowManager.subflowHasRelationship(flow, currentSubflowName)) {
                 if (!subflowManager.hasFinishedAllSubflowIterations(currentSubflowName, submission)) {
@@ -768,7 +768,7 @@ public class ScreenController extends FormFlowController {
         } else {
             // Are you in a nested? and if you are not, go to the nest UUID screen.
           String suuid = "sdfksdfkjh";
-            redirectString = String.format("/flow/%s/%s/%s/%s", flow, nextScreen, uuid), suuid);
+            redirectString = String.format("/flow/%s/%s/%s/%s", flow, nextScreen, uuid, suuid);
             // reroute to the corrected nested subflow, otherwise ->
             redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
         }
@@ -986,7 +986,7 @@ public class ScreenController extends FormFlowController {
       if (subflowManager.subflowHasRelationship(flow, subflowName)) {
         model.put("relatedSubflow", subflowManager.getRelatedSubflowName(flow, subflowName));
         String uuidOfIterationToUpdate = (uuid != null && !uuid.isBlank()) ?
-                uuid : subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
+                uuid : subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission.getInputData());
         if (uuidOfIterationToUpdate == null) {
           throwNotFoundError(flow, screen,
               String.format("UUID was null when trying to find iteration for subflow '%s' in flow '%s. It's possible the user hit back in a subflow. Redirecting.'",
