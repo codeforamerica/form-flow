@@ -33,6 +33,19 @@ public class SubflowManager {
                     String.format("Subflow %s not found in flow %s. Check that your flows-config.yaml is configured correctly.", subflow, flow));
         }
     }
+
+    public Optional<SubflowRelationship> subflowRelationShip(String flowName, String subflowName) {
+        FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
+
+        if (flowConfiguration.getSubflows().containsKey(subflowName)) {
+            SubflowRelationship subflowRelationship = flowConfiguration.getSubflows().get(subflowName).getRelationship();
+            if (subflowRelationship != null) {
+                return Optional.of(subflowRelationship);
+            }
+        }
+
+        return Optional.empty();
+    }
     
     public void addSubflowRelationshipData(ScreenNavigationConfiguration currentScreen, String flow, Submission submission) {
         String subflowName = currentScreen.getSubflow();
@@ -65,6 +78,54 @@ public class SubflowManager {
         }
     }
 
+    public void addRepeatsForIterationData(Submission submission, String subflowName, String subflowUUID,
+            String inputName, List<String> repeatsForInputData) {
+        Map<String, Object> currentSubflowData = submission.getSubflowEntryByUuid(subflowName, subflowUUID);
+
+        if(!repeatsForInputData.isEmpty()){
+            submission.getSubflowEntryByUuid(subflowName, subflowUUID).put(inputName, setSubflowRepeatsOnIterations(currentSubflowData, repeatsForInputData,
+                    inputName));
+        } else {
+            submission.getSubflowEntryByUuid(subflowName, subflowUUID).remove(inputName);
+        }
+
+    }
+
+    private List<Map<String, Object>> setSubflowRepeatsOnIterations(Map<String, Object> currentSubflowData, List<String> inputListToRepeatOn,
+            String inputName) {
+
+        List<Map<String, Object>> repeatsForIterations = new ArrayList<>();
+
+        Boolean repeatRelationHasBeenSet = currentSubflowData.containsKey(inputName);
+        List<Map<String, Object>> relationshipData =  (List<Map<String, Object>>) currentSubflowData.get(inputName);
+
+        if (repeatRelationHasBeenSet && !relationshipData.isEmpty()) {
+            // this should only trigger when a relationship already exists and someone went back to the inputName screen and changed the list
+            //
+//            make sure that is still matches the list
+        } else {
+            if (!inputListToRepeatOn.isEmpty()) {
+                inputListToRepeatOn.forEach(selectedValue ->
+                        repeatsForIterations.add(
+                                createSubflowIterationRepeat(inputName, selectedValue)));
+            }
+        }
+
+        return repeatsForIterations;
+    }
+
+
+    private Map<String, Object> createSubflowIterationRepeat(String saveRelationshipAs, String inputDataId) {
+
+        Map<String, Object> entry = new HashMap<>();
+
+        entry.put("uuid", UUID.randomUUID().toString());
+        entry.put(saveRelationshipAs + "Value", inputDataId);
+        entry.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
+
+        return entry;
+    }
+
     public boolean hasFinishedAllSubflowIterations(String currentSubflowName, Submission submission) {
         List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) submission.getInputData().get(currentSubflowName);
 
@@ -74,6 +135,7 @@ public class SubflowManager {
     
     public String getIterationStartScreenForSubflow(String flowName, String subflowName) {
         FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
+
         if (flowConfiguration.getSubflows().get(subflowName) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Subflow %s not found in flow %s. Check that your flows-config.yaml is configured correctly.", subflowName, flowName));
@@ -97,6 +159,7 @@ public class SubflowManager {
         String relationKey = getRelationKey(flowName, subflowName);
         String relatedIterationId = (String) currentSubflowEntry.get(relationKey);
         String relatedSubflowName = getRelatedSubflowName(flowName, subflowName);
+
         return submission.getSubflowEntryByUuid(relatedSubflowName, relatedIterationId);
     }
 
@@ -104,6 +167,21 @@ public class SubflowManager {
         return flowConfigurations.stream()
                 .filter(config -> config.getName().equals(flow))
                 .findFirst().get().getSubflows().get(subflow);
+    }
+
+    public String getNextUuidToUpdateInCurrentFlow(String inputKey, Map<String, Object> inputData){
+        List<Map<String, Object>> subflowData = (List<Map<String, Object>>) inputData.get(inputKey);
+
+        // Try to find the next incomplete iteration
+        Optional<Map<String, Object>> nextIteration = subflowData.stream()
+                .filter(iteration -> Boolean.FALSE.equals(iteration.get(Submission.ITERATION_IS_COMPLETE_KEY)))
+                .findFirst();
+
+        if (nextIteration.isPresent()) {
+            return nextIteration.get().get("uuid").toString(); // normal forward flow
+        }
+
+        return null;
     }
 
     public String getUuidOfIterationToUpdate(String referer, String subflowName, Submission submission) {
@@ -156,7 +234,7 @@ public class SubflowManager {
         return null; // no UUID match found
     }
 
-    private FlowConfiguration getFlowConfiguration(String flowName) {
+    public FlowConfiguration getFlowConfiguration(String flowName) {
         FlowConfiguration flowConfiguration = flowConfigurations.stream()
                 .filter(config -> config.getName().equals(flowName))
                 .findFirst()

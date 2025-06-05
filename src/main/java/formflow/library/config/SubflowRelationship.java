@@ -7,4 +7,6 @@ public class SubflowRelationship {
     
     private String relatesTo;
     private String relationAlias;
+    private String repeatFor;
+    private String nestedUnder;
 }
