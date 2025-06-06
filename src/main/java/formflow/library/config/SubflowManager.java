@@ -2,6 +2,7 @@ package formflow.library.config;
 
 import formflow.library.data.Submission;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,7 +170,23 @@ public class SubflowManager {
                 .findFirst().get().getSubflows().get(subflow);
     }
 
-    public String getNextUuidToUpdateInCurrentFlow(String inputKey, Map<String, Object> inputData){
+
+    public Map<String, Object> getNestedSubflowByUUID(Submission submission, String parentKey, String parentUUID, String relationshipKey, String nestedUuid){
+        Map<String, Object> subflowData = submission.getSubflowEntryByUuid(parentKey, parentUUID);
+
+        List<Map<String, Object>> nestedSubFlowData = (List) subflowData.getOrDefault(relationshipKey, Collections.EMPTY_LIST);
+
+        Optional<Map<String, Object>> nextIteration = nestedSubFlowData.stream()
+                .filter(iteration -> iteration.get("uuid").equals(nestedUuid))
+                .findFirst();
+
+        if (nextIteration.isPresent()) {
+            return nextIteration.get(); // normal forward flow
+        }
+
+        return null;
+    }
+    public Map<String, Object> getNextUuidToUpdateInCurrentFlow(String inputKey, Map<String, Object> inputData){
         List<Map<String, Object>> subflowData = (List<Map<String, Object>>) inputData.get(inputKey);
 
         // Try to find the next incomplete iteration
@@ -178,7 +195,7 @@ public class SubflowManager {
                 .findFirst();
 
         if (nextIteration.isPresent()) {
-            return nextIteration.get().get("uuid").toString(); // normal forward flow
+            return nextIteration.get(); // normal forward flow
         }
 
         return null;
