@@ -710,7 +710,8 @@ public class ScreenController extends FormFlowController {
       @PathVariable(name = "screen") String requestScreen,
       HttpSession httpSession,
       HttpServletRequest request,
-      @RequestParam(name = "uuid", required = false) String requestUuid
+      @RequestParam(name = "subflowIterationUuid", required = false) String subflowIterationUuid,
+      @RequestParam(name = "nestedIterationUuid", required = false) String nesterIterationUuid
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow, requestScreen);
     // Checks if the flow and screen exist
@@ -727,41 +728,42 @@ public class ScreenController extends FormFlowController {
           String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
     }
 
-    String uuid = null;
-    if (requestUuid != null && !requestUuid.isBlank()) {
-      uuid = getValidatedIterationUuid(submission, flow, currentScreen, requestUuid);
-      if (uuid == null) {
+    String validatedSubflowIterationUuid = null;
+    if (subflowIterationUuid != null && !subflowIterationUuid.isBlank()) {
+      validatedSubflowIterationUuid = getValidatedIterationUuid(submission, flow, currentScreen, subflowIterationUuid);
+      if (validatedSubflowIterationUuid == null) {
         throwNotFoundError(submission.getFlow(), currentScreen.getName(),
             String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-                uuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+                validatedSubflowIterationUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
       }
     }
 
-    String nextScreen = getNextViewableScreen(flow, getNextScreenName(submission, currentScreen, uuid), uuid, submission);
-
-    boolean isCurrentScreenLastInSubflow = getValidatedScreenConfiguration(flow, nextScreen).getScreenNavigationConfiguration().getSubflow() == null;
-    String redirectString;
-    if (uuid != null) {
-      String currentSubflowName = currentScreen.getSubflow();
-      if (isCurrentScreenLastInSubflow) {
-        submission.setIterationIsCompleteToTrue(currentSubflowName, uuid);
-        submission = saveToRepository(submission);
-        redirectString = String.format("/flow/%s/%s", flow, nextScreen);
-        if (subflowManager.subflowHasRelationship(flow, currentSubflowName)) {
-          if (!subflowManager.hasFinishedAllSubflowIterations(currentSubflowName, submission)) {
-            // If you are in a subflow with a relationship we want you to keep looping until you loop over every iteration in the related subflow
-            redirectString = String.format("/flow/%s/%s", flow, subflowManager.getIterationStartScreenForSubflow(flow, currentSubflowName));
-          }
-        }
-      } else {
-        redirectString = String.format("/flow/%s/%s/%s", flow, nextScreen, uuid);
-      }
-    } else {
-      redirectString = String.format("/flow/%s/%s", flow, nextScreen);
+    String nextScreen = getNextViewableScreen(flow, getNextScreenName(submission, currentScreen, validatedSubflowIterationUuid),
+            validatedSubflowIterationUuid,
+            submission);
+    
+    if (validatedSubflowIterationUuid != null) {
+      return handleSubflowNavigation(submission, flow, currentScreen, subflowIterationUuid, nesterIterationUuid);
     }
 
+    String redirectString = String.format("/flow/%s/%s", flow, nextScreen);
     log.info("navigation: flow: " + flow + ", nextScreen: " + nextScreen);
     return new ModelAndView(new RedirectView(redirectString));
+  }
+
+  /**
+   * Get the current viewable screen that doesn't have a condition or meets its condition.
+   *
+   * @param submission submission
+   * @param subflowName       the flow containing the screen
+   * @param currentScreenConfiguration     the current screen
+   * @param subflowIterationUuid       current iteration uuid
+   * @param  nestedSubflowIterationUuid current iteration repeatsFor uuid
+   * @return Next viewable screen if the current one does not satisfy the condition, otherwise the current screen
+   */
+  private ModelAndView handleSubflowNavigation(Submission submission, String subflowName,
+          ScreenNavigationConfiguration currentScreenConfiguration, String subflowIterationUuid, String nestedSubflowIterationUuid){
+    return new ModelAndView();
   }
 
 
