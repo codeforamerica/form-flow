@@ -10,9 +10,11 @@ import formflow.library.config.ConditionManager;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.NextScreen;
+import formflow.library.config.RepeatFor;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.config.SubflowConfiguration;
 import formflow.library.config.SubflowManager;
+import formflow.library.config.SubflowRelationship;
 import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
@@ -519,6 +521,17 @@ public class ScreenController extends FormFlowController {
     }
 
     handleAddressValidation(submission, formSubmission);
+
+    Optional<SubflowRelationship> subflowRelationship = subflowManager.subflowRelationship(flow, currentScreen.getSubflow());
+    if (subflowRelationship.isPresent() && subflowRelationship.get().getRepeatfor() != null) {
+      RepeatFor repeatForConfiguration = subflowRelationship.get().getRepeatfor();
+      String inputNameKey = repeatForConfiguration.getInputName();
+      if (formSubmission.getFormData().containsKey(inputNameKey + "[]")) {
+        subflowManager.addRepeatsForIterationData(submission, currentScreen.getSubflow(), iterationUuid,
+                repeatForConfiguration.getSaveDataAs(),
+                (List) formSubmission.getFormData().getOrDefault(inputNameKey + "[]", List.of()));
+      }
+    }
 
     if (submission.getId() != null) {
       // if we are not working with a new submission, make sure to update any existing data
