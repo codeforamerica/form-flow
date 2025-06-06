@@ -232,7 +232,7 @@ public abstract class AbstractMockMvcTest {
       String inputName,
       String value, Integer numOfErrors) throws Exception {
     postExpectingFailure(pageName, inputName, value);
-    assertEquals(numOfErrors, new FormScreen(getPage(flowName, pageName)).getInputErrors(inputName).size());
+    assertEquals(numOfErrors, new FormScreen(getPage(pageName, flowName)).getInputErrors(inputName).size());
   }
 
   protected void postExpectingFailureAndAssertErrorsDisplayForThatInput(String flowName, String pageName,
@@ -266,13 +266,13 @@ public abstract class AbstractMockMvcTest {
 
   protected void assertPageHasInputError(String flowName, String pageName, String inputName, String errorMessage)
       throws Exception {
-    var page = new FormScreen(getPage(flowName, pageName));
+    var page = new FormScreen(getPage(pageName, flowName));
     assertEquals(errorMessage, page.getInputError(inputName).text());
   }
 
   protected void assertInputHasErrors(String flowName, String pageName, String inputName, List<String> errorMessages)
       throws Exception {
-    var page = new FormScreen(getPage(flowName, pageName));
+    var page = new FormScreen(getPage(pageName, flowName));
     // make sure there are errors returned
     assertFalse(page.getInputErrors(inputName).isEmpty(), "Expected errors on page, but there were none");
     // assert equal amount
