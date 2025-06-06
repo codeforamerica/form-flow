@@ -20,8 +20,11 @@ public class SubflowManager {
 
     List<FlowConfiguration> flowConfigurations;
     
-    public SubflowManager(List<FlowConfiguration> flowConfigurations) {
+    private final SubflowFilterManager subflowFilterManager;
+    
+    public SubflowManager(List<FlowConfiguration> flowConfigurations, SubflowFilterManager subflowFilterManager) {
         this.flowConfigurations = flowConfigurations;
+        this.subflowFilterManager = subflowFilterManager;
     }
 
     public boolean subflowHasRelationship(String flow, String subflow) {
@@ -41,8 +44,15 @@ public class SubflowManager {
         String relatedSubflowName = currentSubflow.getRelationship().getRelatesTo();
         String relatedIdKey = currentSubflow.getRelationship().getRelationAlias();
 
-        List<Map<String, Object>> relatedSubflowData = getSubflowData(submission, relatedSubflowName);
+        List<HashMap<String, Object>> relatedSubflowData = getSubflowData(submission, relatedSubflowName);
         List<Map<String, Object>> currentSubflowData = getOrCreateSubflowData(submission, subflowName);
+
+        if (subflowHasRelationshipFilter(flow, currentScreen.getSubflow())) {
+            List<HashMap<String, Object>> copyOfSubflowDataToFilterAgainst = relatedSubflowData.stream().map(HashMap::new)
+                    .toList();
+            relatedSubflowData = handleSubflowRelationshipFilter(flow, currentScreen.getSubflow(),
+                    copyOfSubflowDataToFilterAgainst);
+        }
 
         if (!submission.getInputData().containsKey(subflowName)) {
             // Initial setup: add all related items as incomplete iterations
@@ -101,9 +111,16 @@ public class SubflowManager {
     }
 
     public SubflowConfiguration getSubflowConfiguration(String flow, String subflow) {
-        return flowConfigurations.stream()
+        SubflowConfiguration subflowConfiguration = flowConfigurations.stream()
                 .filter(config -> config.getName().equals(flow))
                 .findFirst().get().getSubflows().get(subflow);
+        
+        if (subflowConfiguration == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Subflow %s not found in flow configuration for flow: %s. Check that your flows-config.yaml is configured correctly.", subflow, flow));
+        }
+        
+        return subflowConfiguration;
     }
 
     public String getUuidOfIterationToUpdate(String referer, String subflowName, Submission submission) {
@@ -178,8 +195,8 @@ public class SubflowManager {
                 .map(SubflowRelationship::getRelationAlias).orElse("relatedId");
     }
 
-    private List<Map<String, Object>> getSubflowData(Submission submission, String subflowName) {
-        return (List<Map<String, Object>>) submission.getInputData().getOrDefault(subflowName, new ArrayList<>());
+    private List<HashMap<String, Object>> getSubflowData(Submission submission, String subflowName) {
+        return (List<HashMap<String, Object>>) submission.getInputData().getOrDefault(subflowName, new ArrayList<>());
     }
 
     private List<Map<String, Object>> getOrCreateSubflowData(Submission submission, String subflowName) {
@@ -193,5 +210,22 @@ public class SubflowManager {
         entry.put(relationKey, relatedUuid);
         entry.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
         return entry;
+    }
+
+    public Boolean subflowHasRelationshipFilter(String flowName, String subflowName) {
+        FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
+
+        SubflowConfiguration subflowConfiguration = flowConfiguration.getSubflows().get(subflowName);
+        if (subflowConfiguration == null) {
+            throw new IllegalArgumentException("Subflow " + subflowName + " does not exist in flow " + flowName);
+        }
+
+        return subflowConfiguration.getRelationship() != null && subflowConfiguration.getRelationship().getFilter() != null;
+    }
+
+    public List<HashMap<String, Object>> handleSubflowRelationshipFilter(String flowName, String subflowName, List<HashMap<String, Object>> subflowDataToFilter) {
+        SubflowConfiguration subflowConfiguration = getSubflowConfiguration(flowName, subflowName);
+        String filterName = subflowConfiguration.getRelationship().getFilter();
+        return subflowFilterManager.runFilter(subflowDataToFilter, filterName);
     }
 }

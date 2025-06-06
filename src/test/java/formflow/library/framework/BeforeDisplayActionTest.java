@@ -46,7 +46,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     assertThat(submission.getInputData().get("ssnInput")).isNull();
 
     // beforeDisplay
-    MvcResult result = getPageExpectingSuccess("inputs").andReturn();
+    MvcResult result = getPageExpectingSuccess("testFlow", "inputs").andReturn();
     Map<String, String> inputData = (Map<String, String>) result.getModelAndView().getModel().get("inputData");
     assertThat(inputData.get("ssnInput")).isEqualTo(ssnInput);
     assertThat(inputData.get("ssnInputEncrypted")).isNull();
@@ -82,7 +82,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     assertThat(subflowEntry.get("ssnInput")).isNull();
 
     // beforeDisplay
-    MvcResult result = getPageExpectingSuccess("pageWithSSNInput/" + subflowUuid + "/edit").andReturn();
+    MvcResult result = getPageExpectingSuccess("testFlow", "pageWithSSNInput/" + subflowUuid + "/edit").andReturn();
     Map<String, String> subflowItem = (Map<String, String>) result.getModelAndView().getModel().get("currentSubflowItem");
     assertThat(subflowItem.get("ssnInput")).isEqualTo(ssnInput);
     assertThat(subflowItem.get("ssnInputEncrypted")).isNull();

@@ -60,7 +60,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     postExpectingFailure("contactInfoPreference",
         Map.of("email", List.of("malformed.com"), "howToContactYou[]", List.of("email"))
     );
-    assertPageHasInputError("contactInfoPreference", "email", INVALID_EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "email", INVALID_EMAIL_ERROR_MESSAGE);
   }
 
   @Test
@@ -80,7 +80,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
             "phoneNumber", List.of(""))
     );
 
-    assertPageHasInputError("contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
             "email", List.of(""))
     );
 
-    assertPageHasInputError("contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
   }
 
   @Test
@@ -103,7 +103,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
             "phoneNumber", List.of(""))
     );
 
-    assertPageHasInputError("contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
-    assertPageHasInputError("contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
   }
 }

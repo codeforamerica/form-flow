@@ -64,7 +64,7 @@ public class OnPostActionTest extends AbstractMockMvcTest {
             "dateYear", List.of("1999"))
     );
 
-    assertPageHasInputError("inputs", "dateFull", dateErrorMessage);
+    assertPageHasInputError("testFlow", "inputs", "dateFull", dateErrorMessage);
   }
 }
 
