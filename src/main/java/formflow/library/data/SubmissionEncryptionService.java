@@ -4,7 +4,9 @@ import static formflow.library.data.Submission.copySubmission;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.ConfigurationV0;
 import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -54,8 +56,8 @@ public class SubmissionEncryptionService {
 
     try {
       AeadConfig.register();
-      encDec = CleartextKeysetHandle.read(JsonKeysetReader.withString(key))
-          .getPrimitive(Aead.class);
+      KeysetHandle keysetHandle = CleartextKeysetHandle.read(JsonKeysetReader.withString(key));
+      encDec = keysetHandle.getPrimitive(ConfigurationV0.get(), Aead.class);
     } catch (GeneralSecurityException | IOException e) {
       throw new IllegalStateException(e);
     }
