@@ -265,4 +265,19 @@ public class SubflowManager {
         return currentSubflowData.stream()
                 .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
     }
+
+    public Map<String, Object> getNextUuidToUpdateInCurrentFlow(String inputKey, Map<String, Object> inputData){
+        List<Map<String, Object>> subflowData = (List<Map<String, Object>>) inputData.get(inputKey);
+
+        // Try to find the next incomplete iteration
+        Optional<Map<String, Object>> nextIteration = subflowData.stream()
+                .filter(iteration -> Boolean.FALSE.equals(iteration.get(Submission.ITERATION_IS_COMPLETE_KEY)))
+                .findFirst();
+
+        if (nextIteration.isPresent()) {
+            return nextIteration.get(); // normal forward flow
+        }
+
+        return null;
+    }
 }

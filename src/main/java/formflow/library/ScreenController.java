@@ -811,7 +811,6 @@ public class ScreenController extends FormFlowController {
         String redirectString = "";
         String currentSubflowName = currentScreenConfiguration.getSubflow();
 
-        String currentSubflowRelationshipAlias = subflowRelationship.getRelationAlias();
         RepeatFor repeatsFor = subflowRelationship.getRepeatfor();
 
         Map<String, Object> currentSubflowEntryData = submission.getSubflowEntryByUuid(currentSubflowName,
@@ -821,10 +820,16 @@ public class ScreenController extends FormFlowController {
             String repeatsForSaveDataAs = repeatsFor.getSaveDataAs();
 
             if (nestedSubflowIterationUuid == null) {
-                // We are not currently in a nested subflow iteration
-                // If that is the case, then we need to check if the nested data exists, and i
-                // if it does, we route to the first element in the nested list.
-                // If the nested data does not exist, then we need to route to the next screen in the subflow
+                if (currentSubflowEntryData.containsKey(repeatsForSaveDataAs)) {
+                    String firstNestedUuidInData = (String) subflowManager.getNextUuidToUpdateInCurrentFlow(repeatsForSaveDataAs,
+                            currentSubflowEntryData).get("uuid");
+                    redirectString = String.format("/flow/%s/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
+                            subflowIterationUuid,
+                            firstNestedUuidInData);
+                } else {
+                    redirectString = String.format("/flow/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
+                            subflowIterationUuid);
+                }
             }
 
             String validatedNestedSubflowUuid = getValidatedNestedIterationUuid(submission, flowName, currentSubflowName,
@@ -844,7 +849,7 @@ public class ScreenController extends FormFlowController {
                                 currentScreenConfiguration.getName()));
             }
 
-            Boolean inLastScreenOfNestedSubflow = nextScreenConfiguration.getSubflow() == null;
+            Boolean inLastScreenOfNestedSubflow = currentScreenConfiguration.getSubflow() == null;
             if (inLastScreenOfNestedSubflow) {
                 Map<String, Object> nestedIteration = (Map<String, Object>) currentSubflowEntryData.get(
                         validatedNestedSubflowUuid);
@@ -854,13 +859,21 @@ public class ScreenController extends FormFlowController {
                 boolean allRepeatForIterationsComplete = subflowManager.hasFinishedAllIterations(repeatsForSaveDataAs,
                         currentSubflowEntryData);
 
-                if(allRepeatForIterationsComplete){
+                if (allRepeatForIterationsComplete) {
                     submission.setIterationIsCompleteToTrue(currentSubflowName, subflowIterationUuid);
                     saveToRepository(submission);
-                    redirectString = String.format("/flow/%s/%s", flowName, nextScreenConfiguration.getName());
+
+                    if (subflowRelationship.getRelatesTo() != null) {
+                        if (!subflowManager.hasFinishedAllSubflowIterations(currentSubflowName, submission)) {
+                            redirectString = String.format("/flow/%s/%s", flowName,
+                                    subflowManager.getIterationStartScreenForSubflow(flowName, currentSubflowName));
+                        }
+                    }
+                    redirectString = String.format("/flow/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
+                            subflowIterationUuid);
                 } else {
                     redirectString = String.format("/flow/%s/%s/%s/%s", flowName, getNextViewableScreen(flowName,
-                            subflowManager.getIterationStartScreenForSubflow(flowName, currentSubflowName), flowName, submission),
+                                    subflowManager.getIterationStartScreenForSubflow(flowName, currentSubflowName), flowName, submission),
                             subflowIterationUuid,
                             validatedNestedSubflowUuid);
                 }
@@ -868,8 +881,22 @@ public class ScreenController extends FormFlowController {
                 return String.format("/flow/%s/%s/%s/%s", flowName, nextScreenConfiguration.getName(), subflowIterationUuid,
                         validatedNestedSubflowUuid);
             }
-        }
+        } else {
+            if (currentScreenConfiguration.getSubflow() == null) {
+                submission.setIterationIsCompleteToTrue(currentSubflowName, subflowIterationUuid);
+                submission = saveToRepository(submission);
+                if (!subflowManager.hasFinishedAllSubflowIterations(currentSubflowName, submission)) {
+                    redirectString = String.format("/flow/%s/%s", flowName,
+                            subflowManager.getIterationStartScreenForSubflow(flowName, currentSubflowName));
+                } else {
+                    redirectString = String.format("/flow/%s/%s", flowName, nextScreenConfiguration.getName());
+                }
+            } else {
+                redirectString = String.format("/flow/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
+                        subflowIterationUuid);
+            }
 
+        }
         return redirectString;
     }
 
