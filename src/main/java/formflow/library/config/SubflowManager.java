@@ -258,4 +258,11 @@ public class SubflowManager {
 
         return entry;
     }
+
+    public boolean hasFinishedAllIterations(String subflowDataKey, Map<String, Object> subflowIterationData) {
+        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) subflowIterationData.get(subflowDataKey);
+
+        return currentSubflowData.stream()
+                .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
+    }
 }
