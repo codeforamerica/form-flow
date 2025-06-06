@@ -525,8 +525,8 @@ public class ScreenController extends FormFlowController {
     handleAddressValidation(submission, formSubmission);
 
     Optional<SubflowRelationship> subflowRelationship = subflowManager.subflowRelationship(flow, currentScreen.getSubflow());
-    if (subflowRelationship.isPresent() && subflowRelationship.get().getRepeatfor() != null) {
-      RepeatFor repeatForConfiguration = subflowRelationship.get().getRepeatfor();
+    if (subflowRelationship.isPresent() && subflowRelationship.get().getRepeatFor() != null) {
+      RepeatFor repeatForConfiguration = subflowRelationship.get().getRepeatFor();
       String inputNameKey = repeatForConfiguration.getInputName();
       if (formSubmission.getFormData().containsKey(inputNameKey + "[]")) {
         subflowManager.addRepeatsForIterationData(submission, currentScreen.getSubflow(), iterationUuid,
@@ -588,7 +588,7 @@ public class ScreenController extends FormFlowController {
     setSubmissionInSession(httpSession, submission, flow);
     actionManager.handleAfterSaveAction(currentScreen, submission, iterationUuid);
 
-    return new RedirectView(String.format("/flow/%s/%s/navigation?uuid=%s", flow, screen, iterationUuid));
+    return new RedirectView(String.format("/flow/%s/%s/navigation?subflowIterationUuid=%s", flow, screen, iterationUuid));
   }
 
   /**
@@ -629,7 +629,7 @@ public class ScreenController extends FormFlowController {
       }
     }
 
-    return new ModelAndView(new RedirectView(String.format("/flow/%s/%s?uuid=%s", flow, deleteConfirmationScreen, uuid)));
+    return new ModelAndView(new RedirectView(String.format("/flow/%s/%s?subflowIterationUuid=%s", flow, deleteConfirmationScreen, uuid)));
   }
 
   /**
@@ -719,7 +719,7 @@ public class ScreenController extends FormFlowController {
 
   @GetMapping({FLOW_SCREEN_PATH + "/{subflowIterationUuid}/{nestedIterationUuid}",
           FLOW_SCREEN_PATH + "/{subflowIterationUuid}/{nestedIterationUuid}"
-                  + "}/edit"})
+                  + "/edit"})
   ModelAndView getNestedSubflowScreen(
           @PathVariable(name = "flow") String flow,
           @PathVariable(name = "screen") String requestScreen,
@@ -754,12 +754,12 @@ public class ScreenController extends FormFlowController {
 
     final SubflowRelationship subflowRelationship = subflowRelationshipOptional.get();
 
-    if (subflowRelationshipOptional.isPresent() && subflowRelationship.getRepeatfor() == null) {
+    if (subflowRelationshipOptional.isPresent() && subflowRelationship.getRepeatFor() == null) {
       log.error("Flow configuration error, expecting repeatsFor in the nested relationship");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    RepeatFor repeatFor = subflowRelationship.getRepeatfor();
+    RepeatFor repeatFor = subflowRelationship.getRepeatFor();
 
     String validatedSubflowIterationUUID = getValidatedIterationUuid(submission, flow, currentScreen, subflowIterationUuid);
 
@@ -919,7 +919,7 @@ public class ScreenController extends FormFlowController {
         String redirectString = "";
         String currentSubflowName = currentScreenConfiguration.getSubflow();
 
-        RepeatFor repeatsFor = subflowRelationship.getRepeatfor();
+        RepeatFor repeatsFor = subflowRelationship.getRepeatFor();
 
         Map<String, Object> currentSubflowEntryData = submission.getSubflowEntryByUuid(currentSubflowName,
                 subflowIterationUuid);
@@ -1154,8 +1154,8 @@ public class ScreenController extends FormFlowController {
       String uuid = subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
       if (uuid == null) {
         throwNotFoundError(flow, screen,
-            String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-                uuid, subflowName, submission.getFlow(), screen));
+                String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                        uuid, subflowName, submission.getFlow(), screen));
       }
       return String.format("/flow/%s/%s/%s", flow, screen, uuid);
     }
