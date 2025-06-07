@@ -67,7 +67,24 @@ public class ActionManager {
    * @param uuid           The uuid of the current subflow.
    */
   public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
-      Submission submission, String uuid) {
+      Submission submission, String uuid, String repeatsForUuid) {
+    String actionName = currentScreen.getOnPostAction();
+    if (actionName != null) {
+      runAction(actionName, formSubmission, submission, uuid, repeatsForUuid);
+    }
+  }
+
+  /**
+   * <code>handleOnPostAction()</code> invokes a method in the ScreenController. Runs before validation. The
+   * handleOnPostAction method is called on only screens in a subflow. Runs an action if a screen has one defined.
+   *
+   * @param currentScreen  The screen that we are currently saving data from.
+   * @param formSubmission The current form submission
+   * @param submission     The submission object after changes to the current screen have been saved to the repository
+   * @param uuid           The uuid of the current subflow.
+   */
+  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
+          Submission submission, String uuid) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
       runAction(actionName, formSubmission, submission, uuid);
@@ -192,6 +209,10 @@ public class ActionManager {
     runAction(name, () -> getAction(name).run(submission));
   }
 
+  private void runAction(String name, Submission submission, String uuid, String repeatsForUuid) {
+    runAction(name, () -> getAction(name).run(submission, uuid, repeatsForUuid));
+  }
+
   private void runAction(String name, Submission submission, String uuid) {
     runAction(name, () -> getAction(name).run(submission, uuid));
   }
@@ -202,6 +223,10 @@ public class ActionManager {
 
   private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid) {
     runAction(name, () -> getAction(name).run(formSubmission, submission, uuid));
+  }
+
+  private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid, String repeatsForUuid) {
+    runAction(name, () -> getAction(name).run(formSubmission, submission, uuid, repeatsForUuid));
   }
 
   private void runAction(String name, Runnable action) {

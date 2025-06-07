@@ -2,6 +2,7 @@ package formflow.library.config;
 
 import formflow.library.data.Submission;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,17 @@ public class SubflowManager {
         String relatedIterationId = (String) currentSubflowEntry.get(relationKey);
         String relatedSubflowName = getRelatedSubflowName(flowName, subflowName);
         return submission.getSubflowEntryByUuid(relatedSubflowName, relatedIterationId);
+    }
+
+    public Map<String, Object> getRelatedNestedSubflowIteration(Map<String, Object> subflowData,
+            String nestedSubflowKey, String nestedIterationId) {
+
+        List<Map<String, Object>> nestedIterations = (List<Map<String, Object>>) subflowData.getOrDefault(nestedSubflowKey, Collections.EMPTY_LIST);
+
+        Optional<Map<String, Object>> currentIteration = nestedIterations.stream()
+                .filter(iteration -> iteration.get("uuid").equals(nestedIterationId)).findFirst();
+
+        return currentIteration.isPresent() ? currentIteration.get() : null;
     }
 
     public SubflowConfiguration getSubflowConfiguration(String flow, String subflow) {
