@@ -1,0 +1,16 @@
+<th:block
+    th:replace="~{fragments/screens/screenWithYesAndNoButtons ::
+  screenWithYesAndNoButtons(
+    title=#{'Housemates'},
+    header=#{'Do you live with any of these people?'},
+    formAction=${formAction},
+    inputName='hasHousehold',
+    inputContent=~{::inputContent})}">
+  <th:block th:ref="inputContent">
+    <ul class="list--bulleted spacing-below-60">
+      <li th:text="#{'Your spouse'}"></li>
+      <li th:text="#{'Your children'}"></li>
+      <li th:text="#{'Other family members'}"></li>
+    </ul>
+  </th:block>
+</th:block>

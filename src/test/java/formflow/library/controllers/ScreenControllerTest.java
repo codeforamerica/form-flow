@@ -103,7 +103,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
       submissionRepositoryService.save(submission);
-      getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
+      getPageExpectingSuccess("testFlow", "subflowAddItem/aaa-bbb-ccc");
     }
 
     @Test
@@ -460,7 +460,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     String pageName = "subflowAddItem/new";
     postExpectingFailure(pageName, params, "subflowAddItem");
-    var page = new FormScreen(getPage("subflowAddItem"));
+    var page = new FormScreen(getPage("subflowAddItem", "testFlow"));
 
     assertTrue(page.hasDateInputError("dateSubflowFull"));
     assertTrue(page.hasInputError("numberInputSubflow"));
@@ -522,7 +522,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     String pageNamePage2 = "subflowAddItemPage2/" + iterationUuid;
     postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
 
-    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid));
+    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid, "testFlow"));
     assertTrue(page2.hasDateInputError("dateInputSubflowPage2"));
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));

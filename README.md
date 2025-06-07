@@ -332,6 +332,63 @@ Incomplete iterations will not be included in the generated PDF of the submissio
 accessible in the
 database for error resolution and debugging.
 
+### Defining Relationships Between Subflows
+
+Subflows can be related to one another using YAML configuration. This looks like:
+
+```yaml
+subflows:
+ childcareSchedules:
+   relationship:
+     relatesTo: children
+     relationAlias: childId
+     filter: ChildrenInNeedOfChildCare
+```
+
+The above YAML defines a relationship between the `childcareSchedules` subflow and the 'children'
+subflow. This relationship does two things:
+
+It limits the `childcareSchedules` subflow to only allow as many iterations as there are children in
+the database for the children subflow, and it defines a relationship where the `childcareSchedules` 
+subflow JSON data will be stored with a foreign key of the UUID of the `children` subflow iteration
+that a given `childcareSchedules` iteration is related to.
+
+In the JSON this will look like this:
+
+```JSON
+"childCareSchedules": [
+  {
+    "uuid": "977c5ecb-3d15-4c6e-992a-4d3c77a5d9a7",
+    "iterationIsComplete": "true",
+    "childId": "a52a4e5c-6dc4-45e7-95ad-c31724755537"
+  }],
+"children": [
+  {
+    "uuid": "a52a4e5c-6dc4-45e7-95ad-c31724755537",
+    "iterationIsComplete": "true",
+    "childFirstName": "John",
+    "childLastName": "Doe"
+  }]
+```
+Note that `childCareSchedules` has one iteration that includes a foreign key with the defined alias
+of `childId` whose value is the UUID of the `children` subflow iteration that corresponds to that 
+`childCareSchedules` iteration.
+
+#### Accessing Related Subflows in Templates
+Related subflows can be accessed in Thymeleaf templates using the `relatedSubflowIteration` key in
+the Thymeleaf model. This has been added to the Thymeleaf model for convenience and when defining
+relationships between subflows `relatedSubflowIteration` will be present and always hold a value of 
+iteration data for the corresponding related subflow iteration. In this case, with the above JSON 
+example, the `relatedSubflowIteration` for the `childCareSchedules` subflow would be the 
+`HashMap<String, Object>` that represents the `children` subflow iteration or:
+```JSON
+{
+  "uuid": "a52a4e5c-6dc4-45e7-95ad-c31724755537",
+  "iterationIsComplete": "true",
+  "childFirstName": "John",
+  "childLastName": "Doe"
+}
+```
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the

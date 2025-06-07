@@ -1,0 +1,26 @@
+<th:block
+    th:with="houseHoldMemberName=${relatedSubflowIteration.get('householdMemberFirstName') + ' ' + relatedSubflowIteration.get('householdMemberLastName')},">
+  <th:block
+      th:replace="~{fragments/screens/screenWithOneInput ::
+  screenWithOneInput(
+    title=#{'Income Types'},
+    header=${'What sources does ' + houseHoldMemberName + ' receive income from?'},
+    inputName='incomeTypes',
+    formAction=${formAction},
+    inputName='incomeTypes',
+    inputContent=~{::inputContent})}">
+    <th:block th:ref="inputContent">
+      <th:block th:replace="~{fragments/inputs/checkboxFieldset ::
+      checkboxFieldset(inputName='incomeTypes',
+      ariaLabel='header',
+      content=~{::checkboxContent})}">
+        <th:block th:ref="checkboxContent">
+          <th:block
+              th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='incomeTypes', value='incomeJob', label=#{'Job income'})}"/>
+          <th:block
+              th:replace="~{fragments/inputs/checkboxInSet :: checkboxInSet(inputName='incomeTypes', value='incomeSelf', label=#{'Self Employment Income'})}"/>
+        </th:block>
+      </th:block>
+    </th:block>
+  </th:block>
+</th:block>
