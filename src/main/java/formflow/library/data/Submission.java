@@ -161,6 +161,28 @@ public class Submission {
   }
 
   /**
+   * Merges the passed in form submission data with the subflow's iteration data into the Submission's subflow's data for that iteration.
+   *
+   * @param subflowName        subflow that the iteration data belongs with, not null
+   * @param iterationToUpdate  existing data for a particular iteration of a subflow, may be empty, but not null
+   * @param formDataSubmission new data for a particular iteration of a subflow, not null
+   */
+  public void mergeFormDataWithRepeatsForSubflowIterationData(String subflowName, String subflowUuid, String repeatForSaveAsKey, Map<String, Object> iterationToUpdate,
+          Map<String, Object> formDataSubmission) {
+
+    iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
+
+
+    Map<String, Object> subflowIterationData = getSubflowEntryByUuid(subflowName, subflowUuid);
+    List<Map<String, Object>> subflowArr = (List<Map<String, Object>>) subflowIterationData.get(repeatForSaveAsKey);
+    int indexToUpdate = subflowArr.indexOf(iterationToUpdate);
+
+    subflowArr.set(indexToUpdate, formDataSubmission);
+    //toDo - update this replace to actually replace the correct element
+    inputData.replace(subflowName, subflowArr);
+  }
+
+  /**
    * Sets the 'iterationIsComplete' status for a given iteration.
    *
    * @param subflow       the subflow the iteration is a part of
