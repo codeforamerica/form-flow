@@ -375,8 +375,8 @@ of `childId` whose value is the UUID of the `children` subflow iteration that co
 `childCareSchedules` iteration.
 
 #### Accessing Related Subflows in Templates
-Related subflows can be accessed in thymeleaf templates using the `relatedSubflowIteration` key in
-the thymelead model. This has been added to a the thymeleaf model for convenience and when defining
+Related subflows can be accessed in Thymeleaf templates using the `relatedSubflowIteration` key in
+the Thymeleaf model. This has been added to the Thymeleaf model for convenience and when defining
 relationships between subflows `relatedSubflowIteration` will be present and always hold a value of 
 iteration data for the corresponding related subflow iteration. In this case, with the above JSON 
 example, the `relatedSubflowIteration` for the `childCareSchedules` subflow would be the 
