@@ -221,38 +221,38 @@ public class SubflowManager {
     }
 
     public void addRepeatsForIterationData(Submission submission, String subflowName, String subflowUUID,
-            String inputName, List<String> repeatsForInputData) {
+            String saveAsInputName, List<String> repeatsForInputData) {
         Map<String, Object> currentSubflowData = submission.getSubflowEntryByUuid(subflowName, subflowUUID);
 
         if (!repeatsForInputData.isEmpty()) {
             submission.getSubflowEntryByUuid(subflowName, subflowUUID)
-                    .put(inputName, setSubflowRepeatsForIterations(currentSubflowData, repeatsForInputData,
-                            inputName));
+                    .put(saveAsInputName, setSubflowRepeatsForIterations(currentSubflowData, repeatsForInputData,
+                            saveAsInputName));
         } else {
-            submission.getSubflowEntryByUuid(subflowName, subflowUUID).remove(inputName);
+            submission.getSubflowEntryByUuid(subflowName, subflowUUID).remove(saveAsInputName);
         }
 
     }
 
     private List<Map<String, Object>> setSubflowRepeatsForIterations(Map<String, Object> currentSubflowData,
             List<String> inputListToRepeatOn,
-            String inputName) {
+            String repeatsForInputData) {
 
         List<Map<String, Object>> repeatsForIterations = new ArrayList<>();
 
-        Boolean repeatRelationHasBeenSet = currentSubflowData.containsKey(inputName);
-        List<Map<String, Object>> relationshipData = (List<Map<String, Object>>) currentSubflowData.get(inputName);
+        Boolean repeatRelationHasBeenSet = currentSubflowData.containsKey(repeatsForInputData);
+        List<Map<String, Object>> relationshipData = (List<Map<String, Object>>) currentSubflowData.get(repeatsForInputData);
 
         if (repeatRelationHasBeenSet && !relationshipData.isEmpty()) {
             // todo: If the data already exists, keep but if the data is new then add.
 
-            // this should only trigger when a relationship already exists and someone went back to the inputName screen and changed the list
+            // this should only trigger when a relationship already exists and someone went back to the repeatsForInputData screen and changed the list
             //
 //            make sure that is still matches the list
         } else {
             inputListToRepeatOn.forEach(selectedValue ->
                     repeatsForIterations.add(
-                            createSubflowIterationRepeat(inputName, selectedValue)));
+                            createSubflowIterationRepeat(repeatsForInputData, selectedValue)));
 
         }
 
