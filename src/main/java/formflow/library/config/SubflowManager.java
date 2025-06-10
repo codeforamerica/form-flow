@@ -1,7 +1,9 @@
 package formflow.library.config;
 
+import formflow.library.ScreenController;
 import formflow.library.data.Submission;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,7 @@ public class SubflowManager {
     List<FlowConfiguration> flowConfigurations;
     
     private final SubflowFilterManager subflowFilterManager;
-    
+
     public SubflowManager(List<FlowConfiguration> flowConfigurations, SubflowFilterManager subflowFilterManager) {
         this.flowConfigurations = flowConfigurations;
         this.subflowFilterManager = subflowFilterManager;
@@ -101,8 +103,9 @@ public class SubflowManager {
                     String.format("Subflow %s not found in flow %s. Is it possible you entered an incorrect subflow name in your subflow configuration?", currentSubflowName, flowName));
         }
     }
-    
-    public Map<String, Object> getRelatedSubflowIteration(String flowName, String subflowName, String iterationId, Submission submission) {
+
+    public Map<String, Object> getRelatedSubflowIteration(String flowName, String subflowName, String iterationId,
+            Submission submission) {
         Map<String, Object> currentSubflowEntry = submission.getSubflowEntryByUuid(subflowName, iterationId);
         String relationKey = getRelationKey(flowName, subflowName);
         String relatedIterationId = (String) currentSubflowEntry.get(relationKey);
@@ -114,12 +117,12 @@ public class SubflowManager {
         SubflowConfiguration subflowConfiguration = flowConfigurations.stream()
                 .filter(config -> config.getName().equals(flow))
                 .findFirst().get().getSubflows().get(subflow);
-        
+
         if (subflowConfiguration == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Subflow %s not found in flow configuration for flow: %s. Check that your flows-config.yaml is configured correctly.", subflow, flow));
         }
-        
+
         return subflowConfiguration;
     }
 
@@ -227,5 +230,118 @@ public class SubflowManager {
         SubflowConfiguration subflowConfiguration = getSubflowConfiguration(flowName, subflowName);
         String filterName = subflowConfiguration.getRelationship().getFilter();
         return subflowFilterManager.runFilter(subflowDataToFilter, filterName);
+    }
+
+    public Optional<SubflowRelationship> subflowRelationship(String flowName, String subflowName) {
+        FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
+
+        if (flowConfiguration.getSubflows().containsKey(subflowName)) {
+            SubflowRelationship subflowRelationship = flowConfiguration.getSubflows().get(subflowName).getRelationship();
+            if (subflowRelationship != null) {
+                return Optional.of(subflowRelationship);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public void addRepeatsForIterationData(Submission submission, String subflowName, String subflowUUID,
+            String saveAsInputName, List<String> repeatsForInputData) {
+        Map<String, Object> currentSubflowData = submission.getSubflowEntryByUuid(subflowName, subflowUUID);
+
+        if (!repeatsForInputData.isEmpty()) {
+            Boolean repeatRelationHasBeenSet = currentSubflowData.containsKey(saveAsInputName);
+
+            if (!repeatRelationHasBeenSet) {
+                submission.getSubflowEntryByUuid(subflowName, subflowUUID)
+                        .put(saveAsInputName, setSubflowRepeatsForIterations(repeatsForInputData,
+                                saveAsInputName));
+            } else {
+                submission.getSubflowEntryByUuid(subflowName, subflowUUID)
+                        .put(saveAsInputName,
+                                updateSubflowRepeatsForIterations(currentSubflowData, repeatsForInputData, saveAsInputName));
+            }
+        } else {
+            submission.getSubflowEntryByUuid(subflowName, subflowUUID).remove(saveAsInputName);
+        }
+
+    }
+
+    private List<Map<String, Object>> setSubflowRepeatsForIterations(List<String> inputListToRepeatOn,
+            String repeatsForInputData) {
+
+        List<Map<String, Object>> repeatsForIterations = new ArrayList<>();
+
+        inputListToRepeatOn.forEach(selectedValue ->
+                repeatsForIterations.add(
+                        createSubflowIterationRepeat(repeatsForInputData, selectedValue)));
+
+        return repeatsForIterations;
+    }
+
+    private List<Map<String, Object>> updateSubflowRepeatsForIterations(Map<String, Object> currentSubflowData,
+            List<String> repeatsForInputData, String saveAsInputName) {
+        List<Map<String, Object>> currentRepeatForIterations = (List<Map<String, Object>>) currentSubflowData.getOrDefault(
+                saveAsInputName, Collections.EMPTY_LIST);
+        List<Map<String, Object>> newRepeatForIterations = new ArrayList<>();
+
+        repeatsForInputData.forEach(newEntry -> {
+            Optional<Map<String, Object>> matchingIteration = currentRepeatForIterations.stream()
+                    .filter(oldEntry -> oldEntry.get(saveAsInputName + "Value").equals(newEntry)).findFirst();
+
+            if (matchingIteration.isPresent()) {
+                newRepeatForIterations.add(matchingIteration.get());
+            } else {
+                newRepeatForIterations.add(createSubflowIterationRepeat(saveAsInputName, newEntry));
+            }
+        });
+
+        return newRepeatForIterations;
+
+    }
+
+    private Map<String, Object> createSubflowIterationRepeat(String saveRelationshipAs, String inputDataId) {
+
+        Map<String, Object> entry = new HashMap<>();
+
+        entry.put("uuid", UUID.randomUUID().toString());
+        entry.put(saveRelationshipAs + "Value", inputDataId);
+        entry.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
+
+        return entry;
+    }
+
+    public boolean hasFinishedAllIterations(String subflowDataKey, Map<String, Object> subflowIterationData) {
+        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) subflowIterationData.get(subflowDataKey);
+
+        return currentSubflowData.stream()
+                .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
+    }
+
+    public Map<String, Object> getRepeatsForIteration(Map<String, Object> subflowData,
+            String nestedSubflowKey, String nestedIterationId) {
+
+        List<Map<String, Object>> nestedIterations = (List<Map<String, Object>>) subflowData.getOrDefault(nestedSubflowKey,
+                Collections.EMPTY_LIST);
+
+        Optional<Map<String, Object>> currentIteration = nestedIterations.stream()
+                .filter(iteration -> iteration.get("uuid").equals(nestedIterationId)).findFirst();
+
+        return currentIteration.isPresent() ? currentIteration.get() : null;
+    }
+
+    public Map<String, Object> getNextRepeatForIterationUuid(String inputKey, Map<String, Object> inputData) {
+        List<Map<String, Object>> subflowData = (List<Map<String, Object>>) inputData.get(inputKey);
+
+        // Try to find the next incomplete iteration
+        Optional<Map<String, Object>> nextIteration = subflowData.stream()
+                .filter(iteration -> Boolean.FALSE.equals(iteration.get(Submission.ITERATION_IS_COMPLETE_KEY)))
+                .findFirst();
+
+        if (nextIteration.isPresent()) {
+            return nextIteration.get(); // normal forward flow
+        }
+
+        return null;
     }
 }

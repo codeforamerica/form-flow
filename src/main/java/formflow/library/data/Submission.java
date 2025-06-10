@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,6 +159,40 @@ public class Submission {
     int indexToUpdate = subflowArr.indexOf(iterationToUpdate);
     subflowArr.set(indexToUpdate, formDataSubmission);
     inputData.replace(subflowName, subflowArr);
+  }
+
+  /**
+   * Merges the passed in form submission data with the subflow's iteration data into the Submission's subflow's data for that iteration.
+   *
+   * @param subflowName        subflow that the iteration data belongs with, not null
+   * @param iterationToUpdate  existing data for a particular iteration of a subflow, may be empty, but not null
+   * @param formDataSubmission new data for a particular iteration of a subflow, not null
+   */
+  public void mergeFormDataWithRepeatsForSubflowIterationData(String subflowName, String subflowUuid, String repeatForSaveAsKey, Map<String, Object> iterationToUpdate,
+          Map<String, Object> formDataSubmission) {
+
+    iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
+
+
+    Map<String, Object> subflowIterationData = getSubflowEntryByUuid(subflowName, subflowUuid);
+    List<Map<String, Object>> nestedIterations = (List<Map<String, Object>>) subflowIterationData.getOrDefault(repeatForSaveAsKey,
+        Collections.EMPTY_LIST);
+
+    Optional<Map<String, Object>> currentIteration = nestedIterations.stream()
+        .filter(iteration -> iteration.get("uuid").equals(formDataSubmission.get("uuid"))).findFirst();
+
+    if (currentIteration.isPresent()) {
+      int nestedIndexToUpdate = nestedIterations.indexOf(currentIteration.get());
+      nestedIterations.set(nestedIndexToUpdate, formDataSubmission);
+
+      subflowIterationData.put(repeatForSaveAsKey, nestedIterations);
+
+      List<Map<String, Object>> subflowArr = (List<Map<String, Object>>) this.inputData.get(subflowName);
+      int indexToUpdate = subflowArr.indexOf(subflowIterationData);
+      subflowArr.set(indexToUpdate, subflowIterationData);
+      this.inputData.put(subflowName, subflowArr);
+    }
+
   }
 
   /**

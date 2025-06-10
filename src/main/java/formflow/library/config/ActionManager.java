@@ -67,10 +67,28 @@ public class ActionManager {
    * @param uuid           The uuid of the current subflow.
    */
   public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
-      Submission submission, String uuid) {
+          Submission submission, String uuid) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
       runAction(actionName, formSubmission, submission, uuid);
+    }
+  }
+
+  /**
+   * <code>handleOnPostAction()</code> invokes a method in the ScreenController. Runs before validation. The
+   * handleOnPostAction method is called on only screens in a subflow. Runs an action if a screen has one defined.
+   *
+   * @param currentScreen  The screen that we are currently saving data from.
+   * @param formSubmission The current form submission
+   * @param submission     The submission object after changes to the current screen have been saved to the repository
+   * @param uuid           The uuid of the current subflow.
+   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   */
+  public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
+          Submission submission, String uuid, String repeatsForUuid) {
+    String actionName = currentScreen.getOnPostAction();
+    if (actionName != null) {
+      runAction(actionName, formSubmission, submission, uuid, repeatsForUuid);
     }
   }
 
@@ -102,6 +120,23 @@ public class ActionManager {
     String actionName = currentScreen.getBeforeSaveAction();
     if (actionName != null) {
       runAction(actionName, submission, uuid);
+    }
+  }
+
+  /**
+   * <code>handleBeforeSaveAction()</code> invokes a method in the ScreenController. Runs after validation and before
+   * saving. The handleBeforeSaveAction method is called on only screens in a subflow. Runs an action if a screen has one
+   * defined.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   */
+  public void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatsForUuid) {
+    String actionName = currentScreen.getBeforeSaveAction();
+    if (actionName != null) {
+      runAction(actionName, submission, uuid, repeatsForUuid);
     }
   }
 
@@ -138,6 +173,23 @@ public class ActionManager {
   }
 
   /**
+   * <p>
+   * This <code>handleAfterSaveAction()</code> invokes a method after a <b>subflow</b> submission has been saved.
+   * </p>
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   */
+  public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatsForUuid) {
+    String actionName = currentScreen.getAfterSaveAction();
+    if (actionName != null) {
+      runAction(actionName, submission, uuid, repeatsForUuid);
+    }
+  }
+
+  /**
    * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the database
    * and before the view template is displayed. The handleBeforeDisplayAction method is called on all screens except for screens
    * in a subflow. Runs an action if a screen has one defined.
@@ -168,6 +220,23 @@ public class ActionManager {
     }
   }
 
+
+  /**
+   * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the database
+   * and before the view template is displayed. The handleBeforeDisplayAction method is called on only screens in a subflow. Runs
+   * an action if a screen has one defined.
+   *
+   * @param currentScreen The screen that we are currently saving data from.
+   * @param submission    The submission object after changes to the current screen have been saved to the repository
+   * @param uuid          The uuid of the current subflow.
+   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   */
+  public void handleBeforeDisplayAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatsForUuid) {
+    String actionName = currentScreen.getBeforeDisplayAction();
+    if (actionName != null) {
+      runAction(actionName, submission, uuid, repeatsForUuid);
+    }
+  }
   /**
    * <code>handleCrossFieldValidationAction()</code> invokes a method in the ScreenController. Runs after field validation and
    * before saving to the database. The handleCrossFieldValidationAction method is called on all screens. Runs an action if a
@@ -192,6 +261,10 @@ public class ActionManager {
     runAction(name, () -> getAction(name).run(submission));
   }
 
+  private void runAction(String name, Submission submission, String uuid, String repeatsForUuid) {
+    runAction(name, () -> getAction(name).run(submission, uuid, repeatsForUuid));
+  }
+
   private void runAction(String name, Submission submission, String uuid) {
     runAction(name, () -> getAction(name).run(submission, uuid));
   }
@@ -202,6 +275,10 @@ public class ActionManager {
 
   private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid) {
     runAction(name, () -> getAction(name).run(formSubmission, submission, uuid));
+  }
+
+  private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid, String repeatsForUuid) {
+    runAction(name, () -> getAction(name).run(formSubmission, submission, uuid, repeatsForUuid));
   }
 
   private void runAction(String name, Runnable action) {
