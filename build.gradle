@@ -130,10 +130,6 @@ java {
     withSourcesJar()
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['-Xlint:deprecation']
-}
-
 tasks.named('bootJar').configure {
     enabled = false
 }
