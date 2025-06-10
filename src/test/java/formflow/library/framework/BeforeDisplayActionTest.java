@@ -41,7 +41,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
   void shouldSaveEncryptedSSN() throws Exception {
     // beforeSave
     String ssnInput = "111-00-1234";
-    postExpectingSuccess("inputs", Map.of("ssnInput", List.of(ssnInput)));
+    postExpectingSuccess("testFlow","inputs", Map.of("ssnInput", List.of(ssnInput)));
     assertThat(submission.getInputData().get("ssnInputEncrypted")).isEqualTo("BBB-AA-BCDE");
     assertThat(submission.getInputData().get("ssnInput")).isNull();
 

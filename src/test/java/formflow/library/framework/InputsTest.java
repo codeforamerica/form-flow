@@ -93,12 +93,12 @@ public class InputsTest extends AbstractMockMvcTest {
   @Test
   void shouldOnlyRunValidationIfItHasARequiredAnnotation() throws Exception {
     // Should not validate when value is empty
-    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
+    postExpectingNextPageTitle("testFlow","pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
     // Should validate when a value is entered
     postExpectingFailureAndAssertErrorDisplaysForThatInput("testFlow", "pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2",
         "must be greater than 0");
     // Should redirect when input is valid
-    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
+    postExpectingNextPageTitle("testFlow","pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
   }
 
   @Test
@@ -116,7 +116,7 @@ public class InputsTest extends AbstractMockMvcTest {
         "dateDay", List.of("1"),
         "dateYear", List.of("1111")
     );
-    postExpectingFailure("inputs", params);
+    postExpectingFailure("testFlow", "inputs", params);
 
     var screen = new FormScreen(getPage("inputs", "testFlow"));
     assertThat(screen.getElementsByClassName("form-group--error")).isNotNull();

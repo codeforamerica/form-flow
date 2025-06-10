@@ -48,7 +48,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldAcceptEmailWithPreference() throws Exception {
-    postExpectingSuccess("contactInfoPreference",
+    postExpectingSuccess("testFlow",
+            "contactInfoPreference",
         Map.of(
             "email", List.of("foo@bar.com"),
             "howToContactYou[]", List.of("email"))
@@ -57,7 +58,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldAlsoDisplayFieldValidationMessages() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow", "contactInfoPreference",
         Map.of("email", List.of("malformed.com"), "howToContactYou[]", List.of("email"))
     );
     assertPageHasInputError("testFlow", "contactInfoPreference", "email", INVALID_EMAIL_ERROR_MESSAGE);
@@ -65,7 +66,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldAcceptPhoneNumberWithPreference() throws Exception {
-    postExpectingSuccess("contactInfoPreference",
+    postExpectingSuccess("testFlow",
+            "contactInfoPreference",
         Map.of(
             "phoneNumber", List.of("223-456-7891"),
             "howToContactYou", List.of("phone"))
@@ -74,7 +76,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldFailWithPhoneNumberPreferenceNoPhone() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow",
+            "contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("", "phone"),
             "phoneNumber", List.of(""))
@@ -85,7 +88,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldFailWithEmailPreferenceNoEmail() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow",
+            "contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("", "email"),
             "email", List.of(""))
@@ -96,7 +100,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldDisplayErrorMessagesForBothPhoneAndEmailIfBothAreMissing() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow",
+            "contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("email", "phone"),
             "email", List.of(""),
