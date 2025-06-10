@@ -1065,28 +1065,35 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
 
-    var existingInputData = submission.getInputData();
-    if (existingInputData.containsKey(subflow)) {
-      var subflowArr = (ArrayList<Map<String, Object>>) existingInputData.get(subflow);
-      Optional<Map<String, Object>> entryToDelete = subflowArr.stream()
-          .filter(entry -> entry.get("uuid").equals(uuid)).findFirst();
-      entryToDelete.ifPresent(subflowArr::remove);
-      if (!subflowArr.isEmpty()) {
-        existingInputData.put(subflow, subflowArr);
-        submission.setInputData(existingInputData);
-        submission = saveToRepository(submission, subflow);
-      } else {
-        existingInputData.remove(subflow);
-        submission.setInputData(existingInputData);
-        submission = saveToRepository(submission, subflow);
-        return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
-      }
-    } else {
-      return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
+    SubflowConfiguration subflowConfig = subflowManager.getSubflowConfiguration(flow, subflow);
+    RepeatFor repeatForConfiguration = subflowConfig.getRelationship().getRepeatFor();
+
+    if(repeatForConfiguration == null){
+      // file is not configured properly
     }
 
-    String reviewScreen = getValidatedFlowConfigurationByName(flow).getSubflows().get(subflow)
-        .getReviewScreen();
+    Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflow, uuid);
+
+    if (subflowIterationData.containsKey(repeatForConfiguration.getSaveDataAs())) {
+      List<Map<String, Object>> nestedSubflowEntry = (List<Map<String, Object>>) subflowIterationData.get(repeatForConfiguration.getSaveDataAs());
+      Optional<Map<String, Object>> entryToDelete = nestedSubflowEntry.stream()
+          .filter(entry -> entry.get("uuid").equals(repeatForIterationUuid)).findFirst();
+      entryToDelete.ifPresent(nestedSubflowEntry::remove);
+      if (!nestedSubflowEntry.isEmpty()) {
+        subflowIterationData.put(repeatForConfiguration.getSaveDataAs(), nestedSubflowEntry);
+        saveToRepository(submission);
+      } else {
+        subflowIterationData.remove(repeatForConfiguration.getSaveDataAs());
+        saveToRepository(submission);
+        return new ModelAndView("redirect:/flow/%s/%s/%s".formatted(flow, subflowConfig.getIterationStartScreen(),
+            uuid));
+      }
+    } else {
+      return new ModelAndView("redirect:/flow/%s/%s/%s".formatted(flow, subflowConfig.getIterationStartScreen(),
+          uuid));
+    }
+
+    String reviewScreen = subflowConfig.getReviewScreen();
     return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, reviewScreen));
   }
 
