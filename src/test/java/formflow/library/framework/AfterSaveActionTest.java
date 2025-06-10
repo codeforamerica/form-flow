@@ -66,7 +66,7 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     String expectedRecipient = "test@example.com";
     String expectedBody = "This is a test email";
 
-    postWithoutData("inputs").andExpect(redirectedUrl(getUrlForPageName("inputs") + "/navigation"));
+    postWithoutData("testFlow","inputs").andExpect(redirectedUrl(getUrlForPageName("testFlow", "inputs") + "/navigation"));
 
     verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
 
@@ -85,7 +85,7 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
     String expectedRecipient = "test@example.com";
     String expectedBody = "This is a test email";
 
-    ResultActions test = postWithoutData("subflowIterationStart/new");
+    ResultActions test = postWithoutData("testFlow","subflowIterationStart/new");
     String url = test.andExpect(status().is3xxRedirection())
             .andReturn()
             .getResponse()

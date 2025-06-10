@@ -44,7 +44,8 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
 
   @Test
   void shouldSaveFormattedDate() throws Exception {
-    postExpectingSuccess("inputs",
+    postExpectingSuccess("testFlow",
+            "inputs",
         Map.of(
             "dateMonth", List.of("1"),
             "dateDay", List.of("2"),

@@ -47,7 +47,7 @@ public class InputsTest extends AbstractMockMvcTest {
     String ssnInput = "333-22-4444";
     String stateInput = messageSource.getMessage("state.nh", null, Locale.ENGLISH).substring(0, 2);
 
-    FormScreen nextPage = postAndFollowRedirect("inputs",
+    FormScreen nextPage = postAndFollowRedirect("testFlow", "inputs",
         Map.ofEntries(
             Map.entry("textInput", List.of(textInput)),
             Map.entry("areaInput", List.of(areaInput)),
@@ -68,7 +68,7 @@ public class InputsTest extends AbstractMockMvcTest {
     );
     assertThat(nextPage.getTitle()).isEqualTo("Test");
 
-    var inputsScreen = new FormScreen(getPage("inputs"));
+    var inputsScreen = new FormScreen(getPage("inputs", "testFlow"));
 
     // Remove hidden value (our Screen Controller does this automatically)
     List<String> removedHiddenCheckboxSet = checkboxSet.stream().filter(e -> !e.isEmpty()).toList();
@@ -93,19 +93,19 @@ public class InputsTest extends AbstractMockMvcTest {
   @Test
   void shouldOnlyRunValidationIfItHasARequiredAnnotation() throws Exception {
     // Should not validate when value is empty
-    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
+    postExpectingNextPageTitle("testFlow","pageWithOptionalValidation", "validatePositiveIfNotEmpty", "", "Success");
     // Should validate when a value is entered
-    postExpectingFailureAndAssertErrorDisplaysForThatInput("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2",
+    postExpectingFailureAndAssertErrorDisplaysForThatInput("testFlow", "pageWithOptionalValidation", "validatePositiveIfNotEmpty", "-2",
         "must be greater than 0");
     // Should redirect when input is valid
-    postExpectingNextPageTitle("pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
+    postExpectingNextPageTitle("testFlow","pageWithOptionalValidation", "validatePositiveIfNotEmpty", "2", "Success");
   }
 
   @Test
   void shouldShowMultipleErrorMessagesOnSingleInput() throws Exception {
-    postExpectingFailureAndAssertErrorsDisplaysForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
+    postExpectingFailureAndAssertErrorsDisplaysForThatInput("testFlow", "pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
         2);
-    postExpectingFailureAndAssertErrorsDisplayForThatInput("pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
+    postExpectingFailureAndAssertErrorsDisplayForThatInput("testFlow", "pageWithMultipleValidationInput", "inputWithMultipleValidations", "",
         List.of("You must enter a value 2 characters or longer", "Don't leave this blank"));
   }
 
@@ -116,9 +116,9 @@ public class InputsTest extends AbstractMockMvcTest {
         "dateDay", List.of("1"),
         "dateYear", List.of("1111")
     );
-    postExpectingFailure("inputs", params);
+    postExpectingFailure("testFlow", "inputs", params);
 
-    var screen = new FormScreen(getPage("inputs"));
+    var screen = new FormScreen(getPage("inputs", "testFlow"));
     assertThat(screen.getElementsByClassName("form-group--error")).isNotNull();
     assertThat(screen.getInputErrorMessages("dateFull")).containsExactly("Make sure you enter a date between 01/01/1901 and now");
   }
@@ -128,7 +128,7 @@ public class InputsTest extends AbstractMockMvcTest {
 
     @Test
     void multipleCheckboxSetsWithNoneOptionsAreUnique() throws Exception {
-      var screen = new FormScreen(getPage("pageWithCheckboxSetInput"));
+      var screen = new FormScreen(getPage("pageWithCheckboxSetInput", "testFlow"));
 
       assertThat(screen.getElementById("none__checkbox-favoriteFruitCheckbox")).isNotNull();
       assertThat(screen.getElementById("none__checkbox-favoriteVeggieCheckbox")).isNotNull();
@@ -160,7 +160,7 @@ public class InputsTest extends AbstractMockMvcTest {
             zipCode + "Validated");
         when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, addressValidatedAddress));
 
-        nextScreen = postAndFollowRedirect("testAddressValidation",
+        nextScreen = postAndFollowRedirect("testFlow", "testAddressValidation",
             Map.ofEntries(
                 Map.entry(inputName + "StreetAddress1", List.of(streetAddress1)),
                 Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
@@ -196,7 +196,7 @@ public class InputsTest extends AbstractMockMvcTest {
         testMap.put(inputName, null);
         when(addressValidationService.validate(any())).thenReturn(testMap);
 
-        var nextScreen = postAndFollowRedirect("testAddressValidation",
+        var nextScreen = postAndFollowRedirect("testFlow", "testAddressValidation",
             Map.ofEntries(
                 Map.entry(inputName + "StreetAddress1", List.of("Total Junk")),
                 Map.entry(inputName + "StreetAddress2", List.of(streetAddress2)),
@@ -228,7 +228,7 @@ public class InputsTest extends AbstractMockMvcTest {
 
         when(addressValidationService.validate(any())).thenReturn(Map.of(inputName, otherValidatedAddress));
 
-        var nextScreen = postAndFollowRedirect("testAddressValidation",
+        var nextScreen = postAndFollowRedirect("testFlow", "testAddressValidation",
             Map.ofEntries(
                 Map.entry(inputName + "StreetAddress1", List.of("123 Other Main Street")),
                 Map.entry(inputName + "StreetAddress2", List.of("Apt B")),
@@ -264,7 +264,7 @@ public class InputsTest extends AbstractMockMvcTest {
         List.of("You must enter a value 2 characters or longer", "Don't leave this blank"),
         "inputWithSingleValidation", List.of("Enter a value"));
 
-    postExpectingFailureAndAssertInputErrorMessages("pageWithMultipleValidationInput", inputParams,
+    postExpectingFailureAndAssertInputErrorMessages("testFlow", "pageWithMultipleValidationInput", inputParams,
         expectedErrors);
   }
 
@@ -273,13 +273,13 @@ public class InputsTest extends AbstractMockMvcTest {
 
     @Test
     void shouldHaveDefaultClasses() throws Exception {
-      var page = new FormScreen(getPage("pageWithDefaultSubmitButton"));
+      var page = new FormScreen(getPage("pageWithDefaultSubmitButton", "testFlow"));
       assertThat(page.getElementById("form-submit-button").classNames()).isEqualTo(Set.of("button", "button--primary"));
     }
 
     @Test
     void shouldHaveCustomClasses() throws Exception {
-      var page = new FormScreen(getPage("pageWithCustomSubmitButton"));
+      var page = new FormScreen(getPage("pageWithCustomSubmitButton", "testFlow"));
       assertThat(page.getElementById("form-submit-button").classNames()).isEqualTo(Set.of("custom"));
     }
   }
