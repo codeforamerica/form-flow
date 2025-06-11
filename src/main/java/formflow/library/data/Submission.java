@@ -162,37 +162,41 @@ public class Submission {
   }
 
   /**
-   * Merges the passed in form submission data with the subflow's iteration data into the Submission's subflow's data for that iteration.
+   * Merges the passed in form submission data with the subflow's repeatFor iteration data into the Submission's subflow's
+   * repeatsFor iteration data.
    *
-   * @param subflowName        subflow that the iteration data belongs with, not null
-   * @param iterationToUpdate  existing data for a particular iteration of a subflow, may be empty, but not null
-   * @param formDataSubmission new data for a particular iteration of a subflow, not null
+   * @param subflowName            subflow that the iteration data belongs with, not null
+   * @param subflowUuid            subflow iteration uuid
+   * @param repeatForSaveDataAsKey the value of the repeatFor saveDataAs configuration
+   * @param iterationToUpdate      existing data for a particular iteration of a subflow, may be empty, but not null
+   * @param formDataSubmission     new data for a particular iteration of a subflow, not null
+   * @param
    */
-  public void mergeFormDataWithRepeatsForSubflowIterationData(String subflowName, String subflowUuid, String repeatForSaveAsKey, Map<String, Object> iterationToUpdate,
-          Map<String, Object> formDataSubmission) {
+  public void mergeFormDataWithRepeatForSubflowIterationData(String subflowName, String subflowUuid,
+      String repeatForSaveDataAsKey, Map<String, Object> iterationToUpdate,
+      Map<String, Object> formDataSubmission) {
 
     iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
 
-
-    Map<String, Object> subflowIterationData = getSubflowEntryByUuid(subflowName, subflowUuid);
-    List<Map<String, Object>> nestedIterations = (List<Map<String, Object>>) subflowIterationData.getOrDefault(repeatForSaveAsKey,
+    Map<String, Object> subflowEntry = getSubflowEntryByUuid(subflowName, subflowUuid);
+    List<Map<String, Object>> repeatForIterations = (List<Map<String, Object>>) subflowEntry.getOrDefault(
+        repeatForSaveDataAsKey,
         Collections.EMPTY_LIST);
 
-    Optional<Map<String, Object>> currentIteration = nestedIterations.stream()
+    Optional<Map<String, Object>> currentIteration = repeatForIterations.stream()
         .filter(iteration -> iteration.get("uuid").equals(formDataSubmission.get("uuid"))).findFirst();
 
     if (currentIteration.isPresent()) {
-      int nestedIndexToUpdate = nestedIterations.indexOf(currentIteration.get());
-      nestedIterations.set(nestedIndexToUpdate, formDataSubmission);
+      int nestedIndexToUpdate = repeatForIterations.indexOf(currentIteration.get());
+      repeatForIterations.set(nestedIndexToUpdate, formDataSubmission);
 
-      subflowIterationData.put(repeatForSaveAsKey, nestedIterations);
+      subflowEntry.put(repeatForSaveDataAsKey, repeatForIterations);
 
       List<Map<String, Object>> subflowArr = (List<Map<String, Object>>) this.inputData.get(subflowName);
-      int indexToUpdate = subflowArr.indexOf(subflowIterationData);
-      subflowArr.set(indexToUpdate, subflowIterationData);
+      int indexToUpdate = subflowArr.indexOf(subflowEntry);
+      subflowArr.set(indexToUpdate, subflowEntry);
       this.inputData.put(subflowName, subflowArr);
     }
-
   }
 
   /**

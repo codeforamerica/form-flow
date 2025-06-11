@@ -42,12 +42,13 @@ public class ConditionManager {
     }
     return condition.run(submission, uuid);
   }
-  public Boolean runCondition(String conditionName, Submission submission, String uuid, String nestedIterationUuid) {
+
+  public Boolean runCondition(String conditionName, Submission submission, String subflowUuid, String repeatForUuid) {
     Condition condition = getCondition(conditionName);
     if (condition == null) {
       log.warn("Condition not found: " + conditionName);
       return false;
     }
-    return condition.run(submission, uuid, nestedIterationUuid);
+    return condition.run(submission, subflowUuid, repeatForUuid);
   }
 }

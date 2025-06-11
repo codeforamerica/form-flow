@@ -81,14 +81,14 @@ public class ActionManager {
    * @param currentScreen  The screen that we are currently saving data from.
    * @param formSubmission The current form submission
    * @param submission     The submission object after changes to the current screen have been saved to the repository
-   * @param uuid           The uuid of the current subflow.
-   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   * @param subflowUuid    The uuid of the current subflow.
+   * @param repeatForUuid  The uuid of the repeatFor subflow under the current subflow
    */
   public void handleOnPostAction(ScreenNavigationConfiguration currentScreen, FormSubmission formSubmission,
-          Submission submission, String uuid, String repeatsForUuid) {
+      Submission submission, String subflowUuid, String repeatForUuid) {
     String actionName = currentScreen.getOnPostAction();
     if (actionName != null) {
-      runAction(actionName, formSubmission, submission, uuid, repeatsForUuid);
+      runAction(actionName, formSubmission, submission, subflowUuid, repeatForUuid);
     }
   }
 
@@ -130,13 +130,14 @@ public class ActionManager {
    *
    * @param currentScreen The screen that we are currently saving data from.
    * @param submission    The submission object after changes to the current screen have been saved to the repository
-   * @param uuid          The uuid of the current subflow.
-   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   * @param subflowUuid   The uuid of the current subflow.
+   * @param repeatForUuid The uuid of the repeatFor subflow under the current subflow
    */
-  public void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatsForUuid) {
+  public void handleBeforeSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String subflowUuid,
+      String repeatForUuid) {
     String actionName = currentScreen.getBeforeSaveAction();
     if (actionName != null) {
-      runAction(actionName, submission, uuid, repeatsForUuid);
+      runAction(actionName, submission, subflowUuid, repeatForUuid);
     }
   }
 
@@ -179,13 +180,14 @@ public class ActionManager {
    *
    * @param currentScreen The screen that we are currently saving data from.
    * @param submission    The submission object after changes to the current screen have been saved to the repository
-   * @param uuid          The uuid of the current subflow.
-   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   * @param subflowUuid   The uuid of the current subflow.
+   * @param repeatForUuid The uuid of the repeatFor subflow under the current subflow
    */
-  public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatsForUuid) {
+  public void handleAfterSaveAction(ScreenNavigationConfiguration currentScreen, Submission submission, String subflowUuid,
+      String repeatForUuid) {
     String actionName = currentScreen.getAfterSaveAction();
     if (actionName != null) {
-      runAction(actionName, submission, uuid, repeatsForUuid);
+      runAction(actionName, submission, subflowUuid, repeatForUuid);
     }
   }
 
@@ -229,12 +231,12 @@ public class ActionManager {
    * @param currentScreen The screen that we are currently saving data from.
    * @param submission    The submission object after changes to the current screen have been saved to the repository
    * @param uuid          The uuid of the current subflow.
-   * @param repeatsForUuid The uuid of the repeatsFor subflow under the current subflow
+   * @param repeatForUuid The uuid of the repeatFor subflow under the current subflow
    */
-  public void handleBeforeDisplayAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatsForUuid) {
+  public void handleBeforeDisplayAction(ScreenNavigationConfiguration currentScreen, Submission submission, String uuid, String repeatForUuid) {
     String actionName = currentScreen.getBeforeDisplayAction();
     if (actionName != null) {
-      runAction(actionName, submission, uuid, repeatsForUuid);
+      runAction(actionName, submission, uuid, repeatForUuid);
     }
   }
   /**
@@ -261,8 +263,8 @@ public class ActionManager {
     runAction(name, () -> getAction(name).run(submission));
   }
 
-  private void runAction(String name, Submission submission, String uuid, String repeatsForUuid) {
-    runAction(name, () -> getAction(name).run(submission, uuid, repeatsForUuid));
+  private void runAction(String name, Submission submission, String uuid, String repeatForUuid) {
+    runAction(name, () -> getAction(name).run(submission, uuid, repeatForUuid));
   }
 
   private void runAction(String name, Submission submission, String uuid) {
@@ -277,8 +279,8 @@ public class ActionManager {
     runAction(name, () -> getAction(name).run(formSubmission, submission, uuid));
   }
 
-  private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid, String repeatsForUuid) {
-    runAction(name, () -> getAction(name).run(formSubmission, submission, uuid, repeatsForUuid));
+  private void runAction(String name, FormSubmission formSubmission, Submission submission, String uuid, String repeatForUuid) {
+    runAction(name, () -> getAction(name).run(formSubmission, submission, uuid, repeatForUuid));
   }
 
   private void runAction(String name, Runnable action) {

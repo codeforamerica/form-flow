@@ -34,11 +34,11 @@ public interface Action {
   /**
    * Runs an action on submission data on a submission's subflow repeatFor iteration to potentially manipulate the data.
    *
-   * @param submission submission object the action is associated with, not null
-   * @param id         id for the iteration
-   * @param repeatsForUuid id for the repeatsForIteration
+   * @param submission     submission object the action is associated with, not null
+   * @param subflowUuid    uuid of the subflow iteration this should operate on
+   * @param repeatForUuid uuid of the subflows's repeatFor iteration this should operate on
    */
-  default void run(Submission submission, String id, String repeatsForUuid) {
+  default void run(Submission submission, String subflowUuid, String repeatForUuid) {
     throw new UnsupportedOperationException("Not implemented in " + this.getClass().getName());
   }
 
@@ -68,10 +68,10 @@ public interface Action {
    *
    * @param formSubmission form submission object the action is associated with, not null
    * @param submission     submission object the action is associated with, not null
-   * @param id             id for the iteration
-   * @param repeatsForUuid id for the repeatsForIteration
+   * @param subflowUuid    uuid of the subflow iteration this should operate on
+   * @param repeatForUuid uuid of the subflows's repeatFor iteration this should operate on
    */
-  default void run(FormSubmission formSubmission, Submission submission, String id, String repeatsForUuid) {
+  default void run(FormSubmission formSubmission, Submission submission, String subflowUuid, String repeatForUuid) {
     throw new UnsupportedOperationException("Not implemented " + this.getClass().getName());
   }
 

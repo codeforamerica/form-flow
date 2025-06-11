@@ -245,21 +245,21 @@ public class SubflowManager {
         return Optional.empty();
     }
 
-    public void addRepeatsForIterationData(Submission submission, String subflowName, String subflowUUID,
-            String saveAsInputName, List<String> repeatsForInputData) {
+    public void addRepeatForIterationData(Submission submission, String subflowName, String subflowUUID,
+            String saveAsInputName, List<String> repeatForInputData) {
         Map<String, Object> currentSubflowData = submission.getSubflowEntryByUuid(subflowName, subflowUUID);
 
-        if (!repeatsForInputData.isEmpty()) {
+        if (!repeatForInputData.isEmpty()) {
             Boolean repeatRelationHasBeenSet = currentSubflowData.containsKey(saveAsInputName);
 
             if (!repeatRelationHasBeenSet) {
                 submission.getSubflowEntryByUuid(subflowName, subflowUUID)
-                        .put(saveAsInputName, setSubflowRepeatsForIterations(repeatsForInputData,
+                        .put(saveAsInputName, setSubflowRepeatForIterations(repeatForInputData,
                                 saveAsInputName));
             } else {
                 submission.getSubflowEntryByUuid(subflowName, subflowUUID)
                         .put(saveAsInputName,
-                                updateSubflowRepeatsForIterations(currentSubflowData, repeatsForInputData, saveAsInputName));
+                                updateSubflowRepeatForIterations(currentSubflowData, repeatForInputData, saveAsInputName));
             }
         } else {
             submission.getSubflowEntryByUuid(subflowName, subflowUUID).remove(saveAsInputName);
@@ -267,25 +267,25 @@ public class SubflowManager {
 
     }
 
-    private List<Map<String, Object>> setSubflowRepeatsForIterations(List<String> inputListToRepeatOn,
-            String repeatsForInputData) {
+    private List<Map<String, Object>> setSubflowRepeatForIterations(List<String> inputListToRepeatOn,
+            String repeatForInputData) {
 
-        List<Map<String, Object>> repeatsForIterations = new ArrayList<>();
+        List<Map<String, Object>> repeatForIterations = new ArrayList<>();
 
         inputListToRepeatOn.forEach(selectedValue ->
-                repeatsForIterations.add(
-                        createSubflowIterationRepeat(repeatsForInputData, selectedValue)));
+                repeatForIterations.add(
+                        createSubflowIterationRepeat(repeatForInputData, selectedValue)));
 
-        return repeatsForIterations;
+        return repeatForIterations;
     }
 
-    private List<Map<String, Object>> updateSubflowRepeatsForIterations(Map<String, Object> currentSubflowData,
-            List<String> repeatsForInputData, String saveAsInputName) {
+    private List<Map<String, Object>> updateSubflowRepeatForIterations(Map<String, Object> currentSubflowData,
+            List<String> repeatForInputData, String saveAsInputName) {
         List<Map<String, Object>> currentRepeatForIterations = (List<Map<String, Object>>) currentSubflowData.getOrDefault(
                 saveAsInputName, Collections.EMPTY_LIST);
         List<Map<String, Object>> newRepeatForIterations = new ArrayList<>();
 
-        repeatsForInputData.forEach(newEntry -> {
+        repeatForInputData.forEach(newEntry -> {
             Optional<Map<String, Object>> matchingIteration = currentRepeatForIterations.stream()
                     .filter(oldEntry -> oldEntry.get(saveAsInputName + "Value").equals(newEntry)).findFirst();
 
@@ -318,7 +318,7 @@ public class SubflowManager {
                 .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
     }
 
-    public Map<String, Object> getRepeatsForIteration(Map<String, Object> subflowData,
+    public Map<String, Object> getRepeatForIteration(Map<String, Object> subflowData,
             String nestedSubflowKey, String nestedIterationId) {
 
         List<Map<String, Object>> nestedIterations = (List<Map<String, Object>>) subflowData.getOrDefault(nestedSubflowKey,
