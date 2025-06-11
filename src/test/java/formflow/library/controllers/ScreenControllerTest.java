@@ -84,7 +84,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
     @Test
     public void passedUrlParametersShouldBeSaved() throws Exception {
-      mockMvc.perform(get(getUrlForPageName("test")).queryParam("lang", "en").session(session))
+      mockMvc.perform(get(getUrlForPageName("testFlow", "test")).queryParam("lang", "en").session(session))
           .andExpect(status().isOk());
       submission = submissionRepositoryService.findById(submission.getId()).isPresent() ?
           submissionRepositoryService.findById(submission.getId()).get() : null;
@@ -103,7 +103,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
 
       submission.setInputData(Map.of("testSubflow", List.of(subflowItem)));
       submissionRepositoryService.save(submission);
-      getPageExpectingSuccess("subflowAddItem/aaa-bbb-ccc");
+      getPageExpectingSuccess("testFlow", "subflowAddItem/aaa-bbb-ccc");
     }
 
     @Test
@@ -310,7 +310,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       params.put("validationOnState", List.of("NM"));
       params.put("validationOnZipCode", List.of("88201"));
 
-      postExpectingFailure("testAddressValidation", params);
+      postExpectingFailure("testFlow", "testAddressValidation", params);
       verify(addressValidationService, times(0)).validate(any());
     }
 
@@ -339,7 +339,7 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
       params.put("validationOnState", List.of("NM"));
       params.put("validationOnZipCode", List.of("88201"));
 
-      postExpectingSuccess("testAddressValidation", params);
+      postExpectingSuccess("testFlow", "testAddressValidation", params);
 
       verify(addressValidationService, times(1)).validate(any());
     }
@@ -459,8 +459,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     // skipping date, which should cause an error
 
     String pageName = "subflowAddItem/new";
-    postExpectingFailure(pageName, params, "subflowAddItem");
-    var page = new FormScreen(getPage("subflowAddItem"));
+    postExpectingFailure("testFlow", pageName, params, "subflowAddItem");
+    var page = new FormScreen(getPage("subflowAddItem", "testFlow"));
 
     assertTrue(page.hasDateInputError("dateSubflowFull"));
     assertTrue(page.hasInputError("numberInputSubflow"));
@@ -520,9 +520,9 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
     paramsPage2.put("dateSubflowPage2Year", List.of("2012"));
 
     String pageNamePage2 = "subflowAddItemPage2/" + iterationUuid;
-    postExpectingFailure(pageNamePage2, paramsPage2, pageNamePage2);
+    postExpectingFailure("testFlow", pageNamePage2, paramsPage2, pageNamePage2);
 
-    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid));
+    var page2 = new FormScreen(getPage("subflowAddItemPage2/" + iterationUuid, "testFlow"));
     assertTrue(page2.hasDateInputError("dateInputSubflowPage2"));
     assertTrue(page2.hasInputError("numberInputSubflowPage2"));
     assertTrue(page2.hasInputError("moneyInputSubflowPage2"));

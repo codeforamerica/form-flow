@@ -48,7 +48,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldAcceptEmailWithPreference() throws Exception {
-    postExpectingSuccess("contactInfoPreference",
+    postExpectingSuccess("testFlow",
+            "contactInfoPreference",
         Map.of(
             "email", List.of("foo@bar.com"),
             "howToContactYou[]", List.of("email"))
@@ -57,15 +58,16 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldAlsoDisplayFieldValidationMessages() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow", "contactInfoPreference",
         Map.of("email", List.of("malformed.com"), "howToContactYou[]", List.of("email"))
     );
-    assertPageHasInputError("contactInfoPreference", "email", INVALID_EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "email", INVALID_EMAIL_ERROR_MESSAGE);
   }
 
   @Test
   void shouldAcceptPhoneNumberWithPreference() throws Exception {
-    postExpectingSuccess("contactInfoPreference",
+    postExpectingSuccess("testFlow",
+            "contactInfoPreference",
         Map.of(
             "phoneNumber", List.of("223-456-7891"),
             "howToContactYou", List.of("phone"))
@@ -74,36 +76,39 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
   @Test
   void shouldFailWithPhoneNumberPreferenceNoPhone() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow",
+            "contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("", "phone"),
             "phoneNumber", List.of(""))
     );
 
-    assertPageHasInputError("contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
   }
 
   @Test
   void shouldFailWithEmailPreferenceNoEmail() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow",
+            "contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("", "email"),
             "email", List.of(""))
     );
 
-    assertPageHasInputError("contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
   }
 
   @Test
   void shouldDisplayErrorMessagesForBothPhoneAndEmailIfBothAreMissing() throws Exception {
-    postExpectingFailure("contactInfoPreference",
+    postExpectingFailure("testFlow",
+            "contactInfoPreference",
         Map.of(
             "howToContactYou[]", List.of("email", "phone"),
             "email", List.of(""),
             "phoneNumber", List.of(""))
     );
 
-    assertPageHasInputError("contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
-    assertPageHasInputError("contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "email", NO_EMAIL_ERROR_MESSAGE);
+    assertPageHasInputError("testFlow", "contactInfoPreference", "phoneNumber", NO_PHONE_ERROR_MESSAGE);
   }
 }

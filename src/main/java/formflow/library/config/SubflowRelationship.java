@@ -7,4 +7,5 @@ public class SubflowRelationship {
     
     private String relatesTo;
     private String relationAlias;
+    private String filter;
 }

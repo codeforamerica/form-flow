@@ -44,7 +44,8 @@ public class OnPostActionTest extends AbstractMockMvcTest {
 
   @Test
   void shouldSaveFormattedDataInNewFieldAndValidateSuccessfully() throws Exception {
-    postExpectingSuccess("inputs",
+    postExpectingSuccess("testFlow",
+          "inputs",
         Map.of(
             "dateMonth", List.of("1"),
             "dateDay", List.of("3"),
@@ -57,14 +58,15 @@ public class OnPostActionTest extends AbstractMockMvcTest {
   @Test
   void shouldSaveFormattedDateInNewFieldAndFailValidation() throws Exception {
     final String dateErrorMessage = "Date must be in the format of mm/dd/yyyy";
-    postExpectingFailure("inputs",
+    postExpectingFailure("testFlow",
+            "inputs",
         Map.of(
             "dateMonth", List.of("abc"),
             "dateDay", List.of("1"),
             "dateYear", List.of("1999"))
     );
 
-    assertPageHasInputError("inputs", "dateFull", dateErrorMessage);
+    assertPageHasInputError("testFlow", "inputs", "dateFull", dateErrorMessage);
   }
 }
 
