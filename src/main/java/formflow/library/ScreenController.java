@@ -169,18 +169,17 @@ public class ScreenController extends FormFlowController {
       }
     }
 
-    String validatedRepeatForIterationUuid = null;
     if (repeatForIterationUuid != null && !repeatForIterationUuid.isBlank()) {
       Optional<SubflowRelationship> subflowRelationshipOptional = subflowManager.subflowRelationship(flow,
           currentScreen.getSubflow());
 
       if (subflowRelationshipOptional.isPresent() && subflowRelationshipOptional.get().getRepeatFor() != null) {
         RepeatFor repeatForConfiguration = subflowRelationshipOptional.get().getRepeatFor();
-        validatedRepeatForIterationUuid = getValidatedRepeatForIterationUuid(submission, flow, currentScreen.getSubflow(),
+        validateRepeatForIterationUuid(submission, flow, currentScreen.getSubflow(),
             requestUuid, repeatForConfiguration.getSaveDataAs(), repeatForIterationUuid);
       }
 
-      if (validatedRepeatForIterationUuid == null) {
+      if (repeatForIterationUuid == null) {
         // catch to see if they are trying to go to a delete confirmation screen when the UUID is not present anymore.
         // If so, redirect.
         if (isDeleteConfirmationScreen(flow, screen)) {
@@ -201,13 +200,13 @@ public class ScreenController extends FormFlowController {
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
 
-    if (shouldRedirectToNextScreen(validatedUuid, validatedRepeatForIterationUuid, currentScreen, submission)) {
+    if (shouldRedirectToNextScreen(validatedUuid, repeatForIterationUuid, currentScreen, submission)) {
       String nextViewableScreen = getNextViewableScreen(flow, screen, validatedUuid, repeatForIterationUuid, submission);
       log.info("%s is not viewable, redirecting to %s".formatted(screen, nextViewableScreen));
-      if (validatedUuid != null && validatedRepeatForIterationUuid != null) {
+      if (validatedUuid != null && repeatForIterationUuid != null) {
         return new ModelAndView(String.format("redirect:/flow/%s/%s/%s/%s", flow, nextViewableScreen, validatedUuid,
-            validatedRepeatForIterationUuid));
-      } else if (validatedUuid != null && validatedRepeatForIterationUuid == null) {
+            repeatForIterationUuid));
+      } else if (validatedUuid != null && repeatForIterationUuid == null) {
         return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, nextViewableScreen, validatedUuid));
       } else {
         return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, nextViewableScreen));
@@ -224,9 +223,9 @@ public class ScreenController extends FormFlowController {
     submission = saveToRepository(submission);
     setSubmissionInSession(httpSession, submission, flow);
 
-    if (validatedUuid != null && validatedRepeatForIterationUuid != null) {
-      actionManager.handleBeforeDisplayAction(currentScreen, submission, validatedUuid, validatedRepeatForIterationUuid);
-    } else if (validatedUuid != null && validatedRepeatForIterationUuid == null) {
+    if (validatedUuid != null && repeatForIterationUuid != null) {
+      actionManager.handleBeforeDisplayAction(currentScreen, submission, validatedUuid, repeatForIterationUuid);
+    } else if (validatedUuid != null && repeatForIterationUuid == null) {
       actionManager.handleBeforeDisplayAction(currentScreen, submission, validatedUuid);
     } else {
       actionManager.handleBeforeDisplayAction(currentScreen, submission);
@@ -241,7 +240,7 @@ public class ScreenController extends FormFlowController {
     Map<String, Object> model;
     String formAction;
     try {
-      model = createModel(flow, screen, httpSession, submission, validatedUuid, validatedRepeatForIterationUuid, request,
+      model = createModel(flow, screen, httpSession, submission, validatedUuid, repeatForIterationUuid, request,
           referer);
       formAction = createFormActionString(flow, screen, submission, referer);
     } catch (Exception e) {
@@ -817,29 +816,21 @@ public class ScreenController extends FormFlowController {
               subflowIterationUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
     }
 
-    String validatedRepeatForIterationUuid = getValidatedRepeatForIterationUuid(submission, flowName,
+    validateRepeatForIterationUuid(submission, flowName,
         currentScreen.getSubflow(),
         subflowIterationUuid, repeatFor.getSaveDataAs(), repeatForIterationUuid);
-
-    if (validatedRepeatForIterationUuid == null) {
-      throwNotFoundError(submission.getFlow(), currentScreen.getName(),
-          String.format(
-              "RepeatFor iteration with uuid ('%s') not found under subflow '%s' iteration uuid ('%s') in flow '%s', when navigating to '%s'",
-              repeatForIterationUuid, currentScreen.getSubflow(), validatedSubflowIterationUuid, submission.getFlow(),
-              currentScreen.getName()));
-    }
 
     if (shouldRedirectDueToLockedSubmission(screenName, submission, flow)) {
       String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
       return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
     }
 
-    String nextViewableScreen = getNextViewableScreen(flow, screenName, subflowIterationUuid, validatedRepeatForIterationUuid,
+    String nextViewableScreen = getNextViewableScreen(flow, screenName, subflowIterationUuid, repeatForIterationUuid,
         submission);
     if (!nextViewableScreen.equals(screenName)) {
       return new ModelAndView(
           String.format("redirect:/flow/%s/%s/%s/%s", flow, nextViewableScreen, subflowIterationUuid,
-              validatedRepeatForIterationUuid));
+              repeatForIterationUuid));
     }
 
     if (submission == null) {
@@ -849,13 +840,13 @@ public class ScreenController extends FormFlowController {
     }
 
     actionManager.handleBeforeDisplayAction(currentScreen, submission, validatedSubflowIterationUuid,
-        validatedRepeatForIterationUuid);
+        repeatForIterationUuid);
     Map<String, Object> model = createModel(flow, screenName, httpSession, submission, validatedSubflowIterationUuid,
-        validatedRepeatForIterationUuid, request,
+        repeatForIterationUuid, request,
         referer);
     model.put("formAction",
         String.format("/flow/%s/%s/%s/%s", flow, screenName, validatedSubflowIterationUuid,
-            validatedRepeatForIterationUuid));
+            repeatForIterationUuid));
     return new ModelAndView(String.format("%s/%s", flow, screenName), model);
   }
 
@@ -932,27 +923,19 @@ public class ScreenController extends FormFlowController {
               uuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
     }
 
-    String validatedRepeatForIterationUuid = getValidatedRepeatForIterationUuid(submission, flowName,
+    validateRepeatForIterationUuid(submission, flowName,
         currentScreen.getSubflow(),
         uuid, repeatFor.getSaveDataAs(), repeatForIterationUuid);
 
-    if (validatedRepeatForIterationUuid == null) {
-      throwNotFoundError(submission.getFlow(), currentScreen.getName(),
-          String.format(
-              "RepeatFor iteration with uuid ('%s') not found under subflow '%s' iteration uuid ('%s') in flow '%s', when navigating to '%s'",
-              repeatForIterationUuid, currentScreen.getSubflow(), validatedSubflowIterationUuid, submission.getFlow(),
-              currentScreen.getName()));
-    }
-
     Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflowName, validatedSubflowIterationUuid);
     Map<String, Object> iterationToEdit = subflowManager.getRepeatForIteration(subflowIterationData,
-        repeatFor.getSaveDataAs(), validatedRepeatForIterationUuid);
+        repeatFor.getSaveDataAs(), repeatForIterationUuid);
 
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
     handleErrors(httpSession, errorMessages, formSubmission);
     if (!errorMessages.isEmpty()) {
       return new RedirectView(
-          String.format("/flow/%s/%s/%s/%s", flow, screen, validatedSubflowIterationUuid, validatedRepeatForIterationUuid));
+          String.format("/flow/%s/%s/%s/%s", flow, screen, validatedSubflowIterationUuid, repeatForIterationUuid));
     }
 
     if (iterationToEdit != null) {
@@ -961,17 +944,17 @@ public class ScreenController extends FormFlowController {
     }
 
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, validatedSubflowIterationUuid,
-        validatedRepeatForIterationUuid);
+        repeatForIterationUuid);
 
     actionManager.handleBeforeSaveAction(currentScreen, submission, validatedSubflowIterationUuid,
-        validatedRepeatForIterationUuid);
+        repeatForIterationUuid);
     submission = saveToRepository(submission, subflowName);
 
     actionManager.handleAfterSaveAction(currentScreen, submission, validatedSubflowIterationUuid,
-        validatedRepeatForIterationUuid);
+        repeatForIterationUuid);
 
     return new RedirectView(String.format("/flow/%s/%s/navigation?uuid=%s&%s=%s", flow, screen,
-        validatedSubflowIterationUuid, REPEAT_FOR_UUID, validatedRepeatForIterationUuid));
+        validatedSubflowIterationUuid, REPEAT_FOR_UUID, repeatForIterationUuid));
   }
 
   /**
@@ -1254,7 +1237,7 @@ public class ScreenController extends FormFlowController {
         }
       }
 
-      String validatedRepeatForIterationUuid = getValidatedRepeatForIterationUuid(submission, flowName, currentSubflowName,
+      String validatedRepeatForIterationUuid = validateRepeatForIterationUuid(submission, flowName, currentSubflowName,
           subflowIterationUuid, repeatForSaveDataAs, repeatForIterationUuid);
 
       if (validatedRepeatForIterationUuid == null) {
@@ -1319,40 +1302,6 @@ public class ScreenController extends FormFlowController {
 
     }
   }
-
-  private String getValidatedRepeatForIterationUuid(Submission submission, String flow,
-      String subflowName, String subflowIterationUuid, String inputName,
-      String repeatForIterationUuid) {
-    FlowConfiguration flowConfiguration = getValidatedFlowConfigurationByName(flow);
-    if (flowConfiguration == null) {
-      return null;
-    }
-
-    Map<String, Object> iteration = submission.getSubflowEntryByUuid(subflowName, subflowIterationUuid);
-
-    if (iteration.containsKey(inputName)) {
-      List<Map<String, Object>> repeatForIterationsData = (List<Map<String, Object>>) iteration.get(inputName);
-
-      List<Map<String, Object>> matchingRepeatForIteration = repeatForIterationsData.stream()
-          .filter(nestedSubflow -> nestedSubflow.get("uuid").equals(repeatForIterationUuid))
-          .collect(Collectors.toList());
-
-      if (matchingRepeatForIteration.isEmpty()) {
-        iteration = null;
-      } else {
-        if (matchingRepeatForIteration.size() > 1) {
-          log.info(
-              "This repeatFor subflow {} id {} has multiple records. Displaying the first one",
-              inputName, repeatForIterationUuid);
-        }
-
-        iteration = matchingRepeatForIteration.get(0);
-      }
-    }
-
-    return iteration != null ? (String) iteration.get("uuid") : null;
-  }
-
 
   /**
    * Get the current viewable screen that doesn't have a condition or meets its condition.
@@ -1696,5 +1645,48 @@ public class ScreenController extends FormFlowController {
     }
 
     return iteration != null ? (String) iteration.get("uuid") : null;
+  }
+
+  /**
+   * Return the validated UUID in String for, or returns null if not found.
+   *
+   * @param submission             The submission to search in
+   * @param flow                   The current flow we are working in
+   * @param subflowName            The subflow we are in
+   * @param subflowIterationUuid   The subflow iteration id
+   * @param repeatForSaveDataAs    The repeatFor saveDataAs value that is storing repeatFor data
+   * @param repeatForIterationUuid The id of the repeatFor iteration
+   * @return returns boolean if repeatFor iteration exists within given subflow
+   */
+  private boolean validateRepeatForIterationUuid(Submission submission, String flow,
+      String subflowName, String subflowIterationUuid, String repeatForSaveDataAs,
+      String repeatForIterationUuid) {
+    FlowConfiguration flowConfiguration = getValidatedFlowConfigurationByName(flow);
+
+    if (flowConfiguration == null) {
+      log.error(String.format(
+          "Cannot find flow configuration for flow %s",
+          flow));
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+
+    Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflowName, subflowIterationUuid);
+
+    if (subflowIterationData.isEmpty()) {
+      log.error(String.format(
+          "UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when validating repeatFor iteration for uuid ('%s')",
+          subflowIterationUuid, subflowName, submission.getFlow()), repeatForIterationUuid);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+
+    if (!subflowIterationData.containsKey(repeatForSaveDataAs)) {
+      log.error(String.format(
+          "RepeatFor SaveDataAs ('%s') key was not found in the subflow '%s' in flow '%s' with iteration ('%s'), when validating repeatFor iteration for uuid ('%s')'",
+          repeatForSaveDataAs, subflowName, submission.getFlow()), subflowIterationUuid, repeatForIterationUuid);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+
+    List<Map<String, Object>> repeatForIterationsData = (List<Map<String, Object>>) subflowIterationData.get(repeatForSaveDataAs);
+    return repeatForIterationsData.stream().anyMatch(nestedSubflow -> nestedSubflow.get("uuid").equals(repeatForIterationUuid));
   }
 }
