@@ -71,6 +71,10 @@ public class ScreenController extends FormFlowController {
 
   public static final String FLOW = "/flow";
   public static final String FLOW_SCREEN_PATH = "{flow}/{screen}";
+
+  private static final String SUBFLOW_UUID = "uuid";
+
+  private static final String REPEAT_FOR_UUID = "repeatForIterationUuid";
   private final ValidationService validationService;
   private final AddressValidationService addressValidationService;
   private final ConditionManager conditionManager;
@@ -130,7 +134,7 @@ public class ScreenController extends FormFlowController {
       @PathVariable(name = "screen") String requestScreen,
       @RequestParam(required = false) Map<String, String> query_params,
       @RequestParam(value = "uuid", required = false) String requestUuid,
-      @RequestParam(value = "repeatForIterationUuid", required = false) String repeatForIterationUuid,
+      @RequestParam(value = REPEAT_FOR_UUID, required = false) String repeatForIterationUuid,
       @RequestHeader(value = "Referer", required = false) String referer,
       RedirectAttributes redirectAttributes,
       HttpSession httpSession,
@@ -185,14 +189,10 @@ public class ScreenController extends FormFlowController {
             return nothingToDeleteModelAndView;
           }
         } else {
-        throwNotFoundError(submission.getFlow(), currentScreen.getName(),
-                String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-                        requestUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+          throwNotFoundError(submission.getFlow(), currentScreen.getName(),
+              String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                  requestUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
         }
-      } else {
-        throwNotFoundError(submission.getFlow(), currentScreen.getName(),
-                String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-                        requestUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
       }
     }
 
@@ -260,10 +260,10 @@ public class ScreenController extends FormFlowController {
   /**
    * Checks if current screen condition is met.
    *
-   * @param uuid           The uuid of a subflow entry
+   * @param uuid          The uuid of a subflow entry
    * @param repeatForUuid The uuid of the repeatFor subflow under the current subflow
-   * @param currentScreen  The current screen to check
-   * @param submission     submission
+   * @param currentScreen The current screen to check
+   * @param submission    submission
    * @return True - current screen does not meet the condition; False - otherwise
    */
   private boolean shouldRedirectToNextScreen(String uuid, String repeatForUuid, ScreenNavigationConfiguration currentScreen,
@@ -744,14 +744,15 @@ public class ScreenController extends FormFlowController {
   }
 
   /**
-   * Processes input data from a page of a subflow screen. If `new` is supplied for UUID, then it is assumed this is a new
-   * iteration of the subflow and a new UUID is created and associated with the iteration's data.
-   *
+   * Processes input data from a page of a repeatFor iteration subflow screen. All iterations are pre-populated based on the
+   * configuration definition of repeatFor. This method will check if the repeatFor iteration UUID and the subflow iteration UUID
+   * are valid and will properly display the screen requested, if they are
    * <p>
    * If validation of input data passes this will redirect to move the client to the next screen.
    * </p>
    * <p>
-   * If validation of input data fails this will redirect the client to the same subflow screen so they can fix the data.
+   * If validation of input data fails this will redirect the client to the same repeatFor subflow screen so they can fix the
+   * data.
    * </p>
    *
    * @param flow                   The current flow name, not null
@@ -762,14 +763,13 @@ public class ScreenController extends FormFlowController {
    * @return a redirect to next screen
    */
 
-  @GetMapping({FLOW_SCREEN_PATH + "/{uuid}/{repeatForIterationUuid}",
-      FLOW_SCREEN_PATH + "/{uuid}/{repeatForIterationUuid}"
-          + "/edit"})
-  ModelAndView getNestedSubflowScreen(
+  @GetMapping({FLOW_SCREEN_PATH + "/{uuid}/{" + REPEAT_FOR_UUID + "}",
+      FLOW_SCREEN_PATH + "/{uuid}/{" + REPEAT_FOR_UUID + "}/edit"})
+  ModelAndView getRepeatForSubflowScreen(
       @PathVariable(name = "flow") String flow,
       @PathVariable(name = "screen") String requestScreen,
       @PathVariable(name = "uuid") String subflowIterationUuid,
-      @PathVariable(name = "repeatForIterationUuid") String repeatForIterationUuid,
+      @PathVariable(name = REPEAT_FOR_UUID) String repeatForIterationUuid,
       @RequestHeader(value = "Referer", required = false) String referer,
       HttpSession httpSession,
       HttpServletRequest request,
@@ -793,15 +793,17 @@ public class ScreenController extends FormFlowController {
         currentScreen.getSubflow());
 
     if (subflowRelationshipOptional.isEmpty()) {
-      log.error("Flow configuration error, expecting a relationship to be set for the nested subflow");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+      throw new IllegalStateException(String.format(
+          "Configuration Error: Missing Relationship definition in configuration file for subflow %s",
+          currentScreen.getSubflow()));
     }
 
     final SubflowRelationship subflowRelationship = subflowRelationshipOptional.get();
 
     if (subflowRelationshipOptional.isPresent() && subflowRelationship.getRepeatFor() == null) {
-      log.error("Flow configuration error, expecting repeatFor in the nested relationship");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+      throw new IllegalStateException(String.format(
+          "Configuration Error: Missing repeatFor definition for the nested relationship in configuration file for subflow %s",
+          currentScreen.getSubflow()));
     }
 
     RepeatFor repeatFor = subflowRelationship.getRepeatFor();
@@ -822,8 +824,9 @@ public class ScreenController extends FormFlowController {
     if (validatedRepeatForIterationUuid == null) {
       throwNotFoundError(submission.getFlow(), currentScreen.getName(),
           String.format(
-              "UUID ('%s') not found in nested iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-              repeatForIterationUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+              "RepeatFor iteration with uuid ('%s') not found under subflow '%s' iteration uuid ('%s') in flow '%s', when navigating to '%s'",
+              repeatForIterationUuid, currentScreen.getSubflow(), validatedSubflowIterationUuid, submission.getFlow(),
+              currentScreen.getName()));
     }
 
     if (shouldRedirectDueToLockedSubmission(screenName, submission, flow)) {
@@ -875,14 +878,14 @@ public class ScreenController extends FormFlowController {
    * @param httpSession            The HTTP session if it exists, not null
    * @return a redirect to next screen
    */
-  @PostMapping({FLOW_SCREEN_PATH + "/{uuid}/{repeatForIterationUuid}",
-      FLOW_SCREEN_PATH + "/{uuid}/{repeatForIterationUuid}/edit"})
-  RedirectView postNestedSubflowScreen(
+  @PostMapping({FLOW_SCREEN_PATH + "/{uuid}/{" + REPEAT_FOR_UUID + "}",
+      FLOW_SCREEN_PATH + "/{uuid}/{" + REPEAT_FOR_UUID + "}/edit"})
+  RedirectView postRepeatForSubflowScreen(
       @RequestParam(required = false) MultiValueMap<String, String> formData,
       @PathVariable(name = "flow") String flowName,
       @PathVariable(name = "screen") String requestScreen,
       @PathVariable String uuid,
-      @PathVariable(name = "repeatForIterationUuid") String repeatForIterationUuid,
+      @PathVariable(name = REPEAT_FOR_UUID) String repeatForIterationUuid,
       HttpSession httpSession,
       HttpServletRequest request,
       RedirectAttributes redirectAttributes,
@@ -895,7 +898,6 @@ public class ScreenController extends FormFlowController {
         requestScreen,
         uuid);
 
-    // Checks to see if flow and screen exist; If they do not, then this will throw an error
     ScreenConfig screenConfig = getValidatedScreenConfiguration(flowName, requestScreen);
     ScreenNavigationConfiguration currentScreen = screenConfig.getScreenNavigationConfiguration();
     String flow = screenConfig.getFlowName();
@@ -915,8 +917,9 @@ public class ScreenController extends FormFlowController {
     final SubflowRelationship subflowRelationship = subflowRelationshipOptional.get();
 
     if (subflowRelationshipOptional.isPresent() && subflowRelationship.getRepeatFor() == null) {
-      log.error("Flow configuration error, expecting repeatFor in the nested relationship");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+      throw new IllegalStateException(String.format(
+          "Configuration Error: Missing repeatFor definition for the nested relationship in configuration file for subflow %s",
+          subflowName));
     }
 
     RepeatFor repeatFor = subflowRelationship.getRepeatFor();
@@ -936,8 +939,9 @@ public class ScreenController extends FormFlowController {
     if (validatedRepeatForIterationUuid == null) {
       throwNotFoundError(submission.getFlow(), currentScreen.getName(),
           String.format(
-              "UUID ('%s') not found in nested iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-              repeatForIterationUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+              "RepeatFor iteration with uuid ('%s') not found under subflow '%s' iteration uuid ('%s') in flow '%s', when navigating to '%s'",
+              repeatForIterationUuid, currentScreen.getSubflow(), validatedSubflowIterationUuid, submission.getFlow(),
+              currentScreen.getName()));
     }
 
     Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflowName, validatedSubflowIterationUuid);
@@ -966,8 +970,8 @@ public class ScreenController extends FormFlowController {
     actionManager.handleAfterSaveAction(currentScreen, submission, validatedSubflowIterationUuid,
         validatedRepeatForIterationUuid);
 
-    return new RedirectView(String.format("/flow/%s/%s/navigation?uuid=%s&repeatForIterationUuid=%s", flow, screen,
-        validatedSubflowIterationUuid, validatedRepeatForIterationUuid));
+    return new RedirectView(String.format("/flow/%s/%s/navigation?uuid=%s&%s=%s", flow, screen,
+        validatedSubflowIterationUuid, REPEAT_FOR_UUID, validatedRepeatForIterationUuid));
   }
 
   /**
@@ -980,7 +984,7 @@ public class ScreenController extends FormFlowController {
    * @PathVariable uuid        Unique id associated with the subflow's data, not null
    * @PathVariable repeatForIterationUuid Unique id associated with the repeatFor under a subflow
    */
-  @GetMapping("{flow}/{subflow}/{uuid}/{repeatForIterationUuid}/deleteConfirmation")
+  @GetMapping("{flow}/{subflow}/{uuid}/{" + REPEAT_FOR_UUID + "}/deleteConfirmation")
   ModelAndView deleteRepeatForConfirmation(
       @PathVariable String flow,
       @PathVariable String subflow,
@@ -1004,21 +1008,30 @@ public class ScreenController extends FormFlowController {
 
     if (submission != null) {
       Optional<SubflowRelationship> subflowRelationshipOptional = subflowManager.subflowRelationship(flow, subflow);
-      if (subflowRelationshipOptional.isPresent() && subflowRelationshipOptional.get().getRepeatFor() != null) {
-        Map<String, Object> subflowData = submission.getSubflowEntryByUuid(subflow, uuid);
-        Map<String, Object> entryToDelete = subflowManager.getRepeatForIteration(subflowData,
-            subflowRelationshipOptional.get().getRepeatFor().getSaveDataAs(), repeatForIterationUuid);
-
-        if (entryToDelete != null) {
-          httpSession.setAttribute("entryToDelete", entryToDelete);
-        }
+      if (subflowRelationshipOptional.isEmpty()) {
+        throw new IllegalStateException(String.format(
+            "Configuration Error: Missing Relationship definition in configuration file for subflow %s",
+            subflow));
       }
 
+      if (subflowRelationshipOptional.isPresent() && subflowRelationshipOptional.get().getRepeatFor() == null) {
+        throw new IllegalStateException(String.format(
+            "Configuration Error: Missing repeatFor definition for the nested relationship in configuration file for subflow %s",
+            subflow));
+      }
+
+      Map<String, Object> subflowData = submission.getSubflowEntryByUuid(subflow, uuid);
+      Map<String, Object> entryToDelete = subflowManager.getRepeatForIteration(subflowData,
+          subflowRelationshipOptional.get().getRepeatFor().getSaveDataAs(), repeatForIterationUuid);
+
+      if (entryToDelete != null) {
+        httpSession.setAttribute("entryToDelete", entryToDelete);
+      }
     }
 
     return new ModelAndView(new RedirectView(
-        String.format("/flow/%s/%s?uuid=%s&repeatForIterationUuid=%s", flow, deleteConfirmationScreen, uuid,
-            repeatForIterationUuid)));
+        String.format("/flow/%s/%s?uuid=%s&%s=%s", flow, deleteConfirmationScreen, uuid,
+            REPEAT_FOR_UUID, repeatForIterationUuid)));
   }
 
   /**
@@ -1032,7 +1045,7 @@ public class ScreenController extends FormFlowController {
    * submission data for a subflow.  If no submission data is found an error template is returned.
    * @PathVariable repeatForIterationUuid Unique id associated with the repeatFor under a subflow
    */
-  @PostMapping("{flow}/{subflow}/{uuid}/{repeatForIterationUuid}/delete")
+  @PostMapping("{flow}/{subflow}/{uuid}/{" + REPEAT_FOR_UUID + "}/delete")
   ModelAndView deleteSubflowRepeatForIteration(
       @PathVariable(name = "flow") String requestFlow,
       @PathVariable String subflow,
@@ -1050,8 +1063,6 @@ public class ScreenController extends FormFlowController {
         uuid);
     // Checks to make sure flow exists; if it doesn't an error is thrown
     FlowConfiguration flowConfiguration = getValidatedFlowConfigurationByName(requestFlow);
-    String subflowEntryScreen = flowConfiguration.getSubflows().get(subflow)
-        .getEntryScreen();
     String flow = flowConfiguration.getName();
 
     Submission submission = getSubmissionFromSession(httpSession, flow);
@@ -1068,19 +1079,21 @@ public class ScreenController extends FormFlowController {
     RepeatFor repeatForConfiguration = subflowConfig.getRelationship().getRepeatFor();
 
     if (repeatForConfiguration == null) {
-      throw new IllegalStateException(String.format("Missing repeatFor relationship in configuration file for subflow %s", subflow));
+      throw new IllegalStateException(String.format(
+          "Configuration Error: Missing repeatFor definition for the nested relationship in configuration file for subflow %s",
+          subflow));
     }
 
     Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflow, uuid);
 
     if (subflowIterationData.containsKey(repeatForConfiguration.getSaveDataAs())) {
-      List<Map<String, Object>> nestedSubflowEntry = (List<Map<String, Object>>) subflowIterationData.get(
+      List<Map<String, Object>> repeatForIterationData = (List<Map<String, Object>>) subflowIterationData.get(
           repeatForConfiguration.getSaveDataAs());
-      Optional<Map<String, Object>> entryToDelete = nestedSubflowEntry.stream()
+      Optional<Map<String, Object>> entryToDelete = repeatForIterationData.stream()
           .filter(entry -> entry.get("uuid").equals(repeatForIterationUuid)).findFirst();
-      entryToDelete.ifPresent(nestedSubflowEntry::remove);
-      if (!nestedSubflowEntry.isEmpty()) {
-        subflowIterationData.put(repeatForConfiguration.getSaveDataAs(), nestedSubflowEntry);
+      entryToDelete.ifPresent(repeatForIterationData::remove);
+      if (!repeatForIterationData.isEmpty()) {
+        subflowIterationData.put(repeatForConfiguration.getSaveDataAs(), repeatForIterationData);
         saveToRepository(submission);
       } else {
         subflowIterationData.remove(repeatForConfiguration.getSaveDataAs());
@@ -1112,7 +1125,7 @@ public class ScreenController extends FormFlowController {
       HttpSession httpSession,
       HttpServletRequest request,
       @RequestParam(name = "uuid", required = false) String subflowIterationUuid,
-      @RequestParam(name = "repeatForIterationUuid", required = false) String repeatForIterationUuid
+      @RequestParam(name = REPEAT_FOR_UUID, required = false) String repeatForIterationUuid
   ) {
     log.info("GET navigation (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow,
         requestScreen);
@@ -1221,18 +1234,19 @@ public class ScreenController extends FormFlowController {
 
       if (repeatForIterationUuid == null) {
         // the first iteration has not been set yet
-        List nestedSubflowData = (List) currentSubflowEntryData.getOrDefault(repeatForSaveDataAs,
+        List repeatForIterationsData = (List) currentSubflowEntryData.getOrDefault(repeatForSaveDataAs,
             Collections.EMPTY_LIST);
-        if (!nestedSubflowData.isEmpty()) {
+        if (!repeatForIterationsData.isEmpty()) {
           Map<String, Object> nextRepeatForIterationScreen = subflowManager.getNextRepeatForIterationUuid(
               repeatForSaveDataAs,
               currentSubflowEntryData);
-          if(nextRepeatForIterationScreen != null){
+          if (nextRepeatForIterationScreen != null) {
             return String.format("/flow/%s/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
                 subflowIterationUuid,
                 nextRepeatForIterationScreen.get("uuid"));
           } else {
-            return String.format("/flow/%s/%s", flowName, subflowManager.getSubflowConfiguration(flowName, currentSubflowName).getReviewScreen());
+            return String.format("/flow/%s/%s", flowName,
+                subflowManager.getSubflowConfiguration(flowName, currentSubflowName).getReviewScreen());
           }
         } else {
           return String.format("/flow/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
@@ -1246,22 +1260,16 @@ public class ScreenController extends FormFlowController {
       if (validatedRepeatForIterationUuid == null) {
         throwNotFoundError(submission.getFlow(), currentScreenConfiguration.getName(),
             String.format(
-                "repeatForIterationUuid ('%s') not found as an iteration for %s under the "
-                    + "subflowIteration %s in iterations "
-                    + "for subflow '%s' "
-                    + "in flow '%s', when "
-                    + "navigating to '%s'",
-                repeatForIterationUuid, repeatForSaveDataAs, subflowIterationUuid,
-                currentScreenConfiguration.getSubflow(),
-                submission.getFlow(),
+                "RepeatFor iteration with uuid ('%s') not found under subflow '%s' iteration uuid ('%s') in flow '%s', when navigating to '%s'",
+                repeatForIterationUuid, currentScreenConfiguration.getSubflow(), subflowIterationUuid, submission.getFlow(),
                 currentScreenConfiguration.getName()));
       }
 
-      Boolean inLastScreenOfNestedSubflow = nextScreenConfiguration.getSubflow() == null;
-      if (inLastScreenOfNestedSubflow) {
-        Map<String, Object> nestedIteration = subflowManager.getRepeatForIteration(currentSubflowEntryData,
+      Boolean inLastScreenOfRepeatsForIteration = nextScreenConfiguration.getSubflow() == null;
+      if (inLastScreenOfRepeatsForIteration) {
+        Map<String, Object> repeatForIteration = subflowManager.getRepeatForIteration(currentSubflowEntryData,
             repeatForSaveDataAs, validatedRepeatForIterationUuid);
-        nestedIteration.put(ITERATION_IS_COMPLETE_KEY, true);
+        repeatForIteration.put(ITERATION_IS_COMPLETE_KEY, true);
         submission = saveToRepository(submission);
 
         boolean allRepeatForIterationsComplete = subflowManager.hasFinishedAllIterations(repeatForSaveDataAs,
@@ -1320,27 +1328,25 @@ public class ScreenController extends FormFlowController {
       return null;
     }
 
-    Map<String, Object> iteration = null;
-
-    iteration = submission.getSubflowEntryByUuid(subflowName, subflowIterationUuid);
+    Map<String, Object> iteration = submission.getSubflowEntryByUuid(subflowName, subflowIterationUuid);
 
     if (iteration.containsKey(inputName)) {
-      List<Map<String, Object>> nestedSubflowData = (List<Map<String, Object>>) iteration.get(inputName);
+      List<Map<String, Object>> repeatForIterationsData = (List<Map<String, Object>>) iteration.get(inputName);
 
-      List<Map<String, Object>> matchingNestedSubflows = nestedSubflowData.stream()
+      List<Map<String, Object>> matchingRepeatForIteration = repeatForIterationsData.stream()
           .filter(nestedSubflow -> nestedSubflow.get("uuid").equals(repeatForIterationUuid))
           .collect(Collectors.toList());
 
-      if (matchingNestedSubflows.isEmpty()) {
+      if (matchingRepeatForIteration.isEmpty()) {
         iteration = null;
       } else {
-        if (matchingNestedSubflows.size() > 1) {
+        if (matchingRepeatForIteration.size() > 1) {
           log.info(
-              "This nested subflow {} id {} has multiple records for the same subflow. Displaying the first one",
+              "This repeatFor subflow {} id {} has multiple records. Displaying the first one",
               inputName, repeatForIterationUuid);
         }
 
-        iteration = matchingNestedSubflows.get(0);
+        iteration = matchingRepeatForIteration.get(0);
       }
     }
 
@@ -1462,8 +1468,8 @@ public class ScreenController extends FormFlowController {
       String uuid = subflowManager.getUuidOfIterationToUpdate(referer, subflowName, submission);
       if (uuid == null) {
         throwNotFoundError(flow, screen,
-                String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-                        uuid, subflowName, submission.getFlow(), screen));
+            String.format("UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                uuid, subflowName, submission.getFlow(), screen));
       }
       return String.format("/flow/%s/%s/%s", flow, screen, uuid);
     }
@@ -1563,7 +1569,7 @@ public class ScreenController extends FormFlowController {
             Map<String, Object> repeatForIteration = subflowManager.getRepeatForIteration(subflowData, repeatFor.getSaveDataAs(),
                 repeatForIterationUuid);
             model.put("repeatForIteration", repeatForIteration);
-            if(repeatForIteration!= null){
+            if (repeatForIteration != null) {
               model.put("fieldData", repeatForIteration);
             }
 
