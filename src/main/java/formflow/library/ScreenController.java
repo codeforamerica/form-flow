@@ -944,6 +944,13 @@ public class ScreenController extends FormFlowController {
     Map<String, Object> iterationToEdit = subflowManager.getRepeatsForIteration(subflowIterationData,
         repeatFor.getSaveDataAs(), validatedRepeatForIterationUuid);
 
+    var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
+    handleErrors(httpSession, errorMessages, formSubmission);
+    if (!errorMessages.isEmpty()) {
+      return new RedirectView(
+          String.format("/flow/%s/%s/%s/%s", flow, screen, validatedSubflowIterationUuid, validatedRepeatForIterationUuid));
+    }
+
     if (iterationToEdit != null) {
       submission.mergeFormDataWithRepeatsForSubflowIterationData(subflowName, validatedSubflowIterationUuid,
           repeatFor.getSaveDataAs(), iterationToEdit, formSubmission.getFormData());
@@ -951,14 +958,6 @@ public class ScreenController extends FormFlowController {
 
     actionManager.handleOnPostAction(currentScreen, formSubmission, submission, validatedSubflowIterationUuid,
         validatedRepeatForIterationUuid);
-
-    // toDo: make sure validation service works
-//    var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
-//    handleErrors(httpSession, errorMessages, formSubmission);
-//    if (!errorMessages.isEmpty()) {
-//      return new RedirectView(
-//          String.format("/flow/%s/%s/%s/%s", flow, screen, validatedSubflowIterationUuid, validatedRepeatForIterationUuid));
-//    }
 
     actionManager.handleBeforeSaveAction(currentScreen, submission, validatedSubflowIterationUuid,
         validatedRepeatForIterationUuid);
@@ -1068,14 +1067,15 @@ public class ScreenController extends FormFlowController {
     SubflowConfiguration subflowConfig = subflowManager.getSubflowConfiguration(flow, subflow);
     RepeatFor repeatForConfiguration = subflowConfig.getRelationship().getRepeatFor();
 
-    if(repeatForConfiguration == null){
-      // file is not configured properly
+    if (repeatForConfiguration == null) {
+      throw new IllegalStateException(String.format("Missing repeatFor relationship in configuration file for subflow %s", subflow));
     }
 
     Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflow, uuid);
 
     if (subflowIterationData.containsKey(repeatForConfiguration.getSaveDataAs())) {
-      List<Map<String, Object>> nestedSubflowEntry = (List<Map<String, Object>>) subflowIterationData.get(repeatForConfiguration.getSaveDataAs());
+      List<Map<String, Object>> nestedSubflowEntry = (List<Map<String, Object>>) subflowIterationData.get(
+          repeatForConfiguration.getSaveDataAs());
       Optional<Map<String, Object>> entryToDelete = nestedSubflowEntry.stream()
           .filter(entry -> entry.get("uuid").equals(repeatForIterationUuid)).findFirst();
       entryToDelete.ifPresent(nestedSubflowEntry::remove);
@@ -1214,6 +1214,8 @@ public class ScreenController extends FormFlowController {
     Map<String, Object> currentSubflowEntryData = submission.getSubflowEntryByUuid(currentSubflowName,
         subflowIterationUuid);
 
+    ScreenConfig subflowStartScreen = getValidatedScreenConfiguration(flowName,
+        subflowManager.getIterationStartScreenForSubflow(flowName, currentSubflowName));
     if (repeatsFor != null) {
       String repeatsForSaveDataAs = repeatsFor.getSaveDataAs();
 
@@ -1222,12 +1224,16 @@ public class ScreenController extends FormFlowController {
         List nestedSubflowData = (List) currentSubflowEntryData.getOrDefault(repeatsForSaveDataAs,
             Collections.EMPTY_LIST);
         if (!nestedSubflowData.isEmpty()) {
-          Map<String, Object> firstNestedSubflowIteration = subflowManager.getNextRepeatForIterationUuid(
+          Map<String, Object> nextRepeatForIterationScreen = subflowManager.getNextRepeatForIterationUuid(
               repeatsForSaveDataAs,
               currentSubflowEntryData);
-          return String.format("/flow/%s/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
-              subflowIterationUuid,
-              firstNestedSubflowIteration.get("uuid"));
+          if(nextRepeatForIterationScreen != null){
+            return String.format("/flow/%s/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
+                subflowIterationUuid,
+                nextRepeatForIterationScreen.get("uuid"));
+          } else {
+            return String.format("/flow/%s/%s", flowName, subflowManager.getSubflowConfiguration(flowName, currentSubflowName).getReviewScreen());
+          }
         } else {
           return String.format("/flow/%s/%s/%s", flowName, nextScreenConfiguration.getName(),
               subflowIterationUuid);
@@ -1277,8 +1283,7 @@ public class ScreenController extends FormFlowController {
           // go to the next element
           String nextRepeatForUuid = (String) subflowManager.getNextRepeatForIterationUuid(repeatsForSaveDataAs,
               currentSubflowEntryData).get("uuid");
-          ScreenConfig subflowStartScreen = getValidatedScreenConfiguration(flowName,
-              subflowManager.getIterationStartScreenForSubflow(flowName, currentSubflowName));
+
           return String.format("/flow/%s/%s/%s/%s", flowName,
               getNextScreenName(submission, subflowStartScreen.screenNavigationConfiguration, subflowIterationUuid,
                   validatedRepeatForIterationUuid),
@@ -1555,10 +1560,12 @@ public class ScreenController extends FormFlowController {
             RepeatFor repeatFor = subflowRelationship.getRepeatFor();
 
             Map<String, Object> subflowData = submission.getSubflowEntryByUuid(subflowName, uuidOfIterationToUpdate);
-
-            model.put("repeatForIteration",
-                subflowManager.getRepeatsForIteration(subflowData, repeatFor.getSaveDataAs(),
-                    repeatForIterationUuid));
+            Map<String, Object> repeatForIteration = subflowManager.getRepeatsForIteration(subflowData, repeatFor.getSaveDataAs(),
+                repeatForIterationUuid);
+            model.put("repeatForIteration", repeatForIteration);
+            if(repeatForIteration!= null){
+              model.put("fieldData", repeatForIteration);
+            }
 
           }
         }
