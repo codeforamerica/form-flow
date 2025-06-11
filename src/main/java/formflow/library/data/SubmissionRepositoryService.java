@@ -1,12 +1,17 @@
 package formflow.library.data;
 
+import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType.alpha;
+import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType.alphanumeric;
+import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType.numeric;
+
 import formflow.library.config.submission.ShortCodeConfig;
+import formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,9 +137,9 @@ public class SubmissionRepositoryService {
         int codeLength = config.getCodeLength();
         do {
             String newCode = switch (config.getCodeType()) {
-                case alphanumeric -> RandomStringUtils.randomAlphanumeric(codeLength);
-                case alpha -> RandomStringUtils.randomAlphabetic(codeLength);
-                case numeric -> RandomStringUtils.randomNumeric(codeLength);
+                case alphanumeric -> generateRandomCode(codeLength, alphanumeric);
+                case alpha -> generateRandomCode(codeLength, alpha);
+                case numeric -> generateRandomCode(codeLength, numeric);
             };
 
             if (config.isUppercase()) {
@@ -159,5 +164,23 @@ public class SubmissionRepositoryService {
                 log.warn("Confirmation code {} already exists", newCode);
             }
         } while (submission.getShortCode() == null);
+    }
+
+    private static String generateRandomCode(int length, ShortCodeType type) {
+        RandomStringGenerator.Builder builder = new RandomStringGenerator.Builder().withinRange('0', 'z');
+
+        switch (type) {
+            case alphanumeric:
+                builder.filteredBy(Character::isLetterOrDigit);
+                break;
+            case alpha:
+                builder.filteredBy(Character::isLetter);
+                break;
+            case numeric:
+                builder.filteredBy(Character::isDigit);
+                break;
+        }
+
+        return builder.build().generate(length);
     }
 }
