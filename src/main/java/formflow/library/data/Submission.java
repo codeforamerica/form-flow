@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,6 +159,44 @@ public class Submission {
     int indexToUpdate = subflowArr.indexOf(iterationToUpdate);
     subflowArr.set(indexToUpdate, formDataSubmission);
     inputData.replace(subflowName, subflowArr);
+  }
+
+  /**
+   * Merges the passed in form submission data with the subflow's repeatFor iteration data into the Submission's subflow's
+   * repeatsFor iteration data.
+   *
+   * @param subflowName            subflow that the iteration data belongs with, not null
+   * @param subflowUuid            subflow iteration uuid
+   * @param repeatForSaveDataAsKey the value of the repeatFor saveDataAs configuration
+   * @param iterationToUpdate      existing data for a particular iteration of a subflow, may be empty, but not null
+   * @param formDataSubmission     new data for a particular iteration of a subflow, not null
+   * @param
+   */
+  public void mergeFormDataWithRepeatForSubflowIterationData(String subflowName, String subflowUuid,
+      String repeatForSaveDataAsKey, Map<String, Object> iterationToUpdate,
+      Map<String, Object> formDataSubmission) {
+
+    iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
+
+    Map<String, Object> subflowEntry = getSubflowEntryByUuid(subflowName, subflowUuid);
+    List<Map<String, Object>> repeatForIterations = (List<Map<String, Object>>) subflowEntry.getOrDefault(
+        repeatForSaveDataAsKey,
+        Collections.EMPTY_LIST);
+
+    Optional<Map<String, Object>> currentIteration = repeatForIterations.stream()
+        .filter(iteration -> iteration.get("uuid").equals(formDataSubmission.get("uuid"))).findFirst();
+
+    if (currentIteration.isPresent()) {
+      int nestedIndexToUpdate = repeatForIterations.indexOf(currentIteration.get());
+      repeatForIterations.set(nestedIndexToUpdate, formDataSubmission);
+
+      subflowEntry.put(repeatForSaveDataAsKey, repeatForIterations);
+
+      List<Map<String, Object>> subflowArr = (List<Map<String, Object>>) this.inputData.get(subflowName);
+      int indexToUpdate = subflowArr.indexOf(subflowEntry);
+      subflowArr.set(indexToUpdate, subflowEntry);
+      this.inputData.put(subflowName, subflowArr);
+    }
   }
 
   /**
