@@ -274,7 +274,7 @@ public class SubflowManager {
 
         inputListToRepeatOn.forEach(selectedValue ->
                 repeatForIterations.add(
-                        createSubflowIterationRepeat(repeatForInputData, selectedValue)));
+                        createSubflowIterationRepeat(selectedValue)));
 
         return repeatForIterations;
     }
@@ -287,12 +287,12 @@ public class SubflowManager {
 
         repeatForInputData.forEach(newEntry -> {
             Optional<Map<String, Object>> matchingIteration = currentRepeatForIterations.stream()
-                    .filter(oldEntry -> oldEntry.get(saveAsInputName + "Value").equals(newEntry)).findFirst();
+                    .filter(oldEntry -> oldEntry.get("repeatForValue").equals(newEntry)).findFirst();
 
             if (matchingIteration.isPresent()) {
                 newRepeatForIterations.add(matchingIteration.get());
             } else {
-                newRepeatForIterations.add(createSubflowIterationRepeat(saveAsInputName, newEntry));
+                newRepeatForIterations.add(createSubflowIterationRepeat(newEntry));
             }
         });
 
@@ -300,12 +300,12 @@ public class SubflowManager {
 
     }
 
-    private Map<String, Object> createSubflowIterationRepeat(String saveRelationshipAs, String inputDataId) {
+    private Map<String, Object> createSubflowIterationRepeat(String inputDataId) {
 
         Map<String, Object> entry = new HashMap<>();
 
         entry.put("uuid", UUID.randomUUID().toString());
-        entry.put(saveRelationshipAs + "Value", inputDataId);
+        entry.put("repeatForValue", inputDataId);
         entry.put(Submission.ITERATION_IS_COMPLETE_KEY, false);
 
         return entry;
