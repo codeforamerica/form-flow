@@ -866,8 +866,7 @@ public class ScreenController extends FormFlowController {
   }
 
   /**
-   * Processes input data from a page of a subflow screen. If `new` is supplied for UUID, then it is assumed this is a new
-   * iteration of the subflow and a new UUID is created and associated with the iteration's data.
+   * Processes input data from a subflow screen with a repeatFor iteration. The repeatFor iterations are pre-populated and this endpoint only handles validations and navigation.
    *
    * <p>
    * If validation of input data passes this will redirect to move the client to the next screen.
@@ -946,6 +945,9 @@ public class ScreenController extends FormFlowController {
     Map<String, Object> iterationToEdit = subflowManager.getRepeatForIteration(subflowIterationData,
         repeatFor.getSaveDataAs(), repeatForIterationUuid);
 
+    actionManager.handleOnPostAction(currentScreen, formSubmission, submission, validatedSubflowIterationUuid,
+        repeatForIterationUuid);
+
     var errorMessages = validationService.validate(currentScreen, flow, formSubmission, submission);
     handleErrors(httpSession, errorMessages, formSubmission);
     if (!errorMessages.isEmpty()) {
@@ -957,9 +959,6 @@ public class ScreenController extends FormFlowController {
       submission.mergeFormDataWithRepeatForSubflowIterationData(subflowName, validatedSubflowIterationUuid,
           repeatFor.getSaveDataAs(), iterationToEdit, formSubmission.getFormData());
     }
-
-    actionManager.handleOnPostAction(currentScreen, formSubmission, submission, validatedSubflowIterationUuid,
-        repeatForIterationUuid);
 
     actionManager.handleBeforeSaveAction(currentScreen, submission, validatedSubflowIterationUuid,
         repeatForIterationUuid);
@@ -1240,7 +1239,6 @@ public class ScreenController extends FormFlowController {
       throwNotFoundError(submission.getFlow(), currentScreenConfiguration.getName(),
           String.format("repeatFor iteration uuid ('%s') is not valid for subflow '%s' iteration ('%s') in flow %s)",
               repeatForIterationUuid, currentScreenConfiguration.getSubflow(), subflowIterationUuid, flowName));
-      return "";
     } else {
       if (nextScreenConfiguration.getSubflow() == null) {
         Map<String, Object> repeatForIteration = subflowManager.getRepeatForIteration(currentSubflowEntryData,
