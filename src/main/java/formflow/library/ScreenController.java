@@ -1239,6 +1239,7 @@ public class ScreenController extends FormFlowController {
       throwNotFoundError(submission.getFlow(), currentScreenConfiguration.getName(),
           String.format("repeatFor iteration uuid ('%s') is not valid for subflow '%s' iteration ('%s') in flow %s)",
               repeatForIterationUuid, currentScreenConfiguration.getSubflow(), subflowIterationUuid, flowName));
+      return "";
     } else {
       if (nextScreenConfiguration.getSubflow() == null) {
         Map<String, Object> repeatForIteration = subflowManager.getRepeatForIteration(currentSubflowEntryData,
