@@ -176,10 +176,21 @@ public class ScreenController extends FormFlowController {
 
                 if (!isValidRepeatForIterationUuid(submission, flow, currentScreen.getSubflow(),
                         requestUuid, repeatFor.getSaveDataAs(), repeatForIterationUuid)) {
-                    throwNotFoundError(submission.getFlow(), currentScreen.getName(),
-                            String.format(
-                                    "repeatFor iteration uuid ('%s') is not valid for subflow '%s' iteration ('%s') in flow %s)",
-                                    repeatForIterationUuid, currentScreen.getSubflow(), validatedUuid, flow));
+
+                    // catch to see if they are trying to go to a delete confirmation screen when the UUID is not present anymore.
+                    // If so, redirect.
+                    if (isDeleteConfirmationScreen(flow, screen)) {
+                        ModelAndView nothingToDeleteModelAndView = handleDeleteBackBehavior(flow, screen, requestUuid,
+                                submission);
+                        if (nothingToDeleteModelAndView != null) {
+                            return nothingToDeleteModelAndView;
+                        }
+                    } else {
+                        throwNotFoundError(submission.getFlow(), currentScreen.getName(),
+                                String.format(
+                                        "repeatFor iteration uuid ('%s') is not valid for subflow '%s' iteration ('%s') in flow %s)",
+                                        repeatForIterationUuid, currentScreen.getSubflow(), validatedUuid, flow));
+                    }
                 }
             }
         }
