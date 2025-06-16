@@ -183,21 +183,19 @@ public class ScreenController extends FormFlowController {
                 }
                 ;
             }
-
-            if (repeatForIterationUuid == null) {
-                // catch to see if they are trying to go to a delete confirmation screen when the UUID is not present anymore.
-                // If so, redirect.
-                if (isDeleteConfirmationScreen(flow, screen)) {
-                    ModelAndView nothingToDeleteModelAndView = handleDeleteBackBehavior(flow, screen, requestUuid, submission);
-                    if (nothingToDeleteModelAndView != null) {
-                        return nothingToDeleteModelAndView;
-                    }
-                } else {
-                    throwNotFoundError(submission.getFlow(), currentScreen.getName(),
-                            String.format(
-                                    "UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
-                                    requestUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
+        } else if (repeatForIterationUuid == null) {
+            // catch to see if they are trying to go to a delete confirmation screen when the UUID is not present anymore.
+            // If so, redirect.
+            if (isDeleteConfirmationScreen(flow, screen)) {
+                ModelAndView nothingToDeleteModelAndView = handleDeleteBackBehavior(flow, screen, requestUuid, submission);
+                if (nothingToDeleteModelAndView != null) {
+                    return nothingToDeleteModelAndView;
                 }
+            } else {
+                throwNotFoundError(submission.getFlow(), currentScreen.getName(),
+                        String.format(
+                                "UUID ('%s') not found in iterations for subflow '%s' in flow '%s', when navigating to '%s'",
+                                requestUuid, currentScreen.getSubflow(), submission.getFlow(), currentScreen.getName()));
             }
         }
 
@@ -212,7 +210,7 @@ public class ScreenController extends FormFlowController {
             if (validatedUuid != null && repeatForIterationUuid != null) {
                 return new ModelAndView(String.format("redirect:/flow/%s/%s/%s/%s", flow, nextViewableScreen, validatedUuid,
                         repeatForIterationUuid));
-            } else if (validatedUuid != null && repeatForIterationUuid == null) {
+            } else if (validatedUuid != null) {
                 return new ModelAndView(String.format("redirect:/flow/%s/%s/%s", flow, nextViewableScreen, validatedUuid));
             } else {
                 return new ModelAndView(String.format("redirect:/flow/%s/%s", flow, nextViewableScreen));
@@ -231,7 +229,7 @@ public class ScreenController extends FormFlowController {
 
         if (validatedUuid != null && repeatForIterationUuid != null) {
             actionManager.handleBeforeDisplayAction(currentScreen, submission, validatedUuid, repeatForIterationUuid);
-        } else if (validatedUuid != null && repeatForIterationUuid == null) {
+        } else if (validatedUuid != null) {
             actionManager.handleBeforeDisplayAction(currentScreen, submission, validatedUuid);
         } else {
             actionManager.handleBeforeDisplayAction(currentScreen, submission);
@@ -276,7 +274,7 @@ public class ScreenController extends FormFlowController {
         if (conditionManager.conditionExists(currentScreen.getCondition())) {
             if (currentScreen.getSubflow() != null && repeatForUuid != null) {
                 return !conditionManager.runCondition(currentScreen.getCondition(), submission, uuid, repeatForUuid);
-            } else if (currentScreen.getSubflow() != null && repeatForUuid == null) {
+            } else if (currentScreen.getSubflow() != null) {
                 return !conditionManager.runCondition(currentScreen.getCondition(), submission, uuid);
             } else {
                 return !conditionManager.runCondition(currentScreen.getCondition(), submission);
@@ -375,7 +373,7 @@ public class ScreenController extends FormFlowController {
             boolean submitSubmission
     ) throws SmartyException, IOException, InterruptedException {
 
-        log.info("POST postScreen (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow,
+        log.info("POST handlePost (url: {}): flow: {}, screen: {}", request.getRequestURI().toLowerCase(), requestFlow,
                 requestScreen);
         // Checks if screen and flow exist. If getScreenConfig runs successfully, then the flow and screen exist.
         ScreenConfig screenConfig = getValidatedScreenConfiguration(requestFlow, requestScreen);
@@ -539,7 +537,7 @@ public class ScreenController extends FormFlowController {
             Locale locale
     ) throws ResponseStatusException, SmartyException, IOException, InterruptedException {
         log.info(
-                "POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}",
+                "POST postSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
                 request.getRequestURI().toLowerCase(),
                 requestFlow,
                 requestScreen,
@@ -734,11 +732,11 @@ public class ScreenController extends FormFlowController {
             if (!subflowArr.isEmpty()) {
                 existingInputData.put(subflow, subflowArr);
                 submission.setInputData(existingInputData);
-                submission = saveToRepository(submission, subflow);
+                saveToRepository(submission, subflow);
             } else {
                 existingInputData.remove(subflow);
                 submission.setInputData(existingInputData);
-                submission = saveToRepository(submission, subflow);
+                saveToRepository(submission, subflow);
                 return new ModelAndView("redirect:/flow/%s/%s".formatted(flow, subflowEntryScreen));
             }
         } else {
@@ -784,7 +782,7 @@ public class ScreenController extends FormFlowController {
             Locale locale
     ) throws ResponseStatusException {
         log.info(
-                "GET getSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
+                "GET getRepeatForSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
                 request.getRequestURI().toLowerCase(),
                 flow,
                 requestScreen,
@@ -861,7 +859,7 @@ public class ScreenController extends FormFlowController {
 
         final SubflowRelationship subflowRelationship = subflowRelationshipOptional.get();
 
-        if (subflowRelationshipOptional.isPresent() && subflowRelationship.getRepeatFor() == null) {
+        if (subflowRelationship.getRepeatFor() == null) {
             throw new IllegalStateException(String.format(
                     "Configuration Error: Missing repeatFor definition for the nested relationship in configuration file for subflow %s",
                     subflowName));
@@ -901,7 +899,7 @@ public class ScreenController extends FormFlowController {
             Locale locale
     ) throws ResponseStatusException {
         log.info(
-                "POST updateOrCreateIteration (url: {}): flow: {}, screen: {}, uuid: {}",
+                "POST postRepeatForSubflowScreen (url: {}): flow: {}, screen: {}, uuid: {}",
                 request.getRequestURI().toLowerCase(),
                 flowName,
                 requestScreen,
@@ -996,7 +994,7 @@ public class ScreenController extends FormFlowController {
             RedirectAttributes redirectAttributes,
             Locale locale
     ) {
-        log.info("GET deleteConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(), flow, uuid);
+        log.info("GET deleteRepeatForConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(), flow, uuid);
         // Checks to see if flow exists
         String deleteConfirmationScreen = getValidatedFlowConfigurationByName(flow)
                 .getSubflows().get(subflow).getDeleteConfirmationScreen();
@@ -1054,7 +1052,7 @@ public class ScreenController extends FormFlowController {
             Locale locale
     ) throws ResponseStatusException {
         log.info(
-                "POST deleteSubflowIteration (url: {}): flow: {}, uuid: {}",
+                "POST deleteSubflowRepeatForIteration (url: {}): flow: {}, uuid: {}",
                 request.getRequestURI().toLowerCase(),
                 requestFlow,
                 uuid);
@@ -1131,10 +1129,6 @@ public class ScreenController extends FormFlowController {
 
         Submission submission = getSubmissionFromSession(httpSession, flow);
         log.info("Current submission ID is: {} and current Session ID is: {}", submission.getId(), httpSession.getId());
-        if (submission == null) {
-            throwNotFoundError(flow, screen,
-                    String.format("Submission not found in session for flow '{}', when navigating to '{}'", flow, screen));
-        }
 
         String validatedSubflowIterationUuid = null;
         if (subflowIterationUuid != null && !subflowIterationUuid.isBlank()) {
@@ -1483,8 +1477,8 @@ public class ScreenController extends FormFlowController {
                     if (uuidOfIterationToUpdate == null) {
                         throwNotFoundError(flow, screen,
                                 String.format(
-                                        "UUID was null when trying to find iteration for subflow '%s' in flow '%s. It's possible the user hit back in a subflow. Redirecting.'",
-                                        uuidOfIterationToUpdate, subflowName, submission.getFlow(), screen));
+                                        "UUID was null when trying to find iteration for subflow '%s' in flow '%s'. It's possible the user hit back in a subflow from screen '%s'. Redirecting.'",
+                                        subflowName, submission.getFlow(), screen));
                     }
                     model.put("relatedSubflowIteration",
                             subflowManager.getRelatedSubflowIteration(flow, subflowName, uuidOfIterationToUpdate, submission));
@@ -1660,8 +1654,8 @@ public class ScreenController extends FormFlowController {
 
         if (!subflowIterationData.containsKey(repeatForSaveDataAs)) {
             log.error(String.format(
-                    "RepeatFor SaveDataAs ('%s') key was not found in the subflow '%s' in flow '%s' with iteration ('%s'), when validating repeatFor iteration for uuid ('%s')'",
-                    repeatForSaveDataAs, subflowName, submission.getFlow()), subflowIterationUuid, repeatForIterationUuid);
+                    "RepeatFor SaveDataAs ('%s') key was not found in the subflow '%s' in flow '%s' with iteration ('%s'), when validating repeatFor iteration for uuid ('%s')",
+                    repeatForSaveDataAs, subflowName, submission.getFlow(), subflowIterationUuid, repeatForIterationUuid));
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
