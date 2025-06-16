@@ -86,7 +86,7 @@ dependencies {
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'software.amazon.awssdk:s3:2.31.62'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:4.0.1'
-    implementation 'com.github.librepdf:openpdf:2.0.5'
+    implementation 'com.github.librepdf:openpdf:2.2.1'
     implementation 'org.yaml:snakeyaml:2.4'
     implementation 'com.mailgun:mailgun-java:2.0.0'
     implementation 'com.google.crypto.tink:tink:1.17.0'
