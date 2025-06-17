@@ -3672,7 +3672,7 @@ you can contribute it to this project so that other teams can use it.
 
 ### Set Java SDK
 
-- Set the Project SDK to Java 17 in `File -> Project Structure -> SDK`
+- Set the Project SDK to Java 21 in `File -> Project Structure -> SDK`
 - Enable annotation processing
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
 
@@ -3681,9 +3681,9 @@ this command:
 
 `sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk`
 
-- Set the Gradle JVM version to `17 Eclipse Temurin version 17.0.5`
+- Set the Gradle JVM version to `21 Eclipse Temurin version 21.0.6`
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
-- Set the Project SDK in `File > Project Structure` to `17 Eclipse Temurin version 17.0.X`
+- Set the Project SDK in `File > Project Structure` to `21 Eclipse Temurin version 21.0.X`
   in `File > Project Structure`
 
 ### Setup Platform Flavored Google Styles for Java
