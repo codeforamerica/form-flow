@@ -3676,7 +3676,7 @@ you can contribute it to this project so that other teams can use it.
 - Enable annotation processing
   in `Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processor`
 
-**note**: if you do not see the option to select Java 17, you may need to create a symlink by using
+**note**: if you do not see the option to select Java 21, you may need to create a symlink by using
 this command:
 
 `sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk`
