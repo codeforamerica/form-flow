@@ -3681,7 +3681,7 @@ this command:
 
 `sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk`
 
-- Set the Gradle JVM version to `17 Eclipse Temurin version 21.0.6`
+- Set the Gradle JVM version to `21 Eclipse Temurin version 21.0.6`
   in `Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle`
 - Set the Project SDK in `File > Project Structure` to `21 Eclipse Temurin version 21.0.X`
   in `File > Project Structure`
