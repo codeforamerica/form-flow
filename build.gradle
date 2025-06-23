@@ -89,7 +89,7 @@ dependencies {
     implementation 'com.github.librepdf:openpdf:2.2.3'
     implementation 'org.yaml:snakeyaml:2.4'
     implementation 'com.mailgun:mailgun-java:2.0.0'
-    implementation 'com.google.crypto.tink:tink:1.17.0'
+    implementation 'com.google.crypto.tink:tink:1.18.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.2.0'
     implementation 'commons-codec:commons-codec:1.18.0'
