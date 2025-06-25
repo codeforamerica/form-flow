@@ -1216,7 +1216,7 @@ public class ScreenController extends FormFlowController {
                 subflowIterationUuid);
 
         if (repeatForRelationshipConfiguration == null) {
-            if (currentScreenConfiguration.getSubflow() == null) {
+            if (nextScreenConfiguration.getSubflow() == null) {
                 return markSubflowIterationAsCompleteAndReroute(submission, flowName, currentSubflowName, subflowIterationUuid,
                         nextScreenConfiguration.getName());
             } else {
