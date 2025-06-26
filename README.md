@@ -40,6 +40,7 @@ Table of Contents
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
         * [Subflows Data](#subflows-data)
+        * [Defining Relationships Between Subflows](#defining-relationships-between-subflows)
     * [Conditions](#conditions)
         * [Using Conditions in Templates](#using-conditions-in-templates)
     * [Actions](#actions)
@@ -389,6 +390,36 @@ example, the `relatedSubflowIteration` for the `childCareSchedules` subflow woul
   "childLastName": "Doe"
 }
 ```
+
+#### repeatFor
+
+Defines a nested loop pattern between related subflow items and user input selections where for each
+item in a related subflow the user will need to respond to questions for each item selected in a 
+given input. For example, we may want to relate each child in a children subflow with each schedule
+in a childcareSchedules subflow and addtinally asnwer a set of questions for each child care provider
+a corresponding schedule relates to. 
+
+To define such a relationship we would use the `repeatFor` keyword in the subflow YAML:
+```yaml
+  childcareSchedules:
+    relationship:
+      relatesTo: children
+      relationAlias: childUuid
+      filter: ChildrenInNeedOfChildCare
+      repeatFor:
+        inputName: childcareProvidersForCurrentChild
+        saveDataAs: providerSchedules
+```
+
+This defines a relationship between the `childcareSchedules` subflow and the `children` subflow
+where each iteration of the `childcareSchedules` subflow relate to a child in the `children` subflow.
+Additionally, for each child we iterate over in the `childcareSchedules` subflow, we will have a
+nested loop that iterates over each childcare provider selected by the users answer to the 
+`childcareProvidersForCurrentChild` input. The data for each provider will be saved in the JSON like
+so:
+```JSON
+```
+
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
