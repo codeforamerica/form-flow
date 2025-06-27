@@ -87,11 +87,45 @@
             },
             "reviewScreen": {
               "type": "string",
-              "description": "The name of the review screen for this subflow. This is the last screen in a subflow. This screen lists each iteration completed within a subflow, and provides options to edit, delete  or add a new iteration."
+              "description": "The name of the review screen for this subflow. This is the last screen in a subflow. This screen lists each iteration completed within a subflow, and provides options to edit, delete or add a new iteration."
             },
             "deleteConfirmationScreen": {
               "type": "string",
               "description": "The name of the delete confirmation screen for this subflow. This screen appears when a user selects delete on a iteration listed on the review screen. It asks the user to confirm their deletion before submitting the actual deletion request to the server."
+            },
+            "relationship": {
+              "type": "object",
+              "description": "Optional. Used to define a relationship between two subflows, such as a household subflow and an income subflow where each household member will have income.",
+              "properties": {
+                "relatesTo": {
+                  "type": "string",
+                  "description": "The name of the related subflow a given subflow relates to."
+                },
+                "relationAlias": {
+                  "type": "string",
+                  "description": "Optional. The key used to store the UUID of the related subflow iteration. Defaults to 'relatedId' if not provided."
+                },
+                "filter": {
+                  "type": "string",
+                  "description": "Optional. The name of a class that filters related subflow iterations."
+                },
+                "repeatFor": {
+                  "type": "object",
+                  "description": "Optional. Defines a nested loop pattern between related subflow items and user input selections where for each item in a related subflow the user will need to respond to questions for each item selected in a given input.",
+                  "required": ["inputName", "saveDataAs"],
+                  "properties": {
+                    "inputName": {
+                      "type": "string",
+                      "description": "The name of the input field for which multiple selections are possible, which will trigger the nested loop pattern."
+                    },
+                    "saveDataAs": {
+                      "type": "string",
+                      "description": "The name under which the inner loop's iterations are saved in the database JSON."
+                    }
+                  }
+                }
+              },
+              "required": ["relatesTo"]
             }
           }
         }
