@@ -81,12 +81,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.0.2'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.10.1'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.10.2'
     implementation 'org.flywaydb:flyway-core:[9.+,10.+['
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.31.70'
+    implementation 'software.amazon.awssdk:s3:2.31.77'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:4.1.0'
-    implementation 'com.github.librepdf:openpdf:2.2.3'
+    implementation 'com.github.librepdf:openpdf:2.2.4'
     implementation 'org.yaml:snakeyaml:2.4'
     implementation 'com.mailgun:mailgun-java:2.0.0'
     implementation 'com.google.crypto.tink:tink:1.18.0'
@@ -101,7 +101,7 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.jsoup:jsoup:1.21.1'
@@ -111,7 +111,7 @@ dependencies {
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
     testImplementation 'org.projectlombok:lombok:1.18.38'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:5.1.0'
     testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.81'
 }
 
@@ -228,8 +228,8 @@ nexusPublishing {
             } else {
                 println("Using a release version: ${version}")
             }
-            nexusUrl = uri("https://oss.sonatype.org/service/local/")
-            snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
+            snapshotRepositoryUrl = uri("https://central.sonatype.com/repository/maven-snapshots/")
             username = sonatypeUsername
             password = sonatypePassword
         }
