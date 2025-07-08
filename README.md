@@ -335,7 +335,7 @@ database for error resolution and debugging.
 
 ### Defining Relationships Between Subflows
 
-There may be a need to have a subflow, iterations pre-determined by another subflow. Subflow relationships allow for 
+There may be a need to have one subflow's iterations pre-determined by another subflow. Subflow relationships allow for 
 one subflow to be defined and related to another.
 
 ```yaml
@@ -402,7 +402,7 @@ example, the `relatedSubflowIteration` for the `childCareSchedules` subflow woul
 ```
 
 #### repeatFor
-There may be a need to have a second level relationship, where the user selections define a nested
+There may be a need to have a second level relationship, where the user's selections define a nested
 loop pattern.
 
 ```yaml
@@ -429,8 +429,8 @@ question determines the nested subflows.
 
 Defining the repeatFor in the relationship:
 - Defines what inputName should be used to load the nested iterations
-  once the user adds data tagged
-- Defines what how the nested data will be stored under the subflow.
+  once the user submits data stored in the specified input
+- Defines how the nested data will be stored under the subflow.
 
 The data for each provider will be saved in the JSON like
 so:
@@ -443,7 +443,6 @@ so:
       "providerSchedules": [
         {
           "uuid": "4df1c399-9735-405d-aa89-a0468f1404f7",
-          "_csrf": "XucB6U8j5KABQK6Fxc3kQr2ublLiBop9nUEE5rK9xIH6VL8oPd8133Yah5gseZy38-DQJ43IQ2qDYLxQrXI2goPZ_LDJZIwf",
           "repeatForValue": "49bdd0fe-5f91-4f57-9234-17c99246d679",
           "iterationIsComplete": true
         }
@@ -477,14 +476,13 @@ so:
 ### Accessing RepeatFor Iterations in Templates
 RepeatFor iterations can be accessed in Thymeleaf templates using the `repeatForIteration` key in
 the Thymeleaf model. This has been added to the Thymeleaf model for convenience. When defining
-relationships between subflows `repeatForIteration` will be present and always hold a value of
+repeatFor relationships between subflows `repeatForIteration` will be present and always hold a value of
 iteration data for the current repeatForIteration as long as it's defined. In this case, with the above JSON
 example, the `repeatForRelationship` for the `childCareSchedules` subflow would be the
 `HashMap<String, Object>` that represents the `providerSchedule` subflow iteration:
 ```JSON
 {
   "uuid": "4df1c399-9735-405d-aa89-a0468f1404f7",
-  "_csrf": "XucB6U8j5KABQK6Fxc3kQr2ublLiBop9nUEE5rK9xIH6VL8oPd8133Yah5gseZy38-DQJ43IQ2qDYLxQrXI2goPZ_LDJZIwf",
   "repeatForValue": "49bdd0fe-5f91-4f57-9234-17c99246d679",
   "iterationIsComplete": true
 }
