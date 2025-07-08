@@ -40,6 +40,7 @@ Table of Contents
     * [Subflows](#subflows)
         * [Dedicated Subflow Screens](#dedicated-subflow-screens)
         * [Subflows Data](#subflows-data)
+        * [Defining Relationships Between Subflows](#defining-relationships-between-subflows)
     * [Conditions](#conditions)
         * [Using Conditions in Templates](#using-conditions-in-templates)
     * [Actions](#actions)
@@ -334,7 +335,8 @@ database for error resolution and debugging.
 
 ### Defining Relationships Between Subflows
 
-Subflows can be related to one another using YAML configuration. This looks like:
+There may be a need to have one subflow's iterations pre-determined by another subflow. Subflow relationships allow for 
+one subflow to be defined and related to another.
 
 ```yaml
 subflows:
@@ -343,32 +345,41 @@ subflows:
      relatesTo: children
      relationAlias: childId
      filter: ChildrenInNeedOfChildCare
+   entryScreen: schedules-intro
+   iterationStartScreen: schedules-start
+   reviewScreen: schedules-review
 ```
 
-The above YAML defines a relationship between the `childcareSchedules` subflow and the 'children'
-subflow. This relationship does two things:
+The above YAML defines the `childcareSchedules` subflow and its relationship with the the `children`
+subflow. 
 
-It limits the `childcareSchedules` subflow to only allow as many iterations as there are children in
-the database for the children subflow, and it defines a relationship where the `childcareSchedules` 
-subflow JSON data will be stored with a foreign key of the UUID of the `children` subflow iteration
-that a given `childcareSchedules` iteration is related to.
+Defining the relationship:
+- Preloads the `childcareSchedules` iterations based on the relatesTo data. In this case, it creates 
+one subflow iteration per child in the database. Note that the children in the database were created
+from the `children` subflow. 
+- Defines what foreign key will be used to store the `childcareSchedules` subflow in JSON data. In this 
+case, the UUID of the each `children` subflow iteration will be stored as childId.
 
 In the JSON this will look like this:
 
 ```JSON
-"childCareSchedules": [
-  {
-    "uuid": "977c5ecb-3d15-4c6e-992a-4d3c77a5d9a7",
-    "iterationIsComplete": "true",
-    "childId": "a52a4e5c-6dc4-45e7-95ad-c31724755537"
-  }],
-"children": [
-  {
-    "uuid": "a52a4e5c-6dc4-45e7-95ad-c31724755537",
-    "iterationIsComplete": "true",
-    "childFirstName": "John",
-    "childLastName": "Doe"
-  }]
+{
+  "childCareSchedules": [
+    {
+      "uuid": "977c5ecb-3d15-4c6e-992a-4d3c77a5d9a7",
+      "iterationIsComplete": "true",
+      "childId": "a52a4e5c-6dc4-45e7-95ad-c31724755537"
+    }
+  ],
+  "children": [
+    {
+      "uuid": "a52a4e5c-6dc4-45e7-95ad-c31724755537",
+      "iterationIsComplete": "true",
+      "childFirstName": "John",
+      "childLastName": "Doe"
+    }
+  ]
+}
 ```
 Note that `childCareSchedules` has one iteration that includes a foreign key with the defined alias
 of `childId` whose value is the UUID of the `children` subflow iteration that corresponds to that 
@@ -376,7 +387,7 @@ of `childId` whose value is the UUID of the `children` subflow iteration that co
 
 #### Accessing Related Subflows in Templates
 Related subflows can be accessed in Thymeleaf templates using the `relatedSubflowIteration` key in
-the Thymeleaf model. This has been added to the Thymeleaf model for convenience and when defining
+the Thymeleaf model. This has been added to the Thymeleaf model for convenience. When defining
 relationships between subflows `relatedSubflowIteration` will be present and always hold a value of 
 iteration data for the corresponding related subflow iteration. In this case, with the above JSON 
 example, the `relatedSubflowIteration` for the `childCareSchedules` subflow would be the 
@@ -389,6 +400,94 @@ example, the `relatedSubflowIteration` for the `childCareSchedules` subflow woul
   "childLastName": "Doe"
 }
 ```
+
+#### repeatFor
+There may be a need to have a second level relationship, where the user's selections define a nested
+loop pattern.
+
+```yaml
+  childcareSchedules:
+    relationship:
+      relatesTo: children
+      relationAlias: childUuid
+      filter: ChildrenInNeedOfChildCare
+      repeatFor:
+        inputName: childcareProvidersForCurrentChild
+        saveDataAs: providerSchedules
+    entryScreen: schedules-intro
+    iterationStartScreen: schedules-start
+    reviewScreen: schedules-review
+```
+The above YAML defines the `childcareSchedules` subflow and relates it to `children`. The `repeatFor` keyword 
+defines the `inputName` we will use to create the nested loop pattern and `providerSchedules` is how we will 
+store the nested data.
+
+This example shows how we want to store childcare schedules for each child and provider combination.
+The relationship connects the childcare schedules to the children. So, we will loop through every child.
+As we loop through each child, we ask which childcare providers they are applying for. The answer to that 
+question determines the nested subflows.
+
+Defining the repeatFor in the relationship:
+- Defines what inputName should be used to load the nested iterations
+  once the user submits data stored in the specified input
+- Defines how the nested data will be stored under the subflow.
+
+The data for each provider will be saved in the JSON like
+so:
+```JSON
+{
+  "childcareSchedules": [
+    {
+      "uuid": "ebf970e4-0dd9-4cf0-a751-49aa15cd32c9",
+      "childUuid": "a52a4e5c-6dc4-45e7-95ad-c31724755537",
+      "providerSchedules": [
+        {
+          "uuid": "4df1c399-9735-405d-aa89-a0468f1404f7",
+          "repeatForValue": "49bdd0fe-5f91-4f57-9234-17c99246d679",
+          "iterationIsComplete": true
+        }
+      ],
+      "iterationIsComplete": true,
+      "childcareProvidersForCurrentChild[]": [
+        "49bdd0fe-5f91-4f57-9234-17c99246d679"
+      ]
+    }
+  ],
+  "children": [
+    {
+      "uuid": "a52a4e5c-6dc4-45e7-95ad-c31724755537",
+      "iterationIsComplete": "true",
+      "childFirstName": "John",
+      "childLastName": "Doe"
+    }
+  ],
+  "providers": [
+    {
+      "uuid": "49bdd0fe-5f91-4f57-9234-17c99246d679",
+      "providerType": "Individual",
+      "providerLastName": "Norris",
+      "providerFirstName": "Erin",
+      "iterationIsComplete": true,
+    }
+  ]
+}
+```
+
+### Accessing RepeatFor Iterations in Templates
+RepeatFor iterations can be accessed in Thymeleaf templates using the `repeatForIteration` key in
+the Thymeleaf model. This has been added to the Thymeleaf model for convenience. When defining
+repeatFor relationships between subflows `repeatForIteration` will be present and always hold a value of
+iteration data for the current repeatForIteration as long as it's defined. In this case, with the above JSON
+example, the `repeatForRelationship` for the `childCareSchedules` subflow would be the
+`HashMap<String, Object>` that represents the `providerSchedule` subflow iteration:
+```JSON
+{
+  "uuid": "4df1c399-9735-405d-aa89-a0468f1404f7",
+  "repeatForValue": "49bdd0fe-5f91-4f57-9234-17c99246d679",
+  "iterationIsComplete": true
+}
+```
+
 ## Conditions
 
 Conditions are intended to be small pieces of code that can be run from a template or from the
