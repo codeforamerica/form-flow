@@ -1,8 +1,8 @@
 package formflow.library.config.submission;
 
+import formflow.library.data.Submission;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An interface that defines a filtering function to filter data in a subflow relationship context.
@@ -22,7 +22,7 @@ public interface SubflowRelationshipFilter {
    *                             Filtering will only occur against the copy when setting up the data for the subflow relationship.
    * @return The filtered subflow data.
    */
-  default List<HashMap<String, Object>> filter(List<HashMap<String, Object>> subflowDataToFilter) {
+  default List<HashMap<String, Object>> filter(List<HashMap<String, Object>> subflowDataToFilter, Submission submission) {
     throw new UnsupportedOperationException("You did not implement the necessary filter method for your implementing class of the SubflowRelationshipFilter interface: " + this.getClass().getName());
   }
 }
