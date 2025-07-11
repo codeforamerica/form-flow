@@ -53,7 +53,7 @@ public class SubflowManager {
             List<HashMap<String, Object>> copyOfSubflowDataToFilterAgainst = relatedSubflowData.stream().map(HashMap::new)
                     .toList();
             relatedSubflowData = handleSubflowRelationshipFilter(flow, currentScreen.getSubflow(),
-                    copyOfSubflowDataToFilterAgainst);
+                    copyOfSubflowDataToFilterAgainst, submission);
         }
 
         if (!submission.getInputData().containsKey(subflowName)) {
@@ -226,10 +226,10 @@ public class SubflowManager {
         return subflowConfiguration.getRelationship() != null && subflowConfiguration.getRelationship().getFilter() != null;
     }
 
-    public List<HashMap<String, Object>> handleSubflowRelationshipFilter(String flowName, String subflowName, List<HashMap<String, Object>> subflowDataToFilter) {
+    public List<HashMap<String, Object>> handleSubflowRelationshipFilter(String flowName, String subflowName, List<HashMap<String, Object>> subflowDataToFilter, Submission submission) {
         SubflowConfiguration subflowConfiguration = getSubflowConfiguration(flowName, subflowName);
         String filterName = subflowConfiguration.getRelationship().getFilter();
-        return subflowFilterManager.runFilter(subflowDataToFilter, filterName);
+        return subflowFilterManager.runFilter(subflowDataToFilter, filterName, submission);
     }
 
     public Optional<SubflowRelationship> subflowRelationship(String flowName, String subflowName) {

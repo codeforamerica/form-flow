@@ -1,6 +1,7 @@
 package formflow.library.config;
 
 import formflow.library.config.submission.SubflowRelationshipFilter;
+import formflow.library.data.Submission;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -21,11 +22,11 @@ public class SubflowFilterManager {
         return filters.containsKey(filterName);
     }
     
-    public List<HashMap<String, Object>> runFilter(List<HashMap<String, Object>> subflowDataToFilter, String filterName) {
+    public List<HashMap<String, Object>> runFilter(List<HashMap<String, Object>> subflowDataToFilter, String filterName, Submission submission) {
         if (!filterExists(filterName)) {
             throw new IllegalArgumentException("Subflow Relationship Filter " + filterName + " does not exist. Do you have a typo in your yaml configuration?");
         }
         SubflowRelationshipFilter subflowRelationshipFilter = getFilter(filterName);
-        return subflowRelationshipFilter.filter(subflowDataToFilter);
+        return subflowRelationshipFilter.filter(subflowDataToFilter, submission);
     }
 }
