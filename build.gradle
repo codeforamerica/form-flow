@@ -225,13 +225,11 @@ nexusPublishing {
         sonatype {
             if (version.endsWith("-SNAPSHOT")) {
                 println("Using a SNAPSHOT: ${version}")
-                nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
-                snapshotRepositoryUrl = uri("https://central.sonatype.com/repository/maven-snapshots/")
             } else {
                 println("Using a release version: ${version}")
-                nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")  // ← correct URL
-                snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
             }
+            nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
+            snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
             username = sonatypeUsername
             password = sonatypePassword
         }
