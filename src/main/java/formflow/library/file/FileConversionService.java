@@ -31,6 +31,7 @@ import javax.imageio.stream.ImageOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -56,6 +57,9 @@ public class FileConversionService {
 
     @Value("${form-flow.uploads.max-file-size}")
     Integer maxFileSize;
+
+    @Value("${form-flow.uploads.file-conversion.allow-pdf-modification:false}")
+    private boolean allowPdfModification;
 
     private final Map<MimeType, CONVERSION_TO_PDF_TYPE> MIME_TYPE_MAP = Map.ofEntries(
             Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
@@ -103,8 +107,13 @@ public class FileConversionService {
                     yield convertOfficeDocumentToPDF(file, 0);
                 }
                 default -> {
-                    log.info("Skipping converting file of type {} to PDF", fileMimeType);
-                    yield new HashSet<>();
+                    if (allowPdfModification) {
+                        log.info("Allowing pdf modification for file of type {}", fileMimeType);
+                        yield relaxPDFSecuritySettings(file);
+                    } else {
+                        log.info("Skipping converting file of type {} to PDF", fileMimeType);
+                        yield new HashSet<>();
+                    }
                 }
             };
         } catch (IOException e) {
@@ -384,6 +393,61 @@ public class FileConversionService {
                 }
             }
         }
+    }
+
+    /**
+     * Takes a multipartfile representation of a PDF and makes a clone of it, with the relax security settings A read-only PDF is
+     * now not as read-only
+     *
+     * @param file
+     * @return
+     */
+    private Set<MultipartFile> relaxPDFSecuritySettings(MultipartFile file) {
+
+        // Write to a temp file, so we can have a File from the original MultipartFile
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.contains("..") || originalFilename.contains("/")
+                || originalFilename.contains("\\")) {
+            throw new IllegalArgumentException("Unable to relax security setting for PDF. Invalid filename.");
+        }
+
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile("upload_", "_" + file.getOriginalFilename());
+
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                fos.write(file.getBytes());
+            }
+
+            File modifiedPDFFile = getModifiedPDFFile(tempFile);
+            String convertedFileName = Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + "-modified.pdf";
+            MultipartFile newFile = new MockMultipartFile(convertedFileName, convertedFileName, "application/pdf",
+                    new FileInputStream(modifiedPDFFile));
+            return Set.of(newFile);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
+    }
+
+    private static @NotNull File getModifiedPDFFile(File tempFile) throws IOException {
+        String modifiedPDFPath = Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
+
+        PdfReader reader = new PdfReader(tempFile.getAbsolutePath());
+        reader.setModificationAllowedWithoutOwnerPassword(true);
+
+        FileOutputStream outputStream = new FileOutputStream(modifiedPDFPath);
+        PdfStamper stamper = new PdfStamper(reader, outputStream, PdfWriter.VERSION_1_7);
+
+        stamper.close();
+        reader.close();
+        outputStream.close();
+
+        return new File(modifiedPDFPath);
     }
 
     private MultipartFile createMultipartFile(MultipartFile file, InputStream pdf, String suffix) throws IOException {
