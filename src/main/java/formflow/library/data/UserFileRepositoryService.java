@@ -112,5 +112,9 @@ public class UserFileRepositoryService {
         return repository.findAllBySubmissionAndMimeTypeOrderByOriginalName(submission, mimeType);
     }
 
+    public List<UserFile> findAllConvertedOrderByOriginalName(Submission submission, String mimeType) {
+        return repository.findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(submission, mimeType);
+    }
+
 
 }

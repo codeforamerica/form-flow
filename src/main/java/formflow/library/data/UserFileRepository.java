@@ -55,4 +55,11 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
      */
     List<UserFile> findAllBySubmissionAndMimeTypeOrderByOriginalName(Submission submission, String mimeType);
 
+    /**
+     * Finds all the {@link UserFile}s associated with a {@link Submission}} where the mimeType matches and the conversionSourceFileId
+     * is not NULL and ordered by the OriginalName field
+     *
+     * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
+     */
+    List<UserFile> findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(Submission submission, String mimeType);
 }
