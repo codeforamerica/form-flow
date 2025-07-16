@@ -3,6 +3,7 @@ package formflow.library.file;
 import static java.util.Arrays.stream;
 
 import com.google.common.io.Files;
+import jakarta.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,6 +133,22 @@ public class FileValidationService {
     }
 
     return ACCEPTED_MIME_TYPES.contains(mimeType);
+  }
+
+  /**
+   * Returns true if the file is a PDF
+   * @param file
+   * @return
+   * @throws IOException
+   */
+  public Boolean isPDF(@NotNull MultipartFile file) throws IOException {
+    Tika tikaFileValidator = new Tika();
+    if (file.getContentType() == null || file.getContentType().isBlank()) {
+      return false;
+    }
+
+    MimeType mimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
+    return mimeType.equals(new MimeType("application", "pdf"));
   }
 
   /**
