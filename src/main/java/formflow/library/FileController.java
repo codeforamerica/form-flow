@@ -174,7 +174,7 @@ public class FileController extends FormFlowController {
       }
 
       String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
-      if (fileExtension.equals("pdf")) {
+      if (fileValidationService.isPDF(file)) {
         try (PdfReader ignored = new PdfReader(file.getBytes())) {
         } catch (BadPasswordException e) {
           String message = messageSource.getMessage("upload-documents.error-password-protected", null, locale);
