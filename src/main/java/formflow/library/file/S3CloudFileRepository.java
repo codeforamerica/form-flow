@@ -71,9 +71,7 @@ public class S3CloudFileRepository implements CloudFileRepository {
 
             log.info("Upload complete");
         } catch (Exception e) {
-            // make some noise, something's wrong with our connection to S3
-            System.err.println(e.getMessage());
-            log.error("AWS S3 exception occurred: " + e.getMessage());
+            log.error("AWS S3 exception occurred", e);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -108,7 +106,7 @@ public class S3CloudFileRepository implements CloudFileRepository {
             log.info("File {} successfully downloaded", filepath);
             return new CloudFile(fileSize, fileBytes, metadata);
         } catch (IOException e) {
-            log.error("Exception occurred while attempting to get the file with path %s: " + e.getMessage(), filepath);
+            log.error("Exception occurred while attempting to get the file with path {}", filepath, e);
             throw new RuntimeException(e.getMessage());
         }
     }

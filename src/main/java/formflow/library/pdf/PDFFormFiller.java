@@ -124,7 +124,7 @@ public class PDFFormFiller {
     try {
       fontDirectory = resource.getFile();
     } catch (IOException e) {
-      log.error("Could not open resource {}, Error: {}", resource, e.getMessage());
+      log.error("Could not open resource {}", resource, e);
     }
     if (fontDirectory == null || !fontDirectory.isDirectory()) {
       return emptySet;

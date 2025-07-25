@@ -285,14 +285,14 @@ public class ActionManager {
 
   private void runAction(String name, Runnable action) {
     if (action == null) {
-      log.error(String.format("Unable to find Action '%s' to run", name));
+      log.error("Unable to find Action '{}' to run", name);
       return;
     }
 
     try {
       action.run();
     } catch (Exception e) {
-      log.error(String.format("Unable to run Action '%s', %s", name, e));
+      log.error("Unable to run Action '{}'", name, e);
     }
   }
 
@@ -304,7 +304,7 @@ public class ActionManager {
         errorMessages.putAll(messages);
       }
     } catch (Exception e) {
-      log.error(String.format("Unable to find Action '%s' to run", name));
+      log.error("Unable to find Action '{}' to run", name);
     }
     return errorMessages;
   }
