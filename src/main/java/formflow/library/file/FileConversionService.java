@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -403,24 +404,22 @@ public class FileConversionService {
      * @return
      */
     private Set<MultipartFile> relaxPDFSecuritySettings(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename() != null ? Files.getNameWithoutExtension(file.getOriginalFilename()) : UUID.randomUUID().toString();
+
+        // Remove illegal filename characters \ / : * ? " < > | and .
+        String cleanFilename = originalFilename.replaceAll("[\\\\/:*?\"<>|.]", "");
 
         // Write to a temp file, so we can have a File from the original MultipartFile
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || originalFilename.contains("..") || originalFilename.contains("/")
-                || originalFilename.contains("\\")) {
-            throw new IllegalArgumentException("Unable to relax security setting for PDF. Invalid filename.");
-        }
-
         File tempFile = null;
         try {
-            tempFile = File.createTempFile("upload_", "_" + file.getOriginalFilename());
+            tempFile = File.createTempFile("upload_", "_" + originalFilename + ".tmp");
 
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(file.getBytes());
             }
 
             File modifiedPDFFile = getModifiedPDFFile(tempFile);
-            String convertedFileName = Files.getNameWithoutExtension(Objects.requireNonNull(originalFilename)) + "-modified.pdf";
+            String convertedFileName = cleanFilename + "-modified.pdf";
             MultipartFile newFile = new MockMultipartFile(convertedFileName, convertedFileName, "application/pdf",
                     new FileInputStream(modifiedPDFFile));
             return Set.of(newFile);

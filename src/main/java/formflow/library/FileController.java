@@ -230,7 +230,7 @@ public class FileController extends FormFlowController {
       if (e instanceof ResponseStatusException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
       }
-      log.error("Error occurred while uploading file: " + e.getLocalizedMessage());
+      log.error("Error occurred while uploading file", e);
       String message = messageSource.getMessage("upload-documents.file-upload-error", null, locale);
       return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -384,7 +384,7 @@ public class FileController extends FormFlowController {
 
       return new RedirectView(returnPath);
     } catch (Exception e) {
-      log.error("Error occurred while deleting file " + e.getLocalizedMessage());
+      log.error("Error occurred while deleting file", e);
       return new RedirectView("/error");
     }
   }
@@ -446,7 +446,7 @@ public class FileController extends FormFlowController {
       try {
         outputStream.write(fileData);
       } catch (IOException e) {
-        log.error("Error occurred while downloading file " + e.getMessage());
+        log.error("Error occurred while downloading file", e);
       }
     };
 
@@ -510,7 +510,7 @@ public class FileController extends FormFlowController {
         zos.closeEntry();
       }
     } catch (IOException e) {
-      log.error("Error occurred while downloading file " + e.getMessage());
+      log.error("Error occurred while downloading file", e);
       return ResponseEntity.internalServerError().build();
     }
 

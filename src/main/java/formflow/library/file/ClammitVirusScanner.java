@@ -81,7 +81,7 @@ public class ClammitVirusScanner implements FileVirusScanner {
       if (e.getStatusCode() == HttpStatus.REQUEST_TIMEOUT) {
         throw new TimeoutException(e.getMessage());
       }
-      log.error("Received unexpected exception from clammit server: {}", e.getMessage());
+      log.error("Received unexpected exception from clammit server", e);
       throw createWebClientResponseException(500, e.getMessage());
     }
   }
