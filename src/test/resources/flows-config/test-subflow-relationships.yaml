@@ -21,6 +21,9 @@ flow:
     subflow: income
     nextScreens:
       - name: annualHouseholdIncome
+  annualHouseholdIncome:
+    nextScreens:
+      - name: null
 subflows:
   household:
     entryScreen: housemates
@@ -32,6 +35,9 @@ subflows:
       relatesTo: household
       relationAlias: householdMemberIncome
       filter: OnlyPeopleNamedAlex
+      repeatFor:
+        inputName: incomeTypes
+        saveDataAs: incomeAmounts
     entryScreen: income
     iterationStartScreen: incomeTypes
     reviewScreen: annualHouseholdIncome
