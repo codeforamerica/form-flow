@@ -164,19 +164,19 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = 'cy-cfa'
-                        name = 'Cypress Borg'
-                        email = 'cborg@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'luigi'
-                        name = 'Luigi Ray-Montañez'
-                        email = 'luigi@codeforamerica.org'
-                    }
-                    developer {
                         id = 'birdprsn'
                         name = 'Alex Gonzalez'
                         email = 'agonzalez@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'amedrano'
+                        name = 'Ana Medrano'
+                        email = 'amedrano@codeforamerica.org'
+                    }
+                    developer {
+                        id = 'mperlman'
+                        name = 'Marc Perlman'
+                        email = 'mperlman@codeforamerica.org'
                     }
                     developer {
                         id = 'cenyia'
@@ -184,24 +184,9 @@ publishing {
                         email = 'cenyia@codeforamerica.org'
                     }
                     developer {
-                        id = 'rcastillo'
-                        name = 'Rapi Castillo'
-                        email = 'rcastillo@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'bethany'
-                        name = 'Bethany Seeger'
-                        email = 'bseeger@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'vrajmohan'
-                        name = 'Vraj Mohan'
-                        email = 'vraj@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'marthapidcock'
-                        name = 'Martha Pidcock'
-                        email = 'mpidcock@codeforamerica.org'
+                        id = 'mtodd'
+                        name = 'Morgan Todd'
+                        email = 'mtodd@codeforamerica.org'
                     }
                 }
                 scm {
