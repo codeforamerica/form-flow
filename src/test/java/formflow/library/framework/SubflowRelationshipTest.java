@@ -10,6 +10,7 @@ import formflow.library.data.Submission;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,8 +86,11 @@ public class SubflowRelationshipTest extends AbstractMockMvcTest {
     String firstRepeatForUrl = followRedirectsToRepeatFor(firstMemberIncomeTypesResult);
 
     // Process repeat-for iterations for first member
+    Map<String, String> firstMemberIcomeAmounts = new LinkedHashMap<>();
+    firstMemberIcomeAmounts.put("incomeJob", "100");
+    firstMemberIcomeAmounts.put("incomeSelf", "200");
     String nextUrl = processRepeatForIterations(firstRepeatForUrl, "Alex LastName",
-            Map.of("incomeJob", "100", "incomeSelf", "200"));
+            firstMemberIcomeAmounts);
 
     // Should now be on income types for second household member Alex Another LastName
     FormScreen secondMemberIncomeTypesScreen = new FormScreen(mockMvc.perform(get(nextUrl)));
@@ -101,8 +105,10 @@ public class SubflowRelationshipTest extends AbstractMockMvcTest {
     String secondRepeatForUrl = followRedirectsToRepeatFor(secondMemberIncomeTypesResult);
 
     // Process repeat-for iteration for second member
+    Map<String, String> secondMemberIncomeAmounts = new LinkedHashMap<>();
+    secondMemberIncomeAmounts.put("incomeSelf", "100");
     String finalUrl = processRepeatForIterations(secondRepeatForUrl, "Alex Another LastName",
-            Map.of("incomeSelf", "100"));
+            secondMemberIncomeAmounts);
 
     // Verify we reach the review screen
     assertThat(finalUrl).isEqualTo("/flow/testRelatedSubflows/annualHouseholdIncome");
