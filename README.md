@@ -1942,6 +1942,16 @@ your `application.yaml`. See the section on
 Add your `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to your `.env` file as mentioned in
 the [Environment Variables](#environment-variables) section below.
 
+#### AWS Credentials and Authentication
+
+Note that we provide a configuration property to use default AWS credentials authentication instead
+of the Basic Authentication pattern used by the library. This is done by setting the
+`form-flow.aws.use_default_credentials` property to `true` in your `application.yaml`.
+
+Setting this to true will use the default AWS credentials provider chain, and is useful if you are 
+running your application on an AWS service like EC2 or ECS, where the credentials are automatically 
+provided by the AWS SDK in the application container.
+
 ### File Naming Conventions
 
 Before a file is uploaded to S3, we give it a normalized filename. It consists of the flow name,

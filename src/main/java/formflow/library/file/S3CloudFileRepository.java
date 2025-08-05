@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
@@ -38,17 +40,25 @@ public class S3CloudFileRepository implements CloudFileRepository {
     private final String bucketName;
     private final S3Client s3Client;
 
-    public S3CloudFileRepository(@Value("${form-flow.aws.access_key}") String accessKey,
-            @Value("${form-flow.aws.secret_key}") String secretKey,
+    public S3CloudFileRepository(@Value("${form-flow.aws.access_key:}") String accessKey,
+            @Value("${form-flow.aws.secret_key:}") String secretKey,
             @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,
-            @Value("${form-flow.aws.region}") String region) {
+            @Value("${form-flow.aws.region}") String region,
+            @Value("${form-flow.aws.use_default_credentials:false}") boolean useDefaultCredentials) {
 
-        bucketName = s3BucketName;
+        this.bucketName = s3BucketName;
 
-        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+        S3ClientBuilder s3ClientBuilder = S3Client.builder().region(Region.of(region));
+        
+        if (useDefaultCredentials) {
+            log.info("Using default AWS credentials provider chain for S3 Client instead of AWS Basic Credentials Authentication.");
+        } else {
+            log.info("Using AWS Basic Credentials for S3 client from application properties.");
+            AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+            s3ClientBuilder.credentialsProvider(StaticCredentialsProvider.create(awsCreds));
+        }
 
-        s3Client = S3Client.builder().region(Region.of(region)).credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                .build();
+        this.s3Client = s3ClientBuilder.build();
     }
 
     /**
