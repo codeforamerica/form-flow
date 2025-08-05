@@ -40,20 +40,18 @@ public class S3CloudFileRepository implements CloudFileRepository {
     private final String bucketName;
     private final S3Client s3Client;
 
-    public S3CloudFileRepository(@Value("${form-flow.aws.access_key}") String accessKey,
-            @Value("${form-flow.aws.secret_key}") String secretKey,
+    public S3CloudFileRepository(@Value("${form-flow.aws.access_key:}") String accessKey,
+            @Value("${form-flow.aws.secret_key:}") String secretKey,
             @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,
             @Value("${form-flow.aws.region}") String region,
-            Environment environment) {
+            @Value("${form-flow.aws.use_default_credentials:false}") boolean useDefaultCredentials) {
 
         this.bucketName = s3BucketName;
 
         S3ClientBuilder s3ClientBuilder = S3Client.builder().region(Region.of(region));
         
-        boolean isQaProfile = List.of(environment.getActiveProfiles()).contains("qa");
-        
-        if (isQaProfile) {
-            log.info("Using default AWS credentials provider chain for QA environment.");
+        if (useDefaultCredentials) {
+            log.info("Using default AWS credentials provider chain for S3 Client instead of AWS Basic Credentials Authentication.");
         } else {
             log.info("Using AWS Basic Credentials for S3 client from application properties.");
             AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
