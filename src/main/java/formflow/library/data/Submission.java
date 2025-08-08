@@ -175,6 +175,8 @@ public class Submission {
     public void mergeFormDataWithRepeatForSubflowIterationData(String subflowName, String subflowUuid,
             String repeatForSaveDataAsKey, Map<String, Object> iterationToUpdate, Map<String, Object> formDataSubmission) {
 
+        formDataSubmission.remove("_csrf");
+
         iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
 
         Map<String, Object> subflowEntry = getSubflowEntryByUuid(subflowName, subflowUuid);
