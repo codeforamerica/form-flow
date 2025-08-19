@@ -2,8 +2,8 @@ package formflow.library;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
-import com.lowagie.text.exceptions.BadPasswordException;
-import com.lowagie.text.pdf.PdfReader;
+import org.openpdf.text.exceptions.BadPasswordException;
+import org.openpdf.text.pdf.PdfReader;
 import formflow.library.config.FlowConfiguration;
 import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.data.Submission;
