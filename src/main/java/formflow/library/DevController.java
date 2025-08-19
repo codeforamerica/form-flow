@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("dev")
 public class DevController {
 
-  /**
-   * Handles the GET request to `dev/icons`. This method renders a page that displays the current icons available in the
-   * development environment.
-   *
-   * @return The name of the HTML page that shows the icons.
-   */
-  @GetMapping("/icons")
-  String getIcons() {
-    return "fragments/icons";
-  }
+    /**
+     * Handles the GET request to `dev/icons`. This method renders a page that displays the current icons available in the
+     * development environment.
+     *
+     * @return The name of the HTML page that shows the icons.
+     */
+    @GetMapping("/icons")
+    String getIcons() {
+        return "fragments/icons";
+    }
 }

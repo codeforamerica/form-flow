@@ -38,156 +38,159 @@ import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
 @Slf4j
 public class ValidationService {
 
-  private final Validator validator;
-  private final ActionManager actionManager;
-  private static String inputConfigPath;
-  
-  private static final Map<String, Map<String, Boolean>> requiredInputs = new ConcurrentHashMap<>();
-  
-  private static final List<String> requiredAnnotationsList = List.of(
-      NotNull.class.getName(),
-      NotEmpty.class.getName(),
-      NotBlank.class.getName()
-  );
+    private final Validator validator;
+    private final ActionManager actionManager;
+    private static String inputConfigPath;
 
-  /**
-   * Autoconfigured constructor.
-   *
-   * @param validator       Validator from Jakarta package.
-   * @param actionManager   the <code>ActionManager</code> that manages the logic to be run at specific points
-   * @param inputConfigPath the package path where inputs classes are located
-   */
-  public ValidationService(Validator validator, ActionManager actionManager,
-      @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
-    this.validator = validator;
-    this.actionManager = actionManager;
-    ValidationService.inputConfigPath = inputConfigPath;
-  }
+    private static final Map<String, Map<String, Boolean>> requiredInputs = new ConcurrentHashMap<>();
 
-  /**
-   * Validates client inputs with java bean validation based on input definition.
-   *
-   * @param currentScreen  The screen we are currently validating form data from
-   * @param flowName       The name of the current flow, not null
-   * @param formSubmission The input data from a form as a map of field name to field value(s), not null
-   * @param submission     The submission that we are cross validating with
-   * @return a HashMap of field to list of error messages, will be empty if no field violations
-   */
-  public Map<String, List<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
-      FormSubmission formSubmission, Submission submission) {
+    private static final List<String> requiredAnnotationsList = List.of(
+            NotNull.class.getName(),
+            NotEmpty.class.getName(),
+            NotBlank.class.getName()
+    );
 
-    Map<String, List<String>> crossFieldValidationMessages;
-    FormSubmission filteredSubmission = new FormSubmission(formSubmission.getValidatableFields());
-
-    // perform field level validations
-    Map<String, List<String>> validationMessages = performFieldLevelValidation(flowName, filteredSubmission);
-
-    // perform cross-field validations, if supplied in action
-    crossFieldValidationMessages = actionManager.handleCrossFieldValidationAction(currentScreen, filteredSubmission, submission);
-
-    // combine messages and return them
-    validationMessages.putAll(crossFieldValidationMessages);
-
-    return validationMessages;
-  }
-
-  private Map<String, List<String>> performFieldLevelValidation(String flowName, FormSubmission formSubmission) {
-
-    Class<?> flowClass;
-    HashMap<String, List<String>> validationMessages = new HashMap<>();
-
-    try {
-      flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
+    /**
+     * Autoconfigured constructor.
+     *
+     * @param validator       Validator from Jakarta package.
+     * @param actionManager   the <code>ActionManager</code> that manages the logic to be run at specific points
+     * @param inputConfigPath the package path where inputs classes are located
+     */
+    public ValidationService(Validator validator, ActionManager actionManager,
+            @Value("${form-flow.inputs: 'formflow.library.inputs.'}") String inputConfigPath) {
+        this.validator = validator;
+        this.actionManager = actionManager;
+        ValidationService.inputConfigPath = inputConfigPath;
     }
 
-    formSubmission.getFormData().forEach((key, value) -> {
-      boolean dynamicField = false;
-      var messages = new ArrayList<String>();
-      List<String> annotationNames = null;
+    /**
+     * Validates client inputs with java bean validation based on input definition.
+     *
+     * @param currentScreen  The screen we are currently validating form data from
+     * @param flowName       The name of the current flow, not null
+     * @param formSubmission The input data from a form as a map of field name to field value(s), not null
+     * @param submission     The submission that we are cross validating with
+     * @return a HashMap of field to list of error messages, will be empty if no field violations
+     */
+    public Map<String, List<String>> validate(ScreenNavigationConfiguration currentScreen, String flowName,
+            FormSubmission formSubmission, Submission submission) {
 
-      if (key.contains("[]")) {
-        key = key.replace("[]", "");
-      }
+        Map<String, List<String>> crossFieldValidationMessages;
+        FormSubmission filteredSubmission = new FormSubmission(formSubmission.getValidatableFields());
 
-      String originalKey = key;
+        // perform field level validations
+        Map<String, List<String>> validationMessages = performFieldLevelValidation(flowName, filteredSubmission);
 
-      if (key.contains(DYNAMIC_FIELD_MARKER)) {
-        dynamicField = true;
-        key = StringUtils.substringBefore(key, DYNAMIC_FIELD_MARKER);
-      }
+        // perform cross-field validations, if supplied in action
+        crossFieldValidationMessages = actionManager.handleCrossFieldValidationAction(currentScreen, filteredSubmission,
+                submission);
 
-      try {
-        annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
-            .map(annotation -> annotation.annotationType().getName()).toList();
-      } catch (NoSuchFieldException e) {
-        if (dynamicField) {
-          throw new RuntimeException(
-              String.format(
-                  "Input field '%s' has dynamic field marker '%s' in its name, but we are unable to " +
-                      "find the field in the input file. Is it a dynamic field?",
-                  originalKey, DYNAMIC_FIELD_MARKER
-              )
-          );
-        } else {
-          throw new RuntimeException(e);
-        }
-      }
+        // combine messages and return them
+        validationMessages.putAll(crossFieldValidationMessages);
 
-      // if it's acting like a dynamic field, then ensure that it is marked as one
-      if (dynamicField) {
-        if (!annotationNames.contains("formflow.library.data.annotations.DynamicField")) {
-          throw new RuntimeException(
-              String.format(
-                  "Field name '%s' (field: '%s') acts like it's a dynamic field, but the field does not contain the @DynamicField annotation",
-                  key, originalKey
-              )
-          );
-        }
-      }
-
-      if (Collections.disjoint(annotationNames, requiredAnnotationsList) && value.equals("")) {
-        log.info("skipping validation - found empty input for non-required field");
-        return;
-      }
-
-      validator.validateValue(flowClass, key, value)
-          .forEach(violation -> messages.add(violation.getMessage()));
-
-      if (!messages.isEmpty()) {
-        // uses original key to accommodate dynamic input names
-        validationMessages.put(originalKey, messages);
-      }
-    });
-
-    return validationMessages;
-  }
-
-  public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
-    if (!requiredInputs.containsKey(flowName)) {
-      Class<?> flowClass;
-
-      try {
-        flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
-      } catch (ReflectiveOperationException e) {
-        log.error("Error while trying to get the inputs class for flow {}. Make sure the inputs file for your application uses the same name as it's flow.", flowName, e);
-        throw new RuntimeException(e);
-      }
-
-      Field[] declaredFields = flowClass.getDeclaredFields();
-      for (Field field : declaredFields) {
-        if (Arrays.stream(field.getAnnotations())
-            .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
-          if (requiredInputs.containsKey(flowName)) {
-            requiredInputs.get(flowName).put(field.getName(), true);
-          } else {
-            requiredInputs.put(flowName, new ConcurrentHashMap<>(Map.of(field.getName(), true)));
-          }
-        }
-      }
+        return validationMessages;
     }
 
-    return requiredInputs;
-  }
+    private Map<String, List<String>> performFieldLevelValidation(String flowName, FormSubmission formSubmission) {
+
+        Class<?> flowClass;
+        HashMap<String, List<String>> validationMessages = new HashMap<>();
+
+        try {
+            flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+
+        formSubmission.getFormData().forEach((key, value) -> {
+            boolean dynamicField = false;
+            var messages = new ArrayList<String>();
+            List<String> annotationNames = null;
+
+            if (key.contains("[]")) {
+                key = key.replace("[]", "");
+            }
+
+            String originalKey = key;
+
+            if (key.contains(DYNAMIC_FIELD_MARKER)) {
+                dynamicField = true;
+                key = StringUtils.substringBefore(key, DYNAMIC_FIELD_MARKER);
+            }
+
+            try {
+                annotationNames = Arrays.stream(flowClass.getDeclaredField(key).getDeclaredAnnotations())
+                        .map(annotation -> annotation.annotationType().getName()).toList();
+            } catch (NoSuchFieldException e) {
+                if (dynamicField) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Input field '%s' has dynamic field marker '%s' in its name, but we are unable to " +
+                                            "find the field in the input file. Is it a dynamic field?",
+                                    originalKey, DYNAMIC_FIELD_MARKER
+                            )
+                    );
+                } else {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // if it's acting like a dynamic field, then ensure that it is marked as one
+            if (dynamicField) {
+                if (!annotationNames.contains("formflow.library.data.annotations.DynamicField")) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Field name '%s' (field: '%s') acts like it's a dynamic field, but the field does not contain the @DynamicField annotation",
+                                    key, originalKey
+                            )
+                    );
+                }
+            }
+
+            if (Collections.disjoint(annotationNames, requiredAnnotationsList) && value.equals("")) {
+                log.info("skipping validation - found empty input for non-required field");
+                return;
+            }
+
+            validator.validateValue(flowClass, key, value)
+                    .forEach(violation -> messages.add(violation.getMessage()));
+
+            if (!messages.isEmpty()) {
+                // uses original key to accommodate dynamic input names
+                validationMessages.put(originalKey, messages);
+            }
+        });
+
+        return validationMessages;
+    }
+
+    public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
+        if (!requiredInputs.containsKey(flowName)) {
+            Class<?> flowClass;
+
+            try {
+                flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+            } catch (ReflectiveOperationException e) {
+                log.error(
+                        "Error while trying to get the inputs class for flow {}. Make sure the inputs file for your application uses the same name as it's flow.",
+                        flowName, e);
+                throw new RuntimeException(e);
+            }
+
+            Field[] declaredFields = flowClass.getDeclaredFields();
+            for (Field field : declaredFields) {
+                if (Arrays.stream(field.getAnnotations())
+                        .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
+                    if (requiredInputs.containsKey(flowName)) {
+                        requiredInputs.get(flowName).put(field.getName(), true);
+                    } else {
+                        requiredInputs.put(flowName, new ConcurrentHashMap<>(Map.of(field.getName(), true)));
+                    }
+                }
+            }
+        }
+
+        return requiredInputs;
+    }
 }
