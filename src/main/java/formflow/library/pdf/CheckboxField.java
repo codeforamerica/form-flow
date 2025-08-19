@@ -13,12 +13,12 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class CheckboxField extends SubmissionField {
 
-  @ToString.Include
-  @EqualsAndHashCode.Include
-  List<String> value;
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    List<String> value;
 
-  public CheckboxField(String name, List<String> value, Integer iteration) {
-    super(name, iteration);
-    this.value = value;
-  }
+    public CheckboxField(String name, List<String> value, Integer iteration) {
+        super(name, iteration);
+        this.value = value;
+    }
 }
