@@ -1,14 +1,14 @@
 package formflow.library.file;
 
 import com.google.common.io.Files;
-import com.lowagie.text.Document;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.PdfCopy;
-import com.lowagie.text.pdf.PdfImportedPage;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfStamper;
-import com.lowagie.text.pdf.PdfWriter;
+import org.openpdf.text.Document;
+import org.openpdf.text.Image;
+import org.openpdf.text.PageSize;
+import org.openpdf.text.pdf.PdfCopy;
+import org.openpdf.text.pdf.PdfImportedPage;
+import org.openpdf.text.pdf.PdfReader;
+import org.openpdf.text.pdf.PdfStamper;
+import org.openpdf.text.pdf.PdfWriter;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -287,10 +287,13 @@ public class FileConversionService {
             if (!pdfFile.exists()) {
                 if (numberOfRetries < 10) {
                     numberOfRetries++;
-                    log.warn("Unable to find PDF file {} with exit code: {}, will retry with attempt {}", pdfFile.getAbsolutePath(), exitCode, numberOfRetries);
+                    log.warn("Unable to find PDF file {} with exit code: {}, will retry with attempt {}",
+                            pdfFile.getAbsolutePath(), exitCode, numberOfRetries);
                     return convertOfficeDocumentToPDF(file, numberOfRetries);
                 } else {
-                    throw new RuntimeException("PDF conversion failed. Unable to find PDF file " + pdfFile.getAbsolutePath() + " after  " + numberOfRetries + " retries. Final exit code: " + exitCode);
+                    throw new RuntimeException(
+                            "PDF conversion failed. Unable to find PDF file " + pdfFile.getAbsolutePath() + " after  "
+                                    + numberOfRetries + " retries. Final exit code: " + exitCode);
                 }
             }
 
@@ -328,7 +331,8 @@ public class FileConversionService {
                     int totalPages = reader.getNumberOfPages();
 
                     if (maxPages != null && totalPages > maxPages) {
-                        log.warn("Too many pages found for PDF conversion. Only converting {} of {} pages.", maxPages, totalPages);
+                        log.warn("Too many pages found for PDF conversion. Only converting {} of {} pages.", maxPages,
+                                totalPages);
                         totalPages = maxPages;
                     }
 
@@ -399,12 +403,10 @@ public class FileConversionService {
     /**
      * Takes a multipartfile representation of a PDF and makes a clone of it, with the relax security settings A read-only PDF is
      * now not as read-only
-     *
-     * @param file
-     * @return
      */
     private Set<MultipartFile> relaxPDFSecuritySettings(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename() != null ? Files.getNameWithoutExtension(file.getOriginalFilename()) : UUID.randomUUID().toString();
+        String originalFilename = file.getOriginalFilename() != null ? Files.getNameWithoutExtension(file.getOriginalFilename())
+                : UUID.randomUUID().toString();
 
         // Remove illegal filename characters \ / : * ? " < > | and .
         String cleanFilename = originalFilename.replaceAll("[\\\\/:*?\"<>|.]", "");
@@ -434,7 +436,8 @@ public class FileConversionService {
     }
 
     private static @NotNull File getModifiedPDFFile(File tempFile) throws IOException {
-        String modifiedPDFPath = Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
+        String modifiedPDFPath =
+                Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
 
         PdfReader reader = new PdfReader(tempFile.getAbsolutePath());
         reader.setModificationAllowedWithoutOwnerPassword(true);

@@ -32,52 +32,54 @@ import java.util.UUID;
 @RequestMapping("/download")
 public class PdfController extends FormFlowController {
 
-  private final PdfService pdfService;
+    private final PdfService pdfService;
 
-  public PdfController(MessageSource messageSource, PdfService pdfService,
-      SubmissionRepositoryService submissionRepositoryService,
-      UserFileRepositoryService userFileRepositoryService,
-      List<FlowConfiguration> flowConfigurations,
-      FormFlowConfigurationProperties formFlowConfigurationProperties) {
-    super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
-        messageSource);
-    this.pdfService = pdfService;
-  }
-
-  @GetMapping("{flow}/{submissionId}")
-  ResponseEntity<?> downloadPdf(
-      @PathVariable String flow,
-      @PathVariable String submissionId,
-      HttpSession httpSession,
-      HttpServletRequest request,
-      Locale locale
-  ) throws IOException {
-    log.info("GET downloadPdf (url: {}): flow: {}, submissionId: {}", request.getRequestURI().toLowerCase(), flow, submissionId);
-    if (!doesFlowExist(flow)) {
-      throwNotFoundError(flow, null, String.format("Could not find flow %s in your application's flow configuration.", flow));
+    public PdfController(MessageSource messageSource, PdfService pdfService,
+            SubmissionRepositoryService submissionRepositoryService,
+            UserFileRepositoryService userFileRepositoryService,
+            List<FlowConfiguration> flowConfigurations,
+            FormFlowConfigurationProperties formFlowConfigurationProperties) {
+        super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
+                messageSource);
+        this.pdfService = pdfService;
     }
 
-    Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
-    UUID submissionIdForFlow = getSubmissionIdForFlow(httpSession, flow);
-    if (submissionIdForFlow != null && submissionIdForFlow.toString().equals(submissionId) && maybeSubmission.isPresent()) {
-      log.info("Downloading PDF with submission_id: " + submissionId);
-      Submission submission = maybeSubmission.get();
-      HttpHeaders headers = new HttpHeaders();
-      byte[] data = pdfService.getFilledOutPDF(maybeSubmission.get());
+    @GetMapping("{flow}/{submissionId}")
+    ResponseEntity<?> downloadPdf(
+            @PathVariable String flow,
+            @PathVariable String submissionId,
+            HttpSession httpSession,
+            HttpServletRequest request,
+            Locale locale
+    ) throws IOException {
+        log.info("GET downloadPdf (url: {}): flow: {}, submissionId: {}", request.getRequestURI().toLowerCase(), flow,
+                submissionId);
+        if (!doesFlowExist(flow)) {
+            throwNotFoundError(flow, null,
+                    String.format("Could not find flow %s in your application's flow configuration.", flow));
+        }
 
-      headers.add(HttpHeaders.CONTENT_DISPOSITION,
-          "attachment; filename=%s".formatted(pdfService.generatePdfName(submission)));
-      return ResponseEntity
-          .ok()
-          .contentType(MediaType.APPLICATION_PDF)
-          .headers(headers)
-          .body(data);
-    } else {
-      log.warn(
-          "Attempted to download PDF with submission_id: " + submissionId + " but session_id was: "
-              + httpSession.getAttribute(
-              "id"));
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(messageSource.getMessage("error.forbidden", null, locale));
+        Optional<Submission> maybeSubmission = submissionRepositoryService.findById(UUID.fromString(submissionId));
+        UUID submissionIdForFlow = getSubmissionIdForFlow(httpSession, flow);
+        if (submissionIdForFlow != null && submissionIdForFlow.toString().equals(submissionId) && maybeSubmission.isPresent()) {
+            log.info("Downloading PDF with submission_id: " + submissionId);
+            Submission submission = maybeSubmission.get();
+            HttpHeaders headers = new HttpHeaders();
+            byte[] data = pdfService.getFilledOutPDF(maybeSubmission.get());
+
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=%s".formatted(pdfService.generatePdfName(submission)));
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .headers(headers)
+                    .body(data);
+        } else {
+            log.warn(
+                    "Attempted to download PDF with submission_id: " + submissionId + " but session_id was: "
+                            + httpSession.getAttribute(
+                            "id"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(messageSource.getMessage("error.forbidden", null, locale));
+        }
     }
-  }
 }

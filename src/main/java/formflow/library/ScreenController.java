@@ -112,6 +112,7 @@ public class ScreenController extends FormFlowController {
     @AllArgsConstructor
     @Getter
     private class ScreenConfig {
+
         String flowName;
         ScreenNavigationConfiguration screenNavigationConfiguration;
     }
@@ -990,7 +991,8 @@ public class ScreenController extends FormFlowController {
             RedirectAttributes redirectAttributes,
             Locale locale
     ) {
-        log.info("GET deleteRepeatForConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(), flow, uuid);
+        log.info("GET deleteRepeatForConfirmation (url: {}): flow: {}, uuid: {}", request.getRequestURI().toLowerCase(), flow,
+                uuid);
         // Checks to see if flow exists
         String deleteConfirmationScreen = getValidatedFlowConfigurationByName(flow)
                 .getSubflows().get(subflow).getDeleteConfirmationScreen();
@@ -1357,7 +1359,7 @@ public class ScreenController extends FormFlowController {
 
     private NextScreen getNonConditionalNextScreen(ScreenNavigationConfiguration currentScreen) {
         return currentScreen.getNextScreens().stream()
-                .filter(nxtScreen -> nxtScreen.getCondition() == null).toList().get(0);
+                .filter(nxtScreen -> nxtScreen.getCondition() == null).toList().getFirst();
     }
 
     private Boolean isIterationStartScreen(String flow, String screen) {
