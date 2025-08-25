@@ -439,15 +439,35 @@ public class FileConversionService {
         String modifiedPDFPath =
                 Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
 
-        PdfReader reader = new PdfReader(tempFile.getAbsolutePath());
-        reader.setModificationAllowedWithoutOwnerPassword(true);
+        PdfReader reader = null;
+        Document document = null;
+        FileOutputStream outputStream = null;
+        PdfCopy copy = null;
 
-        FileOutputStream outputStream = new FileOutputStream(modifiedPDFPath);
-        PdfStamper stamper = new PdfStamper(reader, outputStream, PdfWriter.VERSION_1_7);
+        try {
+            reader = new PdfReader(tempFile.getAbsolutePath());
+            reader.setModificationAllowedWithoutOwnerPassword(true);
 
-        stamper.close();
-        reader.close();
-        outputStream.close();
+            outputStream = new FileOutputStream(modifiedPDFPath);
+            document = new Document(reader.getPageSizeWithRotation(1));
+            copy = new PdfCopy(document, outputStream);
+
+            document.open();
+            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+                copy.addPage(copy.getImportedPage(reader, i));
+            }
+
+        } finally {
+            if (document != null) {
+                document.close();
+            }
+            if (reader != null) {
+                reader.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
 
         return new File(modifiedPDFPath);
     }
