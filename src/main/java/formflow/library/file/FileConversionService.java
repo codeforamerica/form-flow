@@ -414,7 +414,10 @@ public class FileConversionService {
         // Write to a temp file, so we can have a File from the original MultipartFile
         File tempFile = null;
         try {
-            tempFile = File.createTempFile("upload_", "_" + originalFilename + ".tmp");
+            // Use cleanFilename, not originalFilename, for the temp file to reduce user input risk.
+            // Additionally, limit its length and fallback to UUID if too short, ensuring no path traversal.
+            String safeFilename = (!cleanFilename.isEmpty() && cleanFilename.length() < 50) ? cleanFilename : UUID.randomUUID().toString();
+            tempFile = File.createTempFile("upload_" + safeFilename + "_", ".tmp");
 
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(file.getBytes());
