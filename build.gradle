@@ -29,7 +29,7 @@ targetCompatibility = JavaVersion.VERSION_21
 sourceCompatibility = JavaVersion.VERSION_21
 
 group = "org.codeforamerica.platform"
-version = "1.6.40-SNAPSHOT"
+version = "1.6.41-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -88,7 +88,7 @@ dependencies {
     implementation 'com.smartystreets.api:smartystreets-java-sdk:4.2.0'
     implementation 'com.github.librepdf:openpdf:3.0.0'
     implementation 'org.yaml:snakeyaml:2.4'
-    implementation 'com.mailgun:mailgun-java:2.0.0'
+    implementation 'com.mailgun:mailgun-java:2.1.0'
     implementation 'com.google.crypto.tink:tink:1.18.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.2.2'

@@ -414,7 +414,10 @@ public class FileConversionService {
         // Write to a temp file, so we can have a File from the original MultipartFile
         File tempFile = null;
         try {
-            tempFile = File.createTempFile("upload_", "_" + originalFilename + ".tmp");
+            // Use cleanFilename, not originalFilename, for the temp file to reduce user input risk.
+            // Additionally, limit its length and fallback to UUID if too short, ensuring no path traversal.
+            String safeFilename = (!cleanFilename.isEmpty() && cleanFilename.length() < 50) ? cleanFilename : UUID.randomUUID().toString();
+            tempFile = File.createTempFile("upload_" + safeFilename + "_", ".tmp");
 
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(file.getBytes());
@@ -439,15 +442,35 @@ public class FileConversionService {
         String modifiedPDFPath =
                 Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
 
-        PdfReader reader = new PdfReader(tempFile.getAbsolutePath());
-        reader.setModificationAllowedWithoutOwnerPassword(true);
+        PdfReader reader = null;
+        Document document = null;
+        FileOutputStream outputStream = null;
+        PdfCopy copy = null;
 
-        FileOutputStream outputStream = new FileOutputStream(modifiedPDFPath);
-        PdfStamper stamper = new PdfStamper(reader, outputStream, PdfWriter.VERSION_1_7);
+        try {
+            reader = new PdfReader(tempFile.getAbsolutePath());
+            reader.setModificationAllowedWithoutOwnerPassword(true);
 
-        stamper.close();
-        reader.close();
-        outputStream.close();
+            outputStream = new FileOutputStream(modifiedPDFPath);
+            document = new Document(reader.getPageSizeWithRotation(1));
+            copy = new PdfCopy(document, outputStream);
+
+            document.open();
+            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+                copy.addPage(copy.getImportedPage(reader, i));
+            }
+
+        } finally {
+            if (document != null) {
+                document.close();
+            }
+            if (reader != null) {
+                reader.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
 
         return new File(modifiedPDFPath);
     }
