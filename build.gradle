@@ -91,7 +91,7 @@ dependencies {
     implementation 'com.mailgun:mailgun-java:2.1.0'
     implementation 'com.google.crypto.tink:tink:1.18.0'
     implementation 'org.springframework.session:spring-session-jdbc'
-    implementation 'org.apache.tika:tika-core:3.2.2'
+    implementation 'org.apache.tika:tika-core:3.2.3'
     implementation 'commons-codec:commons-codec:1.19.0'
     implementation 'org.apache.commons:commons-text:1.14.0'
 
