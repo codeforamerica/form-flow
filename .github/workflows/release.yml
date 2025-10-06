@@ -71,7 +71,7 @@ jobs:
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Publish package to Sonatype
         run: |
           ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
