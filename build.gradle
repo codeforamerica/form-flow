@@ -9,6 +9,7 @@ plugins {
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
     id "org.flywaydb.flyway" version "[9.+,10.0["
+    id "com.github.jk1.dependency-license-report" version "2.2" // LICENSE REPORT PLUGIN
 }
 
 tasks.withType(Jar).configureEach {
@@ -224,4 +225,161 @@ nexusPublishing {
 
 javadoc {
     options.addStringOption('Xmaxwarns', '1000')
+}
+
+configurations {
+    licenseReportDependencies {
+        canBeResolved = true
+        canBeConsumed = false
+        extendsFrom configurations.runtimeClasspath
+        extendsFrom configurations.compileClasspath
+        extendsFrom configurations.testImplementation
+        extendsFrom configurations.testCompileClasspath
+        extendsFrom configurations.compileOnly
+        extendsFrom configurations.annotationProcessor
+    }
+}
+
+licenseReport {
+    configurations = ['licenseReportDependencies']
+    outputDir = file("${buildDir}/license-report")
+    renderers = [
+            new com.github.jk1.license.render.CsvReportRenderer()
+    ]
+}
+
+tasks.named('generateLicenseReport') {
+    doLast {
+        def csvFile = new File("${buildDir}/license-report/licenses.csv")
+        if (!csvFile.exists()) {
+            println "No license report found."
+            return
+        }
+
+        // Collect all direct dependency coordinates (group:name:version)
+        def directDeps = configurations.runtimeClasspath
+                .resolvedConfiguration
+                .firstLevelModuleDependencies
+                .collect { "${it.moduleGroup}:${it.moduleName}:${it.moduleVersion}" }
+                .toSet()
+
+        // License normalization map
+        def normalizeLicense = { license ->
+            switch (license.trim()) {
+                case "Apache License 2.0":
+                case "Apache 2.0":
+                case "Apache-2.0":
+                case "The Apache License, Version 2.0":
+                case "Apache License, Version 2.0":
+                case "The Apache Software License, Version 2.0":
+                    return "Apache 2.0"
+                case "MIT License":
+                case "The MIT License (MIT)":
+                case "The MIT License":
+                case "MIT":
+                    return "MIT"
+                case "GNU Lesser General Public License":
+                case "GNU Lesser General Public License v3.0 or later":
+                    return "LGPL"
+                case "GNU General Public License, version 2 with the GNU Classpath Exception":
+                case "GPL2 w/ CPE":
+                    return "GPL"
+                case "Eclipse Public License v2.0":
+                case "Eclipse Public License 1.0":
+                    return "EPL"
+                case "Mozilla Public License, Version 2.0":
+                case "MPL 2.0":
+                    return "MPL"
+                case "Public Domain, per Creative Commons CC0":
+                    return "Public Domain per Creative Commons CC0"
+                default:
+                    return license.replaceAll(",", "") // remove any stray commas
+            }
+        }
+
+        def directByLicense = [:].withDefault { [] }
+        def transitiveByLicense = [:].withDefault { [] }
+        def allDeps = []
+
+        csvFile.eachLine { line ->
+            if (!line.toLowerCase().startsWith("artifact") && line.trim()) {
+                def parts = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/)
+                def library = parts.length > 0 ? parts[0].replaceAll(/^"|"$/, "") : "unknown"
+                def license = parts.length > 2 ? parts[2].replaceAll(/^"|"$/, "") : "unknown"
+
+                if (library == "artifact" && license == "moduleLicense") return
+
+                license = normalizeLicense(license)
+
+                // Match on group:name prefix to identify direct deps
+                def isDirect = directDeps.any { dep ->
+                    def depShort = dep.substring(0, dep.lastIndexOf(':'))
+                    library.startsWith(depShort)
+                }
+
+                def scope = isDirect ? "direct" : "transitive"
+
+                // Extract group, name, version
+                def (group, name, version) = library.tokenize(':')
+                group = group ?: ""
+                name = name ?: ""
+                version = version ?: ""
+
+                allDeps << [
+                        coordinate: "${group}:${name}:${version}",
+                        group     : group,
+                        name      : name,
+                        version   : version,
+                        license   : license ?: "unknown",
+                        scope     : scope
+                ]
+
+                if (isDirect) {
+                    directByLicense[license] << library
+                } else {
+                    transitiveByLicense[license] << library
+                }
+            }
+        }
+
+        // Print grouped text output
+        def printGrouped = { title, map ->
+            println "\n📦 ${title}:"
+            map.sort { -it.value.size() }.each { license, libs ->
+                println "\"${license}\",${libs.size()}"
+                libs.sort().each { lib ->
+                    println "   - ${lib}"
+                }
+                println ""
+            }
+        }
+
+        printGrouped("DIRECT DEPENDENCIES", directByLicense)
+        printGrouped("TRANSITIVE DEPENDENCIES", transitiveByLicense)
+
+        println "\n✅ Total: ${directByLicense.values().sum { it.size() }} direct, ${transitiveByLicense.values().sum { it.size() }} transitive"
+
+        // Write detailed CSV output with full coordinate and CSV-safe quoting
+        def outputCsv = new File("${buildDir}/license-report/licenses_detailed.csv")
+        outputCsv.withPrintWriter { pw ->
+            pw.println('"coordinate","package","name","version","license","scope"')
+            allDeps.sort { a, b ->
+                def scopeOrder = ["direct": 0, "transitive": 1]
+                def c1 = scopeOrder[a.scope] <=> scopeOrder[b.scope]
+                if (c1 != 0) return c1
+                def c2 = a.license <=> b.license
+                if (c2 != 0) return c2
+                def c3 = a.group <=> b.group
+                if (c3 != 0) return c3
+                return a.name <=> b.name
+            }.each { dep ->
+                def csvLine = [dep.coordinate, dep.group, dep.name, dep.version, dep.license, dep.scope]
+                        .collect { "\"${it.replaceAll('"', '""')}\"" } // quote and escape
+                        .join(',')
+                pw.println(csvLine)
+            }
+        }
+
+        println "\n📝 Wrote detailed CSV with coordinates: ${outputCsv.absolutePath}"
+    }
 }
