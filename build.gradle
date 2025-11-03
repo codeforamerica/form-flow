@@ -26,9 +26,6 @@ jacoco {
     toolVersion = '0.8.10'
 }
 
-targetCompatibility = JavaVersion.VERSION_21
-sourceCompatibility = JavaVersion.VERSION_21
-
 group = "org.codeforamerica.platform"
 version = "1.6.43-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
@@ -129,6 +126,8 @@ jacocoTestReport {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withJavadocJar()
     withSourcesJar()
 }

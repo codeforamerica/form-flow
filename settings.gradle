@@ -8,11 +8,9 @@
  */
 
 rootProject.name = "formflow-library"
-include("lib")
 
 buildCache {
     local {
         directory = new File(rootDir, 'build-cache')
-        removeUnusedEntriesAfterDays = 30
     }
 }

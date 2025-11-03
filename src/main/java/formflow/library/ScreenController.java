@@ -66,10 +66,15 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping(ScreenController.FLOW)
 public class ScreenController extends FormFlowController {
 
+    /**
+     * Base path for all FFL flows
+     */
     public static final String FLOW = "/flow";
-    public static final String FLOW_SCREEN_PATH = "{flow}/{screen}";
 
-    private static final String SUBFLOW_UUID = "uuid";
+    /**
+     * Default path pattern for all FFL flows
+     */
+    public static final String FLOW_SCREEN_PATH = "{flow}/{screen}";
 
     private static final String REPEAT_FOR_UUID = "repeatForIterationUuid";
     private final ValidationService validationService;
@@ -81,6 +86,22 @@ public class ScreenController extends FormFlowController {
     private final ShortCodeConfig shortCodeConfig;
     private final SubflowManager subflowManager;
 
+    /**
+     * A controller to render any screen in flows, including subflows.
+     *
+     * @param flowConfigurations              flow configurations
+     * @param userFileRepositoryService       UserFileRepositoryService
+     * @param submissionRepositoryService     SubmissionRepositoryService
+     * @param validationService               ValidationService
+     * @param addressValidationService        AddressValidationService
+     * @param formFlowConfigurationProperties FormFlowConfigurationProperties
+     * @param conditionManager                ConditionManager
+     * @param actionManager                   ActionManager
+     * @param fileValidationService           FileValidationService
+     * @param messageSource                   MessageSource
+     * @param shortCodeConfig                 ShortCodeConfig
+     * @param subflowManager                  SubflowManager
+     */
     public ScreenController(
             List<FlowConfiguration> flowConfigurations,
             UserFileRepositoryService userFileRepositoryService,
