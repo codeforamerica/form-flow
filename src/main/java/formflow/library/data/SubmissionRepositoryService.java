@@ -160,6 +160,7 @@ public class SubmissionRepositoryService {
                 // set this submission's shortcode, and persist it
                 submission.setShortCode(newCode);
                 save(submission);
+                log.info("Created short code {} for submission {}", newCode, submission.getId());
             } else {
                 log.warn("Confirmation code {} already exists", newCode);
             }
@@ -167,20 +168,14 @@ public class SubmissionRepositoryService {
     }
 
     private static String generateRandomCode(int length, ShortCodeType type) {
-        RandomStringGenerator.Builder builder = new RandomStringGenerator.Builder().withinRange('0', 'z');
+        RandomStringGenerator.Builder builder = RandomStringGenerator.builder().withinRange('0', 'z');
 
-        switch (type) {
-            case alphanumeric:
-                builder.filteredBy(Character::isLetterOrDigit);
-                break;
-            case alpha:
-                builder.filteredBy(Character::isLetter);
-                break;
-            case numeric:
-                builder.filteredBy(Character::isDigit);
-                break;
-        }
+        builder = switch (type) {
+            case alphanumeric -> builder.filteredBy(Character::isLetterOrDigit);
+            case alpha -> builder.filteredBy(Character::isLetter);
+            case numeric -> builder.filteredBy(Character::isDigit);
+        };
 
-        return builder.build().generate(length);
+        return builder.get().generate(length);
     }
 }

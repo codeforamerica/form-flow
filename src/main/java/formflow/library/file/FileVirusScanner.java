@@ -1,5 +1,6 @@
 package formflow.library.file;
 
+import java.util.concurrent.TimeoutException;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,6 +14,7 @@ public interface FileVirusScanner {
      *
      * @param file file to check for virus in
      * @return true if virus is found, false otherwise
+     * @throws TimeoutException thrown if the request times out
      */
-    boolean virusDetected(MultipartFile file) throws Exception;
+    boolean virusDetected(MultipartFile file) throws TimeoutException;
 }
