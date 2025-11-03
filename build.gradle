@@ -1,5 +1,4 @@
 plugins {
-    // Apply the java-library plugin for API and implementation separation.
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'java-library'
@@ -8,7 +7,7 @@ plugins {
     id 'jacoco'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
-    id "org.flywaydb.flyway" version "[9.+,10.0["
+    id "org.flywaydb.flyway" version "11.15.0"
     id "com.github.jk1.dependency-license-report" version "3.0.1"
 }
 
@@ -40,9 +39,7 @@ jar {
     zip64 = true
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes(
-                'Main-Class': 'formflow.library.ScreenController'
-        )
+        attributes('Main-Class': 'formflow.library.ScreenController')
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
@@ -53,7 +50,7 @@ bootJar {
     enabled = false
 }
 
-task webjar(type: Jar) {
+tasks.register('webjar', Jar) {
     zip64 = true
     from(fileTree("dist")) {
         into "META-INF/resources"
@@ -61,16 +58,12 @@ task webjar(type: Jar) {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
     implementation 'org.springframework.integration:spring-integration-ws:6.5.3'
     implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -95,7 +88,6 @@ dependencies {
     implementation 'org.apache.commons:commons-text:1.14.0'
 
     compileOnly 'org.projectlombok:lombok'
-
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
@@ -141,18 +133,14 @@ publishing {
         pluginMaven(MavenPublication) {
             artifactId = "form-flow"
             artifact(tasks.named("jar").get().archiveFile)
-
             artifact tasks.javadocJar
             artifact tasks.sourcesJar
 
             versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
+                usage('java-api') { fromResolutionOf('runtimeClasspath') }
+                usage('java-runtime') { fromResolutionResult() }
             }
+
             pom {
                 name = "Form Flow Builder"
                 description = "A Java library placed in a Spring Boot app to generate form flows."
@@ -164,42 +152,20 @@ publishing {
                     }
                 }
                 developers {
-                    developer {
-                        id = 'birdprsn'
-                        name = 'Alex Gonzalez'
-                        email = 'agonzalez@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'amedrano'
-                        name = 'Ana Medrano'
-                        email = 'amedrano@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'mperlman'
-                        name = 'Marc Perlman'
-                        email = 'mperlman@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'cenyia'
-                        name = 'Chibuisi Enyia'
-                        email = 'cenyia@codeforamerica.org'
-                    }
-                    developer {
-                        id = 'mtodd'
-                        name = 'Morgan Todd'
-                        email = 'mtodd@codeforamerica.org'
-                    }
+                    developer { id = 'birdprsn'; name = 'Alex Gonzalez'; email = 'agonzalez@codeforamerica.org' }
+                    developer { id = 'amedrano'; name = 'Ana Medrano'; email = 'amedrano@codeforamerica.org' }
+                    developer { id = 'mperlman'; name = 'Marc Perlman'; email = 'mperlman@codeforamerica.org' }
+                    developer { id = 'cenyia'; name = 'Chibuisi Enyia'; email = 'cenyia@codeforamerica.org' }
+                    developer { id = 'mtodd'; name = 'Morgan Todd'; email = 'mtodd@codeforamerica.org' }
                 }
-                scm {
-                    url = 'scm:git:https://github.com/codeforamerica/form-flow.git'
-                }
+                scm { url = 'scm:git:https://github.com/codeforamerica/form-flow.git' }
             }
         }
     }
 }
 
 signing {
-    required { admin }
+    required = admin
     def signingKey = System.getenv("GPG_SIGNING_KEY")
     def signingPassword = System.getenv("GPG_SIGNING_PASSPHRASE")
     useInMemoryPgpKeys(signingKey, signingPassword)
@@ -230,10 +196,9 @@ configurations {
     licenseReportDependencies {
         canBeResolved = true
         canBeConsumed = false
-        extendsFrom configurations.runtimeClasspath
-        extendsFrom configurations.compileClasspath
+        extendsFrom configurations.implementation
+        extendsFrom configurations.api
         extendsFrom configurations.testImplementation
-        extendsFrom configurations.testCompileClasspath
         extendsFrom configurations.compileOnly
         extendsFrom configurations.annotationProcessor
     }
@@ -242,145 +207,141 @@ configurations {
 licenseReport {
     configurations = ['licenseReportDependencies']
     outputDir = file("${buildDir}/license-report")
-    renderers = [
-            new com.github.jk1.license.render.CsvReportRenderer()
-    ]
+    renderers = [ new com.github.jk1.license.render.CsvReportRenderer() ]
 }
 
+// Safe license-report post-processing for Gradle 9.2+
 afterEvaluate {
-    def licenseTask = tasks.findByName("generateLicenseReport") ?: tasks.findByName("licenseReport")
-
-    if (licenseTask) {
-        licenseTask.doLast {
-            def csvFile = new File("${buildDir}/license-report/licenses.csv")
-            if (!csvFile.exists()) {
-                println "No license report found."
-                return
-            }
-
-            // Collect all direct dependency coordinates (group:name:version)
-            def directDeps = configurations.runtimeClasspath
-                    .resolvedConfiguration
-                    .firstLevelModuleDependencies
-                    .collect { "${it.moduleGroup}:${it.moduleName}:${it.moduleVersion}" }
-                    .toSet()
-
-            // License normalization map
-            def normalizeLicense = { license ->
-                switch (license.trim()) {
-                    case "Apache License 2.0":
-                    case "Apache 2.0":
-                    case "Apache-2.0":
-                    case "The Apache License, Version 2.0":
-                    case "Apache License, Version 2.0":
-                    case "The Apache Software License, Version 2.0":
-                        return "Apache 2.0"
-                    case "MIT License":
-                    case "The MIT License (MIT)":
-                    case "The MIT License":
-                    case "MIT":
-                        return "MIT"
-                    case "GNU Lesser General Public License":
-                    case "GNU Lesser General Public License v3.0 or later":
-                        return "LGPL"
-                    case "GNU General Public License, version 2 with the GNU Classpath Exception":
-                    case "GPL2 w/ CPE":
-                        return "GPL"
-                    case "Eclipse Public License v2.0":
-                    case "Eclipse Public License 1.0":
-                        return "EPL"
-                    case "Mozilla Public License, Version 2.0":
-                    case "MPL 2.0":
-                        return "MPL"
-                    case "Public Domain, per Creative Commons CC0":
-                        return "Public Domain per Creative Commons CC0"
-                    default:
-                        return license.replaceAll(",", "") // remove stray commas
+    def licenseTasks = tasks.matching { it.name == "licenseReport" || it.name == "generateLicenseReport" }
+    if (!licenseTasks.isEmpty()) {
+        licenseTasks.configureEach { licenseTask ->
+            licenseTask.doLast {
+                def csvFile = file("${buildDir}/license-report/licenses.csv")
+                if (!csvFile.exists()) {
+                    println "No license report found."
+                    return
                 }
-            }
 
-            def directByLicense = [:].withDefault { [] }
-            def transitiveByLicense = [:].withDefault { [] }
-            def allDeps = []
+                def directDeps = configurations.runtimeClasspath
+                        .resolvedConfiguration
+                        .firstLevelModuleDependencies
+                        .collect { "${it.moduleGroup}:${it.moduleName}:${it.moduleVersion}" }
+                        .toSet()
 
-            csvFile.eachLine { line ->
-                if (!line.toLowerCase().startsWith("artifact") && line.trim()) {
-                    def parts = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/)
-                    def library = parts.length > 0 ? parts[0].replaceAll(/^"|"$/, "") : "unknown"
-                    def license = parts.length > 2 ? parts[2].replaceAll(/^"|"$/, "") : "unknown"
-
-                    if (library == "artifact" && license == "moduleLicense") return
-
-                    license = normalizeLicense(license)
-
-                    def isDirect = directDeps.any { dep ->
-                        def depShort = dep.substring(0, dep.lastIndexOf(':'))
-                        library.startsWith(depShort)
-                    }
-
-                    def scope = isDirect ? "direct" : "transitive"
-
-                    def (group, name, version) = library.tokenize(':')
-                    group = group ?: ""
-                    name = name ?: ""
-                    version = version ?: ""
-
-                    allDeps << [
-                            coordinate: "${group}:${name}:${version}",
-                            group     : group,
-                            name      : name,
-                            version   : version,
-                            license   : license ?: "unknown",
-                            scope     : scope
-                    ]
-
-                    if (isDirect) {
-                        directByLicense[license] << library
-                    } else {
-                        transitiveByLicense[license] << library
+                def normalizeLicense = { license ->
+                    switch (license.trim()) {
+                        case "Apache License 2.0":
+                        case "Apache 2.0":
+                        case "Apache-2.0":
+                        case "The Apache License, Version 2.0":
+                        case "Apache License, Version 2.0":
+                        case "The Apache Software License, Version 2.0":
+                            return "Apache 2.0"
+                        case "MIT License":
+                        case "The MIT License (MIT)":
+                        case "The MIT License":
+                        case "MIT":
+                            return "MIT"
+                        case "GNU Lesser General Public License":
+                        case "GNU Lesser General Public License v3.0 or later":
+                            return "LGPL"
+                        case "GNU General Public License, version 2 with the GNU Classpath Exception":
+                        case "GPL2 w/ CPE":
+                            return "GPL"
+                        case "Eclipse Public License v2.0":
+                        case "Eclipse Public License 1.0":
+                            return "EPL"
+                        case "Mozilla Public License, Version 2.0":
+                        case "MPL 2.0":
+                            return "MPL"
+                        case "Public Domain, per Creative Commons CC0":
+                            return "Public Domain per Creative Commons CC0"
+                        default:
+                            return license.replaceAll(",", "")
                     }
                 }
-            }
 
-            // Print grouped output
-            def printGrouped = { title, map ->
-                println "\n📦 ${title}:"
-                map.sort { -it.value.size() }.each { license, libs ->
-                    println "\"${license}\",${libs.size()}"
-                    libs.sort().each { lib ->
-                        println "   - ${lib}"
+                def directByLicense = [:].withDefault { [] }
+                def transitiveByLicense = [:].withDefault { [] }
+                def allDeps = []
+
+                csvFile.eachLine { line ->
+                    if (!line.toLowerCase().startsWith("artifact") && line.trim()) {
+                        def parts = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/)
+                        def library = parts.length > 0 ? parts[0].replaceAll(/^"|"$/, "") : "unknown"
+                        def license = parts.length > 2 ? parts[2].replaceAll(/^"|"$/, "") : "unknown"
+
+                        if (library == "artifact" && license == "moduleLicense") return
+
+                        license = normalizeLicense(license)
+
+                        def isDirect = directDeps.any { dep ->
+                            def depShort = dep.substring(0, dep.lastIndexOf(':'))
+                            library.startsWith(depShort)
+                        }
+
+                        def scope = isDirect ? "direct" : "transitive"
+
+                        def (group, name, version) = library.tokenize(':')
+                        group = group ?: ""
+                        name = name ?: ""
+                        version = version ?: ""
+
+                        allDeps << [
+                                coordinate: "${group}:${name}:${version}",
+                                group     : group,
+                                name      : name,
+                                version   : version,
+                                license   : license ?: "unknown",
+                                scope     : scope
+                        ]
+
+                        if (isDirect) {
+                            directByLicense[license] << library
+                        } else {
+                            transitiveByLicense[license] << library
+                        }
                     }
-                    println ""
                 }
-            }
 
-            printGrouped("DIRECT DEPENDENCIES", directByLicense)
-            printGrouped("TRANSITIVE DEPENDENCIES", transitiveByLicense)
-
-            println "\n✅ Total: ${directByLicense.values().sum { it.size() }} direct, ${transitiveByLicense.values().sum { it.size() }} transitive"
-
-            // Write detailed CSV output
-            def outputCsv = new File("${buildDir}/license-report/licenses_detailed.csv")
-            outputCsv.withPrintWriter { pw ->
-                pw.println('"coordinate","package","name","version","license","scope"')
-                allDeps.sort { a, b ->
-                    def scopeOrder = ["direct": 0, "transitive": 1]
-                    def c1 = scopeOrder[a.scope] <=> scopeOrder[b.scope]
-                    if (c1 != 0) return c1
-                    def c2 = a.license <=> b.license
-                    if (c2 != 0) return c2
-                    def c3 = a.group <=> b.group
-                    if (c3 != 0) return c3
-                    return a.name <=> b.name
-                }.each { dep ->
-                    def csvLine = [dep.coordinate, dep.group, dep.name, dep.version, dep.license, dep.scope]
-                            .collect { "\"${it.replaceAll('"', '""')}\"" }
-                            .join(',')
-                    pw.println(csvLine)
+                def printGrouped = { title, map ->
+                    println "\n📦 ${title}:"
+                    map.sort { -it.value.size() }.each { license, libs ->
+                        println "\"${license}\",${libs.size()}"
+                        libs.sort().each { lib ->
+                            println "   - ${lib}"
+                        }
+                        println ""
+                    }
                 }
-            }
 
-            println "\n📝 Wrote detailed CSV with coordinates: ${outputCsv.absolutePath}"
+                printGrouped("DIRECT DEPENDENCIES", directByLicense)
+                printGrouped("TRANSITIVE DEPENDENCIES", transitiveByLicense)
+
+                println "\n✅ Total: ${directByLicense.values().sum { it.size() }} direct, ${transitiveByLicense.values().sum { it.size() }} transitive"
+
+                def outputCsv = file("${buildDir}/license-report/licenses_detailed.csv")
+                outputCsv.withPrintWriter { pw ->
+                    pw.println('"coordinate","package","name","version","license","scope"')
+                    allDeps.sort { a, b ->
+                        def scopeOrder = ["direct": 0, "transitive": 1]
+                        def c1 = scopeOrder[a.scope] <=> scopeOrder[b.scope]
+                        if (c1 != 0) return c1
+                        def c2 = a.license <=> b.license
+                        if (c2 != 0) return c2
+                        def c3 = a.group <=> b.group
+                        if (c3 != 0) return c3
+                        return a.name <=> b.name
+                    }.each { dep ->
+                        def csvLine = [dep.coordinate, dep.group, dep.name, dep.version, dep.license, dep.scope]
+                                .collect { "\"${it.replaceAll('"', '""')}\"" }
+                                .join(',')
+                        pw.println(csvLine)
+                    }
+                }
+
+                println "\n📝 Wrote detailed CSV with coordinates: ${outputCsv.absolutePath}"
+            }
         }
     } else {
         logger.warn("⚠️ License report task not found; skipping post-processing")
