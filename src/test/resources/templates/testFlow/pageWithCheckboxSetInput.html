@@ -12,7 +12,7 @@
         <th:block
             th:replace="~{fragments/form :: form(action='/flow/testFlow/pageWithCheckboxSetInput', content=~{::formContent})}">
           <th:block th:ref="formContent">
-            <th:block th:replace="~{'fragments/honeycrisp/reveal' :: reveal(
+            <th:block th:replace="~{'fragments/system/reveal' :: reveal(
                 controlId='r1',
                 linkLabel=~{::revealLabel1},
                 content=~{::revealContent1})}">
