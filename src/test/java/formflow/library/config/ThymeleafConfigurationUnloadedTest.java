@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.thymeleaf.TemplateEngine;
 
 @ImportAutoConfiguration(ThymeleafAutoConfiguration.class)
-@SpringBootTest(classes = {ThymeleafConfiguration.class}, properties = {"form-flow.design-system.name=honeycrisp"})
+@SpringBootTest(classes = {ThymeleafConfiguration.class}, properties = {"form-flow.design-system.name=system"})
 public class ThymeleafConfigurationUnloadedTest {
 
   @Autowired
