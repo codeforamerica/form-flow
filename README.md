@@ -1554,9 +1554,8 @@ is selected.
 
 Note that both checkbox types have an optional `icon` field which can be used to display an icon
 next the checkbox. These icons are pulled from Google's Material Fonts
-and [Honeycrisp](https://honeycrisp.herokuapp.com/cfa/styleguide) provides some convenience access
-classes.
-For those listed in Honeycrisp, you just need to include the icon name, without the leading `icon-`.
+and our own design system.
+For those icons that are included from our own design system, you just need to include the icon name, without the leading `icon-`.
 For example:
 
 ```html
@@ -1567,7 +1566,7 @@ For example:
                   icon='check')}"/>
 ```
 
-For icons not listed in Honeycrisp you can use
+For Google's Material Fonts' icons you can use
 the [character codepoint for the icon](https://github.com/google/material-design-icons/blob/f5f56570741833bdd36463f1f1b6b7d4edd3f9c1/font/MaterialIconsOutlined-Regular.codepoints)
 .
 
@@ -1605,7 +1604,7 @@ to `checkboxInSet()`:
         th:replace="'fragments/inputs/checkboxInSet' :: checkboxInSet(inputName='vehiclesOwned',value='None of the Above', label='None of the Above', noneOfTheAbove=true)"/>
 ```
 
-Honeycrisp contains JavaScript logic that deselects the other checkboxes when "None of the Above" is
+Our default included Javascript contains logic that deselects the other checkboxes when "None of the Above" is
 selected. To enable it, you'll need to add `noneOfTheAbove.init()` to your JavaScript that runs
 after page load.
 
@@ -1808,11 +1807,7 @@ The address fragment has these optional parameters
 
 #### Reveal
 
-There is a `reveal` fragment that is based on
-the [Honeycrisp reveal element](https://honeycrisp.herokuapp.com/cfa/styleguide#molecules-reveal)
-component.
-
-This fragment will create a section with a header and a box of data. The box of data is closed by
+There is a `reveal` fragment that will create a section with a header and a box of data. The box of data is closed by
 default. The intention is that a user can click on the header and the box containing a description
 about it will open up.
 
@@ -3323,10 +3318,10 @@ and your desired value in your application's `messages.properties` file.
 
 We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
 the [US Web Design System (USWDS)](https://designsystem.digital.gov/). Enabling this
-property will set template resolution to use USWDS styling in place of Honeycrisp. The USWDS
+property will set template resolution to use USWDS styling in place of our default design system. The USWDS
 template location will become the default for your application, pulling USWDS styles, templates and
 fragments
-in place of Honeycrisp ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can
+in place of our default ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can
 override templates and fragments in this path by placing a file with the same name and path in your
 application. For example, placing a file at `/resources/cfa-uswds-templates/fragments/example.html`
 would override the fragment with the same name in the USWDS fragments folder.
@@ -3338,9 +3333,9 @@ When using `cfa-uswds`, we also enable several Gradle tasks that compile Sass an
 starter application. These tasks will automatically run when building/starting the application
 locally. You can learn more about the [Gradle tasks in the section below](#gradle-tasks).
 
-| Property                       | Default | Description                                                                                                                         |
-|--------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise Honeycrisp assets and templates are used. |
+| Property                       | Default | Description                                                                                                                          |
+|--------------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise our default assets and templates are used. |
 |
 
 ### File Upload Properties

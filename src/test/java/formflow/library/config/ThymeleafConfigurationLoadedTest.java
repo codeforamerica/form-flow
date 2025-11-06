@@ -14,14 +14,15 @@ import org.junit.jupiter.api.Test;
 @SpringBootTest(classes = {ThymeleafConfiguration.class}, properties = {"form-flow.design-system.name=cfa-uswds"})
 public class ThymeleafConfigurationLoadedTest {
 
-  @Autowired
-  private TemplateEngine templateEngine;
+    @Autowired
+    private TemplateEngine templateEngine;
 
-  @Test
-  void checkThatUSWDSTemplateResolverIsLoaded() {
-    assertThat(templateEngine.getTemplateResolvers().size()).isEqualTo(2);
-    var uswdsResolver = templateEngine.getTemplateResolvers().stream()
-        .filter(x -> Objects.equals(x.getName(), "org.thymeleaf.templateresolver.ClassLoaderTemplateResolver")).findFirst();
-    assertThat(uswdsResolver).isPresent();
-  }
+    @Test
+    void checkThatUSWDSTemplateResolverIsLoaded() {
+        assertThat(templateEngine.getTemplateResolvers().size()).isEqualTo(2);
+        var uswdsResolver = templateEngine.getTemplateResolvers().stream()
+                .filter(x -> Objects.equals(x.getName(), "org.thymeleaf.templateresolver.ClassLoaderTemplateResolver"))
+                .findFirst();
+        assertThat(uswdsResolver).isPresent();
+    }
 }
