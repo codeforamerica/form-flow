@@ -1,6 +1,7 @@
 package formflow.library.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import formflow.library.utilities.AbstractBasePageTest;
@@ -9,8 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"},
-        webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"}, webEnvironment = RANDOM_PORT)
 public class ScreenControllerJourneyTest extends AbstractBasePageTest {
 
     private final String firstFlow = "testFlow";
@@ -38,8 +38,7 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
         assertThat(testPage.getTitle()).isEqualTo("Test");
 
         // switch to other flow "testOtherFlow"
-        baseUrl = "http://localhost:%s/%s".formatted(localServerPort,
-                "flow/" + secondFlow + "/inputs");
+        baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/" + secondFlow + "/inputs");
         driver.navigate().to(baseUrl);
 
         assertThat(testPage.getTitle()).isEqualTo("Inputs Screen");
@@ -59,8 +58,7 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
         testPage.clickContinue();
         assertThat(testPage.getTitle()).isEqualTo("Test");
 
-        baseUrl = "http://localhost:%s/%s".formatted(localServerPort,
-                "flow/" + firstFlow + "/inputs");
+        baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/" + firstFlow + "/inputs");
         driver.navigate().to(baseUrl);
 
         assertThat(testPage.getTitle()).isEqualTo("Inputs Screen");
@@ -72,8 +70,7 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
         assertThat(testPage.getInputValue("dateYear")).isEqualTo("2010");
         assertThat(testPage.getInputValue("moneyInput")).isEqualTo("110");
 
-        baseUrl = "http://localhost:%s/%s".formatted(localServerPort,
-                "flow/" + secondFlow + "/inputs");
+        baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/" + secondFlow + "/inputs");
         driver.navigate().to(baseUrl);
 
         assertThat(testPage.getTitle()).isEqualTo("Inputs Screen");
@@ -101,13 +98,38 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
         testPage.clickLink("delete");
 
         testPage.clickButton("Yes! Delete it!");
+        // Wait for redirect to complete after deletion
+        await().until(() -> {
+            String title = testPage.getTitle();
+            return title.equals("Subflow Entry Screen") || title.equals("Review Screen");
+        });
         assertThat(testPage.getTitle()).isEqualTo("Subflow Entry Screen");
 
         testPage.goBack();
+        // Wait for page to load after browser back navigation (may reload from bfcache)
+        // First wait for title to be available, then wait for header to ensure page is fully loaded
+        await().until(() -> {
+            try {
+                return testPage.getTitle().equals("Delete the iteration?");
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        // Now wait for header to be available (separate wait to avoid IndexOutOfBoundsException)
+        await().until(() -> {
+            try {
+                String header = testPage.getHeader();
+                return header.equals("Nothing to delete!");
+            } catch (Exception e) {
+                return false;
+            }
+        });
         assertThat(testPage.getTitle()).isEqualTo("Delete the iteration?");
         assertThat(testPage.getHeader()).isEqualTo("Nothing to delete!");
 
         testPage.clickButton("Let's go back!");
+        // Wait for navigation to complete
+        await().until(() -> testPage.getTitle().equals("Subflow Entry Screen"));
         assertThat(testPage.getTitle()).isEqualTo("Subflow Entry Screen");
     }
 
@@ -127,13 +149,35 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
         testPage.clickLink("delete");
 
         testPage.clickButton("Yes! Delete it!");
+        // Wait for redirect to complete after deletion
+        await().until(() -> testPage.getTitle().equals("Review Screen"));
         assertThat(testPage.getTitle()).isEqualTo("Review Screen");
 
         testPage.goBack();
+        // Wait for page to load after browser back navigation (may reload from bfcache)
+        // First wait for title to be available, then wait for header to ensure page is fully loaded
+        await().until(() -> {
+            try {
+                return testPage.getTitle().equals("Delete the iteration?");
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        // Now wait for header to be available (separate wait to avoid IndexOutOfBoundsException)
+        await().until(() -> {
+            try {
+                String header = testPage.getHeader();
+                return header.equals("Nothing to delete!");
+            } catch (Exception e) {
+                return false;
+            }
+        });
         assertThat(testPage.getTitle()).isEqualTo("Delete the iteration?");
         assertThat(testPage.getHeader()).isEqualTo("Nothing to delete!");
 
         testPage.clickButton("Let's go back!");
+        // Wait for navigation to complete
+        await().until(() -> testPage.getTitle().equals("Review Screen"));
         assertThat(testPage.getTitle()).isEqualTo("Review Screen");
     }
 
@@ -144,8 +188,7 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
      * @param numberToRun
      */
     private void runTestSubflowIterations(int numberToRun) {
-        baseUrl = "http://localhost:%s/%s".formatted(localServerPort,
-                "flow/testFlow/testEntryScreen");
+        baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/testFlow/testEntryScreen");
         driver.navigate().to(baseUrl);
 
         assertThat(testPage.getTitle()).isEqualTo("Subflow Entry Screen");

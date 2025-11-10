@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(properties = {
@@ -136,6 +137,15 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     // go forward and back and ensure you only see flow B files
     testPage.clickContinue();
     testPage.goBack();
+    // Wait for page to load after browser back navigation (may reload from bfcache)
+    await().until(() -> {
+      try {
+        List<WebElement> elements = testPage.findElementsByClass("filename-text-name");
+        return elements.size() == 5;
+      } catch (Exception e) {
+        return false;
+      }
+    });
 
     elementsB = testPage.findElementsByClass("filename-text-name");
     assertThat(elementsB.size()).isEqualTo(5);
@@ -147,6 +157,15 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     // switch back to A and ensure no B flow files are present
     baseUrl = "http://localhost:%s/%s".formatted(localServerPort, "flow/uploadFlowA/docUploadJourney");
     driver.navigate().to(baseUrl);
+    // Wait for page to load and elements to be available
+    await().until(() -> {
+      try {
+        List<WebElement> elements = testPage.findElementsByClass("filename-text-name");
+        return elements.size() == 5;
+      } catch (Exception e) {
+        return false;
+      }
+    });
 
     elementsA = testPage.findElementsByClass("filename-text-name");
     assertThat(elementsA.size()).isEqualTo(5);
