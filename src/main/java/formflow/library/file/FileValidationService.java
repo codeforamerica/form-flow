@@ -109,6 +109,7 @@ public class FileValidationService {
    *
    * @param file the file to check the mime type of
    * @return Boolean True if the mimetype is one of the ones the system accepts, False otherwise.
+   * @throws IOException if an I/O error occurs while reading the file
    */
   public Boolean isAcceptedMimeType(MultipartFile file) throws IOException {
     Tika tikaFileValidator = new Tika();
@@ -137,9 +138,9 @@ public class FileValidationService {
 
   /**
    * Returns true if the file is a PDF
-   * @param file
-   * @return
-   * @throws IOException
+   * @param file the file to check
+   * @return true if the file is a PDF, false otherwise
+   * @throws IOException if an I/O error occurs while reading the file
    */
   public Boolean isPDF(@NotNull MultipartFile file) throws IOException {
     Tika tikaFileValidator = new Tika();

@@ -20,6 +20,12 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 public class SecurityConfigurationBase {
 
   /**
+   * Default constructor.
+   */
+  public SecurityConfigurationBase() {
+  }
+
+  /**
    * Sets session cookies to HttpOny and Secure
    *
    * @return serializer with updated cookie settings

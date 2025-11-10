@@ -138,6 +138,16 @@ public class UploadJourneyTests extends AbstractBasePageTest {
     testPage.clickContinue();
     testPage.goBack();
     // Wait for page to load after browser back navigation (may reload from bfcache)
+    // First wait for title to be available, then wait for elements to ensure page is fully loaded
+    await().until(() -> {
+      try {
+        String title = testPage.getTitle();
+        return title.equals("Upload Documents");
+      } catch (Exception e) {
+        return false;
+      }
+    });
+    // Now wait for the file elements to be available
     await().until(() -> {
       try {
         List<WebElement> elements = testPage.findElementsByClass("filename-text-name");

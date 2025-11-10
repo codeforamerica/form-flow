@@ -12,6 +12,12 @@ import java.util.regex.Pattern;
 public class PhoneValidator implements ConstraintValidator<Phone, String> {
 
   /**
+   * Default constructor.
+   */
+  public PhoneValidator() {
+  }
+
+  /**
    * Validates the given phone number against a predefined pattern. This pattern corresponds to a standard US phone number.
    * format.
    *

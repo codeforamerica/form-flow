@@ -24,6 +24,12 @@ import org.yaml.snakeyaml.representer.Representer;
 @ConditionalOnProperty(name = "form-flow.pdf.map-file")
 public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
 
+  /**
+   * Default constructor.
+   */
+  public PdfMapFactory() {
+  }
+
   @Value("${form-flow.pdf.map-file}")
   String configPath;
 

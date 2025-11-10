@@ -13,6 +13,12 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "form-flow.pdf.map-file")
 public class PdfMapFactoryConfig {
 
+  /**
+   * Default constructor.
+   */
+  public PdfMapFactoryConfig() {
+  }
+
   @Bean
   public PdfMapFactory pdfMapFactory() {
     return new PdfMapFactory();

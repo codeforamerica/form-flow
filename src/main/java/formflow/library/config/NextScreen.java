@@ -11,6 +11,12 @@ import lombok.Data;
 @Data
 public class NextScreen {
 
+  /**
+   * Default constructor.
+   */
+  public NextScreen() {
+  }
+
   private String name;
   private String condition;
 }

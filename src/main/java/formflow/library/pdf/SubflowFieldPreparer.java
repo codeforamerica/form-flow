@@ -67,6 +67,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
 
+  /**
+   * Default constructor.
+   */
+  public SubflowFieldPreparer() {
+  }
+
   @Lazy
   @Autowired
   ActionManager actionManager;

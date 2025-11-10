@@ -15,6 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class NoOpCloudFileRepository implements CloudFileRepository {
 
+  /**
+   * Default constructor.
+   */
+  public NoOpCloudFileRepository() {
+  }
+
   @Override
   public void upload(String filepath, MultipartFile file) throws IOException, InterruptedException {
     log.info("Pretending to upload file {} to s3 with filepath {}", file.getOriginalFilename(), filepath);

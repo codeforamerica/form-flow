@@ -8,6 +8,12 @@ import lombok.Data;
 @Data
 public class SubflowConfiguration {
 
+  /**
+   * Default constructor.
+   */
+  public SubflowConfiguration() {
+  }
+
   SubflowRelationship relationship;
   String entryScreen;
   String iterationStartScreen;

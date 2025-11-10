@@ -11,6 +11,12 @@ import lombok.Data;
 @AllArgsConstructor
 public class ValidatedAddress {
 
+  /**
+   * Default constructor.
+   */
+  public ValidatedAddress() {
+  }
+
   String streetAddress;
   String apartmentNumber;
   String city;

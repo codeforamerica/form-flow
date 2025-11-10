@@ -19,6 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class DevController {
 
     /**
+     * Default constructor.
+     */
+    public DevController() {
+    }
+
+    /**
      * Handles the GET request to `dev/icons`. This method renders a page that displays the current icons available in the
      * development environment.
      *

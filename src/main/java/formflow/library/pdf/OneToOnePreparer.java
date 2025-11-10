@@ -8,6 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class OneToOnePreparer implements DefaultSubmissionFieldPreparer {
 
+  /**
+   * Default constructor.
+   */
+  public OneToOnePreparer() {
+  }
+
   @Override
   public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
     Map<String, SubmissionField> preppedFields = new HashMap<>();

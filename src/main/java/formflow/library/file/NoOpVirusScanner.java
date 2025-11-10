@@ -14,6 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class NoOpVirusScanner implements FileVirusScanner {
 
+  /**
+   * Default constructor.
+   */
+  public NoOpVirusScanner() {
+  }
+
   @Override
   public boolean virusDetected(MultipartFile file) {
     log.info("Virus scanning disabled.  Returning false.");

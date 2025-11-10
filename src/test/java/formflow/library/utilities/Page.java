@@ -47,6 +47,11 @@ public class Page {
 
   public void clickButton(String buttonText) {
     checkForBadMessageKeys();
+    // Wait for the button to be available before trying to click it
+    await().until(() -> {
+      List<WebElement> buttons = driver.findElements(By.className("button"));
+      return buttons.stream().anyMatch(button -> button.getText().contains(buttonText));
+    });
     WebElement buttonToClick = driver.findElements(By.className("button")).stream()
         .filter(button -> button.getText().contains(buttonText))
         .findFirst()

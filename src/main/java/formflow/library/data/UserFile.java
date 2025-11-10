@@ -34,10 +34,15 @@ import org.springframework.stereotype.Component;
 @Setter
 @ToString
 @AllArgsConstructor
-@NoArgsConstructor
 @Component
 @Builder
 public class UserFile {
+
+  /**
+   * Default constructor.
+   */
+  public UserFile() {
+  }
 
   @Id
   private UUID fileId;

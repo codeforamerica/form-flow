@@ -15,6 +15,12 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 public class ThymeleafConfiguration {
 
   /**
+   * Default constructor.
+   */
+  public ThymeleafConfiguration() {
+  }
+
+  /**
    * Creates a new ClassLoaderTemplateResolver to be able to resolve templates in the {@code cfa-uswds-templates/} directory.
    *
    * <p>

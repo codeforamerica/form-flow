@@ -20,6 +20,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SSNValidator implements ConstraintValidator<SSN, String> {
 
+    /**
+     * Default constructor.
+     */
+    public SSNValidator() {
+    }
+
     @Value("${form-flow.validation.ssn-pattern:^(?!000|666|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}$}")
     private String pattern;
 
