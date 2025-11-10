@@ -34,14 +34,13 @@ public class ClammitVirusScanner implements FileVirusScanner {
     /**
      * Clammit Virus Scanner An implementation of the FileVirusScanner interface that will use the
      * <a href="https://github.com/codeforamerica/form-flow/tree/create-clammit-av-service">Clammit Virus Scanner Server</a> to
-     * check
-     * files for viruses.
+     * check files for viruses.
      * <p>
      * The Clammit Virus Scanner Server itself is set up independently of this code base.     * @param clammitUrl Clammit AV
      * service url
      *
      * @param clammitUrl Url for the clammit av service
-     * @param timeout Timeout allowed for service call
+     * @param timeout    Timeout allowed for service call
      */
     public ClammitVirusScanner(
             @Value("${form-flow.uploads.virus-scanning.service-url}") String clammitUrl,

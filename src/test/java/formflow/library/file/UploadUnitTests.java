@@ -14,20 +14,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-upload-flow.yaml"}, webEnvironment = RANDOM_PORT)
 public class UploadUnitTests extends AbstractBasePageTest {
 
-  @Override
-  @BeforeEach
-  public void setUp() throws IOException {
-    startingPage = "flow/uploadFlowA/docUploadUnit";
-    super.setUp();
-  }
+    @Override
+    @BeforeEach
+    public void setUp() throws IOException {
+        startingPage = "flow/uploadFlowA/docUploadUnit";
+        super.setUp();
+    }
 
-  @Test
-  void runQunitTests() {
-    takeSnapShot("src/test/resources/qunit-results.png");
-    await().until(
-        () -> driver.findElements(By.id("qunit-testresult-display")).get(0).getAttribute("innerHTML")
-            .contains("tests completed in"));
-    assertThat(testPage.getElementText("qunit-testresult-display")).doesNotContain("global failure");
-    assertThat(testPage.getElementText("qunit-testresult-display")).contains("0 failed");
-  }
+    @Test
+    void runQunitTests() {
+        takeSnapShot("src/test/resources/qunit-results.png");
+        await().until(
+                () -> driver.findElements(By.id("qunit-testresult-display")).get(0).getAttribute("innerHTML")
+                        .contains("tests completed in"));
+        assertThat(testPage.getElementText("qunit-testresult-display")).doesNotContain("global failure");
+        assertThat(testPage.getElementText("qunit-testresult-display")).contains("0 failed");
+    }
 }

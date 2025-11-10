@@ -3,11 +3,9 @@ package formflow.library.config;
 import formflow.library.config.submission.Action;
 import formflow.library.data.FormSubmission;
 import formflow.library.data.Submission;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -193,9 +191,8 @@ public class ActionManager {
 
     /**
      * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the
-     * database
-     * and before the view template is displayed. The handleBeforeDisplayAction method is called on all screens except for screens
-     * in a subflow. Runs an action if a screen has one defined.
+     * database and before the view template is displayed. The handleBeforeDisplayAction method is called on all screens except
+     * for screens in a subflow. Runs an action if a screen has one defined.
      *
      * @param currentScreen The screen that we are currently saving data from.
      * @param submission    The submission object after changes to the current screen have been saved to the repository
@@ -209,9 +206,8 @@ public class ActionManager {
 
     /**
      * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the
-     * database
-     * and before the view template is displayed. The handleBeforeDisplayAction method is called on only screens in a subflow.
-     * Runs an action if a screen has one defined.
+     * database and before the view template is displayed. The handleBeforeDisplayAction method is called on only screens in a
+     * subflow. Runs an action if a screen has one defined.
      *
      * @param currentScreen The screen that we are currently saving data from.
      * @param submission    The submission object after changes to the current screen have been saved to the repository
@@ -227,9 +223,8 @@ public class ActionManager {
 
     /**
      * <code>handleBeforeDisplayAction()</code> invokes a method in the ScreenController. Runs after getting data from the
-     * database
-     * and before the view template is displayed. The handleBeforeDisplayAction method is called on only screens in a subflow.
-     * Runs an action if a screen has one defined.
+     * database and before the view template is displayed. The handleBeforeDisplayAction method is called on only screens in a
+     * subflow. Runs an action if a screen has one defined.
      *
      * @param currentScreen The screen that we are currently saving data from.
      * @param submission    The submission object after changes to the current screen have been saved to the repository

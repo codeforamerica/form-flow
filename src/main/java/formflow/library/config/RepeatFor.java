@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class RepeatFor {
+
+    private String inputName;
+    private String saveDataAs;
     /**
      * Default constructor.
      */
     public RepeatFor() {
     }
-
-    private String inputName;
-    private String saveDataAs;
 }

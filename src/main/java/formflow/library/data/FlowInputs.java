@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 
 public class FlowInputs {
 
-  /**
-   * Default constructor.
-   */
-  public FlowInputs() {
-  }
+    @NotBlank
+    private String _csrf;
 
-  @NotBlank
-  private String _csrf;
+    /**
+     * Default constructor.
+     */
+    public FlowInputs() {
+    }
 }

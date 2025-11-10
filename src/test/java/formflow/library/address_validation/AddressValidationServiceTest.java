@@ -22,103 +22,103 @@ import org.junit.jupiter.api.Test;
 
 class AddressValidationServiceTest {
 
-  ValidationRequestFactory validationRequestFactory = mock(ValidationRequestFactory.class);
-  Client client = mock(Client.class);
-  ClientFactory clientFactory = mock(ClientFactory.class);
+    ValidationRequestFactory validationRequestFactory = mock(ValidationRequestFactory.class);
+    Client client = mock(Client.class);
+    ClientFactory clientFactory = mock(ClientFactory.class);
 
-  String authId = "authId";
-  String authToken = "authToken";
-  String license = "license";
+    String authId = "authId";
+    String authToken = "authToken";
+    String license = "license";
 
-  @BeforeEach
-  void setUp() {
-    when(clientFactory.create(authId, authToken, license)).thenReturn(client);
-  }
+    @BeforeEach
+    void setUp() {
+        when(clientFactory.create(authId, authToken, license)).thenReturn(client);
+    }
 
-  @Test
-  void validateShouldCallSmartyToValidateAddress() throws SmartyException, IOException, InterruptedException {
-    FormSubmission formSubmission = new FormSubmission(Map.of());
+    @Test
+    void validateShouldCallSmartyToValidateAddress() throws SmartyException, IOException, InterruptedException {
+        FormSubmission formSubmission = new FormSubmission(Map.of());
 
-    AddressValidationService addressValidationService = new AddressValidationService(
-        validationRequestFactory,
-        clientFactory,
-        authId,
-        authToken,
-        license,
-        true);
-    Lookup lookup = mock(Lookup.class);
-    Candidate candidate = mock(Candidate.class);
-    Components components = mock(Components.class);
+        AddressValidationService addressValidationService = new AddressValidationService(
+                validationRequestFactory,
+                clientFactory,
+                authId,
+                authToken,
+                license,
+                true);
+        Lookup lookup = mock(Lookup.class);
+        Candidate candidate = mock(Candidate.class);
+        Components components = mock(Components.class);
 
-    Batch batch = new Batch();
-    when(lookup.getResult()).thenReturn(List.of(candidate));
-    when(lookup.getInputId()).thenReturn("validatedInput");
-    when(candidate.getComponents()).thenReturn(components);
-    when(candidate.getDeliveryLine1()).thenReturn("validatedStreetAddress");
-    when(components.getSecondaryNumber()).thenReturn("validatedAptNumber");
-    when(components.getCityName()).thenReturn("validatedCity");
-    when(components.getState()).thenReturn("validatedState");
-    when(components.getZipCode()).thenReturn("validatedZipCode");
-    when(lookup.getResult(0)).thenReturn(candidate);
-    when(lookup.getInputId()).thenReturn("validatedInput");
-    when(candidate.getComponents()).thenReturn(components);
-    when(candidate.getDeliveryLine1()).thenReturn("validatedStreetAddress");
-    when(components.getSecondaryNumber()).thenReturn("validatedAptNumber");
-    when(components.getCityName()).thenReturn("validatedCity");
-    when(components.getState()).thenReturn("validatedState");
-    when(components.getZipCode()).thenReturn("validatedZipCode");
-    when(components.getPlus4Code()).thenReturn("1234");
-    when(lookup.getResult(0)).thenReturn(candidate);
-    batch.add(lookup);
+        Batch batch = new Batch();
+        when(lookup.getResult()).thenReturn(List.of(candidate));
+        when(lookup.getInputId()).thenReturn("validatedInput");
+        when(candidate.getComponents()).thenReturn(components);
+        when(candidate.getDeliveryLine1()).thenReturn("validatedStreetAddress");
+        when(components.getSecondaryNumber()).thenReturn("validatedAptNumber");
+        when(components.getCityName()).thenReturn("validatedCity");
+        when(components.getState()).thenReturn("validatedState");
+        when(components.getZipCode()).thenReturn("validatedZipCode");
+        when(lookup.getResult(0)).thenReturn(candidate);
+        when(lookup.getInputId()).thenReturn("validatedInput");
+        when(candidate.getComponents()).thenReturn(components);
+        when(candidate.getDeliveryLine1()).thenReturn("validatedStreetAddress");
+        when(components.getSecondaryNumber()).thenReturn("validatedAptNumber");
+        when(components.getCityName()).thenReturn("validatedCity");
+        when(components.getState()).thenReturn("validatedState");
+        when(components.getZipCode()).thenReturn("validatedZipCode");
+        when(components.getPlus4Code()).thenReturn("1234");
+        when(lookup.getResult(0)).thenReturn(candidate);
+        batch.add(lookup);
 
-    when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
+        when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
 
-    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of(
-        "validatedInput",
-        new ValidatedAddress("validatedStreetAddress",
-            "validatedAptNumber",
-            "validatedCity",
-            "validatedState",
-            "validatedZipCode-1234")
-    ));
-    verify(client, times(1)).send(batch);
-  }
+        assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of(
+                "validatedInput",
+                new ValidatedAddress("validatedStreetAddress",
+                        "validatedAptNumber",
+                        "validatedCity",
+                        "validatedState",
+                        "validatedZipCode-1234")
+        ));
+        verify(client, times(1)).send(batch);
+    }
 
-  @Test
-  void shouldReturnEmptyMapWhenNoAddressRecommendationIsFound() throws SmartyException, IOException, InterruptedException {
-    FormSubmission formSubmission = new FormSubmission(Map.of());
+    @Test
+    void shouldReturnEmptyMapWhenNoAddressRecommendationIsFound() throws SmartyException, IOException, InterruptedException {
+        FormSubmission formSubmission = new FormSubmission(Map.of());
 
-    AddressValidationService addressValidationService = new AddressValidationService(
-        validationRequestFactory,
-        clientFactory,
-        authId,
-        authToken,
-        license,
-        true);
-    Lookup lookup = mock(Lookup.class);
+        AddressValidationService addressValidationService = new AddressValidationService(
+                validationRequestFactory,
+                clientFactory,
+                authId,
+                authToken,
+                license,
+                true);
+        Lookup lookup = mock(Lookup.class);
 
-    Batch batch = new Batch();
-    when(lookup.getInputId()).thenReturn("validatedInput");
-    batch.add(lookup);
+        Batch batch = new Batch();
+        when(lookup.getInputId()).thenReturn("validatedInput");
+        batch.add(lookup);
 
-    when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
+        when(validationRequestFactory.create(formSubmission)).thenReturn(batch);
 
-    var result = new HashMap<>();
-    result.put("validatedInput", null);
-    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(result);
-    verify(client, times(1)).send(batch);
-  }
+        var result = new HashMap<>();
+        result.put("validatedInput", null);
+        assertThat(addressValidationService.validate(formSubmission)).isEqualTo(result);
+        verify(client, times(1)).send(batch);
+    }
 
-  @Test
-  void shouldNotRunAddressValidationWhenFlagIsSetToOff() throws SmartyException, IOException, InterruptedException {
-    AddressValidationService addressValidationService = new AddressValidationService(
-        validationRequestFactory,
-        clientFactory,
-        authId,
-        authToken,
-        license,
-        false);
-    FormSubmission formSubmission = new FormSubmission(Map.of());
-    assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of());
-  }
+    @Test
+    void shouldNotRunAddressValidationWhenFlagIsSetToOff() throws SmartyException, IOException, InterruptedException {
+        AddressValidationService addressValidationService = new AddressValidationService(
+                validationRequestFactory,
+                clientFactory,
+                authId,
+                authToken,
+                license,
+                false);
+        FormSubmission formSubmission = new FormSubmission(Map.of());
+        assertThat(addressValidationService.validate(formSubmission)).isEqualTo(Map.of());
+    }
 }

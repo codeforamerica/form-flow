@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OnlyPeopleNamedAlex implements SubflowRelationshipFilter {
-    
+
     @Override
     public List<HashMap<String, Object>> filter(List<HashMap<String, Object>> subflowDataToFilter, Submission submission) {
         return subflowDataToFilter.stream().filter(data -> "Alex".equals(data.get("householdMemberFirstName"))).toList();

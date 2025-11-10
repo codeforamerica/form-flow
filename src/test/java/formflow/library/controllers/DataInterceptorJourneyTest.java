@@ -13,34 +13,35 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-landmark-flow.yaml"}, webEnvironment = RANDOM_PORT)
 @TestPropertySource(properties = {"form-flow.session-continuity-interceptor.enabled=true"})
 public class DataInterceptorJourneyTest extends AbstractBasePageTest {
-  @Test
-  void interceptorShouldRedirectToLandingPageIfSessionIsNull() {
-    assertThat(testPage.getTitle()).isEqualTo("Test index page");
-    testPage.clickButton("Start the test flow");
-    // firstScreen
-    testPage.enter("firstName", "Testy");
-    testPage.clickContinue();
-    // nonFormPage
-    String currentSessionCookie = getCurrentSessionCookie();
-    assertThat(currentSessionCookie).isNotNull();
-    deleteSessionCookie();
-    assertThat(getCurrentSessionCookie()).isNull();
-    testPage.clickContinue();
-    assertThat(testPage.getTitle()).isEqualTo("Test index page");
-  }
 
-  protected String getCurrentSessionCookie() {
-    if (driver.manage().getCookieNamed("SESSION") == null){
-      return null;
+    @Test
+    void interceptorShouldRedirectToLandingPageIfSessionIsNull() {
+        assertThat(testPage.getTitle()).isEqualTo("Test index page");
+        testPage.clickButton("Start the test flow");
+        // firstScreen
+        testPage.enter("firstName", "Testy");
+        testPage.clickContinue();
+        // nonFormPage
+        String currentSessionCookie = getCurrentSessionCookie();
+        assertThat(currentSessionCookie).isNotNull();
+        deleteSessionCookie();
+        assertThat(getCurrentSessionCookie()).isNull();
+        testPage.clickContinue();
+        assertThat(testPage.getTitle()).isEqualTo("Test index page");
     }
-    return driver.manage().getCookieNamed("SESSION").getValue();
-  }
 
-  protected void deleteSessionCookie(){
-    System.out.println("SessionId before deletion: " + getCurrentSessionCookie());
-    driver.manage().deleteCookieNamed("SESSION");
-    System.out.println("SessionId after deletion: " + getCurrentSessionCookie());
-    Set<Cookie> cookies = driver.manage().getCookies();
-    cookies.forEach(cookie -> System.out.println(cookie.getName() + ": " + cookie.getValue()));
-  }
+    protected String getCurrentSessionCookie() {
+        if (driver.manage().getCookieNamed("SESSION") == null) {
+            return null;
+        }
+        return driver.manage().getCookieNamed("SESSION").getValue();
+    }
+
+    protected void deleteSessionCookie() {
+        System.out.println("SessionId before deletion: " + getCurrentSessionCookie());
+        driver.manage().deleteCookieNamed("SESSION");
+        System.out.println("SessionId after deletion: " + getCurrentSessionCookie());
+        Set<Cookie> cookies = driver.manage().getCookies();
+        cookies.forEach(cookie -> System.out.println(cookie.getName() + ": " + cookie.getValue()));
+    }
 }

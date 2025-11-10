@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 public class CalculateTotalBeforeSave implements Action {
 
-  public void run(Submission submission, String id) {
-    List<Map<String, Object>> subflow = (List<Map<String, Object>>) submission.getInputData()
-        .get("income");
-    var totalIncome = subflow.stream()
-        .map(e -> Double.parseDouble((String) e.get("textInput")))
-        .reduce(Double::sum)
-        .get();
+    public void run(Submission submission, String id) {
+        List<Map<String, Object>> subflow = (List<Map<String, Object>>) submission.getInputData()
+                .get("income");
+        var totalIncome = subflow.stream()
+                .map(e -> Double.parseDouble((String) e.get("textInput")))
+                .reduce(Double::sum)
+                .get();
 
-    submission.getInputData().put("totalIncome", totalIncome);
-  }
+        submission.getInputData().put("totalIncome", totalIncome);
+    }
 }

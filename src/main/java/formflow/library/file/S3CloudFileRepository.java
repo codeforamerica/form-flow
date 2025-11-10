@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -49,9 +48,10 @@ public class S3CloudFileRepository implements CloudFileRepository {
         this.bucketName = s3BucketName;
 
         S3ClientBuilder s3ClientBuilder = S3Client.builder().region(Region.of(region));
-        
+
         if (useDefaultCredentials) {
-            log.info("Using default AWS credentials provider chain for S3 Client instead of AWS Basic Credentials Authentication.");
+            log.info(
+                    "Using default AWS credentials provider chain for S3 Client instead of AWS Basic Credentials Authentication.");
         } else {
             log.info("Using AWS Basic Credentials for S3 client from application properties.");
             AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);

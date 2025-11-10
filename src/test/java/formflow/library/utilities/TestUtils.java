@@ -8,15 +8,15 @@ import java.time.OffsetTime;
 
 public class TestUtils {
 
-  public static String getAbsoluteFilepathString(String resourceFilename) {
-    URL resource = TestUtils.class.getClassLoader().getResource(resourceFilename);
-    if (resource != null) {
-      return (new File(resource.getFile())).getAbsolutePath();
+    public static String getAbsoluteFilepathString(String resourceFilename) {
+        URL resource = TestUtils.class.getClassLoader().getResource(resourceFilename);
+        if (resource != null) {
+            return (new File(resource.getFile())).getAbsolutePath();
+        }
+        return "";
     }
-    return "";
-  }
 
-  public static OffsetDateTime makeOffsetDateTime(String isoDate) {
-    return LocalDate.parse(isoDate).atTime(OffsetTime.parse("00:00-08:00"));
-  }
+    public static OffsetDateTime makeOffsetDateTime(String isoDate) {
+        return LocalDate.parse(isoDate).atTime(OffsetTime.parse("00:00-08:00"));
+    }
 }

@@ -13,13 +13,13 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class SingleField extends SubmissionField {
 
-  @ToString.Include
-  @EqualsAndHashCode.Include
-  @NotNull String value;
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    @NotNull String value;
 
-  public SingleField(String name, @NotNull String value, Integer iteration) {
-    super(name, iteration);
-    this.value = value;
-  }
+    public SingleField(String name, @NotNull String value, Integer iteration) {
+        super(name, iteration);
+        this.value = value;
+    }
 }
 

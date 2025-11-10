@@ -14,35 +14,35 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Slf4j
 public class ThymeleafConfiguration {
 
-  /**
-   * Default constructor.
-   */
-  public ThymeleafConfiguration() {
-  }
+    /**
+     * Default constructor.
+     */
+    public ThymeleafConfiguration() {
+    }
 
-  /**
-   * Creates a new ClassLoaderTemplateResolver to be able to resolve templates in the {@code cfa-uswds-templates/} directory.
-   *
-   * <p>
-   * The resolver will be configured to look in the {@code cfa-uswds-templates} directory for {@code .html} files. The assumed
-   * encoding will be {@code UTF-8}.  The templates will not be cached.
-   * </p>
-   *
-   * @return a new resolver configured to work with library uswds templates.
-   */
-  @Bean
-  @ConditionalOnProperty(name = "form-flow.design-system.name", havingValue = "cfa-uswds")
-  public ClassLoaderTemplateResolver cfaUswdsTemplateResolver() {
-    log.info("Template resolution has been set to include the path `cfa-uswds-templates/`.");
-    ClassLoaderTemplateResolver secondaryTemplateResolver = new ClassLoaderTemplateResolver();
-    secondaryTemplateResolver.setPrefix("cfa-uswds-templates/");
-    secondaryTemplateResolver.setSuffix(".html");
-    secondaryTemplateResolver.setTemplateMode(TemplateMode.HTML);
-    secondaryTemplateResolver.setCharacterEncoding("UTF-8");
-    secondaryTemplateResolver.setOrder(0);
-    secondaryTemplateResolver.setCheckExistence(true);
-    secondaryTemplateResolver.setCacheable(false);
+    /**
+     * Creates a new ClassLoaderTemplateResolver to be able to resolve templates in the {@code cfa-uswds-templates/} directory.
+     *
+     * <p>
+     * The resolver will be configured to look in the {@code cfa-uswds-templates} directory for {@code .html} files. The assumed
+     * encoding will be {@code UTF-8}.  The templates will not be cached.
+     * </p>
+     *
+     * @return a new resolver configured to work with library uswds templates.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "form-flow.design-system.name", havingValue = "cfa-uswds")
+    public ClassLoaderTemplateResolver cfaUswdsTemplateResolver() {
+        log.info("Template resolution has been set to include the path `cfa-uswds-templates/`.");
+        ClassLoaderTemplateResolver secondaryTemplateResolver = new ClassLoaderTemplateResolver();
+        secondaryTemplateResolver.setPrefix("cfa-uswds-templates/");
+        secondaryTemplateResolver.setSuffix(".html");
+        secondaryTemplateResolver.setTemplateMode(TemplateMode.HTML);
+        secondaryTemplateResolver.setCharacterEncoding("UTF-8");
+        secondaryTemplateResolver.setOrder(0);
+        secondaryTemplateResolver.setCheckExistence(true);
+        secondaryTemplateResolver.setCacheable(false);
 
-    return secondaryTemplateResolver;
-  }
+        return secondaryTemplateResolver;
+    }
 }

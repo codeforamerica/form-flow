@@ -8,12 +8,11 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.UUID;
 import org.springframework.util.AntPathMatcher;
 
 /**
@@ -22,19 +21,27 @@ import org.springframework.util.AntPathMatcher;
 @Component
 public class MDCInsertionFilter implements Filter {
 
+    public static final String PATH_FORMAT = "/flow/{flow}/{screen}";
+
     /**
      * Default constructor.
      */
     public MDCInsertionFilter() {
     }
 
-    public static final String PATH_FORMAT = "/flow/{flow}/{screen}";
+    private static void removeMDCAttributes() {
+        MDC.remove("sessionId");
+        MDC.remove("submissionId");
+        MDC.remove("xForwardedFor");
+        MDC.remove("method");
+        MDC.remove("request");
+    }
 
     @Override
     public void doFilter(
-        ServletRequest servletRequest,
-        ServletResponse servletResponse,
-        FilterChain filterChain
+            ServletRequest servletRequest,
+            ServletResponse servletResponse,
+            FilterChain filterChain
     ) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
@@ -44,7 +51,7 @@ public class MDCInsertionFilter implements Filter {
 
         try {
             Map<String, String> parsedUrl = new AntPathMatcher().extractUriTemplateVariables(PATH_FORMAT,
-                request.getRequestURI());
+                    request.getRequestURI());
             submissionId = FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow"));
         } catch (Exception e) {
             // We could get an error if there is no session or if the URL didn't match the
@@ -60,13 +67,5 @@ public class MDCInsertionFilter implements Filter {
 
         filterChain.doFilter(servletRequest, servletResponse);
         removeMDCAttributes();
-    }
-
-    private static void removeMDCAttributes() {
-        MDC.remove("sessionId");
-        MDC.remove("submissionId");
-        MDC.remove("xForwardedFor");
-        MDC.remove("method");
-        MDC.remove("request");
     }
 }

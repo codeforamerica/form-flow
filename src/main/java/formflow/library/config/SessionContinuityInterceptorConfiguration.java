@@ -15,24 +15,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
 public class SessionContinuityInterceptorConfiguration implements WebMvcConfigurer {
 
-  /**
-   * Default constructor.
-   */
-  public SessionContinuityInterceptorConfiguration() {
-  }
+    @Autowired
+    List<FlowConfiguration> flowConfigurations;
 
-  @Autowired
-  List<FlowConfiguration> flowConfigurations;
-  
-  
-  /**
-   * Adds the SessionContinuityInterceptor to the Interceptor registry.
-   * @param registry the Interceptor registry.
-   */
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new SessionContinuityInterceptor(flowConfigurations))
-        .addPathPatterns(List.of(SessionContinuityInterceptor.FLOW_PATH_FORMAT,
-            SessionContinuityInterceptor.NAVIGATION_FLOW_PATH_FORMAT));
-  }
+    /**
+     * Default constructor.
+     */
+    public SessionContinuityInterceptorConfiguration() {
+    }
+
+    /**
+     * Adds the SessionContinuityInterceptor to the Interceptor registry.
+     *
+     * @param registry the Interceptor registry.
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new SessionContinuityInterceptor(flowConfigurations))
+                .addPathPatterns(List.of(SessionContinuityInterceptor.FLOW_PATH_FORMAT,
+                        SessionContinuityInterceptor.NAVIGATION_FLOW_PATH_FORMAT));
+    }
 }

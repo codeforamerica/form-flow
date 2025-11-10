@@ -1,27 +1,25 @@
 package formflow.library.pdf;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
 public class PdfMapSubflow {
 
+    List<String> subflows;
+    int totalIterations;
+    Map<String, Object> inputFields;
     /**
      * Default constructor.
      */
     public PdfMapSubflow() {
     }
-
-    List<String> subflows;
-    int totalIterations;
-    Map<String, Object> inputFields;
 
     /**
      * Returns all the inputFields associated with a subflow's iterations, expanded out, up to the totalIterations number defined

@@ -20,52 +20,55 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 class ClammitVirusScannerTest {
 
-  ClammitVirusScanner clammitVirusScanner;
-  MockWebServer mockWebServer;
-  int timeout = 2000;
+    ClammitVirusScanner clammitVirusScanner;
+    MockWebServer mockWebServer;
+    int timeout = 2000;
 
-  @BeforeEach
-  void setUp() throws IOException {
-    mockWebServer = new MockWebServer();
-    mockWebServer.start();
-    HttpUrl clammitUrl = mockWebServer.url("/scan");
-    clammitVirusScanner = new ClammitVirusScanner(clammitUrl.toString(), timeout);
-  }
+    @BeforeEach
+    void setUp() throws IOException {
+        mockWebServer = new MockWebServer();
+        mockWebServer.start();
+        HttpUrl clammitUrl = mockWebServer.url("/scan");
+        clammitVirusScanner = new ClammitVirusScanner(clammitUrl.toString(), timeout);
+    }
 
-  @AfterEach
-  void tearDown() throws IOException {
-    mockWebServer.shutdown();
-  }
+    @AfterEach
+    void tearDown() throws IOException {
+        mockWebServer.shutdown();
+    }
 
-  @Test
-  void virusDetectedReturnsTrueWhenClammitServiceReturns418() throws Exception {
-    MultipartFile virusFile = new MockMultipartFile("virus", "virus.jpg", IMAGE_JPEG_VALUE, "virus".getBytes());
-    mockWebServer.enqueue(new MockResponse().setBody("File - has a virus!").setResponseCode(HttpStatus.I_AM_A_TEAPOT.value()));
+    @Test
+    void virusDetectedReturnsTrueWhenClammitServiceReturns418() throws Exception {
+        MultipartFile virusFile = new MockMultipartFile("virus", "virus.jpg", IMAGE_JPEG_VALUE, "virus".getBytes());
+        mockWebServer.enqueue(
+                new MockResponse().setBody("File - has a virus!").setResponseCode(HttpStatus.I_AM_A_TEAPOT.value()));
 
-    assertThat(clammitVirusScanner.virusDetected(virusFile)).isTrue();
-  }
+        assertThat(clammitVirusScanner.virusDetected(virusFile)).isTrue();
+    }
 
-  @Test
-  void virusDetectedReturnsFalseWhenClammitServiceReturns200() throws Exception {
-    MultipartFile cleanFile = new MockMultipartFile("file", "file.jpg", IMAGE_JPEG_VALUE, "file".getBytes());
-    mockWebServer.enqueue(new MockResponse().setBody("No virus here!").setResponseCode(HttpStatus.OK.value()));
+    @Test
+    void virusDetectedReturnsFalseWhenClammitServiceReturns200() throws Exception {
+        MultipartFile cleanFile = new MockMultipartFile("file", "file.jpg", IMAGE_JPEG_VALUE, "file".getBytes());
+        mockWebServer.enqueue(new MockResponse().setBody("No virus here!").setResponseCode(HttpStatus.OK.value()));
 
-    assertThat(clammitVirusScanner.virusDetected(cleanFile)).isFalse();
-  }
+        assertThat(clammitVirusScanner.virusDetected(cleanFile)).isFalse();
+    }
 
-  @Test
-  void virusDetectedThrowsExceptionWhenRequestTimesOut() {
-    MultipartFile cleanFile = new MockMultipartFile("file", "file.jpg", IMAGE_JPEG_VALUE, "file".getBytes());
-    mockWebServer.enqueue(new MockResponse().setBodyDelay(timeout + 1, MILLISECONDS).setBody("Timed out"));
+    @Test
+    void virusDetectedThrowsExceptionWhenRequestTimesOut() {
+        MultipartFile cleanFile = new MockMultipartFile("file", "file.jpg", IMAGE_JPEG_VALUE, "file".getBytes());
+        mockWebServer.enqueue(new MockResponse().setBodyDelay(timeout + 1, MILLISECONDS).setBody("Timed out"));
 
-    assertThatExceptionOfType(TimeoutException.class).isThrownBy(() -> clammitVirusScanner.virusDetected(cleanFile));
-  }
+        assertThatExceptionOfType(TimeoutException.class).isThrownBy(() -> clammitVirusScanner.virusDetected(cleanFile));
+    }
 
-  @Test
-  void virusDetectedThrowsExceptionWhenUnexpectedResponseOccurs() {
-    MultipartFile cleanFile = new MockMultipartFile("file", "file.jpg", IMAGE_JPEG_VALUE, "file".getBytes());
-    mockWebServer.enqueue(new MockResponse().setBody("Something weird happened!").setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+    @Test
+    void virusDetectedThrowsExceptionWhenUnexpectedResponseOccurs() {
+        MultipartFile cleanFile = new MockMultipartFile("file", "file.jpg", IMAGE_JPEG_VALUE, "file".getBytes());
+        mockWebServer.enqueue(new MockResponse().setBody("Something weird happened!")
+                .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    assertThatExceptionOfType(WebClientResponseException.class).isThrownBy(() -> clammitVirusScanner.virusDetected(cleanFile));
-  }
+        assertThatExceptionOfType(WebClientResponseException.class).isThrownBy(
+                () -> clammitVirusScanner.virusDetected(cleanFile));
+    }
 }

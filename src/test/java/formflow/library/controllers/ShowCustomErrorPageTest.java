@@ -9,19 +9,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml", "form-flow.error.show-stack-trace=false"}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml",
+        "form-flow.error.show-stack-trace=false"}, webEnvironment = RANDOM_PORT)
 public class ShowCustomErrorPageTest extends AbstractBasePageTest {
 
-  @Override
-  @BeforeEach
-  public void setUp() throws IOException {
-    startingPage = "flow/inputs/asdf";
-    super.setUp();
-  }
+    @Override
+    @BeforeEach
+    public void setUp() throws IOException {
+        startingPage = "flow/inputs/asdf";
+        super.setUp();
+    }
 
-  @Test
-  void showCustomErrorPageToHideInternalErrorWhenPropertyIsDisabled() {
-    assertThat(testPage.getBody()).contains("We're sorry, but something went wrong. Please try again later.");
-  }
+    @Test
+    void showCustomErrorPageToHideInternalErrorWhenPropertyIsDisabled() {
+        assertThat(testPage.getBody()).contains("We're sorry, but something went wrong. Please try again later.");
+    }
 
 }

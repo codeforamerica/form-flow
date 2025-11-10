@@ -49,40 +49,32 @@ import org.springframework.stereotype.Component;
 @Builder
 public class Submission {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
-
-    @Column(name = "flow")
-    private String flow;
-
-    @Type(JsonType.class)
-    @Column(name = "input_data", columnDefinition = "jsonb")
-    private Map<String, Object> inputData;
-
-    @Type(JsonType.class)
-    @Column(name = "url_params", columnDefinition = "jsonb")
-    private Map<String, String> urlParams;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private OffsetDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
-    @Column(name = "submitted_at")
-    private OffsetDateTime submittedAt;
-
-    @Setter(AccessLevel.NONE)
-    @Column(name = "short_code")
-    private String shortCode;
-
     /**
      * The key name for the field in an iteration's data that holds the status of completion for the iteration.
      */
     public static final String ITERATION_IS_COMPLETE_KEY = "iterationIsComplete";
+    @Id
+    @GeneratedValue
+    private UUID id;
+    @Column(name = "flow")
+    private String flow;
+    @Type(JsonType.class)
+    @Column(name = "input_data", columnDefinition = "jsonb")
+    private Map<String, Object> inputData;
+    @Type(JsonType.class)
+    @Column(name = "url_params", columnDefinition = "jsonb")
+    private Map<String, String> urlParams;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private OffsetDateTime createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
+    @Column(name = "submitted_at")
+    private OffsetDateTime submittedAt;
+    @Setter(AccessLevel.NONE)
+    @Column(name = "short_code")
+    private String shortCode;
 
     /**
      * Creates a new <code>Submission</code> with empty content
@@ -90,6 +82,54 @@ public class Submission {
     public Submission() {
         inputData = new HashMap<>();
         urlParams = new HashMap<>();
+    }
+
+    /**
+     * Create a deep copy of the given submission.
+     *
+     * @param origSubmission given submission to copy
+     * @return deep copy of origSubmission
+     */
+    public static Submission copySubmission(Submission origSubmission) {
+        Submission newSubmission = new Submission();
+        newSubmission.setUrlParams(new HashMap<>(origSubmission.getUrlParams()));
+
+        newSubmission.setFlow(origSubmission.getFlow());
+        newSubmission.setCreatedAt(origSubmission.getCreatedAt());
+        newSubmission.setUpdatedAt(origSubmission.getUpdatedAt());
+        newSubmission.setSubmittedAt(origSubmission.getSubmittedAt());
+        newSubmission.setId(origSubmission.getId());
+
+        newSubmission.setShortCode(origSubmission.getShortCode());
+
+        // deep copy the subflows and any lists
+        newSubmission.setInputData(copyMap(origSubmission.getInputData()));
+        return newSubmission;
+    }
+
+    private static Map<String, Object> copyMap(Map<String, Object> origMap) {
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : origMap.entrySet()) {
+            if (entry.getValue() instanceof List) {
+                List data = (List) entry.getValue();
+                if (data.size() == 0) {
+                    result.put(entry.getKey(), new ArrayList<>());
+                } else if (data.get(0) instanceof String) {
+                    result.put(entry.getKey(), new ArrayList<>(data));
+                } else if (data.get(0) instanceof Map) {
+                    List<Map> newList = new ArrayList<>();
+                    for (Map element : (List<Map>) data) {
+                        newList.add(copyMap(element));
+                    }
+                    result.put(entry.getKey(), newList);
+                } else {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            } else {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
     /**
@@ -243,55 +283,6 @@ public class Submission {
         inputData.remove(inputName + AddressParts.CITY + UNVALIDATED_FIELD_MARKER_VALIDATED);
         inputData.remove(inputName + AddressParts.STATE + UNVALIDATED_FIELD_MARKER_VALIDATED);
         inputData.remove(inputName + AddressParts.ZIPCODE + UNVALIDATED_FIELD_MARKER_VALIDATED);
-    }
-
-    /**
-     * Create a deep copy of the given submission.
-     *
-     * @param origSubmission given submission to copy
-     * @return deep copy of origSubmission
-     */
-    public static Submission copySubmission(Submission origSubmission) {
-        Submission newSubmission = new Submission();
-        newSubmission.setUrlParams(new HashMap<>(origSubmission.getUrlParams()));
-
-        newSubmission.setFlow(origSubmission.getFlow());
-        newSubmission.setCreatedAt(origSubmission.getCreatedAt());
-        newSubmission.setUpdatedAt(origSubmission.getUpdatedAt());
-        newSubmission.setSubmittedAt(origSubmission.getSubmittedAt());
-        newSubmission.setId(origSubmission.getId());
-
-        newSubmission.setShortCode(origSubmission.getShortCode());
-
-        // deep copy the subflows and any lists
-        newSubmission.setInputData(copyMap(origSubmission.getInputData()));
-        return newSubmission;
-    }
-
-
-    private static Map<String, Object> copyMap(Map<String, Object> origMap) {
-        Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Object> entry : origMap.entrySet()) {
-            if (entry.getValue() instanceof List) {
-                List data = (List) entry.getValue();
-                if (data.size() == 0) {
-                    result.put(entry.getKey(), new ArrayList<>());
-                } else if (data.get(0) instanceof String) {
-                    result.put(entry.getKey(), new ArrayList<>(data));
-                } else if (data.get(0) instanceof Map) {
-                    List<Map> newList = new ArrayList<>();
-                    for (Map element : (List<Map>) data) {
-                        newList.add(copyMap(element));
-                    }
-                    result.put(entry.getKey(), newList);
-                } else {
-                    result.put(entry.getKey(), entry.getValue());
-                }
-            } else {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return result;
     }
 
     public void setShortCode(String shortCode) {

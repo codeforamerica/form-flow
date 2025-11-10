@@ -130,14 +130,6 @@ public class ScreenController extends FormFlowController {
         log.info("Screen Controller Created!");
     }
 
-    @AllArgsConstructor
-    @Getter
-    private class ScreenConfig {
-
-        String flowName;
-        ScreenNavigationConfiguration screenNavigationConfiguration;
-    }
-
     /**
      * Chooses which screen template and model data to render.
      *
@@ -1417,7 +1409,6 @@ public class ScreenController extends FormFlowController {
         return String.format("/flow/%s/%s/new", flow, screen);
     }
 
-
     private Map<String, Object> createModel(String flow, String screen, HttpSession httpSession, Submission submission,
             String uuid, String repeatForIterationUuid, HttpServletRequest request, String referer) {
         Map<String, Object> model = new HashMap<>();
@@ -1742,5 +1733,13 @@ public class ScreenController extends FormFlowController {
         }
 
         return redirectString;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    private class ScreenConfig {
+
+        String flowName;
+        ScreenNavigationConfiguration screenNavigationConfiguration;
     }
 }

@@ -6,12 +6,12 @@ package formflow.library.exceptions;
  */
 public class FlowConfigurationException extends RuntimeException {
 
-  /**
-   * Constructs a new FlowConfigurationException with the specified message.
-   *
-   * @param message The message that is sent on exception
-   */
-  public FlowConfigurationException(String message) {
-    super(message);
-  }
+    /**
+     * Constructs a new FlowConfigurationException with the specified message.
+     *
+     * @param message The message that is sent on exception
+     */
+    public FlowConfigurationException(String message) {
+        super(message);
+    }
 }

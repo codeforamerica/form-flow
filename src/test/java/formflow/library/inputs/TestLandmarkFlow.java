@@ -8,6 +8,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 @SuppressWarnings("unused")
 public class TestLandmarkFlow extends FlowInputs {
 
-  @NotBlank(message = "{validations.make-sure-to-provide-a-first-name}")
-  String firstName;
+    @NotBlank(message = "{validations.make-sure-to-provide-a-first-name}")
+    String firstName;
 }

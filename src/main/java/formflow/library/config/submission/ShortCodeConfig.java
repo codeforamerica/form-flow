@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "form-flow.short-code")
 public class ShortCodeConfig {
 
+    private Map<String, Config> shortCodeConfigs;
+
     /**
      * Default constructor.
      */
     public ShortCodeConfig() {
     }
-
-    private Map<String, Config> shortCodeConfigs;
 
     public Config getConfig(String flowName) {
         return shortCodeConfigs != null ? shortCodeConfigs.get(flowName) : null;
@@ -30,10 +30,25 @@ public class ShortCodeConfig {
     @Getter
     public static class Config {
 
+        private int codeLength = 6;
+        private ShortCodeType codeType = ShortCodeType.alphanumeric;
+        private boolean uppercase = true;
+        private ShortCodeCreationPoint creationPoint = ShortCodeCreationPoint.submission;
+        private String prefix = null;
+        private String suffix = null;
+
         /**
          * Default constructor.
          */
         public Config() {
+        }
+
+        public boolean isCreateShortCodeAtCreation() {
+            return ShortCodeCreationPoint.creation.equals(creationPoint);
+        }
+
+        public boolean isCreateShortCodeAtSubmission() {
+            return ShortCodeCreationPoint.submission.equals(creationPoint);
         }
 
         public enum ShortCodeType {
@@ -42,26 +57,6 @@ public class ShortCodeConfig {
 
         public enum ShortCodeCreationPoint {
             creation, submission
-        }
-
-        private int codeLength = 6;
-
-        private ShortCodeType codeType = ShortCodeType.alphanumeric;
-
-        private boolean uppercase = true;
-
-        private ShortCodeCreationPoint creationPoint = ShortCodeCreationPoint.submission;
-
-        private String prefix = null;
-
-        private String suffix = null;
-
-        public boolean isCreateShortCodeAtCreation() {
-            return ShortCodeCreationPoint.creation.equals(creationPoint);
-        }
-
-        public boolean isCreateShortCodeAtSubmission() {
-            return ShortCodeCreationPoint.submission.equals(creationPoint);
         }
 
     }

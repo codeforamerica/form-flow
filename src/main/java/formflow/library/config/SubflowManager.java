@@ -1,6 +1,5 @@
 package formflow.library.config;
 
-import formflow.library.ScreenController;
 import formflow.library.data.Submission;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,9 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class SubflowManager {
 
-    List<FlowConfiguration> flowConfigurations;
-    
     private final SubflowFilterManager subflowFilterManager;
+    List<FlowConfiguration> flowConfigurations;
 
     public SubflowManager(List<FlowConfiguration> flowConfigurations, SubflowFilterManager subflowFilterManager) {
         this.flowConfigurations = flowConfigurations;
@@ -35,10 +33,11 @@ public class SubflowManager {
             return flowConfiguration.getSubflows().get(subflow).getRelationship() != null;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Subflow %s not found in flow %s. Check that your flows-config.yaml is configured correctly.", subflow, flow));
+                    String.format("Subflow %s not found in flow %s. Check that your flows-config.yaml is configured correctly.",
+                            subflow, flow));
         }
     }
-    
+
     public void addSubflowRelationshipData(ScreenNavigationConfiguration currentScreen, String flow, Submission submission) {
         String subflowName = currentScreen.getSubflow();
 
@@ -78,29 +77,33 @@ public class SubflowManager {
     }
 
     public boolean hasFinishedAllSubflowIterations(String currentSubflowName, Submission submission) {
-        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) submission.getInputData().get(currentSubflowName);
+        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) submission.getInputData()
+                .get(currentSubflowName);
 
         return currentSubflowData.stream()
                 .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
     }
-    
+
     public String getIterationStartScreenForSubflow(String flowName, String subflowName) {
         FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
         if (flowConfiguration.getSubflows().get(subflowName) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Subflow %s not found in flow %s. Check that your flows-config.yaml is configured correctly.", subflowName, flowName));
+                    String.format("Subflow %s not found in flow %s. Check that your flows-config.yaml is configured correctly.",
+                            subflowName, flowName));
         }
         return flowConfiguration.getSubflows().get(subflowName).getIterationStartScreen();
     }
 
     public String getRelatedSubflowName(String flowName, String currentSubflowName) {
         FlowConfiguration flowConfiguration = getFlowConfiguration(flowName);
-        
+
         if (flowConfiguration.getSubflows().containsKey(currentSubflowName)) {
             return flowConfiguration.getSubflows().get(currentSubflowName).getRelationship().getRelatesTo();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Subflow %s not found in flow %s. Is it possible you entered an incorrect subflow name in your subflow configuration?", currentSubflowName, flowName));
+                    String.format(
+                            "Subflow %s not found in flow %s. Is it possible you entered an incorrect subflow name in your subflow configuration?",
+                            currentSubflowName, flowName));
         }
     }
 
@@ -120,7 +123,9 @@ public class SubflowManager {
 
         if (subflowConfiguration == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Subflow %s not found in flow configuration for flow: %s. Check that your flows-config.yaml is configured correctly.", subflow, flow));
+                    String.format(
+                            "Subflow %s not found in flow configuration for flow: %s. Check that your flows-config.yaml is configured correctly.",
+                            subflow, flow));
         }
 
         return subflowConfiguration;
@@ -150,7 +155,9 @@ public class SubflowManager {
     }
 
     public boolean isReferedFromSubflowIteration(String referer) {
-        if (referer == null) return false;
+        if (referer == null) {
+            return false;
+        }
         // Check if the URL matches pattern /<screenName>/<UUID>
         Pattern refererPattern = Pattern.compile(
                 ".*/[^/]+/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-" +
@@ -161,7 +168,9 @@ public class SubflowManager {
     }
 
     public String extractUuidFromReferer(String referer) {
-        if (referer == null) return null;
+        if (referer == null) {
+            return null;
+        }
 
         Pattern uuidPattern = Pattern.compile(
                 ".*/[^/]+/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-" +
@@ -226,7 +235,8 @@ public class SubflowManager {
         return subflowConfiguration.getRelationship() != null && subflowConfiguration.getRelationship().getFilter() != null;
     }
 
-    public List<HashMap<String, Object>> handleSubflowRelationshipFilter(String flowName, String subflowName, List<HashMap<String, Object>> subflowDataToFilter, Submission submission) {
+    public List<HashMap<String, Object>> handleSubflowRelationshipFilter(String flowName, String subflowName,
+            List<HashMap<String, Object>> subflowDataToFilter, Submission submission) {
         SubflowConfiguration subflowConfiguration = getSubflowConfiguration(flowName, subflowName);
         String filterName = subflowConfiguration.getRelationship().getFilter();
         return subflowFilterManager.runFilter(subflowDataToFilter, filterName, submission);

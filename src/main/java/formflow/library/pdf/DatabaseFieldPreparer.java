@@ -12,39 +12,40 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {
 
-  /**
-   * Default constructor.
-   */
-  public DatabaseFieldPreparer() {
-  }
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-  private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-
-  @Override
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
-    Map<String, SubmissionField> databaseFields = new HashMap<>();
-    Map<String, Object> dbFields = pdfMap.getDbFields();
-
-    if (dbFields != null) {
-      dbFields.forEach((fieldName, value) -> {
-        switch (fieldName) {
-          case "submittedAt" ->
-              databaseFields.put(fieldName, new DatabaseField(fieldName, formatDateWithNoTime(submission.getSubmittedAt())));
-          case "submissionId" -> databaseFields.put(fieldName, new DatabaseField(fieldName, submission.getId().toString()));
-          case "createdAt" ->
-              databaseFields.put(fieldName, new DatabaseField(fieldName, formatDateWithNoTime(submission.getCreatedAt())));
-          case "updatedAt" ->
-              databaseFields.put(fieldName, new DatabaseField(fieldName, formatDateWithNoTime(submission.getUpdatedAt())));
-          case "flow" -> databaseFields.put(fieldName, new DatabaseField(fieldName, submission.getFlow()));
-          default -> log.error("Unable to map unknown database field: {}", fieldName);
-        }
-      });
+    /**
+     * Default constructor.
+     */
+    public DatabaseFieldPreparer() {
     }
 
-    return databaseFields;
-  }
+    @Override
+    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
+        Map<String, SubmissionField> databaseFields = new HashMap<>();
+        Map<String, Object> dbFields = pdfMap.getDbFields();
 
-  private String formatDateWithNoTime(OffsetDateTime offsetDateTime) {
-    return offsetDateTime != null ? dateTimeFormatter.format(offsetDateTime) : "";
-  }
+        if (dbFields != null) {
+            dbFields.forEach((fieldName, value) -> {
+                switch (fieldName) {
+                    case "submittedAt" -> databaseFields.put(fieldName,
+                            new DatabaseField(fieldName, formatDateWithNoTime(submission.getSubmittedAt())));
+                    case "submissionId" ->
+                            databaseFields.put(fieldName, new DatabaseField(fieldName, submission.getId().toString()));
+                    case "createdAt" -> databaseFields.put(fieldName,
+                            new DatabaseField(fieldName, formatDateWithNoTime(submission.getCreatedAt())));
+                    case "updatedAt" -> databaseFields.put(fieldName,
+                            new DatabaseField(fieldName, formatDateWithNoTime(submission.getUpdatedAt())));
+                    case "flow" -> databaseFields.put(fieldName, new DatabaseField(fieldName, submission.getFlow()));
+                    default -> log.error("Unable to map unknown database field: {}", fieldName);
+                }
+            });
+        }
+
+        return databaseFields;
+    }
+
+    private String formatDateWithNoTime(OffsetDateTime offsetDateTime) {
+        return offsetDateTime != null ? dateTimeFormatter.format(offsetDateTime) : "";
+    }
 }

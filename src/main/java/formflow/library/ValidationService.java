@@ -1,5 +1,7 @@
 package formflow.library;
 
+import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
+
 import formflow.library.config.ActionManager;
 import formflow.library.config.ScreenNavigationConfiguration;
 import formflow.library.data.FormSubmission;
@@ -8,7 +10,6 @@ import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.apache.commons.lang3.StringUtils;
-
-import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
 
 /**
  * A service that validates flow inputs based on input definition.
@@ -38,17 +37,15 @@ import static formflow.library.inputs.FieldNameMarkers.DYNAMIC_FIELD_MARKER;
 @Slf4j
 public class ValidationService {
 
-    private final Validator validator;
-    private final ActionManager actionManager;
-    private static String inputConfigPath;
-
     private static final Map<String, Map<String, Boolean>> requiredInputs = new ConcurrentHashMap<>();
-
     private static final List<String> requiredAnnotationsList = List.of(
             NotNull.class.getName(),
             NotEmpty.class.getName(),
             NotBlank.class.getName()
     );
+    private static String inputConfigPath;
+    private final Validator validator;
+    private final ActionManager actionManager;
 
     /**
      * Autoconfigured constructor.
@@ -62,6 +59,35 @@ public class ValidationService {
         this.validator = validator;
         this.actionManager = actionManager;
         ValidationService.inputConfigPath = inputConfigPath;
+    }
+
+    public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
+        if (!requiredInputs.containsKey(flowName)) {
+            Class<?> flowClass;
+
+            try {
+                flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
+            } catch (ReflectiveOperationException e) {
+                log.error(
+                        "Error while trying to get the inputs class for flow {}. Make sure the inputs file for your application uses the same name as it's flow.",
+                        flowName, e);
+                throw new RuntimeException(e);
+            }
+
+            Field[] declaredFields = flowClass.getDeclaredFields();
+            for (Field field : declaredFields) {
+                if (Arrays.stream(field.getAnnotations())
+                        .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
+                    if (requiredInputs.containsKey(flowName)) {
+                        requiredInputs.get(flowName).put(field.getName(), true);
+                    } else {
+                        requiredInputs.put(flowName, new ConcurrentHashMap<>(Map.of(field.getName(), true)));
+                    }
+                }
+            }
+        }
+
+        return requiredInputs;
     }
 
     /**
@@ -163,34 +189,5 @@ public class ValidationService {
         });
 
         return validationMessages;
-    }
-
-    public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
-        if (!requiredInputs.containsKey(flowName)) {
-            Class<?> flowClass;
-
-            try {
-                flowClass = Class.forName(inputConfigPath + StringUtils.capitalize(flowName));
-            } catch (ReflectiveOperationException e) {
-                log.error(
-                        "Error while trying to get the inputs class for flow {}. Make sure the inputs file for your application uses the same name as it's flow.",
-                        flowName, e);
-                throw new RuntimeException(e);
-            }
-
-            Field[] declaredFields = flowClass.getDeclaredFields();
-            for (Field field : declaredFields) {
-                if (Arrays.stream(field.getAnnotations())
-                        .anyMatch(annotation -> requiredAnnotationsList.contains(annotation.annotationType().getName()))) {
-                    if (requiredInputs.containsKey(flowName)) {
-                        requiredInputs.get(flowName).put(field.getName(), true);
-                    } else {
-                        requiredInputs.put(flowName, new ConcurrentHashMap<>(Map.of(field.getName(), true)));
-                    }
-                }
-            }
-        }
-
-        return requiredInputs;
     }
 }

@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DidNotFindSubflowAddressSuggestion implements Condition {
 
-  @Override
-  public Boolean run(Submission submission, String uuid) {
-    List<Map<String, Object>> subflowDataList = (List<Map<String, Object>>) submission.getInputData().get("testSubflow");
+    @Override
+    public Boolean run(Submission submission, String uuid) {
+        List<Map<String, Object>> subflowDataList = (List<Map<String, Object>>) submission.getInputData().get("testSubflow");
 
-    Map<String, Object> theEntry = subflowDataList.get(0);
-    return !theEntry.containsKey("validationOnStreetAddress1_validated");
-  }
+        Map<String, Object> theEntry = subflowDataList.get(0);
+        return !theEntry.containsKey("validationOnStreetAddress1_validated");
+    }
 }

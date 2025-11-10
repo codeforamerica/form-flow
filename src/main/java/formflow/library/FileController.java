@@ -65,17 +65,13 @@ public class FileController extends FormFlowController {
     private final FileConversionService fileConversionService;
     private final String SESSION_USERFILES_KEY = "userFiles";
     private final Integer maxFiles;
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Value("${form-flow.uploads.default-doc-type-label:}")
     private String defaultDocType;
-
     @Value("${form-flow.uploads.virus-scanning.enabled:false}")
     private boolean isVirusScanningEnabled;
-
     @Value("${form-flow.uploads.file-conversion.convert-to-pdf:false}")
     private boolean convertUploadToPDF;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public FileController(
             UserFileRepositoryService userFileRepositoryService,

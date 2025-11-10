@@ -9,27 +9,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class OneToManyPreparer implements DefaultSubmissionFieldPreparer {
 
-  /**
-   * Default constructor.
-   */
-  public OneToManyPreparer() {
-  }
+    /**
+     * Default constructor.
+     */
+    public OneToManyPreparer() {
+    }
 
-  @Override
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
-    Map<String, Object> fieldMap = pdfMap.getAllFields();
-    Map<String, SubmissionField> preppedFields = new HashMap<>();
+    @Override
+    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
+        Map<String, Object> fieldMap = pdfMap.getAllFields();
+        Map<String, SubmissionField> preppedFields = new HashMap<>();
 
-    fieldMap.keySet().stream()
-        .filter(field -> fieldMap.get(field) instanceof Map && submission.getInputData().get(field + "[]") != null)
-        .forEach(field ->
-            preppedFields.put(field, new CheckboxField(
-                    field,
-                    (List<String>) submission.getInputData().get(field + "[]"),
-                    null
-                )
-            )
-        );
-    return preppedFields;
-  }
+        fieldMap.keySet().stream()
+                .filter(field -> fieldMap.get(field) instanceof Map && submission.getInputData().get(field + "[]") != null)
+                .forEach(field ->
+                        preppedFields.put(field, new CheckboxField(
+                                        field,
+                                        (List<String>) submission.getInputData().get(field + "[]"),
+                                        null
+                                )
+                        )
+                );
+        return preppedFields;
+    }
 }
