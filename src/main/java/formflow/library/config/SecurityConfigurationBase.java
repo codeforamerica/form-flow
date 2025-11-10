@@ -19,46 +19,46 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 @EnableWebSecurity
 public class SecurityConfigurationBase {
 
-  /**
-   * Default constructor.
-   */
-  public SecurityConfigurationBase() {
-  }
+    /**
+     * Default constructor.
+     */
+    public SecurityConfigurationBase() {
+    }
 
-  /**
-   * Sets session cookies to HttpOny and Secure
-   *
-   * @return serializer with updated cookie settings
-   */
-  @Bean
-  public DefaultCookieSerializer setDefaultSecurityCookie() {
-    DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-    serializer.setUseSecureCookie(true);
-    serializer.setUseHttpOnlyCookie(true);
-    return serializer;
-  }
+    /**
+     * Sets session cookies to HttpOny and Secure
+     *
+     * @return serializer with updated cookie settings
+     */
+    @Bean
+    public DefaultCookieSerializer setDefaultSecurityCookie() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setUseSecureCookie(true);
+        serializer.setUseHttpOnlyCookie(true);
+        return serializer;
+    }
 
-  /**
-   * Disables basic auth while retaining other security features
-   *
-   * @param httpSecurity HttpSecurity object
-   * @return HttpSecurity configuration with authentication disabled
-   * @throws Exception Internal configuration error
-   */
-  @Bean
-  @ConditionalOnMissingBean
-  SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-    httpSecurity.formLogin(AbstractHttpConfigurer::disable);
-    return httpSecurity.build();
-  }
+    /**
+     * Disables basic auth while retaining other security features
+     *
+     * @param httpSecurity HttpSecurity object
+     * @return HttpSecurity configuration with authentication disabled
+     * @throws Exception Internal configuration error
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.formLogin(AbstractHttpConfigurer::disable);
+        return httpSecurity.build();
+    }
 
-  /**
-   * Use X-Forwarded-For / X-Forwarded-Proto headers when generating full link URLs.
-   *
-   * @return ForwardedHeaderFilter object
-   */
-  @Bean
-  public ForwardedHeaderFilter forwardedHeaderFilter() {
-    return new ForwardedHeaderFilter();
-  }
+    /**
+     * Use X-Forwarded-For / X-Forwarded-Proto headers when generating full link URLs.
+     *
+     * @return ForwardedHeaderFilter object
+     */
+    @Bean
+    public ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new ForwardedHeaderFilter();
+    }
 }

@@ -14,14 +14,15 @@ import org.thymeleaf.TemplateEngine;
 @SpringBootTest(classes = {ThymeleafConfiguration.class}, properties = {"form-flow.design-system.name=system"})
 public class ThymeleafConfigurationUnloadedTest {
 
-  @Autowired
-  private TemplateEngine templateEngine;
+    @Autowired
+    private TemplateEngine templateEngine;
 
-  @Test
-  void checkThatUSWDSTemplateResolverIsLoaded() {
-    assertThat(templateEngine.getTemplateResolvers().size()).isEqualTo(1);
-    var uswdsResolver = templateEngine.getTemplateResolvers().stream()
-        .filter(x -> Objects.equals(x.getName(), "org.thymeleaf.templateresolver.ClassLoaderTemplateResolver")).findFirst();
-    assertThat(uswdsResolver).isNotPresent();
-  }
+    @Test
+    void checkThatUSWDSTemplateResolverIsLoaded() {
+        assertThat(templateEngine.getTemplateResolvers().size()).isEqualTo(1);
+        var uswdsResolver = templateEngine.getTemplateResolvers().stream()
+                .filter(x -> Objects.equals(x.getName(), "org.thymeleaf.templateresolver.ClassLoaderTemplateResolver"))
+                .findFirst();
+        assertThat(uswdsResolver).isNotPresent();
+    }
 }

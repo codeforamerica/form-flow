@@ -6,9 +6,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface CloudFileRepository {
 
-  void upload(String filePath, MultipartFile file) throws IOException, InterruptedException;
+    void upload(String filePath, MultipartFile file) throws IOException, InterruptedException;
 
-  CloudFile get(String filepath);
+    CloudFile get(String filepath);
 
-  void delete(String filepath);
+    void delete(String filepath);
 }

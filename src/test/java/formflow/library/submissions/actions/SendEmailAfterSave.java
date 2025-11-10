@@ -10,22 +10,22 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 public class SendEmailAfterSave implements Action {
 
-  @Autowired
-  private MailgunEmailClient mailgunEmailClient;
+    @Autowired
+    private MailgunEmailClient mailgunEmailClient;
 
-  public void run(Submission submission) {
-    mailgunEmailClient.sendEmail(
-        "Subject",
-        "test@example.com",
-        "This is a test email"
-    );
-  }
+    public void run(Submission submission) {
+        mailgunEmailClient.sendEmail(
+                "Subject",
+                "test@example.com",
+                "This is a test email"
+        );
+    }
 
-  public void run(Submission submission, String id) {
-    mailgunEmailClient.sendEmail(
-        "Subject",
-        "test@example.com",
-        "This is a test email"
-    );
-  }
+    public void run(Submission submission, String id) {
+        mailgunEmailClient.sendEmail(
+                "Subject",
+                "test@example.com",
+                "This is a test email"
+        );
+    }
 }

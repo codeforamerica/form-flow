@@ -2,7 +2,6 @@ package formflow.library.config;
 
 import java.util.Collections;
 import java.util.List;
-
 import lombok.Data;
 
 /**
@@ -11,21 +10,18 @@ import lombok.Data;
 @Data
 public class ScreenNavigationConfiguration {
 
-  /**
-   * Default constructor.
-   */
-  public ScreenNavigationConfiguration() {
-  }
-
-  private String name;
-
-  private List<NextScreen> nextScreens = Collections.emptyList();
-  private String subflow;
-
-  private String onPostAction;
-  private String crossFieldValidationAction;
-  private String beforeSaveAction;
-  private String beforeDisplayAction;
-  private String afterSaveAction;
-  private String condition;
+    private String name;
+    private List<NextScreen> nextScreens = Collections.emptyList();
+    private String subflow;
+    private String onPostAction;
+    private String crossFieldValidationAction;
+    private String beforeSaveAction;
+    private String beforeDisplayAction;
+    private String afterSaveAction;
+    private String condition;
+    /**
+     * Default constructor.
+     */
+    public ScreenNavigationConfiguration() {
+    }
 }

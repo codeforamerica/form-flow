@@ -28,16 +28,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class PDFFormFiller {
 
+    private final ApplicationContext applicationContext;
     @Value("${form-flow.pdf.fontDirectory:file:/opt/pdf-fonts}")
     private String pdfFontDirectoryPath;
-
     @Value("${form-flow.pdf.generate-flattened:true}")
     private boolean generateFlattened;
-
     @Value("${form-flow.pdf.read-only:false}")
     private boolean readOnly;
-
-    private final ApplicationContext applicationContext;
 
     /**
      * Constructor

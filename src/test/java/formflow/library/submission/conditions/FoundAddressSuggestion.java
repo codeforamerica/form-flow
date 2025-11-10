@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 public class FoundAddressSuggestion implements Condition {
 
-  @Override
-  public Boolean run(Submission submission) {
-    return submission.getInputData().containsKey("validationOnStreetAddress1_validated");
-  }
+    @Override
+    public Boolean run(Submission submission) {
+        return submission.getInputData().containsKey("validationOnStreetAddress1_validated");
+    }
 }

@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class AddressValidationServiceTestConfiguration {
 
-  @Bean
-  @Primary
-  public AddressValidationService addressValidationService() {
-    return Mockito.mock(AddressValidationService.class);
-  }
+    @Bean
+    @Primary
+    public AddressValidationService addressValidationService() {
+        return Mockito.mock(AddressValidationService.class);
+    }
 }

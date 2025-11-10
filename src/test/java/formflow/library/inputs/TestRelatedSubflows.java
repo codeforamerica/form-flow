@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
 public class TestRelatedSubflows extends FlowInputs {
-    
+
     private String hasHousehold;
     private String householdMemberFirstName;
     private String householdMemberLastName;

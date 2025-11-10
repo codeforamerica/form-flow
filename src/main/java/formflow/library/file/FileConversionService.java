@@ -1,14 +1,6 @@
 package formflow.library.file;
 
 import com.google.common.io.Files;
-import org.openpdf.text.Document;
-import org.openpdf.text.Image;
-import org.openpdf.text.PageSize;
-import org.openpdf.text.pdf.PdfCopy;
-import org.openpdf.text.pdf.PdfImportedPage;
-import org.openpdf.text.pdf.PdfReader;
-import org.openpdf.text.pdf.PdfStamper;
-import org.openpdf.text.pdf.PdfWriter;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -33,6 +25,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.jetbrains.annotations.NotNull;
+import org.openpdf.text.Document;
+import org.openpdf.text.Image;
+import org.openpdf.text.PageSize;
+import org.openpdf.text.pdf.PdfCopy;
+import org.openpdf.text.pdf.PdfImportedPage;
+import org.openpdf.text.pdf.PdfReader;
+import org.openpdf.text.pdf.PdfStamper;
+import org.openpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -43,24 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 public class FileConversionService {
-
-    @Value("${form-flow.uploads.file-conversion.prefix:}")
-    private String convertedPrefix;
-
-    @Value("${form-flow.uploads.file-conversion.suffix:}")
-    private String convertedSuffix;
-
-    @Value("${form-flow.uploads.file-conversion.max-conversion-size:}")
-    private Integer maxConversionSize;
-
-    @Value("${form-flow.uploads.file-conversion.max-pages:}")
-    private Integer maxPages;
-
-    @Value("${form-flow.uploads.max-file-size}")
-    Integer maxFileSize;
-
-    @Value("${form-flow.uploads.file-conversion.allow-pdf-modification:false}")
-    private boolean allowPdfModification;
 
     private final Map<MimeType, CONVERSION_TO_PDF_TYPE> MIME_TYPE_MAP = Map.ofEntries(
             Map.entry(MediaType.IMAGE_GIF, CONVERSION_TO_PDF_TYPE.IMAGE),
@@ -78,15 +60,59 @@ public class FileConversionService {
             Map.entry(new MimeType("application", "vnd.oasis.opendocument.text"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT),
             Map.entry(new MimeType("application", "zip"), CONVERSION_TO_PDF_TYPE.OFFICE_DOCUMENT)
     );
-
-    private enum CONVERSION_TO_PDF_TYPE {
-        IMAGE, OFFICE_DOCUMENT, NONE;
-    }
-
     private final Tika tikaFileValidator;
+    @Value("${form-flow.uploads.max-file-size}")
+    Integer maxFileSize;
+    @Value("${form-flow.uploads.file-conversion.prefix:}")
+    private String convertedPrefix;
+    @Value("${form-flow.uploads.file-conversion.suffix:}")
+    private String convertedSuffix;
+    @Value("${form-flow.uploads.file-conversion.max-conversion-size:}")
+    private Integer maxConversionSize;
+    @Value("${form-flow.uploads.file-conversion.max-pages:}")
+    private Integer maxPages;
+    @Value("${form-flow.uploads.file-conversion.allow-pdf-modification:false}")
+    private boolean allowPdfModification;
 
     public FileConversionService() {
         tikaFileValidator = new Tika();
+    }
+
+    private static @NotNull File getModifiedPDFFile(File tempFile) throws IOException {
+        String modifiedPDFPath =
+                Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
+
+        PdfReader reader = null;
+        Document document = null;
+        FileOutputStream outputStream = null;
+        PdfCopy copy = null;
+
+        try {
+            reader = new PdfReader(tempFile.getAbsolutePath());
+            reader.setModificationAllowedWithoutOwnerPassword(true);
+
+            outputStream = new FileOutputStream(modifiedPDFPath);
+            document = new Document(reader.getPageSizeWithRotation(1));
+            copy = new PdfCopy(document, outputStream);
+
+            document.open();
+            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+                copy.addPage(copy.getImportedPage(reader, i));
+            }
+
+        } finally {
+            if (document != null) {
+                document.close();
+            }
+            if (reader != null) {
+                reader.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
+
+        return new File(modifiedPDFPath);
     }
 
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
@@ -416,7 +442,8 @@ public class FileConversionService {
         try {
             // Use cleanFilename, not originalFilename, for the temp file to reduce user input risk.
             // Additionally, limit its length and fallback to UUID if too short, ensuring no path traversal.
-            String safeFilename = (!cleanFilename.isEmpty() && cleanFilename.length() < 50) ? cleanFilename : UUID.randomUUID().toString();
+            String safeFilename =
+                    (!cleanFilename.isEmpty() && cleanFilename.length() < 50) ? cleanFilename : UUID.randomUUID().toString();
             tempFile = File.createTempFile("upload_" + safeFilename + "_", ".tmp");
 
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
@@ -436,43 +463,6 @@ public class FileConversionService {
                 tempFile.delete();
             }
         }
-    }
-
-    private static @NotNull File getModifiedPDFFile(File tempFile) throws IOException {
-        String modifiedPDFPath =
-                Files.getNameWithoutExtension(Objects.requireNonNull(tempFile.getAbsolutePath())) + "-modified.pdf";
-
-        PdfReader reader = null;
-        Document document = null;
-        FileOutputStream outputStream = null;
-        PdfCopy copy = null;
-
-        try {
-            reader = new PdfReader(tempFile.getAbsolutePath());
-            reader.setModificationAllowedWithoutOwnerPassword(true);
-
-            outputStream = new FileOutputStream(modifiedPDFPath);
-            document = new Document(reader.getPageSizeWithRotation(1));
-            copy = new PdfCopy(document, outputStream);
-
-            document.open();
-            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-                copy.addPage(copy.getImportedPage(reader, i));
-            }
-
-        } finally {
-            if (document != null) {
-                document.close();
-            }
-            if (reader != null) {
-                reader.close();
-            }
-            if (outputStream != null) {
-                outputStream.close();
-            }
-        }
-
-        return new File(modifiedPDFPath);
     }
 
     private MultipartFile createMultipartFile(MultipartFile file, InputStream pdf, String suffix) throws IOException {
@@ -515,5 +505,9 @@ public class FileConversionService {
             maxConversionSize = maxFileSize;
         }
         return maxConversionSize;
+    }
+
+    private enum CONVERSION_TO_PDF_TYPE {
+        IMAGE, OFFICE_DOCUMENT, NONE;
     }
 }

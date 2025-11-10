@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 public class FormatDateBeforeSave implements Action {
 
-  public void run(Submission submission) {
-    List<String> dateComponents = new ArrayList<>(3);
-    dateComponents.add((String) submission.getInputData().get("dateMonth"));
-    dateComponents.add((String) submission.getInputData().get("dateDay"));
-    dateComponents.add((String) submission.getInputData().get("dateYear"));
-    submission.getInputData().put("formattedDate", String.join("/", dateComponents));
-  }
+    public void run(Submission submission) {
+        List<String> dateComponents = new ArrayList<>(3);
+        dateComponents.add((String) submission.getInputData().get("dateMonth"));
+        dateComponents.add((String) submission.getInputData().get("dateDay"));
+        dateComponents.add((String) submission.getInputData().get("dateYear"));
+        submission.getInputData().put("formattedDate", String.join("/", dateComponents));
+    }
 }

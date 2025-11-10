@@ -19,25 +19,25 @@ import java.lang.annotation.Target;
 @Documented
 public @interface DynamicField {
 
-  /**
-   * The default message that will be used in validation messages.
-   *
-   * @return the default validation message
-   */
-  String message() default "";
+    /**
+     * The default message that will be used in validation messages.
+     *
+     * @return the default validation message
+     */
+    String message() default "";
 
-  /**
-   * Defines the group(s) the constraint belongs to. This is used for grouped validation.
-   *
-   * @return the groups for which the constraint is applicable
-   */
-  Class<?>[] groups() default {};
+    /**
+     * Defines the group(s) the constraint belongs to. This is used for grouped validation.
+     *
+     * @return the groups for which the constraint is applicable
+     */
+    Class<?>[] groups() default {};
 
-  /**
-   * Can be used by clients of the Bean Validation API to assign custom payload objects to a constraint.
-   *
-   * @return the payload associated with the constraint
-   */
-  Class<? extends Payload>[] payload() default {};
+    /**
+     * Can be used by clients of the Bean Validation API to assign custom payload objects to a constraint.
+     *
+     * @return the payload associated with the constraint
+     */
+    Class<? extends Payload>[] payload() default {};
 
 }

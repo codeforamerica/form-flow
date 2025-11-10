@@ -67,95 +67,96 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
 
-  /**
-   * Default constructor.
-   */
-  public SubflowFieldPreparer() {
-  }
+    @Lazy
+    @Autowired
+    ActionManager actionManager;
 
-  @Lazy
-  @Autowired
-  ActionManager actionManager;
-
-  /**
-   * This will prepare the SubmissionFields for all the data across all the subflows specified in the PdfMap.
-   *
-   * @param submission the submission
-   * @param pdfMap     the field mappings from the pdf-map.yaml file
-   * @return a map of field name to SubmissionField
-   */
-  public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
-    Map<String, SubmissionField> preppedFields = new HashMap<>();
-    List<Map<String, Object>> subflowDataList = new ArrayList<>();
-    Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
-    final List<String> IGNORED_FIELDS = List.of("uuid", "iterationIsComplete");
-
-    if (subflowMap == null) {
-      return Collections.emptyMap();
+    /**
+     * Default constructor.
+     */
+    public SubflowFieldPreparer() {
     }
 
-    subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
-      if (submission.getInputData().containsKey(pdfSubflowName)) {
-        subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
-      }
+    /**
+     * This will prepare the SubmissionFields for all the data across all the subflows specified in the PdfMap.
+     *
+     * @param submission the submission
+     * @param pdfMap     the field mappings from the pdf-map.yaml file
+     * @return a map of field name to SubmissionField
+     */
+    public Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap) {
+        Map<String, SubmissionField> preppedFields = new HashMap<>();
+        List<Map<String, Object>> subflowDataList = new ArrayList<>();
+        Map<String, PdfMapSubflow> subflowMap = pdfMap.getSubflowInfo();
+        final List<String> IGNORED_FIELDS = List.of("uuid", "iterationIsComplete");
 
-      if (!subflowDataList.isEmpty()) {
+        if (subflowMap == null) {
+            return Collections.emptyMap();
+        }
 
-        AtomicInteger atomInteger = new AtomicInteger(1);
-        subflowDataList.forEach(iteration -> {
-
-          // only prepare as many as PDF can hold.
-          if (atomInteger.get() > pdfSubflow.getTotalIterations()) {
-            return;
-          }
-
-          if (iteration.get(Submission.ITERATION_IS_COMPLETE_KEY) != null && iteration.get(Submission.ITERATION_IS_COMPLETE_KEY)
-              .equals(false)) {
-            return;
-          }
-
-          iteration.forEach((key, value) -> {
-            if (IGNORED_FIELDS.contains(key)) {
-              return;
+        subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
+            if (submission.getInputData().containsKey(pdfSubflowName)) {
+                subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
             }
 
-            String newKey = getNewKey(key, atomInteger.get());
+            if (!subflowDataList.isEmpty()) {
 
-            if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {
-              return;
-            }
+                AtomicInteger atomInteger = new AtomicInteger(1);
+                subflowDataList.forEach(iteration -> {
 
-            // tack on suffix for field. "_%d" where %d is the iteration number
-            if (key.endsWith("[]")) {
-              // don't update the inner values.
-              preppedFields.put(newKey, new CheckboxField(key.replace("[]", ""),
-                  (List<String>) value, atomInteger.get()));
-            } else {
-              preppedFields.put(newKey, new SingleField(key, value.toString(), atomInteger.get()));
+                    // only prepare as many as PDF can hold.
+                    if (atomInteger.get() > pdfSubflow.getTotalIterations()) {
+                        return;
+                    }
+
+                    if (iteration.get(Submission.ITERATION_IS_COMPLETE_KEY) != null && iteration.get(
+                                    Submission.ITERATION_IS_COMPLETE_KEY)
+                            .equals(false)) {
+                        return;
+                    }
+
+                    iteration.forEach((key, value) -> {
+                        if (IGNORED_FIELDS.contains(key)) {
+                            return;
+                        }
+
+                        String newKey = getNewKey(key, atomInteger.get());
+
+                        if (!pdfMap.getAllFields().containsKey(newKey.replace("[]", ""))) {
+                            return;
+                        }
+
+                        // tack on suffix for field. "_%d" where %d is the iteration number
+                        if (key.endsWith("[]")) {
+                            // don't update the inner values.
+                            preppedFields.put(newKey, new CheckboxField(key.replace("[]", ""),
+                                    (List<String>) value, atomInteger.get()));
+                        } else {
+                            preppedFields.put(newKey, new SingleField(key, value.toString(), atomInteger.get()));
+                        }
+                    });
+                    atomInteger.incrementAndGet();
+                });
             }
-          });
-          atomInteger.incrementAndGet();
         });
-      }
-    });
-    return preppedFields;
-  }
-
-  /**
-   * Set the ActionManager explicitly. Generally the ActionManager is AutoWired in, but in the event that it can't be, or we want
-   * to override it, this provides the ability to do that.
-   *
-   * @param actionManager ActionManager to use
-   */
-  public void setActionManager(ActionManager actionManager) {
-    this.actionManager = actionManager;
-  }
-
-  private String getNewKey(String existingKey, Integer iteration) {
-    if (existingKey.contains("[]")) {
-      return existingKey.replace("[]", "_" + iteration + "[]");
-    } else {
-      return existingKey + "_" + iteration;
+        return preppedFields;
     }
-  }
+
+    /**
+     * Set the ActionManager explicitly. Generally the ActionManager is AutoWired in, but in the event that it can't be, or we
+     * want to override it, this provides the ability to do that.
+     *
+     * @param actionManager ActionManager to use
+     */
+    public void setActionManager(ActionManager actionManager) {
+        this.actionManager = actionManager;
+    }
+
+    private String getNewKey(String existingKey, Integer iteration) {
+        if (existingKey.contains("[]")) {
+            return existingKey.replace("[]", "_" + iteration + "[]");
+        } else {
+            return existingKey + "_" + iteration;
+        }
+    }
 }

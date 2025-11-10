@@ -1,30 +1,43 @@
 package formflow.library.pdf;
 
-import org.openpdf.text.pdf.AcroFields;
-import org.openpdf.text.pdf.PdfReader;
-import org.openpdf.text.pdf.parser.PdfTextExtractor;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.openpdf.text.pdf.AcroFields;
+import org.openpdf.text.pdf.PdfReader;
+import org.openpdf.text.pdf.parser.PdfTextExtractor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @SpringBootTest(properties = {
         "form-flow.path=flows-config/test-flow.yaml"})
 class PDFFormFillerTest {
 
+    private final String pdf = "/pdfs/testPdf.pdf";
     @Autowired
     PDFFormFiller pdfFormFiller;
-    private final String pdf = "/pdfs/testPdf.pdf";
+
+    private static String getField(File file, String fieldName) throws IOException {
+        try (PdfReader reader = new PdfReader(file.getPath())) {
+            AcroFields form = reader.getAcroFields();
+            return form.getField(fieldName);
+        }
+    }
+
+    private static String getText(File file) throws IOException {
+        try (PdfReader reader = new PdfReader(file.getPath())) {
+            PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(reader);
+            return pdfTextExtractor.getTextFromPage(1);
+        }
+    }
 
     @Test
     void shouldMapAllFieldTypes() throws IOException {
@@ -103,19 +116,5 @@ class PDFFormFillerTest {
 
         File file = pdfFormFiller.fill(pdf, fields, false);
         assertEquals(getField(file, "TEXT_FIELD"), submittedValue);
-    }
-
-    private static String getField(File file, String fieldName) throws IOException {
-        try (PdfReader reader = new PdfReader(file.getPath())) {
-            AcroFields form = reader.getAcroFields();
-            return form.getField(fieldName);
-        }
-    }
-
-    private static String getText(File file) throws IOException {
-        try (PdfReader reader = new PdfReader(file.getPath())) {
-            PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(reader);
-            return pdfTextExtractor.getTextFromPage(1);
-        }
     }
 }

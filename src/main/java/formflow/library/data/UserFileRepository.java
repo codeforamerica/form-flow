@@ -1,10 +1,9 @@
 package formflow.library.data;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for UserFile objects
@@ -31,7 +30,7 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
     /**
      * Finds all the {@link UserFile}s associated with a {@link Submission}} where the conversionSourceFileId matches
      *
-     * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
+     * @param submission             the {@link Submission} for which the associated {@link UserFile}s are sought
      * @param conversionSourceFileId
      * @return
      */
@@ -56,10 +55,11 @@ public interface UserFileRepository extends JpaRepository<UserFile, UUID> {
     List<UserFile> findAllBySubmissionAndMimeTypeOrderByOriginalName(Submission submission, String mimeType);
 
     /**
-     * Finds all the {@link UserFile}s associated with a {@link Submission}} where the mimeType matches and the conversionSourceFileId
-     * is not NULL and ordered by the OriginalName field
+     * Finds all the {@link UserFile}s associated with a {@link Submission}} where the mimeType matches and the
+     * conversionSourceFileId is not NULL and ordered by the OriginalName field
      *
      * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
      */
-    List<UserFile> findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(Submission submission, String mimeType);
+    List<UserFile> findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(Submission submission,
+            String mimeType);
 }

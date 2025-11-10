@@ -33,72 +33,68 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-after-save-action.yaml"})
 public class AfterSaveActionTest extends AbstractMockMvcTest {
 
-  Submission submission;
+    private final MailgunMessagesApi mailgunMessagesApi = mock(MailgunMessagesApi.class);
+    Submission submission;
+    @MockitoBean
+    private SubmissionRepositoryService submissionRepositoryService;
+    @Autowired
+    private ScreenController screenController;
+    @Autowired
+    private MailgunEmailClient mailgunEmailClient;
 
-  @MockitoBean
-  private SubmissionRepositoryService submissionRepositoryService;
+    @BeforeEach
+    public void setUp() throws Exception {
+        UUID submissionUUID = UUID.randomUUID();
+        mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
+        submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
+        mailgunEmailClient.setMailgunMessagesApi(mailgunMessagesApi);
 
-  @Autowired
-  private ScreenController screenController;
+        super.setUp();
+        ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
+        when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+    }
 
-  @Autowired
-  private MailgunEmailClient mailgunEmailClient;
+    @Test
+    void shouldSendEmailAfterSave() throws Exception {
+        final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+        String expectedSubject = "Subject";
+        String expectedRecipient = "test@example.com";
+        String expectedBody = "This is a test email";
 
-  private final MailgunMessagesApi mailgunMessagesApi = mock(MailgunMessagesApi.class);
+        postWithoutData("testFlow", "inputs").andExpect(redirectedUrl(getUrlForPageName("testFlow", "inputs") + "/navigation"));
 
-  @BeforeEach
-  public void setUp() throws Exception {
-    UUID submissionUUID = UUID.randomUUID();
-    mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
-    submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
-    mailgunEmailClient.setMailgunMessagesApi(mailgunMessagesApi);
+        verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
 
-    super.setUp();
-    ////when(submissionRepositoryService.findOrCreate(any())).thenReturn(submission);
-    when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
-  }
+        final Message builtMessage = captor.getValue();
+        AssertionsForClassTypes.assertThat(builtMessage).isNotNull();
+        AssertionsForClassTypes.assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
+        AssertionsForClassTypes.assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
+        AssertionsForClassTypes.assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
+    }
 
-  @Test
-  void shouldSendEmailAfterSave() throws Exception {
-    final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-    doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
-    String expectedSubject = "Subject";
-    String expectedRecipient = "test@example.com";
-    String expectedBody = "This is a test email";
+    @Test
+    void shouldSendEmailAfterSaveInSubflow() throws Exception {
+        final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
+        String expectedSubject = "Subject";
+        String expectedRecipient = "test@example.com";
+        String expectedBody = "This is a test email";
 
-    postWithoutData("testFlow","inputs").andExpect(redirectedUrl(getUrlForPageName("testFlow", "inputs") + "/navigation"));
+        ResultActions test = postWithoutData("testFlow", "subflowIterationStart/new");
+        String url = test.andExpect(status().is3xxRedirection())
+                .andReturn()
+                .getResponse()
+                .getRedirectedUrl();
+        assertThat(url).isNotNull();
+        assertThat(url.contains("next"));
 
-    verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
+        verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
 
-    final Message builtMessage = captor.getValue();
-    AssertionsForClassTypes.assertThat(builtMessage).isNotNull();
-    AssertionsForClassTypes.assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
-    AssertionsForClassTypes.assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
-    AssertionsForClassTypes.assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
-  }
-
-  @Test
-  void shouldSendEmailAfterSaveInSubflow() throws Exception {
-    final ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-    doReturn(null).when(mailgunMessagesApi).sendMessage(any(), captor.capture());
-    String expectedSubject = "Subject";
-    String expectedRecipient = "test@example.com";
-    String expectedBody = "This is a test email";
-
-    ResultActions test = postWithoutData("testFlow","subflowIterationStart/new");
-    String url = test.andExpect(status().is3xxRedirection())
-            .andReturn()
-            .getResponse()
-            .getRedirectedUrl();
-    assertThat(url).isNotNull();
-    assertThat(url.contains("next"));
-
-    verify(mailgunMessagesApi, times(1)).sendMessage(any(), any());
-
-    final Message builtMessage = captor.getValue();
-    AssertionsForClassTypes.assertThat(builtMessage).isNotNull();
-    AssertionsForClassTypes.assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
-    AssertionsForClassTypes.assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
-    AssertionsForClassTypes.assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
-  }
+        final Message builtMessage = captor.getValue();
+        AssertionsForClassTypes.assertThat(builtMessage).isNotNull();
+        AssertionsForClassTypes.assertThat(builtMessage.getSubject()).isEqualTo(expectedSubject);
+        AssertionsForClassTypes.assertThat(builtMessage.getTo().contains(expectedRecipient)).isEqualTo(true);
+        AssertionsForClassTypes.assertThat(builtMessage.getHtml()).isEqualTo(expectedBody);
+    }
 }

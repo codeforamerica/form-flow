@@ -56,284 +56,283 @@ import org.springframework.web.context.WebApplicationContext;
 @ContextConfiguration
 public abstract class AbstractMockMvcTest {
 
-  @MockitoBean
-  protected Clock clock;
+    @MockitoBean
+    protected Clock clock;
 
-  @MockitoBean
-  protected Submission submission;
+    @MockitoBean
+    protected Submission submission;
 
-  @MockitoSpyBean
-  protected SubmissionRepositoryService submissionRepositoryService;
+    @MockitoSpyBean
+    protected SubmissionRepositoryService submissionRepositoryService;
+    @Autowired
+    protected MockMvc mockMvc;
+    protected MockHttpSession session = new MockHttpSession();
+    @Autowired
+    protected MessageSource messageSource;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-  @Autowired
-  private WebApplicationContext webApplicationContext;
-
-  @Autowired
-  protected MockMvc mockMvc;
-
-  protected MockHttpSession session = new MockHttpSession();
-
-  @Autowired
-  protected MessageSource messageSource;
-
-  @BeforeEach
-  protected void setUp() throws Exception {
-    this.mockMvc = MockMvcBuilders
-        .webAppContextSetup(this.webApplicationContext)
-        .apply(sharedHttpSession()) // use this session across requests
-        .build();
-  }
-
-  protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
-    if (flowInfo.length % 2 != 0) {
-      throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
+    @BeforeEach
+    protected void setUp() throws Exception {
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(this.webApplicationContext)
+                .apply(sharedHttpSession()) // use this session across requests
+                .build();
     }
-    Iterator<Object> iterator = Arrays.stream(flowInfo).iterator();
-    Map<String, Object> flowMap = new HashMap<>();
-    while (iterator.hasNext()) {
-      String flowName = (String) iterator.next();
-      UUID submissionId = (UUID) iterator.next();
-      flowMap.put(flowName, submissionId);
+
+    protected void setFlowInfoInSession(MockHttpSession mockHttpSession, Object... flowInfo) {
+        if (flowInfo.length % 2 != 0) {
+            throw new IllegalArgumentException("Arguments should be paired flowName -> submission id (UUID).");
+        }
+        Iterator<Object> iterator = Arrays.stream(flowInfo).iterator();
+        Map<String, Object> flowMap = new HashMap<>();
+        while (iterator.hasNext()) {
+            String flowName = (String) iterator.next();
+            UUID submissionId = (UUID) iterator.next();
+            flowMap.put(flowName, submissionId);
+        }
+        mockHttpSession.setAttribute(SUBMISSION_MAP_NAME, flowMap);
     }
-    mockHttpSession.setAttribute(SUBMISSION_MAP_NAME, flowMap);
-  }
 
-  protected Map<String, byte[]> getZipContentsMap(byte[] zipBytes) throws IOException {
-    Map<String, byte[]> contents = new HashMap<>();
+    protected Map<String, byte[]> getZipContentsMap(byte[] zipBytes) throws IOException {
+        Map<String, byte[]> contents = new HashMap<>();
 
-    try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
-      ZipEntry entry;
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+            ZipEntry entry;
 
-      while ((entry = zis.getNextEntry()) != null) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
+            while ((entry = zis.getNextEntry()) != null) {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
 
-        while ((len = zis.read(buffer)) > 0) {
-          outputStream.write(buffer, 0, len);
+                while ((len = zis.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, len);
+                }
+
+                contents.put(entry.getName(), outputStream.toByteArray());
+                zis.closeEntry();
+            }
         }
 
-        contents.put(entry.getName(), outputStream.toByteArray());
-        zis.closeEntry();
-      }
+        return contents;
     }
 
-    return contents;
-  }
-
-  @Deprecated // assumes `pageName` is within `testFlow` config
-  protected ResultActions postExpectingSuccess(String flowName, String pageName, Map<String, List<String>> params) throws Exception {
-    String postUrl = getUrlForPageName(flowName, pageName);
-    return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
-  }
-
-  // Appends the id to the post URL
-  protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params, String uuid) throws Exception {
-    String uuidString = uuid == null ? "" : '/' + uuid;
-    return postToUrlExpectingSuccess(postUrl + uuidString, redirectUrl, params);
-  }
-
-  protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
-      Map<String, List<String>> params) throws Exception {
-    return mockMvc.perform(post(postUrl)
-            .with(csrf())
-            .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(params))
-    ).andExpect(redirectedUrl(redirectUrl));
-  }
-
-  // Same as postToUrlExpectingSuccess, but expecting a pattern instead of an exact match
-  protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
-      Map<String, List<String>> params) throws Exception {
-    return mockMvc.perform(post(postUrl)
-            .with(csrf())
-            .session(session)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(new LinkedMultiValueMap<>(params))
-    ).andExpect(redirectedUrlPattern(redirectUrlPattern));
-  }
-
-  protected String getUrlExpectingSuccessRedirectPattern(String getUrl) throws Exception {
-    return mockMvc.perform(get(getUrl).session(session))
-        .andExpect(status().is3xxRedirection()).andReturn()
-        .getResponse()
-        .getRedirectedUrl();
-  }
-
-  protected void postExpectingNextPageTitle(String flowName, String pageName,
-      String inputName,
-      String value,
-      String nextPageTitle) throws Exception {
-    String postUrl = getUrlForPageName(flowName, pageName);
-    postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, List.of(value)));
-    FormScreen nextPage = followRedirectsForPageName("testFlow", pageName);
-    assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
-  }
-
-  protected void continueExpectingNextPageTitle(String flow, String currentPageName, String nextPageTitle)
-      throws Exception {
-    var nextPage = followRedirectsForPageName(flow, currentPageName);
-    assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
-  }
-
-  protected ResultActions postExpectingFailure(String flowName, String pageName, String inputName, String value)
-      throws Exception {
-    String postUrl = getUrlForPageName(flowName, pageName);
-    return mockMvc.perform(
-        post(postUrl)
-            .session(session)
-            .with(csrf())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .param(inputName, value)
-    ).andExpect(redirectedUrl(postUrl));
-  }
-
-  protected ResultActions postExpectingFailure(String flowName, String pageName, Map<String, List<String>> params) throws Exception {
-    return postExpectingFailure(flowName, pageName, params, pageName);
-  }
-
-  protected ResultActions postExpectingFailure(String flowName, String pageName, Map<String, List<String>> params,
-      String redirectUrl) throws Exception {
-
-    String postUrl = getUrlForPageName(flowName, pageName);
-    MockHttpServletRequestBuilder post = post(postUrl)
-        .session(session)
-        .with(csrf())
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-        .params(new LinkedMultiValueMap<>(params));
-
-    return mockMvc.perform(post).andExpect(redirectedUrl(getUrlForPageName(flowName, redirectUrl)));
-  }
-
-  protected ResultActions postExpectingFailures(String flowName, String pageName, Map<String, String> params)
-      throws Exception {
-
-    String postUrl = getUrlForPageName(flowName, pageName);
-    MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-    params.forEach(multiValueMap::add);
-    return mockMvc.perform(
-        post(postUrl)
-            .with(csrf())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .params(multiValueMap)
-    ).andExpect(redirectedUrl(postUrl));
-  }
-
-  protected void postExpectingFailureAndAssertErrorDisplaysForThatInput(String flowName, String pageName,
-      String inputName,
-      String value, String errorMessage) throws Exception {
-    postExpectingFailure(flowName, pageName, inputName, value);
-    assertPageHasInputError(flowName, pageName, inputName, errorMessage);
-  }
-
-  protected void postExpectingFailureAndAssertErrorsDisplaysForThatInput(String flowName, String pageName,
-      String inputName,
-      String value, Integer numOfErrors) throws Exception {
-    postExpectingFailure(flowName, pageName, inputName, value);
-    assertEquals(numOfErrors, new FormScreen(getPage(pageName, flowName)).getInputErrors(inputName).size());
-  }
-
-  protected void postExpectingFailureAndAssertErrorsDisplayForThatInput(String flowName, String pageName,
-      String inputName,
-      String value, List<String> errorMessages) throws Exception {
-    postExpectingFailure(flowName, pageName, inputName, value);
-    assertInputHasErrors(flowName, pageName, inputName, errorMessages);
-  }
-
-  protected void postExpectingFailureAndAssertInputErrorMessages(String flowName, String pageName,
-      Map<String, String> inputParams,
-      Map<String, List<String>> expectedErrorMessages) throws Exception {
-    postExpectingFailures(flowName, pageName, inputParams);
-    for (String inputName : inputParams.keySet()) {
-      assertInputHasErrors(flowName, pageName, inputName, expectedErrorMessages.get(inputName));
+    @Deprecated // assumes `pageName` is within `testFlow` config
+    protected ResultActions postExpectingSuccess(String flowName, String pageName, Map<String, List<String>> params)
+            throws Exception {
+        String postUrl = getUrlForPageName(flowName, pageName);
+        return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
     }
-  }
 
-  protected ResultActions postWithoutData(String flowName, String pageName) throws Exception {
-    String postUrl = getUrlForPageName(flowName, pageName);
-    return mockMvc.perform(
-        post(postUrl)
-            .with(csrf())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    );
-  }
-
-  protected String getUrlForPageName(String flowName, String pageName) {
-    return "/flow/" + flowName + "/" + pageName;
-  }
-
-  protected void assertPageHasInputError(String flowName, String pageName, String inputName, String errorMessage)
-      throws Exception {
-    var page = new FormScreen(getPage(pageName, flowName));
-    assertEquals(errorMessage, page.getInputError(inputName).text());
-  }
-
-  protected void assertInputHasErrors(String flowName, String pageName, String inputName, List<String> errorMessages)
-      throws Exception {
-    var page = new FormScreen(getPage(pageName, flowName));
-    // make sure there are errors returned
-    assertFalse(page.getInputErrors(inputName).isEmpty(), "Expected errors on page, but there were none");
-    // assert equal amount
-    assertEquals(errorMessages.size(), page.getInputErrors(inputName).size(),
-        "The page has a different number of errors than expected");
-    // now check if they match the expected ones.
-    assertTrue(errorMessages.containsAll(page.getInputErrors(inputName).stream().map(Element::ownText).toList()),
-        "The error messages expected do match what was returned");
-  }
-
-  @NotNull
-  protected ResultActions getPage(String pageName, String flowName) throws Exception {
-    MockHttpServletRequestBuilder get = get("/flow/" + flowName + "/" + pageName).session(session);
-    return mockMvc.perform(get);
-  }
-
-
-  @NotNull
-  protected ResultActions getPageExpectingSuccess(String flowName, String pageName) throws Exception {
-    return getPage(pageName, flowName).andExpect(status().isOk());
-  }
-
-  /**
-   * Accepts the page you are on and follows the redirects to get the next page
-   *
-   * @param currentPageName the page
-   * @return a form page that can be asserted against
-   */
-  protected FormScreen followRedirectsForPageName(String flow, String currentPageName) throws Exception {
-    var nextPage = "/flow/%s/%s/navigation".formatted(flow, currentPageName);
-    while (Objects.requireNonNull(nextPage).contains("/navigation")) {
-      // follow redirects
-      nextPage = mockMvc.perform(get(nextPage).session(session))
-              .andExpect(status().is3xxRedirection()).andReturn()
-              .getResponse()
-              .getRedirectedUrl();
+    // Appends the id to the post URL
+    protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
+            Map<String, List<String>> params, String uuid) throws Exception {
+        String uuidString = uuid == null ? "" : '/' + uuid;
+        return postToUrlExpectingSuccess(postUrl + uuidString, redirectUrl, params);
     }
-    return new FormScreen(mockMvc.perform(get(nextPage)));
-  }
 
-  protected String followRedirectsForUrl(String currentPageUrl) throws Exception {
-    var nextPage = currentPageUrl;
-    while (Objects.requireNonNull(nextPage).contains("/navigation")) {
-      // follow redirects
-      nextPage = mockMvc.perform(get(nextPage).session(session))
-          .andExpect(status().is3xxRedirection()).andReturn()
-          .getResponse()
-          .getRedirectedUrl();
+    protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
+            Map<String, List<String>> params) throws Exception {
+        return mockMvc.perform(post(postUrl)
+                .with(csrf())
+                .session(session)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .params(new LinkedMultiValueMap<>(params))
+        ).andExpect(redirectedUrl(redirectUrl));
     }
-    return nextPage;
-  }
 
-  protected FormScreen postAndFollowRedirect(String flowName, String pageName, Map<String, List<String>> params) throws Exception {
-    postExpectingSuccess(flowName, pageName, params);
-    return followRedirectsForPageName(flowName, pageName);
-  }
+    // Same as postToUrlExpectingSuccess, but expecting a pattern instead of an exact match
+    protected ResultActions postToUrlExpectingSuccessRedirectPattern(String postUrl, String redirectUrlPattern,
+            Map<String, List<String>> params) throws Exception {
+        return mockMvc.perform(post(postUrl)
+                .with(csrf())
+                .session(session)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .params(new LinkedMultiValueMap<>(params))
+        ).andExpect(redirectedUrlPattern(redirectUrlPattern));
+    }
 
-  protected Map<String, Object> getMostRecentlyCreatedIterationData(MockHttpSession session, String flow, String subflow) {
-    UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get(flow);
-    Submission submission = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-    List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submission.getInputData().get(subflow);
-    return iterationsAfterFirstPost.get(iterationsAfterFirstPost.size() - 1);
-  }
+    protected String getUrlExpectingSuccessRedirectPattern(String getUrl) throws Exception {
+        return mockMvc.perform(get(getUrl).session(session))
+                .andExpect(status().is3xxRedirection()).andReturn()
+                .getResponse()
+                .getRedirectedUrl();
+    }
+
+    protected void postExpectingNextPageTitle(String flowName, String pageName,
+            String inputName,
+            String value,
+            String nextPageTitle) throws Exception {
+        String postUrl = getUrlForPageName(flowName, pageName);
+        postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of(inputName, List.of(value)));
+        FormScreen nextPage = followRedirectsForPageName("testFlow", pageName);
+        assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
+    }
+
+    protected void continueExpectingNextPageTitle(String flow, String currentPageName, String nextPageTitle)
+            throws Exception {
+        var nextPage = followRedirectsForPageName(flow, currentPageName);
+        assertThat(nextPage.getTitle()).isEqualTo(nextPageTitle);
+    }
+
+    protected ResultActions postExpectingFailure(String flowName, String pageName, String inputName, String value)
+            throws Exception {
+        String postUrl = getUrlForPageName(flowName, pageName);
+        return mockMvc.perform(
+                post(postUrl)
+                        .session(session)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param(inputName, value)
+        ).andExpect(redirectedUrl(postUrl));
+    }
+
+    protected ResultActions postExpectingFailure(String flowName, String pageName, Map<String, List<String>> params)
+            throws Exception {
+        return postExpectingFailure(flowName, pageName, params, pageName);
+    }
+
+    protected ResultActions postExpectingFailure(String flowName, String pageName, Map<String, List<String>> params,
+            String redirectUrl) throws Exception {
+
+        String postUrl = getUrlForPageName(flowName, pageName);
+        MockHttpServletRequestBuilder post = post(postUrl)
+                .session(session)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .params(new LinkedMultiValueMap<>(params));
+
+        return mockMvc.perform(post).andExpect(redirectedUrl(getUrlForPageName(flowName, redirectUrl)));
+    }
+
+    protected ResultActions postExpectingFailures(String flowName, String pageName, Map<String, String> params)
+            throws Exception {
+
+        String postUrl = getUrlForPageName(flowName, pageName);
+        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
+        params.forEach(multiValueMap::add);
+        return mockMvc.perform(
+                post(postUrl)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .params(multiValueMap)
+        ).andExpect(redirectedUrl(postUrl));
+    }
+
+    protected void postExpectingFailureAndAssertErrorDisplaysForThatInput(String flowName, String pageName,
+            String inputName,
+            String value, String errorMessage) throws Exception {
+        postExpectingFailure(flowName, pageName, inputName, value);
+        assertPageHasInputError(flowName, pageName, inputName, errorMessage);
+    }
+
+    protected void postExpectingFailureAndAssertErrorsDisplaysForThatInput(String flowName, String pageName,
+            String inputName,
+            String value, Integer numOfErrors) throws Exception {
+        postExpectingFailure(flowName, pageName, inputName, value);
+        assertEquals(numOfErrors, new FormScreen(getPage(pageName, flowName)).getInputErrors(inputName).size());
+    }
+
+    protected void postExpectingFailureAndAssertErrorsDisplayForThatInput(String flowName, String pageName,
+            String inputName,
+            String value, List<String> errorMessages) throws Exception {
+        postExpectingFailure(flowName, pageName, inputName, value);
+        assertInputHasErrors(flowName, pageName, inputName, errorMessages);
+    }
+
+    protected void postExpectingFailureAndAssertInputErrorMessages(String flowName, String pageName,
+            Map<String, String> inputParams,
+            Map<String, List<String>> expectedErrorMessages) throws Exception {
+        postExpectingFailures(flowName, pageName, inputParams);
+        for (String inputName : inputParams.keySet()) {
+            assertInputHasErrors(flowName, pageName, inputName, expectedErrorMessages.get(inputName));
+        }
+    }
+
+    protected ResultActions postWithoutData(String flowName, String pageName) throws Exception {
+        String postUrl = getUrlForPageName(flowName, pageName);
+        return mockMvc.perform(
+                post(postUrl)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        );
+    }
+
+    protected String getUrlForPageName(String flowName, String pageName) {
+        return "/flow/" + flowName + "/" + pageName;
+    }
+
+    protected void assertPageHasInputError(String flowName, String pageName, String inputName, String errorMessage)
+            throws Exception {
+        var page = new FormScreen(getPage(pageName, flowName));
+        assertEquals(errorMessage, page.getInputError(inputName).text());
+    }
+
+    protected void assertInputHasErrors(String flowName, String pageName, String inputName, List<String> errorMessages)
+            throws Exception {
+        var page = new FormScreen(getPage(pageName, flowName));
+        // make sure there are errors returned
+        assertFalse(page.getInputErrors(inputName).isEmpty(), "Expected errors on page, but there were none");
+        // assert equal amount
+        assertEquals(errorMessages.size(), page.getInputErrors(inputName).size(),
+                "The page has a different number of errors than expected");
+        // now check if they match the expected ones.
+        assertTrue(errorMessages.containsAll(page.getInputErrors(inputName).stream().map(Element::ownText).toList()),
+                "The error messages expected do match what was returned");
+    }
+
+    @NotNull
+    protected ResultActions getPage(String pageName, String flowName) throws Exception {
+        MockHttpServletRequestBuilder get = get("/flow/" + flowName + "/" + pageName).session(session);
+        return mockMvc.perform(get);
+    }
+
+
+    @NotNull
+    protected ResultActions getPageExpectingSuccess(String flowName, String pageName) throws Exception {
+        return getPage(pageName, flowName).andExpect(status().isOk());
+    }
+
+    /**
+     * Accepts the page you are on and follows the redirects to get the next page
+     *
+     * @param currentPageName the page
+     * @return a form page that can be asserted against
+     */
+    protected FormScreen followRedirectsForPageName(String flow, String currentPageName) throws Exception {
+        var nextPage = "/flow/%s/%s/navigation".formatted(flow, currentPageName);
+        while (Objects.requireNonNull(nextPage).contains("/navigation")) {
+            // follow redirects
+            nextPage = mockMvc.perform(get(nextPage).session(session))
+                    .andExpect(status().is3xxRedirection()).andReturn()
+                    .getResponse()
+                    .getRedirectedUrl();
+        }
+        return new FormScreen(mockMvc.perform(get(nextPage)));
+    }
+
+    protected String followRedirectsForUrl(String currentPageUrl) throws Exception {
+        var nextPage = currentPageUrl;
+        while (Objects.requireNonNull(nextPage).contains("/navigation")) {
+            // follow redirects
+            nextPage = mockMvc.perform(get(nextPage).session(session))
+                    .andExpect(status().is3xxRedirection()).andReturn()
+                    .getResponse()
+                    .getRedirectedUrl();
+        }
+        return nextPage;
+    }
+
+    protected FormScreen postAndFollowRedirect(String flowName, String pageName, Map<String, List<String>> params)
+            throws Exception {
+        postExpectingSuccess(flowName, pageName, params);
+        return followRedirectsForPageName(flowName, pageName);
+    }
+
+    protected Map<String, Object> getMostRecentlyCreatedIterationData(MockHttpSession session, String flow, String subflow) {
+        UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get(flow);
+        Submission submission = submissionRepositoryService.findById(testSubflowLogicUUID).get();
+        List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submission.getInputData().get(subflow);
+        return iterationsAfterFirstPost.get(iterationsAfterFirstPost.size() - 1);
+    }
 }

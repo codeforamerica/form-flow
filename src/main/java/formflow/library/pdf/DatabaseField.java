@@ -13,13 +13,13 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class DatabaseField extends SubmissionField {
 
-  @ToString.Include
-  @EqualsAndHashCode.Include
-  @NotNull String value;
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    @NotNull String value;
 
-  public DatabaseField(String name, @NotNull String value) {
-    super(name, null);
-    this.value = value;
-  }
+    public DatabaseField(String name, @NotNull String value) {
+        super(name, null);
+        this.value = value;
+    }
 
 }

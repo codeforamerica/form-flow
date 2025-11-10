@@ -19,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
         "form-flow.short-code.short-code-configs.testFlow.code-type=alpha",
         "form-flow.short-code.short-code-configs.testFlow.suffix=-TEST"
 })
-
 class ShortCodeConfigAlphaTest {
 
     @Autowired

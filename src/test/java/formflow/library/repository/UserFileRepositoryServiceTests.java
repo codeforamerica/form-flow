@@ -9,7 +9,6 @@ import formflow.library.data.UserFileRepositoryService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,65 +22,65 @@ import org.springframework.util.MimeTypeUtils;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 public class UserFileRepositoryServiceTests {
 
-  @Autowired
-  private UserFileRepositoryService userFileRepositoryService;
-  @Autowired
-  private SubmissionRepositoryService submissionRepositoryService;
+    @Autowired
+    private UserFileRepositoryService userFileRepositoryService;
+    @Autowired
+    private SubmissionRepositoryService submissionRepositoryService;
 
-  @Value("${form-flow.uploads.default-doc-type-label:'OTHER'}")
-  private String docTypeDefaultValue;
+    @Value("${form-flow.uploads.default-doc-type-label:'OTHER'}")
+    private String docTypeDefaultValue;
 
-  private Submission submission;
+    private Submission submission;
 
-  @BeforeEach
-  void setup() {
-    var inputData = Map.of(
-        "testKey", "this is a test value",
-        "otherTestKey", List.of("A", "B", "C")
-    );
-    submission = Submission.builder()
-        .inputData(inputData)
-        .urlParams(new HashMap<>())
-        .flow("testFlow")
-        .build();
-    submission = submissionRepositoryService.save(submission);
-  }
+    @BeforeEach
+    void setup() {
+        var inputData = Map.of(
+                "testKey", "this is a test value",
+                "otherTestKey", List.of("A", "B", "C")
+        );
+        submission = Submission.builder()
+                .inputData(inputData)
+                .urlParams(new HashMap<>())
+                .flow("testFlow")
+                .build();
+        submission = submissionRepositoryService.save(submission);
+    }
 
-  @Test
-  void shouldUseProperDefaultForDocTypeLabel() {
-    UserFile testFile = UserFile.builder()
-        .fileId(UUID.randomUUID())
-        .submission(submission)
-        .originalName("originalName.jpg")
-        .repositoryPath("/some/path/here")
-        .filesize((float) 1000.0)
-        .mimeType(MimeTypeUtils.IMAGE_JPEG_VALUE)
-        .virusScanned(true)
-        .build();
+    @Test
+    void shouldUseProperDefaultForDocTypeLabel() {
+        UserFile testFile = UserFile.builder()
+                .fileId(UUID.randomUUID())
+                .submission(submission)
+                .originalName("originalName.jpg")
+                .repositoryPath("/some/path/here")
+                .filesize((float) 1000.0)
+                .mimeType(MimeTypeUtils.IMAGE_JPEG_VALUE)
+                .virusScanned(true)
+                .build();
 
-    UserFile savedFile = saveAndReload(testFile);
-    assertThat(savedFile.getDocTypeLabel()).isEqualTo(docTypeDefaultValue);
-  }
+        UserFile savedFile = saveAndReload(testFile);
+        assertThat(savedFile.getDocTypeLabel()).isEqualTo(docTypeDefaultValue);
+    }
 
-  @Test
-  void shouldUseDocTypeSetInUserFileBuilderCall() {
-    UserFile testFile = UserFile.builder()
-        .fileId(UUID.randomUUID())
-        .submission(submission)
-        .originalName("originalName.jpg")
-        .repositoryPath("/some/path/here")
-        .filesize((float) 1000.0)
-        .mimeType(MimeTypeUtils.IMAGE_JPEG_VALUE)
-        .virusScanned(true)
-        .docTypeLabel("BirthCertificate")
-        .build();
+    @Test
+    void shouldUseDocTypeSetInUserFileBuilderCall() {
+        UserFile testFile = UserFile.builder()
+                .fileId(UUID.randomUUID())
+                .submission(submission)
+                .originalName("originalName.jpg")
+                .repositoryPath("/some/path/here")
+                .filesize((float) 1000.0)
+                .mimeType(MimeTypeUtils.IMAGE_JPEG_VALUE)
+                .virusScanned(true)
+                .docTypeLabel("BirthCertificate")
+                .build();
 
-    UserFile savedFile = saveAndReload(testFile);
-    assertThat(savedFile.getDocTypeLabel()).isEqualTo("BirthCertificate");
-  }
+        UserFile savedFile = saveAndReload(testFile);
+        assertThat(savedFile.getDocTypeLabel()).isEqualTo("BirthCertificate");
+    }
 
-  private UserFile saveAndReload(UserFile testFile) {
-    UserFile savedFile = userFileRepositoryService.save(testFile);
-    return userFileRepositoryService.findById(savedFile.getFileId()).orElseThrow();
-  }
+    private UserFile saveAndReload(UserFile testFile) {
+        UserFile savedFile = userFileRepositoryService.save(testFile);
+        return userFileRepositoryService.findById(savedFile.getFileId()).orElseThrow();
+    }
 }

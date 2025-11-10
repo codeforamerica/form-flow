@@ -1,9 +1,9 @@
 package formflow.library.data.validators;
 
 import formflow.library.data.annotations.Money;
-import java.util.regex.Pattern;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
 
 /**
  * Validates that a given string is in the correct money format. The format is defined as one or more digits, optionally followed
@@ -12,25 +12,25 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class MoneyValidator implements ConstraintValidator<Money, String> {
 
-  /**
-   * Default constructor.
-   */
-  public MoneyValidator() {
-  }
-
-  /**
-   * Checks if the provided {@code String} value matches the expected money format. The format is validated against the regex
-   * pattern which ensures that the value consists of one or more digits, optionally followed by a dot and two decimal places.
-   *
-   * @param value   the {@code String} value to be validated
-   * @param context context in which the constraint is evaluated
-   * @return {@code true} if the value matches the money format, otherwise {@code false}
-   */
-  @Override
-  public boolean isValid(String value, ConstraintValidatorContext context) {
-    if (value != null && !value.isBlank()){
-      return Pattern.matches("(^(0|([1-9]\\d*))?(\\.\\d{1,2})?$)?", value);
+    /**
+     * Default constructor.
+     */
+    public MoneyValidator() {
     }
-    return true;
-  }
+
+    /**
+     * Checks if the provided {@code String} value matches the expected money format. The format is validated against the regex
+     * pattern which ensures that the value consists of one or more digits, optionally followed by a dot and two decimal places.
+     *
+     * @param value   the {@code String} value to be validated
+     * @param context context in which the constraint is evaluated
+     * @return {@code true} if the value matches the money format, otherwise {@code false}
+     */
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value != null && !value.isBlank()) {
+            return Pattern.matches("(^(0|([1-9]\\d*))?(\\.\\d{1,2})?$)?", value);
+        }
+        return true;
+    }
 }

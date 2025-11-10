@@ -1,7 +1,7 @@
 package formflow.library.interceptors;
 
-import formflow.library.config.FormFlowConfigurationProperties;
 import formflow.library.config.FlowConfiguration;
+import formflow.library.config.FormFlowConfigurationProperties;
 import java.util.List;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class SpyInterceptorConfig implements WebMvcConfigurer {
 
     @Autowired
     private List<FlowConfiguration> flowConfigurations;
-    
+
     @Autowired
     private FormFlowConfigurationProperties formFlowConfigurationProperties;
 
@@ -32,7 +32,7 @@ public class SpyInterceptorConfig implements WebMvcConfigurer {
     public SessionContinuityInterceptor dataRequiredInterceptor() {
         return Mockito.spy(new SessionContinuityInterceptor(flowConfigurations));
     }
-    
+
     @Bean
     @Primary
     public DisabledFlowInterceptor disabledFlowInterceptor() {

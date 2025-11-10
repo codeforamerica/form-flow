@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 public class TrueCondition implements Condition {
 
-  @Override
-  public Boolean run(Submission submission) {
-    return true;
-  }
+    @Override
+    public Boolean run(Submission submission) {
+        return true;
+    }
 }

@@ -24,50 +24,50 @@ import org.yaml.snakeyaml.representer.Representer;
 @ConditionalOnProperty(name = "form-flow.pdf.map-file")
 public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
 
-  /**
-   * Default constructor.
-   */
-  public PdfMapFactory() {
-  }
+    @Value("${form-flow.pdf.map-file}")
+    String configPath;
 
-  @Value("${form-flow.pdf.map-file}")
-  String configPath;
-
-  @Override
-  public List<PdfMap> getObject() {
-    ClassPathResource classPathResource = new ClassPathResource(configPath);
-
-    LoaderOptions loaderOptions = new LoaderOptions();
-    loaderOptions.setAllowDuplicateKeys(false);
-    loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
-    loaderOptions.setAllowRecursiveKeys(true);
-
-    Constructor constructor = new Constructor(PdfMap.class, loaderOptions);
-    TypeDescription inputsDescription = new TypeDescription(HashMap.class);
-    constructor.addTypeDescription(inputsDescription);
-    Representer representer = new Representer(new DumperOptions());
-    representer.getPropertyUtils().setSkipMissingProperties(true);
-    Yaml yaml = new Yaml(constructor, representer,
-        new DumperOptions(), loaderOptions);
-    List<PdfMap> pdfMap = new ArrayList<>();
-    try {
-      Iterable<Object> pdfMapConfigurationIterable = yaml.loadAll(classPathResource.getInputStream());
-      pdfMapConfigurationIterable.forEach(map -> pdfMap.add((PdfMap) map));
-    } catch (IOException e) {
-      log.error("Can't find the pdf map file: " + configPath, e);
-      e.printStackTrace();
+    /**
+     * Default constructor.
+     */
+    public PdfMapFactory() {
     }
 
-    return pdfMap;
-  }
+    @Override
+    public List<PdfMap> getObject() {
+        ClassPathResource classPathResource = new ClassPathResource(configPath);
 
-  @Override
-  public Class<?> getObjectType() {
-    return PdfMap.class;
-  }
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setAllowDuplicateKeys(false);
+        loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
+        loaderOptions.setAllowRecursiveKeys(true);
 
-  @Override
-  public boolean isSingleton() {
-    return false;
-  }
+        Constructor constructor = new Constructor(PdfMap.class, loaderOptions);
+        TypeDescription inputsDescription = new TypeDescription(HashMap.class);
+        constructor.addTypeDescription(inputsDescription);
+        Representer representer = new Representer(new DumperOptions());
+        representer.getPropertyUtils().setSkipMissingProperties(true);
+        Yaml yaml = new Yaml(constructor, representer,
+                new DumperOptions(), loaderOptions);
+        List<PdfMap> pdfMap = new ArrayList<>();
+        try {
+            Iterable<Object> pdfMapConfigurationIterable = yaml.loadAll(classPathResource.getInputStream());
+            pdfMapConfigurationIterable.forEach(map -> pdfMap.add((PdfMap) map));
+        } catch (IOException e) {
+            log.error("Can't find the pdf map file: " + configPath, e);
+            e.printStackTrace();
+        }
+
+        return pdfMap;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return PdfMap.class;
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return false;
+    }
 }

@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface DefaultSubmissionFieldPreparer {
 
-  Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap);
+    Map<String, SubmissionField> prepareSubmissionFields(Submission submission, PdfMap pdfMap);
 }

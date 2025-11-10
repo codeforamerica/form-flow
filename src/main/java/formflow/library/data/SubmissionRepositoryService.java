@@ -36,6 +36,18 @@ public class SubmissionRepositoryService {
         this.shortCodeConfig = shortCodeConfig;
     }
 
+    private static String generateRandomCode(int length, ShortCodeType type) {
+        RandomStringGenerator.Builder builder = RandomStringGenerator.builder().withinRange('0', 'z');
+
+        builder = switch (type) {
+            case alphanumeric -> builder.filteredBy(Character::isLetterOrDigit);
+            case alpha -> builder.filteredBy(Character::isLetter);
+            case numeric -> builder.filteredBy(Character::isDigit);
+        };
+
+        return builder.get().generate(length);
+    }
+
     /**
      * Saves the Submission in the database.
      *
@@ -165,17 +177,5 @@ public class SubmissionRepositoryService {
                 log.warn("Confirmation code {} already exists", newCode);
             }
         } while (submission.getShortCode() == null);
-    }
-
-    private static String generateRandomCode(int length, ShortCodeType type) {
-        RandomStringGenerator.Builder builder = RandomStringGenerator.builder().withinRange('0', 'z');
-
-        builder = switch (type) {
-            case alphanumeric -> builder.filteredBy(Character::isLetterOrDigit);
-            case alpha -> builder.filteredBy(Character::isLetter);
-            case numeric -> builder.filteredBy(Character::isDigit);
-        };
-
-        return builder.get().generate(length);
     }
 }

@@ -22,8 +22,9 @@ public class CheckboxField extends SubmissionField {
 
     /**
      * A Checkbox Field
-     * @param name Field name
-     * @param value Field value
+     *
+     * @param name      Field name
+     * @param value     Field value
      * @param iteration Iteration
      */
     public CheckboxField(String name, List<String> value, Integer iteration) {

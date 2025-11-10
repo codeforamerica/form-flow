@@ -10,13 +10,13 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 @Configuration
 public class MessageSourceConfig {
 
-  @Bean
-  public MessageSource messageSource() {
-    ResourceBundleMessageSource rs = new ResourceBundleMessageSource();
-    rs.setBasenames("messages-form-flow");
-    rs.setDefaultLocale(ENGLISH);
-    rs.setUseCodeAsDefaultMessage(true);
-    return rs;
-  }
+    @Bean
+    public MessageSource messageSource() {
+        ResourceBundleMessageSource rs = new ResourceBundleMessageSource();
+        rs.setBasenames("messages-form-flow");
+        rs.setDefaultLocale(ENGLISH);
+        rs.setUseCodeAsDefaultMessage(true);
+        return rs;
+    }
 
 }

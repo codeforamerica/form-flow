@@ -1,12 +1,11 @@
 package formflow.library.data;
 
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * Service to retrieve and store UploadedFile objects in the database.
@@ -83,7 +82,7 @@ public class UserFileRepositoryService {
     /**
      * Finds all the {@link UserFile}s associated with a {@link Submission}} where the conversionSourceFileId matches
      *
-     * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
+     * @param submission             the {@link Submission} for which the associated {@link UserFile}s are sought
      * @param conversionSourceFileId
      * @return {@link List} of associated {@link UserFile} objects
      */
@@ -113,7 +112,8 @@ public class UserFileRepositoryService {
     }
 
     public List<UserFile> findAllConvertedOrderByOriginalName(Submission submission, String mimeType) {
-        return repository.findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(submission, mimeType);
+        return repository.findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(submission,
+                mimeType);
     }
 
 

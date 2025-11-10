@@ -9,25 +9,24 @@ import org.springframework.stereotype.Component;
 
 /**
  * Validates that a given string is in the correct social security number format. This validator is used in conjunction with the
- * {@link formflow.library.data.annotations.SSN} annotation to ensure that the string representation of SSN values adheres to this format.
+ * {@link formflow.library.data.annotations.SSN} annotation to ensure that the string representation of SSN values adheres to this
+ * format.
  * <p>
  * The default format is defined as ###-##-####, but with the following constraints:
  * <p>
- * does not begin with 000, 666, or 900-999
- * does not have 00 in the middle group
- * does not end with 0000
+ * does not begin with 000, 666, or 900-999 does not have 00 in the middle group does not end with 0000
  */
 @Component
 public class SSNValidator implements ConstraintValidator<SSN, String> {
+
+    @Value("${form-flow.validation.ssn-pattern:^(?!000|666|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}$}")
+    private String pattern;
 
     /**
      * Default constructor.
      */
     public SSNValidator() {
     }
-
-    @Value("${form-flow.validation.ssn-pattern:^(?!000|666|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}$}")
-    private String pattern;
 
     /**
      * Checks if the provided {@code String} value matches the expected SSN format. T

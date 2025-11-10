@@ -25,259 +25,260 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(properties = {"form-flow.path=flows-config/test-flow.yaml"})
 class SubmissionRepositoryServiceTest {
 
-  @Autowired
-  private SubmissionRepositoryService submissionRepositoryService;
+    @PersistenceContext
+    EntityManager entityManager;
+    @Autowired
+    private SubmissionRepositoryService submissionRepositoryService;
+    @Autowired
+    private ShortCodeConfig shortCodeConfig;
 
-  @PersistenceContext
-  EntityManager entityManager;
+    @Test
+    void shouldSaveASubmissionWithUUID() {
+        Submission firstSubmission = new Submission();
+        firstSubmission.setFlow("testFlow");
 
-  @Autowired
-  private ShortCodeConfig shortCodeConfig;
+        firstSubmission = saveAndReload(firstSubmission);
 
-  @Test
-  void shouldSaveASubmissionWithUUID() {
-    Submission firstSubmission = new Submission();
-    firstSubmission.setFlow("testFlow");
-
-    firstSubmission = saveAndReload(firstSubmission);
-
-    assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
-  }
-
-  @Test
-  void testShortCodePersistsOneTimeOnly() {
-    Submission submission = new Submission();
-    submission.setFlow("testFlow");
-    assertThat(submission.getShortCode()).isNull();
-
-    submission = saveAndReload(submission);
-    assertThat(submission.getId()).isInstanceOf(UUID.class);
-
-    // Only saved, not submitted via the controller so the short code should be null
-    assertThat(submission.getShortCode()).isNull();
-
-    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
-    Submission reloaded = submissionRepositoryService.findById(submission.getId()).get();
-    assertThat(reloaded.getShortCode()).isNotNull();
-
-    try {
-      submission.setShortCode("testShortCode");
-      Assertions.fail();
-    } catch (UnsupportedOperationException e) {
-      assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
+        assertThat(firstSubmission.getId()).isInstanceOf(UUID.class);
     }
 
-    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
-    // this should be a no-op, because there already is a Short Code
-    reloaded = submissionRepositoryService.findById(submission.getId()).get();
-    assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
-  }
+    @Test
+    void testShortCodePersistsOneTimeOnly() {
+        Submission submission = new Submission();
+        submission.setFlow("testFlow");
+        assertThat(submission.getShortCode()).isNull();
 
-  @Test
-  void testFindByShortCode() {
-    Submission submission = new Submission();
-    submission.setFlow("testFlow");
-    submission = saveAndReload(submission);
+        submission = saveAndReload(submission);
+        assertThat(submission.getId()).isInstanceOf(UUID.class);
 
-    submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+        // Only saved, not submitted via the controller so the short code should be null
+        assertThat(submission.getShortCode()).isNull();
 
-    ShortCodeConfig.Config config = shortCodeConfig.getConfig(submission.getFlow());
+        submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+        Submission reloaded = submissionRepositoryService.findById(submission.getId()).get();
+        assertThat(reloaded.getShortCode()).isNotNull();
 
-    int expectedLength = config.getCodeLength() +
-            (config.getPrefix() != null ? config.getPrefix().length() : 0) +
-            (config.getSuffix() != null ? config.getSuffix().length() : 0);
+        try {
+            submission.setShortCode("testShortCode");
+            Assertions.fail();
+        } catch (UnsupportedOperationException e) {
+            assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
+        }
 
-    assertThat(submission.getShortCode().length()).isEqualTo(expectedLength);
-
-    String coreOfCode = submission.getShortCode();
-    if (config.getPrefix() != null) {
-      coreOfCode = submission.getShortCode().substring(config.getPrefix().length());
+        submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+        // this should be a no-op, because there already is a Short Code
+        reloaded = submissionRepositoryService.findById(submission.getId()).get();
+        assertThat(reloaded.getShortCode()).isEqualTo(submission.getShortCode());
     }
 
-    if (config.getSuffix() != null) {
-      coreOfCode = coreOfCode.substring(0, coreOfCode.length() - config.getSuffix().length());
+    @Test
+    void testFindByShortCode() {
+        Submission submission = new Submission();
+        submission.setFlow("testFlow");
+        submission = saveAndReload(submission);
+
+        submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+
+        ShortCodeConfig.Config config = shortCodeConfig.getConfig(submission.getFlow());
+
+        int expectedLength = config.getCodeLength() +
+                (config.getPrefix() != null ? config.getPrefix().length() : 0) +
+                (config.getSuffix() != null ? config.getSuffix().length() : 0);
+
+        assertThat(submission.getShortCode().length()).isEqualTo(expectedLength);
+
+        String coreOfCode = submission.getShortCode();
+        if (config.getPrefix() != null) {
+            coreOfCode = submission.getShortCode().substring(config.getPrefix().length());
+        }
+
+        if (config.getSuffix() != null) {
+            coreOfCode = coreOfCode.substring(0, coreOfCode.length() - config.getSuffix().length());
+        }
+
+        assertThat(coreOfCode.matches("[A-Za-z0-9]+")).isEqualTo(true);
+
+        Optional<Submission> reloadedSubmission = submissionRepositoryService.findByShortCode(submission.getShortCode());
+        if (reloadedSubmission.isPresent()) {
+            assertThat(submission).isEqualTo(reloadedSubmission.get());
+            assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
+        } else {
+            Assertions.fail();
+        }
     }
 
-    assertThat(coreOfCode.matches("[A-Za-z0-9]+")).isEqualTo(true);
+    @Test
+    void shouldSaveSubmission() {
+        var inputData = Map.of(
+                "testKey", "this is a test value",
+                "otherTestKey", List.of("A", "B", "C"),
+                "household", List.of(Map.of("firstName", "John", "lastName", "Perez")));
+        var timeNow = Instant.now();
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .urlParams(new HashMap<>())
+                .flow("testFlow")
+                .submittedAt(OffsetDateTime.now())
+                .build();
 
-    Optional<Submission> reloadedSubmission = submissionRepositoryService.findByShortCode(submission.getShortCode());
-    if (reloadedSubmission.isPresent()) {
-      assertThat(submission).isEqualTo(reloadedSubmission.get());
-      assertThat(submission.getShortCode()).isEqualTo(reloadedSubmission.get().getShortCode());
-    } else {
-      Assertions.fail();
+        Submission savedSubmission = saveAndReload(submission);
+        assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
+        assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
+        assertThat(savedSubmission.getSubmittedAt()).isBefore(OffsetDateTime.now());
     }
-  }
 
-  @Test
-  void shouldSaveSubmission() {
-    var inputData = Map.of(
-        "testKey", "this is a test value",
-        "otherTestKey", List.of("A", "B", "C"),
-        "household", List.of(Map.of("firstName", "John", "lastName", "Perez")));
-    var timeNow = Instant.now();
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .urlParams(new HashMap<>())
-        .flow("testFlow")
-        .submittedAt(OffsetDateTime.now())
-        .build();
+    @Test
+    void shouldUpdateExistingSubmission() {
+        var inputData = Map.of(
+                "testKey", "this is a test value",
+                "otherTestKey", List.of("A", "B", "C"));
+        var timeNow = Instant.now();
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .urlParams(new HashMap<>())
+                .flow("testFlow")
+                .submittedAt(OffsetDateTime.now())
+                .build();
+        Submission savedSubmission = saveAndReload(submission);
 
-    Submission savedSubmission = saveAndReload(submission);
-    assertThat(savedSubmission.getFlow()).isEqualTo("testFlow");
-    assertThat(savedSubmission.getInputData()).isEqualTo(inputData);
-    assertThat(savedSubmission.getSubmittedAt()).isBefore(OffsetDateTime.now());
-  }
+        var newInputData = Map.of(
+                "newKey", "this is a new value",
+                "otherNewKey", List.of("X", "Y", "Z"));
+        savedSubmission.setInputData(newInputData);
+        savedSubmission = saveAndReload(savedSubmission);
+        assertThat(savedSubmission.getInputData()).isEqualTo(newInputData);
+    }
 
-  @Test
-  void shouldUpdateExistingSubmission() {
-    var inputData = Map.of(
-        "testKey", "this is a test value",
-        "otherTestKey", List.of("A", "B", "C"));
-    var timeNow = Instant.now();
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .urlParams(new HashMap<>())
-        .flow("testFlow")
-        .submittedAt(OffsetDateTime.now())
-        .build();
-    Submission savedSubmission = saveAndReload(submission);
+    @Test
+    void shouldRemoveCSRFFromInputData() {
+        var inputData = new HashMap<String, Object>();
+        inputData.put("testKey", "this is a test value");
+        inputData.put("otherTestKey", List.of("A", "B", "C"));
+        inputData.put("_csrf", "a1fd9167-9d6d-4298-b9x4-2fc6c75ff3ab");
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .flow("testFlow")
+                .build();
 
-    var newInputData = Map.of(
-        "newKey", "this is a new value",
-        "otherNewKey", List.of("X", "Y", "Z"));
-    savedSubmission.setInputData(newInputData);
-    savedSubmission = saveAndReload(savedSubmission);
-    assertThat(savedSubmission.getInputData()).isEqualTo(newInputData);
-  }
+        submissionRepositoryService.removeFlowCSRF(submission);
 
-  @Test
-  void shouldRemoveCSRFFromInputData() {
-    var inputData = new HashMap<String, Object>();
-    inputData.put("testKey", "this is a test value");
-    inputData.put("otherTestKey", List.of("A", "B", "C"));
-    inputData.put("_csrf", "a1fd9167-9d6d-4298-b9x4-2fc6c75ff3ab");
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .flow("testFlow")
-        .build();
+        assertThat(submission.getInputData().containsKey("_csrf")).isFalse();
+        assertThat(submission.getInputData().containsKey("testKey")).isTrue();
+    }
 
-    submissionRepositoryService.removeFlowCSRF(submission);
+    @Test
+    void shouldRemoveCSRFFromSubflowInputData() {
+        var inputData = new HashMap<String, Object>();
+        ArrayList<Map<String, Object>> subflowArr = new ArrayList<>();
+        var subflowMap = new HashMap<String, Object>();
+        subflowMap.put("_csrf", "a1fd9167-9d6d-4298-b9x4-2fc6c75ff3ab");
+        subflowMap.put("foo", "bar");
+        subflowArr.add(subflowMap);
+        inputData.put("household", subflowArr);
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .flow("testFlow")
+                .build();
 
-    assertThat(submission.getInputData().containsKey("_csrf")).isFalse();
-    assertThat(submission.getInputData().containsKey("testKey")).isTrue();
-  }
+        submissionRepositoryService.removeSubflowCSRF(submission, "household");
 
-  @Test
-  void shouldRemoveCSRFFromSubflowInputData() {
-    var inputData = new HashMap<String, Object>();
-    ArrayList<Map<String, Object>> subflowArr = new ArrayList<>();
-    var subflowMap = new HashMap<String, Object>();
-    subflowMap.put("_csrf", "a1fd9167-9d6d-4298-b9x4-2fc6c75ff3ab");
-    subflowMap.put("foo", "bar");
-    subflowArr.add(subflowMap);
-    inputData.put("household", subflowArr);
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .flow("testFlow")
-        .build();
+        var subflowEntry = (ArrayList<Map<String, Object>>) submission.getInputData().get("household");
+        assertThat(subflowEntry.get(0).containsKey("_csrf")).isFalse();
+        assertThat(subflowEntry.get(0).containsKey("foo")).isTrue();
+    }
 
-    submissionRepositoryService.removeSubflowCSRF(submission, "household");
+    @Test
+    void findByIdShouldReturnsDecryptedField() {
+        var inputData = Map.of(
+                "testKey", "this is a test value",
+                "otherTestKey", List.of("A", "B", "C"),
+                "ssnInput", "123-45-6789",
+                "household", List.of(Map.of("firstName", "John", "lastName", "Perez", "ssnInputSubflow", "321-54-9876")));
+        var timeNow = Instant.now();
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .urlParams(new HashMap<>())
+                .flow("testFlow")
+                .submittedAt(OffsetDateTime.now())
+                .build();
 
-    var subflowEntry = (ArrayList<Map<String, Object>>) submission.getInputData().get("household");
-    assertThat(subflowEntry.get(0).containsKey("_csrf")).isFalse();
-    assertThat(subflowEntry.get(0).containsKey("foo")).isTrue();
-  }
+        Submission dbSubmission = saveAndReload(submission);
+        assertThat(dbSubmission.getInputData().containsKey("ssnInput")).isTrue();
+        assertThat(dbSubmission.getInputData().containsKey("ssnInput_encrypted")).isFalse();
+        assertThat(dbSubmission.getInputData().get("ssnInput")).isEqualTo("123-45-6789");
 
-  @Test
-  void findByIdShouldReturnsDecryptedField() {
-    var inputData = Map.of(
-        "testKey", "this is a test value",
-        "otherTestKey", List.of("A", "B", "C"),
-        "ssnInput", "123-45-6789",
-        "household", List.of(Map.of("firstName", "John", "lastName", "Perez", "ssnInputSubflow", "321-54-9876")));
-    var timeNow = Instant.now();
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .urlParams(new HashMap<>())
-        .flow("testFlow")
-        .submittedAt(OffsetDateTime.now())
-        .build();
+        Map<String, Object> subflowData = (Map) ((List) dbSubmission.getInputData().get("household")).get(0);
+        assertThat(subflowData.containsKey("ssnInputSubflow")).isTrue();
+        assertThat(subflowData.containsKey("ssnInputSubflow_encrypted")).isFalse();
+        assertThat(subflowData.get("ssnInputSubflow")).isEqualTo("321-54-9876");
+    }
 
-    Submission dbSubmission = saveAndReload(submission);
-    assertThat(dbSubmission.getInputData().containsKey("ssnInput")).isTrue();
-    assertThat(dbSubmission.getInputData().containsKey("ssnInput_encrypted")).isFalse();
-    assertThat(dbSubmission.getInputData().get("ssnInput")).isEqualTo("123-45-6789");
+    @Test
+    void saveShouldEncryptFieldInDB() {
+        var inputData = Map.of(
+                "testKey", "this is a test value",
+                "otherTestKey", List.of("A", "B", "C"),
+                "ssnInput", "123-45-6789",
+                "household", List.of(Map.of("firstName", "John", "lastName", "Perez", "ssnInputSubflow", "321-54-9876")));
+        var timeNow = Instant.now();
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .urlParams(new HashMap<>())
+                .flow("testFlow")
+                .submittedAt(OffsetDateTime.now())
+                .build();
 
-    Map<String, Object> subflowData = (Map) ((List) dbSubmission.getInputData().get("household")).get(0);
-    assertThat(subflowData.containsKey("ssnInputSubflow")).isTrue();
-    assertThat(subflowData.containsKey("ssnInputSubflow_encrypted")).isFalse();
-    assertThat(subflowData.get("ssnInputSubflow")).isEqualTo("321-54-9876");
-  }
+        UUID subId = submissionRepositoryService.save(submission).getId();
 
-  @Test
-  void saveShouldEncryptFieldInDB() {
-    var inputData = Map.of(
-        "testKey", "this is a test value",
-        "otherTestKey", List.of("A", "B", "C"),
-        "ssnInput", "123-45-6789",
-        "household", List.of(Map.of("firstName", "John", "lastName", "Perez", "ssnInputSubflow", "321-54-9876")));
-    var timeNow = Instant.now();
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .urlParams(new HashMap<>())
-        .flow("testFlow")
-        .submittedAt(OffsetDateTime.now())
-        .build();
+        var query = entityManager.createQuery("SELECT s FROM Submission s WHERE s.id = :id");
+        query.setParameter("id", subId);
+        Submission resultSubmission = (Submission) query.getSingleResult();
 
-    UUID subId = submissionRepositoryService.save(submission).getId();
+        // sanity check to ensure we got the correct submission
+        assertThat(resultSubmission.getId()).isEqualTo(subId);
 
-    var query = entityManager.createQuery("SELECT s FROM Submission s WHERE s.id = :id");
-    query.setParameter("id", subId);
-    Submission resultSubmission = (Submission) query.getSingleResult();
+        // check first level ssn
+        assertThat(resultSubmission.getInputData().containsKey("ssnInput")).isFalse();
+        assertThat(resultSubmission.getInputData().containsKey("ssnInput_encrypted")).isTrue();
+        assertThat(resultSubmission.getInputData().get("ssnInput_encrypted")).isNotEqualTo(
+                submission.getInputData().get("ssnInput"));
 
-    // sanity check to ensure we got the correct submission
-    assertThat(resultSubmission.getId()).isEqualTo(subId);
+        // check subflow ssn field
+        Map<String, Object> resultHouseholdSubflow =
+                (Map<String, Object>) ((List) resultSubmission.getInputData().get("household")).get(0);
+        Map<String, Object> origHouseholdSubflow = (Map<String, Object>) ((List) submission.getInputData().get("household")).get(
+                0);
+        assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow_encrypted")).isTrue();
+        assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow")).isFalse();
+        assertThat(resultHouseholdSubflow.get("ssnInputSubflow_encrypted")).isNotEqualTo(
+                origHouseholdSubflow.get("ssnInputSubflow"));
+    }
 
-    // check first level ssn
-    assertThat(resultSubmission.getInputData().containsKey("ssnInput")).isFalse();
-    assertThat(resultSubmission.getInputData().containsKey("ssnInput_encrypted")).isTrue();
-    assertThat(resultSubmission.getInputData().get("ssnInput_encrypted")).isNotEqualTo(submission.getInputData().get("ssnInput"));
+    @Test
+    void shouldSetCreatedAtAndUpdatedAtFields() {
+        var inputData = Map.of(
+                "testKey", "this is a test value",
+                "otherTestKey", List.of("A", "B", "C")
+        );
+        var submission = Submission.builder()
+                .inputData(inputData)
+                .urlParams(new HashMap<>())
+                .flow("testFlow")
+                .build();
 
-    // check subflow ssn field
-    Map<String, Object> resultHouseholdSubflow =
-        (Map<String, Object>) ((List) resultSubmission.getInputData().get("household")).get(0);
-    Map<String, Object> origHouseholdSubflow = (Map<String, Object>) ((List) submission.getInputData().get("household")).get(0);
-    assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow_encrypted")).isTrue();
-    assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow")).isFalse();
-    assertThat(resultHouseholdSubflow.get("ssnInputSubflow_encrypted")).isNotEqualTo(origHouseholdSubflow.get("ssnInputSubflow"));
-  }
+        Submission savedSubmission = saveAndReload(submission);
+        assertThat(savedSubmission.getCreatedAt()).isBefore(OffsetDateTime.now());
 
-  @Test
-  void shouldSetCreatedAtAndUpdatedAtFields() {
-    var inputData = Map.of(
-        "testKey", "this is a test value",
-        "otherTestKey", List.of("A", "B", "C")
-    );
-    var submission = Submission.builder()
-        .inputData(inputData)
-        .urlParams(new HashMap<>())
-        .flow("testFlow")
-        .build();
+        savedSubmission.getInputData().put("newKey", "newValue");
+        Submission updatedSubmission = saveAndReload(savedSubmission);
 
-    Submission savedSubmission = saveAndReload(submission);
-    assertThat(savedSubmission.getCreatedAt()).isBefore(OffsetDateTime.now());
+        assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
+        assertThat(updatedSubmission.getUpdatedAt()).isBefore(OffsetDateTime.now());
+        assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
+    }
 
-    savedSubmission.getInputData().put("newKey", "newValue");
-    Submission updatedSubmission = saveAndReload(savedSubmission);
-
-    assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
-    assertThat(updatedSubmission.getUpdatedAt()).isBefore(OffsetDateTime.now());
-    assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
-  }
-
-  private Submission saveAndReload(Submission submission) {
-    Submission savedSubmission = submissionRepositoryService.save(submission);
-    return submissionRepositoryService.findById(savedSubmission.getId()).orElseThrow();
-  }
+    private Submission saveAndReload(Submission submission) {
+        Submission savedSubmission = submissionRepositoryService.save(submission);
+        return submissionRepositoryService.findById(savedSubmission.getId()).orElseThrow();
+    }
 }
