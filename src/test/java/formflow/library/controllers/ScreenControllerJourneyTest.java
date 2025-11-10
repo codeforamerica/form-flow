@@ -107,12 +107,19 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
 
         testPage.goBack();
         // Wait for page to load after browser back navigation (may reload from bfcache)
-        // Wait for both title and header to be available to ensure page is fully loaded
+        // First wait for title to be available, then wait for header to ensure page is fully loaded
         await().until(() -> {
             try {
-                String title = testPage.getTitle();
+                return testPage.getTitle().equals("Delete the iteration?");
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        // Now wait for header to be available (separate wait to avoid IndexOutOfBoundsException)
+        await().until(() -> {
+            try {
                 String header = testPage.getHeader();
-                return title.equals("Delete the iteration?") && header.equals("Nothing to delete!");
+                return header.equals("Nothing to delete!");
             } catch (Exception e) {
                 return false;
             }
@@ -148,12 +155,19 @@ public class ScreenControllerJourneyTest extends AbstractBasePageTest {
 
         testPage.goBack();
         // Wait for page to load after browser back navigation (may reload from bfcache)
-        // Wait for both title and header to be available to ensure page is fully loaded
+        // First wait for title to be available, then wait for header to ensure page is fully loaded
         await().until(() -> {
             try {
-                String title = testPage.getTitle();
+                return testPage.getTitle().equals("Delete the iteration?");
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        // Now wait for header to be available (separate wait to avoid IndexOutOfBoundsException)
+        await().until(() -> {
+            try {
                 String header = testPage.getHeader();
-                return title.equals("Delete the iteration?") && header.equals("Nothing to delete!");
+                return header.equals("Nothing to delete!");
             } catch (Exception e) {
                 return false;
             }
