@@ -2,6 +2,12 @@ package formflow.library.inputs;
 
 public class FieldNameMarkers {
 
+  /**
+   * Default constructor.
+   */
+  public FieldNameMarkers() {
+  }
+
   public static final String UNVALIDATED_FIELD_MARKER_CSRF = "_csrf";
   public static final String UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS = "validate_";
   public static final String UNVALIDATED_FIELD_MARKER_VALIDATED = "_validated";

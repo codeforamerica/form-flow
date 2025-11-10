@@ -8,6 +8,12 @@ import lombok.Data;
  */
 @Data
 public class LandmarkConfiguration {
+  /**
+   * Default constructor.
+   */
+  public LandmarkConfiguration() {
+  }
+
   String firstScreen;
   ArrayList<String> afterSubmitPages;
 }

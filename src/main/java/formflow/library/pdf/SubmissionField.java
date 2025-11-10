@@ -10,6 +10,12 @@ import lombok.ToString;
 @ToString(onlyExplicitlyIncluded = true)
 public abstract class SubmissionField {
 
+  /**
+   * Default constructor.
+   */
+  public SubmissionField() {
+  }
+
   @ToString.Include
   @EqualsAndHashCode.Include
   public String name = null;

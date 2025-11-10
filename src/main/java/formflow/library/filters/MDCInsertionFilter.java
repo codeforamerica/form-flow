@@ -22,6 +22,12 @@ import org.springframework.util.AntPathMatcher;
 @Component
 public class MDCInsertionFilter implements Filter {
 
+    /**
+     * Default constructor.
+     */
+    public MDCInsertionFilter() {
+    }
+
     public static final String PATH_FORMAT = "/flow/{flow}/{screen}";
 
     @Override

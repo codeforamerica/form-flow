@@ -12,6 +12,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {
 
+  /**
+   * Default constructor.
+   */
+  public DatabaseFieldPreparer() {
+  }
+
   private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
   @Override

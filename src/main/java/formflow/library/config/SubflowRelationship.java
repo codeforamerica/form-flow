@@ -4,6 +4,11 @@ import lombok.Data;
 
 @Data
 public class SubflowRelationship {
+    /**
+     * Default constructor.
+     */
+    public SubflowRelationship() {
+    }
     
     private String relatesTo;
     private String relationAlias;

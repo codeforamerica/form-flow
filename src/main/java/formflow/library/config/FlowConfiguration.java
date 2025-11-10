@@ -13,6 +13,12 @@ import lombok.Getter;
 @Getter
 public class FlowConfiguration {
 
+  /**
+   * Default constructor.
+   */
+  public FlowConfiguration() {
+  }
+
   private String name;
 
   private Map<String, ScreenNavigationConfiguration> flow;

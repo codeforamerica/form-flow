@@ -14,6 +14,12 @@ import java.util.List;
 @Configuration
 public class FlowsConfigurationFactoryConfig {
 
+  /**
+   * Default constructor.
+   */
+  public FlowsConfigurationFactoryConfig() {
+  }
+
   @Autowired(required = false)
   FormFlowConfigurationProperties formFlowConfigurationProperties;
 
@@ -34,6 +40,7 @@ public class FlowsConfigurationFactoryConfig {
    * Bean to get a list of FlowConfiguration objects.
    *
    * @return list of flow configuration objects
+   * @throws IOException if an I/O error occurs while reading the configuration
    */
   @Bean
   public List<FlowConfiguration> flowsConfiguration() throws IOException {

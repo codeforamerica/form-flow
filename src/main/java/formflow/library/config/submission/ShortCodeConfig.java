@@ -10,6 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "form-flow.short-code")
 public class ShortCodeConfig {
 
+    /**
+     * Default constructor.
+     */
+    public ShortCodeConfig() {
+    }
+
     private Map<String, Config> shortCodeConfigs;
 
     public Config getConfig(String flowName) {
@@ -23,6 +29,12 @@ public class ShortCodeConfig {
     @Setter
     @Getter
     public static class Config {
+
+        /**
+         * Default constructor.
+         */
+        public Config() {
+        }
 
         public enum ShortCodeType {
             alphanumeric, alpha, numeric;

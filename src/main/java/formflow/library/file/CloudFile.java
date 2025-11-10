@@ -13,6 +13,12 @@ import lombok.Getter;
 @Getter
 public class CloudFile {
 
+    /**
+     * Default constructor.
+     */
+    public CloudFile() {
+    }
+
     private Long fileSize;
     private byte[] fileBytes;
     private Map<String, Object> metadata;

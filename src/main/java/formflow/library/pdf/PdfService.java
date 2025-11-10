@@ -39,6 +39,7 @@ public class PdfService {
      *
      * @param submission the submission for which the PDF should be generated
      * @return a pdf byte array
+     * @throws IOException if an I/O error occurs while reading or writing the PDF file
      */
     public byte[] getFilledOutPDF(Submission submission) throws IOException {
         File file = generate(submission);

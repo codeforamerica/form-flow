@@ -7,6 +7,12 @@ package formflow.library.utils;
 public class RegexUtils {
 
     /**
+     * Default constructor.
+     */
+    public RegexUtils() {
+    }
+
+    /**
      * Regular expression pattern for validating email addresses. This pattern conforms to the general email format, allowing a
      * wide range of email addresses. It includes support for various characters in the local part and domain of the email
      * address.

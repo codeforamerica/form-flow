@@ -8,6 +8,12 @@ import java.util.ArrayList;
 public class InputUtils {
 
     /**
+     * Default constructor.
+     */
+    public InputUtils() {
+    }
+
+    /**
      * Static function to help determine if a String or ArrayList contains the {@code target} value.
      *
      * <p>Currently, this performs a comparison between two data types:</p>

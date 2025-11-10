@@ -11,6 +11,12 @@ import lombok.Data;
 @Data
 public class ScreenNavigationConfiguration {
 
+  /**
+   * Default constructor.
+   */
+  public ScreenNavigationConfiguration() {
+  }
+
   private String name;
 
   private List<NextScreen> nextScreens = Collections.emptyList();

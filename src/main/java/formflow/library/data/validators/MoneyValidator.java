@@ -13,6 +13,12 @@ import jakarta.validation.ConstraintValidatorContext;
 public class MoneyValidator implements ConstraintValidator<Money, String> {
 
   /**
+   * Default constructor.
+   */
+  public MoneyValidator() {
+  }
+
+  /**
    * Checks if the provided {@code String} value matches the expected money format. The format is validated against the regex
    * pattern which ensures that the value consists of one or more digits, optionally followed by a dot and two decimal places.
    *

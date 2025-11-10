@@ -18,6 +18,12 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class FormFlowConfigurationProperties {
 
+  /**
+   * Default constructor.
+   */
+  public FormFlowConfigurationProperties() {
+  }
+
   private List<Map<String, String>> disabledFlows = new ArrayList<>();
   private List<Map<String, String>> lockAfterSubmitted = new ArrayList<>();
 
