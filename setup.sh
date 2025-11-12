@@ -57,39 +57,47 @@ fi
 # Increase PostgreSQL max_connections to handle multiple test contexts
 # This is needed for Flyway 11.17.0+ which may use more connections during migrations
 echo 'Configuring PostgreSQL max_connections...'
-PG_VERSION=16
-PG_DATA_DIR=$(brew --prefix postgresql@${PG_VERSION})/var/postgresql@${PG_VERSION}
-PG_CONF_FILE="${PG_DATA_DIR}/postgresql.conf"
 
-# Try to find postgresql.conf in common locations
-if [ -f "$PG_CONF_FILE" ]; then
-  # Backup original config
-  if ! grep -q "# max_connections increased for Flyway 11.17.0+" "$PG_CONF_FILE"; then
-    # Check current max_connections value
-    CURRENT_MAX=$(grep "^max_connections" "$PG_CONF_FILE" | head -1 | awk '{print $3}' | tr -d '#')
-    if [ -z "$CURRENT_MAX" ] || [ "$CURRENT_MAX" -lt 200 ]; then
-      echo "Setting max_connections to 200 in $PG_CONF_FILE"
-      # Comment out existing max_connections line if present
-      sed -i.bak 's/^max_connections/# max_connections (original)/' "$PG_CONF_FILE" 2>/dev/null || true
-      # Add new max_connections setting
-      echo "" >> "$PG_CONF_FILE"
-      echo "# max_connections increased for Flyway 11.17.0+ test compatibility" >> "$PG_CONF_FILE"
-      echo "max_connections = 200" >> "$PG_CONF_FILE"
-      echo "PostgreSQL configuration updated. Restarting PostgreSQL service..."
-      brew services restart postgresql@${PG_VERSION} || true
+# Try to set max_connections using ALTER SYSTEM (works if user has superuser privileges)
+# This creates a postgresql.auto.conf file that PostgreSQL will read on next restart
+if psql -U postgres -d postgres -c "ALTER SYSTEM SET max_connections = 200;" 2>/dev/null; then
+  echo "Successfully set max_connections to 200 via ALTER SYSTEM"
+  echo "PostgreSQL will use this setting after restart. Restarting PostgreSQL service..."
+  brew services restart postgresql@16 2>/dev/null || echo "Please restart PostgreSQL manually for the change to take effect"
+elif psql -U form-flow-test -d postgres -c "ALTER SYSTEM SET max_connections = 200;" 2>/dev/null; then
+  echo "Successfully set max_connections to 200 via ALTER SYSTEM"
+  echo "PostgreSQL will use this setting after restart. Restarting PostgreSQL service..."
+  brew services restart postgresql@16 2>/dev/null || echo "Please restart PostgreSQL manually for the change to take effect"
+else
+  # Fallback: try to find and edit postgresql.conf directly
+  PG_VERSION=16
+  PG_DATA_DIR=$(brew --prefix postgresql@${PG_VERSION} 2>/dev/null)/var/postgresql@${PG_VERSION}
+  PG_CONF_FILE="${PG_DATA_DIR}/postgresql.conf"
+  
+  if [ -f "$PG_CONF_FILE" ]; then
+    if ! grep -q "# max_connections increased for Flyway 11.17.0+" "$PG_CONF_FILE"; then
+      CURRENT_MAX=$(grep "^max_connections" "$PG_CONF_FILE" 2>/dev/null | head -1 | awk '{print $3}' | tr -d '# ' || echo "0")
+      if [ -z "$CURRENT_MAX" ] || [ "$CURRENT_MAX" -lt 200 ] 2>/dev/null; then
+        echo "Setting max_connections to 200 in $PG_CONF_FILE"
+        # Backup and update
+        cp "$PG_CONF_FILE" "${PG_CONF_FILE}.bak" 2>/dev/null || true
+        sed -i.bak 's/^max_connections/# max_connections (original)/' "$PG_CONF_FILE" 2>/dev/null || true
+        echo "" >> "$PG_CONF_FILE"
+        echo "# max_connections increased for Flyway 11.17.0+ test compatibility" >> "$PG_CONF_FILE"
+        echo "max_connections = 200" >> "$PG_CONF_FILE"
+        echo "PostgreSQL configuration updated. Restarting PostgreSQL service..."
+        brew services restart postgresql@${PG_VERSION} 2>/dev/null || echo "Please restart PostgreSQL manually"
+      else
+        echo "max_connections is already set to $CURRENT_MAX (>= 200), skipping update"
+      fi
     else
-      echo "max_connections is already set to $CURRENT_MAX (>= 200), skipping update"
+      echo "max_connections already configured for Flyway 11.17.0+"
     fi
   else
-    echo "max_connections already configured for Flyway 11.17.0+"
+    echo "Warning: Could not automatically set max_connections."
+    echo "  To set manually, run: psql -U postgres -d postgres -c \"ALTER SYSTEM SET max_connections = 200;\""
+    echo "  Then restart PostgreSQL: brew services restart postgresql@16"
   fi
-else
-  # Alternative: try using ALTER SYSTEM (requires superuser, works without restart in some cases)
-  echo "Attempting to set max_connections via ALTER SYSTEM..."
-  psql -U postgres -d postgres -c "ALTER SYSTEM SET max_connections = 200;" 2>/dev/null || \
-  psql -U form-flow-test -d postgres -c "ALTER SYSTEM SET max_connections = 200;" 2>/dev/null || \
-  echo "Warning: Could not automatically set max_connections. You may need to manually set it in postgresql.conf"
-  echo "  To set manually: edit postgresql.conf and set max_connections = 200, then restart PostgreSQL"
 fi
 
 # Build the jar and run tests

@@ -22,7 +22,12 @@ jobs:
           POSTGRES_USER: form-flow-test
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: form-flow-test
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          -c max_connections=200
         ports:
           - 5432:5432
 
@@ -48,8 +53,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Verify PostgreSQL max_connections
+        run: |
+          # Wait for PostgreSQL to be ready
+          until pg_isready -h localhost -p 5432 -U form-flow-test; do
+            echo "Waiting for PostgreSQL..."
+            sleep 1
+          done
+          # Verify max_connections is set correctly (should be 200 from Docker -c flag)
+          echo "Checking PostgreSQL max_connections setting:"
+          PGPASSWORD=postgres psql -h localhost -p 5432 -U form-flow-test -d postgres -c "SHOW max_connections;" || true
 
       - name: Test with Gradle
         id: test
