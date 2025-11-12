@@ -109,6 +109,7 @@ dependencies {
 test {
     finalizedBy jacocoTestReport
     useJUnitPlatform()
+    maxParallelForks = 1  // Run tests sequentially to avoid connection exhaustion
 }
 
 jacocoTestReport {

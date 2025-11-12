@@ -42,13 +42,20 @@ spring:
     username: form-flow-test
     password: postgres
     hikari:
-      maximum-pool-size: 2
+      maximum-pool-size: 5
+      connection-timeout: 30000
+      minimum-idle: 0
+      idle-timeout: 60000
+      max-lifetime: 300000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
   flyway:
     baselineOnMigrate: true
     placeholders:
       uuid_function: "gen_random_uuid"
       user_file_doc_type_default_label: ${form-flow.uploads.default-doc-type-label:#{null}}
     clean-disabled: false
+    connect-retries: 0
   messages:
     encoding: ISO-8859-1
     basename: messages, messages-form-flow
