@@ -192,13 +192,9 @@ public class FileController extends FormFlowController {
             }
 
             UUID userFileId = UUID.randomUUID();
-            String uploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName, userFileId,
-                    fileExtension);
-            if (prependShortCode) {
-                uploadLocation = String.format("%s_%s/originals/%s_%s_%s.%s", submission.getShortCode(), submission.getId(), flow,
-                        inputName, userFileId,
-                        fileExtension);
-            }
+            String fileNamePath = prependShortCode ? "originals/%s_%s_%s.%s" : "%s_%s_%s.%s";
+            String uploadLocation = setFilePathName(submission, String.format(fileNamePath, flow, inputName, userFileId,
+                    fileExtension));
 
             cloudFileRepository.upload(uploadLocation, file);
 
@@ -297,15 +293,11 @@ public class FileController extends FormFlowController {
         String convertedFileExtension = Files.getFileExtension(
                 Objects.requireNonNull(convertedMultipartFile.getOriginalFilename()));
         UUID convertedUserFileId = UUID.randomUUID();
-        String convertedFileUploadLocation = String.format("%s/%s_%s_%s.%s", submission.getId(), flow, inputName,
-                convertedUserFileId,
-                convertedFileExtension);
 
-        if (prependShortCode) {
-            convertedFileUploadLocation = String.format("%s_%s/converted/%s_%s_%s.%s", submission.getShortCode(), submission.getId(), flow, inputName,
-                    convertedUserFileId,
-                    convertedFileExtension);
-        }
+        String fileNamePath = prependShortCode ? "converted/%s_%s_%s.%s" : "%s_%s_%s.%s";
+        String convertedFileUploadLocation = setFilePathName(submission, String.format(fileNamePath, flow, inputName,
+                convertedUserFileId,
+                convertedFileExtension));
 
         try {
             cloudFileRepository.upload(convertedFileUploadLocation, convertedMultipartFile);
@@ -541,5 +533,17 @@ public class FileController extends FormFlowController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + "UserFiles-" + submission.getId() + ".zip" + "\"")
                 .body(responseBody);
+    }
+
+    private String setFilePathName(Submission submission, String fileName) {
+        if (prependShortCode && submission.getShortCode() != null) {
+            return String.format("%s_%s/%s", submission.getShortCode(),
+                    submission.getId(), fileName);
+        } else {
+            if (prependShortCode) {
+                log.warn("Unable to set S3 file location using short code for submission {}.", submission.getId());
+            }
+            return String.format("%s/%s", submission.getId(), fileName);
+        }
     }
 }
