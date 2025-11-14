@@ -2101,6 +2101,27 @@ With the above example, `sample file.doc` will be converted to `new-sample file-
 
 Converted documents do not count against the total number of user uploaded files.
 
+If you want to include short code or confirmation code in your file structure, you can do so using the yaml:
+
+```yaml
+form-flow:
+  uploads:
+    prepend-short-code: true
+```
+
+This will update the file naming structure so that confirmation code is included in the folder name and originals
+and converted files are nested under different folders as follows:
+```
+{CONF_CODE}_{SUBMISSION_ID}/
+ - SUBMISSION_ID-CCAP-Application-Form.pdf
+ - /originals/
+       file1
+       file2
+ - /converted/
+       convertedfile1
+       convertedfile2
+```
+
 ### Virus Scanning
 
 #### ClamAV Server

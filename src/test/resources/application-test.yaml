@@ -8,6 +8,7 @@ form-flow:
     max-file-size: '17'
     thumbnail-width: '100'
     thumbnail-height: '50'
+    prepend-short-code: false
     virus-scanning:
       enabled: true
       service-url: 'https://app-58915.on-aptible.com/clammit/scan'
