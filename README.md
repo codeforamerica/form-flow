@@ -2197,7 +2197,7 @@ that you would like to download. When you use the download-all endpoint, every f
 the `user_files` table associated with a submission are zipped together and downloaded.
 
 
-
+## Address Validation
 Form flow library will support address validation through [Smarty](https://www.smarty.com/).
 
 ### Registration with Smarty
