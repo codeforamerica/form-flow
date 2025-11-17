@@ -2196,7 +2196,7 @@ attribute for the HTTP session matches the `submissionId` for the group of files
 that you would like to download. When you use the download-all endpoint, every file in
 the `user_files` table associated with a submission are zipped together and downloaded.
 
-## Address Validation
+
 
 Form flow library will support address validation through [Smarty](https://www.smarty.com/).
 
@@ -2209,7 +2209,7 @@ and make note of your `auth-id` and `auth-token`. You will need these to configu
 ### How to Configure
 
 You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
-the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
+the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)## Address Validation
 file in the starter app repo has an example for creating the `.env` for a form flow application.
 You will also need to add the following to your `application.yaml` file:
 
@@ -2329,6 +2329,58 @@ Note how the conditions first check that Smarty validation is on by looking for 
 hidden field `validate_residentialAddress` and they check if a validated address line is present in
 Submission's input data. This is because `residentialAddressStreetAddress1_validated` would only be
 present if Smarty had performed address validation.
+
+### Customizing Address Validation
+
+The form-flow library provides a default SmartyStreets implementation of address validation. However, you can provide your own implementation by creating a class that implements the `AddressValidationService` interface and annotating it with `@Service`. When Spring detects your custom implementation, it will automatically use it instead of the default SmartyStreets service.
+
+This is useful if you want to:
+- Disable address validation entirely
+- Use a different address validation provider
+- Implement custom validation logic
+
+Here's an example of a no-op implementation that disables address validation:
+
+```java
+package com.example.myapp.services;
+
+import formflow.library.address_validation.AddressValidationService;
+import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.data.FormSubmission;
+import java.util.Map;
+import org.springframework.stereotype.Service;
+
+/**
+ * No-op implementation of AddressValidationService that performs no address validation.
+ * 
+ * <p>This service replaces the default SmartyStreets implementation, effectively
+ * disabling address validation for the application.</p>
+ */
+@Service
+public class NoopAddressValidationService implements AddressValidationService {
+
+    /**
+     * Returns an empty map, indicating no address validation was performed.
+     * 
+     * @param formSubmission The form submission containing addresses (ignored).
+     * @return An empty map, as no validation is performed.
+     */
+    @Override
+    public Map<String, ValidatedAddress> validate(FormSubmission formSubmission) {
+        // No validation performed - return empty map
+        return Map.of();
+    }
+}
+```
+
+To use a custom implementation:
+
+1. Create a class in your application package that implements `AddressValidationService`
+2. Annotate it with `@Service` (or `@Component`)
+3. Ensure it's in a package that's component-scanned by Spring (typically any package under your `@SpringBootApplication` class)
+4. Spring will automatically detect and use your implementation instead of the default
+
+The default SmartyStreets implementation will only be used if no custom `AddressValidationService` bean is found in the application context.
 
 ## PDF Generation
 
