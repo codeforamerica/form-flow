@@ -2209,7 +2209,7 @@ and make note of your `auth-id` and `auth-token`. You will need these to configu
 ### How to Configure
 
 You will need to add `SMARTY_AUTH_ID` and `SMARTY_AUTH_TOKEN` to your `.env` file. Note that
-the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)## Address Validation
+the [sample.env](https://github.com/codeforamerica/form-flow-starter-app/blob/main/sample.env)
 file in the starter app repo has an example for creating the `.env` for a form flow application.
 You will also need to add the following to your `application.yaml` file:
 
