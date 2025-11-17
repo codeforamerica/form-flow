@@ -2196,8 +2196,8 @@ attribute for the HTTP session matches the `submissionId` for the group of files
 that you would like to download. When you use the download-all endpoint, every file in
 the `user_files` table associated with a submission are zipped together and downloaded.
 
-
 ## Address Validation
+
 Form flow library will support address validation through [Smarty](https://www.smarty.com/).
 
 ### Registration with Smarty
