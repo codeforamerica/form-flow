@@ -561,30 +561,27 @@ public class FileController extends FormFlowController {
      * @return an SubmissionIdentifiers with an id and a short code, if one exists. null otherwise.
      */
     private SubmissionIdentifiers getSubmissionIdentifiers(Submission submission) {
-        if (linkSubmissionsByField == null || linkSubmissionsByField.isBlank()) {
+        if (linkSubmissionsByField == null || linkSubmissionsByField.isBlank() || !submission.getInputData().containsKey(linkSubmissionsByField)) {
             return new SubmissionIdentifiers(submission.getId(), submission.getShortCode());
         } else {
-            if (submission.getInputData().containsKey(linkSubmissionsByField)) {
-                String linkFieldValue = submission.getInputData().get(linkSubmissionsByField).toString();
-                try {
-                    Optional<Submission> linkedSubmissionOptional = submissionRepositoryService.findById(
-                            UUID.fromString(linkFieldValue));
-                    if (linkedSubmissionOptional.isPresent()) {
-                        Submission linkedSubmission = linkedSubmissionOptional.get();
-                        if (linkedSubmission.getShortCode() != null) {
-                            return new SubmissionIdentifiers(linkedSubmission.getId(), linkedSubmission.getShortCode());
-                        } else {
-                            log.error("Was able to link submission {} to submission {} but short code is null",
-                                    submission.getId(), linkedSubmissionOptional.get().getId());
-                        }
+            String linkFieldValue = submission.getInputData().get(linkSubmissionsByField).toString();
+            try {
+                Optional<Submission> linkedSubmissionOptional = submissionRepositoryService.findById(UUID.fromString(linkFieldValue));
+                if (linkedSubmissionOptional.isPresent()) {
+                    Submission linkedSubmission = linkedSubmissionOptional.get();
+                    if (linkedSubmission.getShortCode() != null) {
+                        return new SubmissionIdentifiers(linkedSubmission.getId(), linkedSubmission.getShortCode());
                     } else {
-                        log.error("Unable to link submission {} to submission {} because linked submission was not found",
-                                submission.getId(), linkFieldValue);
+                        log.error("Was able to link submission {} to submission {} but short code is null",
+                                submission.getId(), linkedSubmissionOptional.get().getId());
                     }
-                } catch (IllegalArgumentException e) {
-                    log.error("Unable to link submission {} to another submission because field {} is {}", submission.getId(),
-                            linkSubmissionsByField, linkFieldValue);
+                } else {
+                    log.error("Unable to link submission {} to submission {} because linked submission was not found",
+                            submission.getId(), linkFieldValue);
                 }
+            } catch (IllegalArgumentException e) {
+                log.error("Unable to link submission {} to another submission because field {} is {}", submission.getId(),
+                        linkSubmissionsByField, linkFieldValue);
             }
             return null;
         }
