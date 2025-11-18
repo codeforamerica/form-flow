@@ -26,7 +26,7 @@ jacoco {
 }
 
 group = "org.codeforamerica.platform"
-version = "2.1.1-SNAPSHOT"
+version = "2.1.2-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
