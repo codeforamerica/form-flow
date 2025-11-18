@@ -74,6 +74,8 @@ public class FileController extends FormFlowController {
     private boolean convertUploadToPDF;
     @Value("${form-flow.uploads.prepend-short-code:false}")
     private boolean prependShortCode;
+    @Value("${form-flow.uploads.link-submissions-by-field:}")
+    private String linkSubmissionsByField;
 
     public FileController(
             UserFileRepositoryService userFileRepositoryService,
@@ -87,7 +89,8 @@ public class FileController extends FormFlowController {
             FileConversionService fileConversionService,
             @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
             @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable,
-            @Value("${form-flow.uploads.prepend-short-code:false}") boolean prependShortCode) {
+            @Value("${form-flow.uploads.prepend-short-code:false}") boolean prependShortCode,
+            @Value("${form-flow.uploads.link-submissions-by-field:}") String linkSubmissionsByField) {
         super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
                 messageSource);
         this.cloudFileRepository = cloudFileRepository;
@@ -97,6 +100,7 @@ public class FileController extends FormFlowController {
         this.fileVirusScanner = fileVirusScanner;
         this.blockIfClammitUnreachable = blockIfClammitUnreachable;
         this.prependShortCode = prependShortCode;
+        this.linkSubmissionsByField = linkSubmissionsByField;
     }
 
     /**
@@ -536,14 +540,60 @@ public class FileController extends FormFlowController {
     }
 
     private String setFilePathName(Submission submission, String fileName) {
-        if (prependShortCode && submission.getShortCode() != null) {
-            return String.format("%s_%s/%s", submission.getShortCode(),
-                    submission.getId(), fileName);
+        SubmissionIdentifiers submissionIdentifiers = getSubmissionIdentifiers(submission);
+        if (prependShortCode && submissionIdentifiers != null && submissionIdentifiers.shortCode() != null) {
+            return String.format("%s_%s/%s", submissionIdentifiers.shortCode(), submissionIdentifiers.id(), fileName);
         } else {
             if (prependShortCode) {
                 log.warn("Unable to set S3 file location using short code for submission {}.", submission.getId());
             }
             return String.format("%s/%s", submission.getId(), fileName);
         }
+    }
+
+    /**
+     * Returns a SubmissionIdentifiers record with the original submission's id and short code if there is no config to link the
+     * original submission to another submission If there is a config, the link field exists in the original submission, it's a
+     * valid UUID, it's associated with another submission, and that other submission has a short code... return that id and short
+     * code. Otherwise, return null.
+     *
+     * @param submission the original submission
+     * @return an SubmissionIdentifiers with an id and a short code, if one exists. null otherwise.
+     */
+    private SubmissionIdentifiers getSubmissionIdentifiers(Submission submission) {
+        if (linkSubmissionsByField == null || linkSubmissionsByField.isBlank() || !submission.getInputData().containsKey(linkSubmissionsByField)) {
+            return new SubmissionIdentifiers(submission.getId(), submission.getShortCode());
+        } else {
+            String linkFieldValue = submission.getInputData().get(linkSubmissionsByField).toString();
+            try {
+                Optional<Submission> linkedSubmissionOptional = submissionRepositoryService.findById(UUID.fromString(linkFieldValue));
+                if (linkedSubmissionOptional.isPresent()) {
+                    Submission linkedSubmission = linkedSubmissionOptional.get();
+                    if (linkedSubmission.getShortCode() != null) {
+                        return new SubmissionIdentifiers(linkedSubmission.getId(), linkedSubmission.getShortCode());
+                    } else {
+                        log.error("Was able to link submission {} to submission {} but short code is null",
+                                submission.getId(), linkedSubmissionOptional.get().getId());
+                    }
+                } else {
+                    log.error("Unable to link submission {} to submission {} because linked submission was not found",
+                            submission.getId(), linkFieldValue);
+                }
+            } catch (IllegalArgumentException e) {
+                log.error("Unable to link submission {} to another submission because field {} is {}", submission.getId(),
+                        linkSubmissionsByField, linkFieldValue);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * A private record that holds the Submission id and Submission short code
+     *
+     * @param id        The submission id as a UUID
+     * @param shortCode The submission short code as a String
+     */
+    private record SubmissionIdentifiers(UUID id, String shortCode) {
+
     }
 }
