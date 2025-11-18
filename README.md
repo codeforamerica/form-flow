@@ -2122,6 +2122,19 @@ and converted files are nested under different folders as follows:
        convertedfile2
 ```
 
+If you want to use the short code in your file structure, but want to use the UUID and code from a linked submission, you can specify the `input_data` field that joins the submissions.
+
+If the original submission contains that field, the value of that field is a UUID, the UUID is the Id of a valid Submission, and that Submission has a short code, that submission's id and short code will be used instead.
+
+You can configue this by setting the field name:
+
+```yaml
+form-flow:
+  uploads:
+    prepend-short-code: true
+    link-submissions-by-field: 'familySubmissionId'
+```
+
 ### Virus Scanning
 
 #### ClamAV Server
