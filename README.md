@@ -2132,7 +2132,7 @@ You can configue this by setting the field name:
 form-flow:
   uploads:
     prepend-short-code: true
-    link-submissions-by-field: 'familySubmissionId'
+    link-submissions-by-field: 'nameOfRelationshipField'
 ```
 
 ### Virus Scanning
