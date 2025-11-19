@@ -26,7 +26,7 @@ jacoco {
 }
 
 group = "org.codeforamerica.platform"
-version = "2.1.1-SNAPSHOT"
+version = "2.1.2-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -64,7 +64,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.integration:spring-integration-ws:6.5.3'
+    implementation 'org.springframework.integration:spring-integration-ws:7.0.0'
     implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -76,7 +76,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:11.17.0'
     implementation "org.flywaydb:flyway-database-postgresql:11.17.0"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.38.8'
+    implementation 'software.amazon.awssdk:s3:2.38.9'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:4.2.0'
     implementation 'com.github.librepdf:openpdf:3.0.0'
     implementation 'org.yaml:snakeyaml:2.5'
@@ -102,7 +102,7 @@ dependencies {
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
     testImplementation 'org.projectlombok:lombok:1.18.42'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:5.3.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:5.3.2'
     testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.82'
 }
 
