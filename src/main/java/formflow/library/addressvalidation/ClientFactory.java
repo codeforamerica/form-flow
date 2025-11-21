@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.addressvalidation;
 
 import com.smartystreets.api.ClientBuilder;
 import com.smartystreets.api.StaticCredentials;
