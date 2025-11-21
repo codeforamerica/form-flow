@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.addressvalidation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -113,3 +113,4 @@ public class AddressValidationJourneyTest extends AbstractBasePageTest {
         assertThat(testPage.getTitle()).isEqualTo("testAddressValidationNotFound (subflow)");
     }
 }
+

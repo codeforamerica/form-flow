@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.addressvalidation;
 
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -16,3 +16,4 @@ public class AddressValidationServiceTestConfiguration {
         return Mockito.mock(AddressValidationService.class);
     }
 }
+

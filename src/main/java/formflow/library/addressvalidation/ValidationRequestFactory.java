@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.addressvalidation;
 
 
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
@@ -61,3 +61,4 @@ public class ValidationRequestFactory {
         return smartyBatch;
     }
 }
+

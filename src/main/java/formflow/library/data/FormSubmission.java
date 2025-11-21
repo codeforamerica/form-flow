@@ -4,7 +4,7 @@ import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATED;
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
-import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.addressvalidation.ValidatedAddress;
 import formflow.library.inputs.AddressParts;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.addressvalidation;
 
 import com.smartystreets.api.us_street.Batch;
 import com.smartystreets.api.us_street.Client;
@@ -7,15 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
- * Service class for validating addresses using the SmartyStreets API. This service handles the creation of validation requests,
- * interaction with the SmartyStreets client, and processing of the validation results.
+ * Default service implementation for validating addresses using the SmartyStreets API. This service handles the
+ * creation of validation requests, interaction with the SmartyStreets client, and processing of the validation results.
+ *
+ * <p>
+ * This implementation is automatically used when no custom AddressValidationService bean is provided by the
+ * consuming application.
+ * </p>
  */
-@Service
 @Slf4j
-public class AddressValidationService {
+public class SmartyStreetsAddressValidationService implements AddressValidationService {
 
     private final ValidationRequestFactory validationRequestFactory;
     private final ClientFactory clientFactory;
@@ -26,7 +29,7 @@ public class AddressValidationService {
     private final boolean isEnabled;
 
     /**
-     * Constructs an AddressValidationService with dependencies and configuration properties.
+     * Constructs a SmartyStreetsAddressValidationService with dependencies and configuration properties.
      *
      * @param validationRequestFactory Factory for creating validation requests.
      * @param clientFactory            Factory for creating SmartyStreets clients.
@@ -35,7 +38,7 @@ public class AddressValidationService {
      * @param license                  The license key for the SmartyStreets API.
      * @param isEnabled                Application property indicating if address validation is enabled.
      */
-    public AddressValidationService(ValidationRequestFactory validationRequestFactory, ClientFactory clientFactory,
+    public SmartyStreetsAddressValidationService(ValidationRequestFactory validationRequestFactory, ClientFactory clientFactory,
             @Value("${form-flow.address-validation.smarty.auth-id:}") String authId,
             @Value("${form-flow.address-validation.smarty.auth-token:}") String authToken,
             @Value("${form-flow.address-validation.smarty.license:}") String license,
@@ -55,12 +58,14 @@ public class AddressValidationService {
      * @param formSubmission The form submission containing the addresses to be validated.
      * @return A map of identifier strings to ValidatedAddress objects.
      */
+    @Override
     public Map<String, ValidatedAddress> validate(FormSubmission formSubmission) {
 
         if (!isEnabled) {
             return Map.of();
         }
 
+        log.info("Validating address using Smarty");
         try {
             Batch smartyBatch = validationRequestFactory.create(formSubmission);
             Client client = clientFactory.create(authId, authToken, license);
@@ -90,3 +95,4 @@ public class AddressValidationService {
         }
     }
 }
+

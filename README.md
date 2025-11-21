@@ -2244,6 +2244,43 @@ can add the following to your `application.yaml` file:
 
 This will globally disable address validation for all address fields in your application.
 
+### Customizing Address Validation
+
+By default, the library uses `SmartyStreetsAddressValidationService` for address validation. However, you can provide your own implementation of `AddressValidationService` in your consuming application. When you provide a custom bean, it will automatically be used instead of the default SmartyStreets implementation.
+
+To create a custom address validation service:
+
+1. Create a class that implements `formflow.library.addressvalidation.AddressValidationService`
+2. Annotate it with `@Service` or provide it as a `@Bean` in a `@Configuration` class
+3. Implement the `validate(FormSubmission formSubmission)` method
+
+Here's an example of a no-op implementation that simply logs that validation occurred:
+
+```java
+package com.yourcompany.yourapp.services;
+
+import formflow.library.addressvalidation.AddressValidationService;
+import formflow.library.addressvalidation.ValidatedAddress;
+import formflow.library.data.FormSubmission;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Service
+@Slf4j
+public class NoopAddressValidationService implements AddressValidationService {
+
+    @Override
+    public Map<String, ValidatedAddress> validate(FormSubmission formSubmission) {
+        log.info("Validating address via NoopAddressValidationService");
+        // Return empty map - no validation performed
+        return Map.of();
+    }
+}
+```
+
+When you provide a custom `AddressValidationService` bean, the library will automatically detect it and use your implementation instead of the default SmartyStreets service.
+
 ### Validating an Address
 
 We have provided a `cfa:address` live template which provides form fields for Street Address, Apt
