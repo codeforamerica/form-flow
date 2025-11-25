@@ -147,8 +147,14 @@ public abstract class FormFlowController {
         Submission submission = null;
         try {
             submission = getSubmissionFromSession(httpSession, flow);
-        } catch (SessionExpiredException ignored) {
-            // it's okay if it doesn't exist already
+        } catch (SessionExpiredException e) {
+            // it's ok to ignore this here, we'll create a new submission
+        } catch (ResponseStatusException e) {
+            if (e.getStatusCode().value() == 404) {
+                // // it's ok to ignore this here, we'll create a new submission
+            } else {
+                throw e;
+            }
         }
 
         if (submission == null) {
