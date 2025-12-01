@@ -3506,6 +3506,31 @@ actuator endpoints.
 * [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints)
 * [Actuator API](https://docs.spring.io/spring-boot/docs/3.1.2/actuator-api/htmlsingle)
 
+### Spring Specific Configuration
+
+Note that your application should set its own specific session based time out configuration. 
+The form flow library uses spring session for session management, but your application
+will need to set its own configuration for spring session. You can do this utilizing the following
+property in your `application.yaml` file:
+
+```yaml
+spring:
+  session:
+    timeout: 1h
+```
+This sets the session time out to 1 hour. If you do not set this property, spring session will
+default to 30 minutes.
+
+#### Session Timeout Behavior
+
+When a user's session times out, they will be redirected the homepage of the application with a
+notice that their session has expired. 
+
+The default language of the notice reads: "Your session expired. In order to protect your data, we have redirected you to the beginning of the application. If you were in the middle of completing your application, please start again."
+
+If you would like to replace the default notice message, you can override the message property
+`error.session-expired` in your applications `messages.properties` file.
+
 ## Flow and Subflow Configuration
 
 ### flows-config.yaml File
