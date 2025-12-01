@@ -2,12 +2,14 @@ package formflow.library.config;
 
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
@@ -38,6 +40,20 @@ public class SecurityConfigurationBase {
         return serializer;
     }
 
+
+    /**
+     * Provides the default AccessDeniedHandler that handles CSRF exceptions.
+     * <p> 
+     * When a CSRF exception is caused by a likely session expiration, this handler will
+     * redirect the user to the home page with a session expired message. All other access denied exceptions are deleted to 
+     * Spring Security's default handler.
+     * @return the AccessDeniedHandler bean.
+     */
+    @Bean
+    public AccessDeniedHandler sessionExpiredCSRFAccessDeniedHandler() {
+        return new SessionExpiredCSRFAccessDeniedHandler();
+    }
+
     /**
      * Disables basic auth while retaining other security features
      *
@@ -47,8 +63,13 @@ public class SecurityConfigurationBase {
      */
     @Bean
     @ConditionalOnMissingBean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.formLogin(AbstractHttpConfigurer::disable);
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, 
+            AccessDeniedHandler sessionExpiredCSRFAccessDeniedHandler) throws Exception {
+        
+        httpSecurity.formLogin(AbstractHttpConfigurer::disable)
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(sessionExpiredCSRFAccessDeniedHandler)
+                );
         return httpSecurity.build();
     }
 
