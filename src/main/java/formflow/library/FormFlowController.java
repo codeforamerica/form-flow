@@ -146,9 +146,9 @@ public abstract class FormFlowController {
      */
     public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
         // If session is null, we can't retrieve from it or synchronize on it
-        // Just create a new submission (matching original behavior)
+        // Just create a new submission
         if (httpSession == null) {
-            log.info("Submission not found in session for flow '{}', creating one.", flow);
+            log.info("No session found for flow '{}', creating new Submission.", flow);
             return new Submission();
         }
 
