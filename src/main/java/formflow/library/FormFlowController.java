@@ -145,23 +145,11 @@ public abstract class FormFlowController {
      * @return The {@link Submission} object from the database or a new {@link Submission} object if one was not found
      */
     public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
-        // If session is null, we can't synchronize on it, so we can't safely check/create
-        // In this case, getSubmissionFromSession will throw an exception which we'll catch
+        // If session is null, we can't retrieve from it or synchronize on it
+        // Just create a new submission (matching original behavior)
         if (httpSession == null) {
-            // Can't synchronize on null, so just follow original logic without synchronization
-            // This is an edge case - normally session should exist
-            Submission submission = null;
-            try {
-                submission = getSubmissionFromSession(httpSession, flow);
-            } catch (ResponseStatusException ignored) {
-                // it's okay if it doesn't exist already
-            }
-
-            if (submission == null) {
-                log.info("Submission not found in session for flow '{}', creating one.", flow);
-                submission = new Submission();
-            }
-            return submission;
+            log.info("Submission not found in session for flow '{}', creating one.", flow);
+            return new Submission();
         }
 
         // Synchronize on the session to prevent race conditions when multiple threads
