@@ -145,18 +145,27 @@ public abstract class FormFlowController {
      * @return The {@link Submission} object from the database or a new {@link Submission} object if one was not found
      */
     public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
-        Submission submission = null;
-        try {
-            submission = getSubmissionFromSession(httpSession, flow);
-        } catch (ResponseStatusException ignored) {
-            // it's okay if it doesn't exist already
+        if (httpSession == null) {
+            log.info("Submission not found in session for flow '{}', creating one (session is null).", flow);
+            return new Submission();
         }
 
-        if (submission == null) {
-            log.info("Submission not found in session for flow '{}', creating one.", flow);
-            submission = new Submission();
+        // Synchronize on the session to prevent race conditions when multiple threads
+        // check for and create submissions concurrently
+        synchronized (httpSession) {
+            Submission submission = null;
+            try {
+                submission = getSubmissionFromSession(httpSession, flow);
+            } catch (ResponseStatusException ignored) {
+                // it's okay if it doesn't exist already
+            }
+
+            if (submission == null) {
+                log.info("Submission not found in session for flow '{}', creating one.", flow);
+                submission = new Submission();
+            }
+            return submission;
         }
-        return submission;
     }
 
     /**
@@ -207,15 +216,20 @@ public abstract class FormFlowController {
             return;
         }
 
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
-        UUID id = submission != null ? submission.getId() : null;
+        // Synchronize on the session to prevent race conditions when multiple threads
+        // modify the submission map concurrently. This ensures the read-modify-write
+        // operation is atomic.
+        synchronized (session) {
+            Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+            UUID id = submission != null ? submission.getId() : null;
 
-        if (submissionMap == null) {
-            submissionMap = new HashMap<>();
+            if (submissionMap == null) {
+                submissionMap = new HashMap<>();
+            }
+
+            submissionMap.put(flow, id);
+            session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
         }
-
-        submissionMap.put(flow, id);
-        session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
     }
 
     /**
