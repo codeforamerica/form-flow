@@ -4,8 +4,8 @@ import static formflow.library.data.Submission.ITERATION_IS_COMPLETE_KEY;
 import static formflow.library.inputs.FieldNameMarkers.UNVALIDATED_FIELD_MARKER_VALIDATE_ADDRESS;
 
 import com.smartystreets.api.exceptions.SmartyException;
-import formflow.library.address_validation.AddressValidationService;
-import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.addressvalidation.AddressValidationService;
+import formflow.library.addressvalidation.ValidatedAddress;
 import formflow.library.config.ActionManager;
 import formflow.library.config.ConditionManager;
 import formflow.library.config.FlowConfiguration;

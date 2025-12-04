@@ -1,4 +1,4 @@
-package formflow.library.address_validation;
+package formflow.library.addressvalidation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
@@ -39,7 +39,7 @@ class AddressValidationServiceTest {
     void validateShouldCallSmartyToValidateAddress() throws SmartyException, IOException, InterruptedException {
         FormSubmission formSubmission = new FormSubmission(Map.of());
 
-        AddressValidationService addressValidationService = new AddressValidationService(
+        AddressValidationService addressValidationService = new SmartyStreetsAddressValidationService(
                 validationRequestFactory,
                 clientFactory,
                 authId,
@@ -88,7 +88,7 @@ class AddressValidationServiceTest {
     void shouldReturnEmptyMapWhenNoAddressRecommendationIsFound() throws SmartyException, IOException, InterruptedException {
         FormSubmission formSubmission = new FormSubmission(Map.of());
 
-        AddressValidationService addressValidationService = new AddressValidationService(
+        AddressValidationService addressValidationService = new SmartyStreetsAddressValidationService(
                 validationRequestFactory,
                 clientFactory,
                 authId,
@@ -111,7 +111,7 @@ class AddressValidationServiceTest {
 
     @Test
     void shouldNotRunAddressValidationWhenFlagIsSetToOff() throws SmartyException, IOException, InterruptedException {
-        AddressValidationService addressValidationService = new AddressValidationService(
+        AddressValidationService addressValidationService = new SmartyStreetsAddressValidationService(
                 validationRequestFactory,
                 clientFactory,
                 authId,

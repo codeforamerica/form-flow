@@ -3,6 +3,7 @@ package formflow.library.interceptors;
 import formflow.library.FormFlowController;
 import formflow.library.ScreenController;
 import formflow.library.config.FlowConfiguration;
+import formflow.library.exceptions.SessionExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -67,9 +68,8 @@ public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered
             if (parsedUrl.get("screen").equals(firstScreen)) {
                 return true;
             }
-            log.debug("No active session found for request to {}. Redirecting to landing page.", request.getRequestURI());
-            response.sendRedirect(REDIRECT_URL);
-            return false;
+
+            throw new SessionExpiredException(String.format("No active session found while requesting %s. It's possible the session had expired.", request.getRequestURI()));
         }
 
         if (FormFlowController.getSubmissionIdForFlow(session, parsedUrl.get("flow")) == null &&

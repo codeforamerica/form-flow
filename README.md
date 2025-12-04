@@ -2343,6 +2343,58 @@ hidden field `validate_residentialAddress` and they check if a validated address
 Submission's input data. This is because `residentialAddressStreetAddress1_validated` would only be
 present if Smarty had performed address validation.
 
+### Customizing Address Validation
+
+The form-flow library provides a default SmartyStreets implementation of address validation. However, you can provide your own implementation by creating a class that implements the `AddressValidationService` interface and annotating it with `@Service`. When Spring detects your custom implementation, it will automatically use it instead of the default SmartyStreets service.
+
+This is useful if you want to:
+- Disable address validation entirely
+- Use a different address validation provider
+- Implement custom validation logic
+
+Here's an example of a no-op implementation that disables address validation:
+
+```java
+package com.example.myapp.services;
+
+import formflow.library.address_validation.AddressValidationService;
+import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.data.FormSubmission;
+import java.util.Map;
+import org.springframework.stereotype.Service;
+
+/**
+ * No-op implementation of AddressValidationService that performs no address validation.
+ * 
+ * <p>This service replaces the default SmartyStreets implementation, effectively
+ * disabling address validation for the application.</p>
+ */
+@Service
+public class NoopAddressValidationService implements AddressValidationService {
+
+    /**
+     * Returns an empty map, indicating no address validation was performed.
+     * 
+     * @param formSubmission The form submission containing addresses (ignored).
+     * @return An empty map, as no validation is performed.
+     */
+    @Override
+    public Map<String, ValidatedAddress> validate(FormSubmission formSubmission) {
+        // No validation performed - return empty map
+        return Map.of();
+    }
+}
+```
+
+To use a custom implementation:
+
+1. Create a class in your application package that implements `AddressValidationService`
+2. Annotate it with `@Service` (or `@Component`)
+3. Ensure it's in a package that's component-scanned by Spring (typically any package under your `@SpringBootApplication` class)
+4. Spring will automatically detect and use your implementation instead of the default
+
+The default SmartyStreets implementation will only be used if no custom `AddressValidationService` bean is found in the application context.
+
 ## PDF Generation
 
 The Form Flow Library uses the [OpenPDF](https://github.com/LibrePDF/OpenPDF) library to generate
@@ -3453,6 +3505,31 @@ actuator endpoints.
 
 * [Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints)
 * [Actuator API](https://docs.spring.io/spring-boot/docs/3.1.2/actuator-api/htmlsingle)
+
+### Spring Specific Configuration
+
+Note that your application should set its own specific session based time out configuration. 
+The form flow library uses spring session for session management, but your application
+will need to set its own configuration for spring session. You can do this utilizing the following
+property in your `application.yaml` file:
+
+```yaml
+spring:
+  session:
+    timeout: 1h
+```
+This sets the session time out to 1 hour. If you do not set this property, spring session will
+default to 30 minutes.
+
+#### Session Timeout Behavior
+
+When a user's session times out, they will be redirected the homepage of the application with a
+notice that their session has expired. 
+
+The default language of the notice reads: "Your session expired. In order to protect your data, we have redirected you to the beginning of the application. If you were in the middle of completing your application, please start again."
+
+If you would like to replace the default notice message, you can override the message property
+`error.session-expired` in your applications `messages.properties` file.
 
 ## Flow and Subflow Configuration
 

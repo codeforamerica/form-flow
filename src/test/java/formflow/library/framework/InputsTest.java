@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import formflow.library.address_validation.AddressValidationService;
-import formflow.library.address_validation.ValidatedAddress;
+import formflow.library.addressvalidation.AddressValidationService;
+import formflow.library.addressvalidation.ValidatedAddress;
 import formflow.library.utilities.AbstractMockMvcTest;
 import formflow.library.utilities.FormScreen;
 import java.util.HashMap;

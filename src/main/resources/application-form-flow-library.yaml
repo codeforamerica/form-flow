@@ -8,7 +8,6 @@ spring:
     basename: messages, messages-form-flow
   session:
     store-type: jdbc
-    timeout: 72h
     jdbc:
       initialize-schema: always
   jpa:
