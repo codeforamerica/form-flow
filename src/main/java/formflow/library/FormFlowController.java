@@ -153,7 +153,7 @@ public abstract class FormFlowController {
         }
 
         // Synchronize on the session to prevent race conditions when multiple threads
-        // check for and create submissions concurrently
+        // check for, create, or manipulate the submission concurrently
         synchronized (httpSession) {
             Submission submission = null;
             try {
