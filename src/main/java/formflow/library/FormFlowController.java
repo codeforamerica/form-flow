@@ -72,7 +72,9 @@ public abstract class FormFlowController {
 
         Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
         if (submissionMap == null) {
-            throw new SessionExpiredException("The submission map was null when looking up the submission. It's likely the session expired.");
+            // Submission map being null is normal for a new session (first screen)
+            // Return null instead of throwing exception - the interceptor will handle it
+            return null;
         }
 
         return submissionMap.get(flow);
@@ -184,7 +186,10 @@ public abstract class FormFlowController {
 
         Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
         if (submissionMap == null) {
-            throw new SessionExpiredException("The submission map was null when looking up the submission. It's likely the session expired.");
+            // Submission map being null is normal for a new session
+            // Throw ResponseStatusException so findOrCreateSubmission can catch it and create a new submission
+            throwNotFoundError(flow, null,
+                    String.format("There was no submission map present in the session for flow '%s'.", flow));
         }
 
         UUID id = submissionMap.get(flow);
