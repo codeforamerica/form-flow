@@ -67,15 +67,21 @@ public abstract class FormFlowController {
      */
     public static UUID getSubmissionIdForFlow(HttpSession session, String flow) {
         if (session == null) {
-            throw new SessionExpiredException("The session was null when looking up the submission. It's likely the session expired.");
+            String msg = "The session was null when looking up the submission. It's likely the session expired.";
+            log.info(msg);
+            throw new SessionExpiredException(msg);
         }
 
         Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        log.info("getSubmissionIdForFlow for session: {}, submissionMap size: {}, flow: {}", session.getId(), submissionMap != null ? submissionMap.size() : null, flow);
         if (submissionMap == null) {
-            throw new SessionExpiredException("The submission map was null when looking up the submission. It's likely the session expired.");
+            String msg = "The submission map was null when looking up the submission. It's likely the session expired.";
+            throw new SessionExpiredException(msg);
         }
+        UUID submissionId = submissionMap.get(flow);
+        log.info("getSubmissionIdForFlow returned {} for session: {}, flow: {}", submissionId, session.getId(), flow);
 
-        return submissionMap.get(flow);
+        return submissionId;
     }
 
     /**
@@ -145,20 +151,23 @@ public abstract class FormFlowController {
      */
     public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
         Submission submission = null;
+        String sessionId = httpSession != null ? httpSession.getId() : null;
         try {
             submission = getSubmissionFromSession(httpSession, flow);
+            log.info("Found submission: {} for session: {} ", submission, sessionId);
         } catch (SessionExpiredException e) {
             // it's ok to ignore this here, we'll create a new submission
         } catch (ResponseStatusException e) {
             if (e.getStatusCode().value() == 404) {
-                // // it's ok to ignore this here, we'll create a new submission
+                log.info("Got a 404 for flow {} with session {}", flow, sessionId);
+                // it's ok to ignore this here, we'll create a new submission
             } else {
                 throw e;
             }
         }
 
         if (submission == null) {
-            log.info("Submission not found in session for flow '{}', creating one.", flow);
+            log.info("Submission not found in session {} for flow '{}', creating one.", sessionId, flow);
             submission = new Submission();
         }
         return submission;
@@ -173,16 +182,23 @@ public abstract class FormFlowController {
      * @return {@link Submission} for the flow, if one exists, else null
      */
     protected Submission getSubmissionFromSession(HttpSession session, String flow) {
+
         if (session == null) {
-            throw new SessionExpiredException("The session was null when looking up the submission. It's likely the session expired.");
+            String msg = "The session was null when looking up the submission. It's likely the session expired. Flow: " + flow;
+            log.info(msg);
+            throw new SessionExpiredException(msg);
         }
 
         Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        log.info("getSubmissionFromSession for session: {}, submissionMap size: {}, flow: {}", session.getId(), submissionMap != null ? submissionMap.size() : null, flow);
         if (submissionMap == null) {
-            throw new SessionExpiredException("The submission map was null when looking up the submission. It's likely the session expired.");
+            String msg = "The submission map was null when looking up the submission. It's likely the session expired.";
+            throw new SessionExpiredException(msg);
         }
 
         UUID id = submissionMap.get(flow);
+        log.info("getSubmissionFromSession returned {} for session: {}, flow: {}", id, session.getId(), flow);
+
         if (id != null) {
             Optional<Submission> maybeSubmission = submissionRepositoryService.findById(id);
             if (maybeSubmission.isPresent()) {
@@ -203,22 +219,24 @@ public abstract class FormFlowController {
      * @param flow       A {@link String} containing the name of the flow to store the Submission data for
      */
     protected void setSubmissionInSession(HttpSession session, Submission submission, String flow) {
+        UUID submissionId = submission != null ? submission.getId() : null;
+
         if (session == null) {
-            log.error(
-                    "Unable to put the submission ID ('{}') into the session for the flow '{}'. Session is null.",
-                    submission != null ? submission.getId() : null,
-                    flow);
+            log.error("Unable to put the submission ID ('{}') into the session for the flow '{}'. Session is null.", submissionId, flow);
             return;
         }
 
+        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
         Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
-        UUID id = submission != null ? submission.getId() : null;
+        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
 
         if (submissionMap == null) {
             submissionMap = new HashMap<>();
         }
 
-        submissionMap.put(flow, id);
+        submissionMap.put(flow, submissionId);
+        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap.size());
+
         session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
     }
 
