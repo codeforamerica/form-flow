@@ -1445,9 +1445,11 @@ public class ScreenController extends FormFlowController {
             });
         }
 
+        Boolean formDataSubmissionExists = httpSession.getAttribute("formDataSubmission") != null;
+
         // Merge form data that was submitted, with already existing inputData
         // This helps in the case of errors, so all the current data is on the page
-        if (httpSession.getAttribute("formDataSubmission") != null) {
+        if (formDataSubmissionExists) {
             FormSubmission formSubmission = new FormSubmission(
                     (Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
             if (subflowName != null && uuid != null && !uuid.isBlank()) {
@@ -1464,10 +1466,11 @@ public class ScreenController extends FormFlowController {
         model.put("errorMessages", httpSession.getAttribute("errorMessages"));
         model.put("fieldData", submission.getInputData());
         model.put("userFiles", userFileRepositoryService.findAllBySubmission(submission));
+
         if (subflowName != null) {
             if (uuid != null && !uuid.isBlank()) {
                 model.put("fieldData", submission.getSubflowEntryByUuid(subflowName, uuid));
-            } else if (httpSession.getAttribute("formSubmissionData") != null) {
+            } else if (formDataSubmissionExists) {
                 // this is a new subflow iteration, we have submission data, so share that
                 model.put("fieldData", httpSession.getAttribute("formDataSubmission"));
             }
@@ -1500,7 +1503,12 @@ public class ScreenController extends FormFlowController {
                         Map<String, Object> repeatForIteration = subflowManager.getRepeatForIteration(subflowData,
                                 repeatFor.getSaveDataAs(),
                                 repeatForIterationUuid);
+
+                        if (formDataSubmissionExists) {
+                            repeatForIteration.putAll((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+                        }
                         model.put("repeatForIteration", repeatForIteration);
+
                         if (repeatForIteration != null) {
                             model.put("fieldData", repeatForIteration);
                         }
