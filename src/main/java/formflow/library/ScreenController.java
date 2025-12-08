@@ -1504,7 +1504,7 @@ public class ScreenController extends FormFlowController {
                                 repeatFor.getSaveDataAs(),
                                 repeatForIterationUuid);
 
-                        if (formDataSubmissionExists) {
+                        if (formDataSubmissionExists && repeatForIteration != null) {
                             repeatForIteration.putAll((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
                         }
                         model.put("repeatForIteration", repeatForIteration);
