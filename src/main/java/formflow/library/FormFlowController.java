@@ -154,7 +154,7 @@ public abstract class FormFlowController {
         String sessionId = httpSession != null ? httpSession.getId() : null;
         try {
             submission = getSubmissionFromSession(httpSession, flow);
-            String submissionId = submission != null ? submission.getId().toString() : "not found";
+            String submissionId = submission != null && submission.getId() != null ? submission.getId().toString() : "n/a";
             log.info("Found submission: {} for session: {} ", submissionId, sessionId);
         } catch (SessionExpiredException e) {
             // it's ok to ignore this here, we'll create a new submission
