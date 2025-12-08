@@ -55,7 +55,6 @@ public class UserFileRepositoryServiceTests {
                 .repositoryPath("/some/path/here")
                 .filesize((float) 1000.0)
                 .mimeType(MimeTypeUtils.IMAGE_JPEG_VALUE)
-                .virusScanned(true)
                 .build();
 
         UserFile savedFile = saveAndReload(testFile);
@@ -71,7 +70,6 @@ public class UserFileRepositoryServiceTests {
                 .repositoryPath("/some/path/here")
                 .filesize((float) 1000.0)
                 .mimeType(MimeTypeUtils.IMAGE_JPEG_VALUE)
-                .virusScanned(true)
                 .docTypeLabel("BirthCertificate")
                 .build();
 

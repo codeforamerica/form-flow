@@ -69,7 +69,6 @@ Table of Contents
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
-        * [Virus Scanning](#virus-scanning)
     * [Document Download](#document-download)
         * [Downloading Individual Files](#downloading-individual-files)
         * [Downloading All Files](#downloading-all-files)
@@ -2032,8 +2031,7 @@ The table includes:
 * `original_name` - original name of the file at the time of upload
 * `doc_type_label` - the document type label for the file
 * `repository_path` - the location of the file in cloud storage
-* `virus_scanned` - boolean field indicating if the file was scanned for viruses. `false` means the
-  file was not scanned when it was uploaded.  `true` means it was scanned and free of viruses.
+* `virus_scanned` - boolean field indicating if the file was scanned for viruses.
 
 #### Document Use Type
 
@@ -2134,32 +2132,6 @@ form-flow:
     prepend-short-code: true
     link-submissions-by-field: 'nameOfRelationshipField'
 ```
-
-### Virus Scanning
-
-#### ClamAV Server
-
-File uploads made through form flow can be scanned for viruses. We provide a way to pass
-files to a ClamAV server.
-
-Our team maintains a [ClamAV based service](https://github.com/codeforamerica/clamav-server)
-that can be deployed alongside a form flow application. The form flow library can send files to
-this service to be scanned for viruses.
-
-To run the ClamAV server you'll need to deploy it, enable virus scanning in your app, and then
-provide the endpoint url to the form flow library. After virus scanning is enabled, the file upload
-widget will return an error message if a client uploads a file containing a virus and reject it.
-
-Configuration for this feature can be found in
-our [configuration section](#virus-scanner-properties).
-
-There is a field `virus_scanned` in the `user_files` table with `Boolean` as its value.
-
-* `true` if the file was scanned by the service and did not have a virus.
-* `false` if not scanned, either because the service is down or disabled.
-
-> ⚠️ If virus scanning is enabled and a virus is detected in a file, it is rejected and not saved in
-> our systems.
 
 #### Cloud Storage Security in AWS
 
@@ -3433,15 +3405,6 @@ locally. You can learn more about the [Gradle tasks in the section below](#gradl
 | `form-flow.uploads.max-files`           | `20`                                                       | Maximum number of files that can be uploaded                                                                                          |
 | `form-flow.uploads.thumbnail-width`     | `64`                                                       | Thumbnail width in pixels                                                                                                             |
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
-
-#### Virus Scanner Properties
-
-| Property                                                | Default | Description                                                                                                                                         |
-|---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.uploads.virus-scanning.enabled`              | `false` | Turns on virus scanning component                                                                                                                   |
-| `form-flow.uploads.virus-scanning.service-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                    |
-| `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                              |
-| `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesn't return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
 
 #### Max File Size Configuration
 
