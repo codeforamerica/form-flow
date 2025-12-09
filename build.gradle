@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
-    id "org.flywaydb.flyway" version "11.18.0"
+    id "org.flywaydb.flyway" version "11.19.0"
     id "com.github.jk1.dependency-license-report" version "3.0.1"
 }
 
@@ -73,8 +73,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.0.2-1'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.13.2'
-    implementation 'org.flywaydb:flyway-core:11.18.0'
-    implementation "org.flywaydb:flyway-database-postgresql:11.18.0"
+    implementation 'org.flywaydb:flyway-core:11.19.0'
+    implementation "org.flywaydb:flyway-database-postgresql:11.19.0"
     implementation 'org.webjars.npm:dropzone:5.9.3'
     implementation 'software.amazon.awssdk:s3:2.40.3'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:4.2.0'
