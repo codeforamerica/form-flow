@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
-    id "org.flywaydb.flyway" version "11.18.0"
+    id "org.flywaydb.flyway" version "11.19.0"
     id "com.github.jk1.dependency-license-report" version "3.0.1"
 }
 
@@ -26,7 +26,7 @@ jacoco {
 }
 
 group = "org.codeforamerica.platform"
-version = "2.2.3-SNAPSHOT"
+version = "2.2.5-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -73,15 +73,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.0.2-1'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.13.2'
-    implementation 'org.flywaydb:flyway-core:11.18.0'
-    implementation "org.flywaydb:flyway-database-postgresql:11.18.0"
+    implementation 'org.flywaydb:flyway-core:11.19.0'
+    implementation "org.flywaydb:flyway-database-postgresql:11.19.0"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.40.3'
+    implementation 'software.amazon.awssdk:s3:2.40.5'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:4.2.0'
     implementation 'com.github.librepdf:openpdf:3.0.0'
     implementation 'org.yaml:snakeyaml:2.5'
     implementation 'com.mailgun:mailgun-java:2.1.1'
-    implementation 'com.google.crypto.tink:tink:1.19.0'
+    implementation 'com.google.crypto.tink:tink:1.20.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.2.3'
     implementation 'commons-codec:commons-codec:1.20.0'
