@@ -165,9 +165,9 @@ public abstract class FormFlowController {
             try {
                 submission = getSubmissionFromSession(httpSession, flow);
                 String submissionId = submission != null && submission.getId() != null ? submission.getId().toString() : "n/a";
-                log.info("Found submission: {} for session: {} ", submissionId, sessionId);
+                log.info("Found submission: {} for session: {} ", submissionId, httpSession.getId());
             } catch (ResponseStatusException e) {
-                log.info("Got a {} for flow {} with session {}", e.getStatusCode().value(), flow, sessionId);
+                log.info("Got a {} for flow {} with session {}", e.getStatusCode().value(), flow, httpSession.getId());
                 // it's ok to ignore this here, we'll create a new submission
             }
 
