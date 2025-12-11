@@ -47,12 +47,22 @@ public class SessionExpiredCSRFAccessDeniedHandler implements AccessDeniedHandle
         if (likelyExpired) {
             log.info("CSRF denied with missing session. Treating as expired session. URI: {}", request.getRequestURI());
 
-            // Use param to denote expired session on home screen
-            response.sendRedirect(request.getContextPath() + "/?sessionExpired=true");
+            if (isAjaxRequest(request)) {
+                // XHR callers cannot follow redirects, so return an error they can handle.
+                response.setHeader("X-Session-Expired", "true");
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Session expired");
+            } else {
+                // Use param to denote expired session on home screen
+                response.sendRedirect(request.getContextPath() + "/?sessionExpired=true");
+            }
             return;
         }
 
         // Preserve Spring Security default behavior in a real CSRF mismatch
         defaultHandler.handle(request, response, ex);
+    }
+
+    private boolean isAjaxRequest(HttpServletRequest request) {
+        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
 }
