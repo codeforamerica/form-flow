@@ -72,7 +72,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.0.2-1'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.13.2'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.13.3'
     implementation 'org.flywaydb:flyway-core:11.19.0'
     implementation "org.flywaydb:flyway-database-postgresql:11.19.0"
     implementation 'org.webjars.npm:dropzone:5.9.3'
