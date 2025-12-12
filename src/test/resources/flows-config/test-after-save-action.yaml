@@ -1,14 +1,14 @@
 name: testFlow
 flow:
   inputs:
-    afterSaveAction: SendEmailAfterSave
+    afterSaveAction: LookupRandomSubmissionAfterSave
     nextScreens:
       - name: subflowEntry
   subflowEntry:
     nextScreens:
       - name: subflowIterationStart
   subflowIterationStart:
-    afterSaveAction: SendEmailAfterSave
+    afterSaveAction: LookupRandomSubmissionAfterSave
     subflow: income
     nextScreens:
       - name: next

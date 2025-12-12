@@ -19,11 +19,6 @@ form-flow:
     path: 'src/test/resources/pdfs/'
     map-file: 'pdf-map.yaml'
     fontDirectory: "classpath:pdf-fonts"
-  email-client:
-    mailgun:
-      key: testing-fake-key
-      domain: 'mail.forms-starter.cfa-platforms.org'
-      sender-email: 'Testing <test@mail.forms-starter.cfa-platforms.org>'
   short-code:
     short-code-configs:
       testFlow:
