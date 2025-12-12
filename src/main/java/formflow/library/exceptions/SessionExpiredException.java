@@ -1,7 +1,11 @@
 package formflow.library.exceptions;
 
-public class SessionExpiredException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class SessionExpiredException extends ResponseStatusException {
+
     public SessionExpiredException(String message) {
-        super(message);
+        super(HttpStatus.NOT_FOUND, message);
     }
 }

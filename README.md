@@ -22,7 +22,6 @@ The library includes tooling for:
 - Data Persistence using [Hibernate](https://hibernate.org/)
 - File Uploads
 - PDF Generation based on user input
-- Sending emails using [Mailgun](https://www.mailgun.com/)
 
 An example project built with the use of this Form Flow library can be found in
 our [Form Flow Starter App](https://github.com/codeforamerica/form-flow-starter-app) repository.
@@ -69,7 +68,6 @@ Table of Contents
         * [Uploaded File Storage](#uploaded-file-storage)
         * [Deleting Uploaded Files](#deleting-uploaded-files)
         * [S3 File Retention Policies](#s3-file-retention-policies)
-        * [Virus Scanning](#virus-scanning)
     * [Document Download](#document-download)
         * [Downloading Individual Files](#downloading-individual-files)
         * [Downloading All Files](#downloading-all-files)
@@ -84,10 +82,6 @@ Table of Contents
         * [Creating a pdf-map.yaml File](#creating-a-pdf-mapyaml-file)
         * [Default Field Preparers](#default-field-preparers)
         * [SubmissionField](#submissionfield)
-    * [Sending Email](#sending-email)
-        * [Building a Custom Email Service](#building-a-custom-email-service)
-        * [Creating a Custom Email Service With EmailClient](#creating-a-custom-email-service-with-emailclient)
-        * [Mailgun](#mailgun)
     * [Localization](#localization)
         * [Setting Application Properties](#setting-application-properties)
         * [Supplying Translation Files](#supplying-translation-files)
@@ -2032,8 +2026,7 @@ The table includes:
 * `original_name` - original name of the file at the time of upload
 * `doc_type_label` - the document type label for the file
 * `repository_path` - the location of the file in cloud storage
-* `virus_scanned` - boolean field indicating if the file was scanned for viruses. `false` means the
-  file was not scanned when it was uploaded.  `true` means it was scanned and free of viruses.
+* `virus_scanned` - boolean field indicating if the file was scanned for viruses.
 
 #### Document Use Type
 
@@ -2134,32 +2127,6 @@ form-flow:
     prepend-short-code: true
     link-submissions-by-field: 'nameOfRelationshipField'
 ```
-
-### Virus Scanning
-
-#### ClamAV Server
-
-File uploads made through form flow can be scanned for viruses. We provide a way to pass
-files to a ClamAV server.
-
-Our team maintains a [ClamAV based service](https://github.com/codeforamerica/clamav-server)
-that can be deployed alongside a form flow application. The form flow library can send files to
-this service to be scanned for viruses.
-
-To run the ClamAV server you'll need to deploy it, enable virus scanning in your app, and then
-provide the endpoint url to the form flow library. After virus scanning is enabled, the file upload
-widget will return an error message if a client uploads a file containing a virus and reject it.
-
-Configuration for this feature can be found in
-our [configuration section](#virus-scanner-properties).
-
-There is a field `virus_scanned` in the `user_files` table with `Boolean` as its value.
-
-* `true` if the file was scanned by the service and did not have a virus.
-* `false` if not scanned, either because the service is down or disabled.
-
-> ⚠️ If virus scanning is enabled and a virus is detected in a file, it is rejected and not saved in
-> our systems.
 
 #### Cloud Storage Security in AWS
 
@@ -2835,198 +2802,6 @@ following 2 fonts:
 An example of providing these font files in the `/opt/pdf-fonts` directory is shown in
 the [starter app's Dockefile](https://github.com/codeforamerica/form-flow-starter-app/blob/main/Dockerfile).
 
-## Sending Email
-
-Form flow library(FFL) is using [Mailgun](https://www.mailgun.com/) as its default email service
-provider. If you
-would like to use an alternative email service, then you have two choices:
-
-1. Build a custom email client service that does not implement the EmailClient interface.
-2. Create an email service that implements the EmailClient interface.
-
-### Building a Custom Email Service
-
-1. Add the alternative email client to the dependencies in your application
-2. Generate a service using your alternative email client
-3. Call the service from an action(
-   example: [SendEmailClient](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java))
-   or from an endpoint
-
-### Creating a Custom Email Service With EmailClient
-
-The
-FFLs’ [EmailClient](https://github.com/codeforamerica/form-flow/blob/main/src/main/java/formflow/library/email/EmailClient.java)
-interface contains an overloaded send method with three method signatures. For developers creating
-custom email services with the EmailClient interface, note that sendEmail
-methods expect a return. The response object that is returned by Mailgun can be
-seen [here](https://github.com/codeforamerica/form-flow/blob/ccafd4d6024525a66a28b4b9c31fac81b55eab50/src/main/java/formflow/library/email/MailgunEmailClient.java#L69).
-
-### Mailgun
-
-#### Register an email account with Mailgun
-
-Go to the Mailgun [site](https://www.mailgun.com/) and create a Mailgun account. Update DNS records
-and verify your domain. Generate an API key for the Mailgun account. Note your Mailgun id and key.
-
-#### Configure Mailgun
-
-To [configure Mailgun](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials-)
-with the proper credentials an engineer must pass a mailgun domain,
-mailgun key, and a mailgun sender-email into their application. Those keys are passed into
-the application.yaml as displayed below:
-
-```yaml
-  email-client:
-    mailgun:
-      key: ${MAILGUN_KEY:'no-key-set'}
-      domain: 'mail.forms-starter.cfa-platforms.org'
-      sender-email: 'UBI Demo <demo@mail.forms-starter.cfa-platforms.org>'
-```
-
-##### Required Mailgun keys:
-
-| Name           | Descriptor       | How you get it                                                   | 
-|----------------|------------------|------------------------------------------------------------------|
-| `key`          | `MAILGUN_KEY`    | passed in through .env files or secrets.                         |
-| `domain`       | `Mailgun Domain` | passed into application.yaml as a string into the domain field.  |
-| `sender-email` | `Sender Email`   | passed into the application.yaml file in the sender-email field. | 
-
-##### Required Fields for Emails
-
-To build an email message you must pass at least three String arguments into the sendEmail()
-method on a MailgunEmailClient object:
-
-1. an email subject
-2. an email recipient
-3. an email body. The email body will take a string written in html and apply the text and styling
-   to the body of the email.
-
-* Note: We suggest passing the emails subject and the email body through message.properties to allow
-  for language translation.
-
-Each email message can also include these fields:
-
-- **emailsToCC** → This is a list of emails passed into the cc: field of application.yaml.
-  To capture the list of cc's, developers can grab the list of emails from the application.yaml
-  using @Value and passing in the field ”${form-flow.flow.ubi.email.confirmation.cc:}” based on the
-  application.yaml found above.
-- **emailToBCC** → is the list of emails passed into the bcc: field of application.yaml
-- **attachments** → The list of files to attach, This field accepts a list of files that are added
-  as
-  attachments to the email.
-- **requireTls** → this is a boolean that determines whether a message can only be sent through tls
-  connection.  `requireTls` is set to `true` by default. SNE's can call `setRequireTls()`, of
-  the `MailgunEmailClient` class. Passing `false` as an argument to the `setRequireTls()` will turn
-  off `requireTls` for emails.
-
-| Name            | Input Type   | Required Field | Description                                                 | Defaults   | 
-|-----------------|--------------|----------------|-------------------------------------------------------------|------------| 
-| subject         | String       | *              | The subject of an email                                     |            |
-| recipient email | String       | *              | The mailbox that the email is sent to                       |            | 
-| emailToCC       | List<String> | *              | The list of mailboxes that are copied the email             | empty list |
-| emailToBcc      | List<String> |                | List of mailboxes that are blind copied the email           | empty list | 
-| emailBody       | String       |                | Body of an email.  The html version                         |            |  
-| attachments     | List<File>   |                | List of files to be added as attachment to an email         | empty list | 
-| requireTls      | boolean      |                | Requires that messages be only sent through **TLS** service | true       | 
-
-##### Where to use Mailgun Email Client
-
-We recommend that [actions](#actions) be utilized to trigger the sending of emails. In the example
-found [here](https://github.com/codeforamerica/form-flow-starter-app/blob/main/src/main/java/org/formflowstartertemplate/app/submission/actions/SendEmailConfirmation.java):
-
-1. A beforeSave action is called on a page in the `flows-config.yaml file` to trigger an email being
-   sent like
-   [this](https://github.com/codeforamerica/form-flow-starter-app/blob/12bc95233ef82bfd82813b17ce2eb96b1805e315/src/main/resources/flows-config.yaml#L114):
-
-```yaml
-  signName:
-    beforeSaveAction: SendEmailConfirmation
-    nextScreens:
-      - name: nextSteps
-```
-
-2. A MailgunEmailClient is pulled into a beforeSaveAction,
-3. An instance of the mailgunEmailClient is used to call the sendEmail() method with the necessary
-   arguments.
-
-You can either analyze the response or exit the action after emails have been sent.
-
-##### How to send an email
-
-To pass an email message to the email service, first you need to import the MailgunEmailClient from
-the form flow library using:
-
-```java 
-import formflow.library.email.MailgunEmailClient;
-```
-
-We also advise that you import `MessageSource` to capture the email subject and email body, allowing
-for language translation.
-The recipient email be should be captured and passed into the `sendEmail()` method as a String.
-It’s recommended that developers pass a list of strings representing email addresses to **cc:**
-and/or **bcc:** fields. These stringed lists can be injected into class variables as seen below:
-
-```java
-
-@Value("${form-flow.flow.ubi.email.confirmation.cc:}")
-private List<String> emailToCc;
-
-@Value("${form-flow.flow.ubi.email.confirmation.bcc:}")
-private List<String> emailToBcc;
-```
-
-In order to add attachments, a list of type `<File>` must be generated to a `mailgunEmailClient`
-object. To send an email MailgunEmailClient object must call the `sendEmail()` method with the
-appropriate
-arguments. SendEmail is overloaded allowing it to be called in three ways:
-
-1. `sendEmail( String subject, String recipientEmail, String emailBody)`
-2. `sendEmail( String subject, String recipientEmail, String emailBody, List<File> attachments)`
-
-3. `sendEmail( String subject, String recipientEmail, String emailBody, List<String> emailsToCC,
-   List<String> emailsToBCC, List<File> attachments, boolean requireTls)`
-
-Below is an example of a sendEmail() call being made by an application using the form flow library.
-Please note that pdfs is a list of files to be passed as attachments with the email.
-
-```java
-MessageResponse response=mailgunEmailClient.sendEmail(
-    emailSubject,
-    recipientEmail,
-    emailToCc,
-    emailToBcc,
-    emailBody,
-    pdfs,
-    requireTls
-    );
-```
-
-The `sendEmail()` method will send an email and return the `MessageResponse` object it receives from
-mailgun as JSON. The message response should mirror the JSON found below if a message has been
-successfully
-queued by Mailgun.
-
-```json
-{
-  "message": "Queued. Thank you.",
-  "id": "<20111114174239.25659.5817@samples.mailgun.org>"
-}
-```
-
-When a malformed(bad) email is sent to the Mailgun api, mailgun throws an error. The error includes
-an
-error code and a corresponding error message as seen below.
-
-```logcatfilter
-... INFO  com.mailgun.util.ConsoleLogger - [MailgunMessagesApi#sendMessage] <--- HTTP/1.1 400 Bad Request (812ms)
-... ERROR f.library.email.MailgunEmailClient - [400 Bad Request] during [POST] to [https://api.mailgun.net/v3/.../messages] 
-[MailgunMessagesApi#sendMessage(String,Message)]: [{"message":"bcc parameter is not a valid address. please check documentation"}]
-```
-
-The error message thrown by mailgun is passed to the response object when an email fails. Common
-Mailgun error codes can be found
-[here](https://documentation.mailgun.com/en/latest/api-sending.html#error-codes).
-
 ## Localization
 
 ### Setting Application Properties
@@ -3433,15 +3208,6 @@ locally. You can learn more about the [Gradle tasks in the section below](#gradl
 | `form-flow.uploads.max-files`           | `20`                                                       | Maximum number of files that can be uploaded                                                                                          |
 | `form-flow.uploads.thumbnail-width`     | `64`                                                       | Thumbnail width in pixels                                                                                                             |
 | `form-flow.uploads.thumbnail-height`    | `60`                                                       | Thumbnail height in pixels                                                                                                            |
-
-#### Virus Scanner Properties
-
-| Property                                                | Default | Description                                                                                                                                         |
-|---------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.uploads.virus-scanning.enabled`              | `false` | Turns on virus scanning component                                                                                                                   |
-| `form-flow.uploads.virus-scanning.service-url`          | None    | Full path for scanning on hosted (clamav-server)                                                                                                    |
-| `form-flow.uploads.virus-scanning.timeout`              | `5000`  | Timeout in MS for checking for viruses                                                                                                              |
-| `form-flow.uploads.virus-scanning.block-if-unreachable` | `false` | If the scanner doesn't return an expected result before the timeout, the upload will be blocked and an error message will be returned to front-end. |
 
 #### Max File Size Configuration
 

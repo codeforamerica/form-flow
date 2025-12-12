@@ -12,7 +12,6 @@ import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileConversionService;
 import formflow.library.file.FileValidationService;
-import formflow.library.file.FileVirusScanner;
 import formflow.library.utils.UserFileMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -27,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +46,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
@@ -59,28 +56,27 @@ import org.springframework.web.servlet.view.RedirectView;
 public class FileController extends FormFlowController {
 
     private final CloudFileRepository cloudFileRepository;
-    private final Boolean blockIfClammitUnreachable;
-    private final FileVirusScanner fileVirusScanner;
     private final FileValidationService fileValidationService;
     private final FileConversionService fileConversionService;
     private final String SESSION_USERFILES_KEY = "userFiles";
     private final Integer maxFiles;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Value("${form-flow.uploads.default-doc-type-label:}")
     private String defaultDocType;
-    @Value("${form-flow.uploads.virus-scanning.enabled:false}")
-    private boolean isVirusScanningEnabled;
+
     @Value("${form-flow.uploads.file-conversion.convert-to-pdf:false}")
     private boolean convertUploadToPDF;
+
     @Value("${form-flow.uploads.prepend-short-code:false}")
     private boolean prependShortCode;
+
     @Value("${form-flow.uploads.link-submissions-by-field:}")
     private String linkSubmissionsByField;
 
     public FileController(
             UserFileRepositoryService userFileRepositoryService,
             CloudFileRepository cloudFileRepository,
-            FileVirusScanner fileVirusScanner,
             SubmissionRepositoryService submissionRepositoryService,
             List<FlowConfiguration> flowConfigurations,
             FormFlowConfigurationProperties formFlowConfigurationProperties,
@@ -88,7 +84,6 @@ public class FileController extends FormFlowController {
             FileValidationService fileValidationService,
             FileConversionService fileConversionService,
             @Value("${form-flow.uploads.max-files:20}") Integer maxFiles,
-            @Value("${form-flow.uploads.virus-scanning.block-if-unreachable:false}") boolean blockIfClammitUnreachable,
             @Value("${form-flow.uploads.prepend-short-code:false}") boolean prependShortCode,
             @Value("${form-flow.uploads.link-submissions-by-field:}") String linkSubmissionsByField) {
         super(submissionRepositoryService, userFileRepositoryService, flowConfigurations, formFlowConfigurationProperties,
@@ -97,8 +92,6 @@ public class FileController extends FormFlowController {
         this.fileValidationService = fileValidationService;
         this.fileConversionService = fileConversionService;
         this.maxFiles = maxFiles;
-        this.fileVirusScanner = fileVirusScanner;
-        this.blockIfClammitUnreachable = blockIfClammitUnreachable;
         this.prependShortCode = prependShortCode;
         this.linkSubmissionsByField = linkSubmissionsByField;
     }
@@ -152,25 +145,6 @@ public class FileController extends FormFlowController {
                 return new ResponseEntity<>(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             }
 
-            boolean wasScannedForVirus = false;
-            if (isVirusScanningEnabled) {
-                try {
-                    if (fileVirusScanner.virusDetected(file)) {
-                        String message = messageSource.getMessage("upload-documents.error-virus-found", null, locale);
-                        return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
-                    }
-                    wasScannedForVirus = true;
-                } catch (WebClientResponseException | TimeoutException e) {
-                    wasScannedForVirus = false;
-                    if (blockIfClammitUnreachable) {
-                        log.error("The virus scan service could not be reached. Blocking upload.");
-                        String message = messageSource.getMessage("upload-documents.error-virus-scanner-unavailable", null,
-                                locale);
-                        return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
-                    }
-                }
-            }
-
             if (fileValidationService.isTooLarge(file)) {
                 String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
                         List.of(fileValidationService.getMaxFileSizeInMb()).toArray(),
@@ -209,7 +183,6 @@ public class FileController extends FormFlowController {
                     .repositoryPath(uploadLocation)
                     .filesize((float) file.getSize())
                     .mimeType(file.getContentType())
-                    .virusScanned(wasScannedForVirus)
                     .docTypeLabel(defaultDocType)
                     .build();
 
@@ -313,7 +286,6 @@ public class FileController extends FormFlowController {
                     .repositoryPath(convertedFileUploadLocation)
                     .filesize((float) convertedMultipartFile.getSize())
                     .mimeType(convertedMultipartFile.getContentType())
-                    .virusScanned(true)
                     .docTypeLabel(defaultDocType)
                     .conversionSourceFileId(originalUserFileId)
                     .build();
@@ -561,12 +533,14 @@ public class FileController extends FormFlowController {
      * @return an SubmissionIdentifiers with an id and a short code, if one exists. null otherwise.
      */
     private SubmissionIdentifiers getSubmissionIdentifiers(Submission submission) {
-        if (linkSubmissionsByField == null || linkSubmissionsByField.isBlank() || !submission.getInputData().containsKey(linkSubmissionsByField)) {
+        if (linkSubmissionsByField == null || linkSubmissionsByField.isBlank() || !submission.getInputData()
+                .containsKey(linkSubmissionsByField)) {
             return new SubmissionIdentifiers(submission.getId(), submission.getShortCode());
         } else {
             String linkFieldValue = submission.getInputData().get(linkSubmissionsByField).toString();
             try {
-                Optional<Submission> linkedSubmissionOptional = submissionRepositoryService.findById(UUID.fromString(linkFieldValue));
+                Optional<Submission> linkedSubmissionOptional = submissionRepositoryService.findById(
+                        UUID.fromString(linkFieldValue));
                 if (linkedSubmissionOptional.isPresent()) {
                     Submission linkedSubmission = linkedSubmissionOptional.get();
                     if (linkedSubmission.getShortCode() != null) {

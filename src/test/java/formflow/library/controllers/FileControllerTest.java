@@ -18,7 +18,6 @@ import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
 import formflow.library.data.UserFile;
 import formflow.library.data.UserFileRepositoryService;
-import formflow.library.file.ClammitVirusScanner;
 import formflow.library.file.CloudFile;
 import formflow.library.file.CloudFileRepository;
 import formflow.library.file.FileValidationService;
@@ -53,7 +52,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @SpringBootTest(properties = {
         "form-flow.path=flows-config/test-conditional-navigation.yaml",
@@ -65,18 +63,22 @@ public class FileControllerTest extends AbstractMockMvcTest {
     private final UUID fileId = UUID.randomUUID();
     Submission submission;
     private MockMvc mockMvc;
+
     @MockitoSpyBean
     private CloudFileRepository cloudFileRepository;
+
     @MockitoBean
     private SubmissionRepositoryService submissionRepositoryService;
+
     @MockitoBean
     private UserFileRepositoryService userFileRepositoryService;
+
     @Autowired
     private FileController fileController;
-    @MockitoBean
-    private ClammitVirusScanner clammitVirusScanner;
+
     @MockitoSpyBean
     private FileValidationService fileValidationService;
+
     @Captor
     private ArgumentCaptor<UserFile> userFileArgumentCaptor;
 
@@ -87,7 +89,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
         mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
         submission = Submission.builder().id(submissionUUID).build();
 
-        when(clammitVirusScanner.virusDetected(any())).thenReturn(false);
         when(submissionRepositoryService.save(any())).thenReturn(submission);
         // Set the file ID on the UserFile since Mockito won't actually set one (it just returns what we tell it to)
         // It does not call the actual save method which is what sets the ID
@@ -157,78 +158,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
     }
 
     @Test
-    void shouldShowFileContainsVirusErrorIfClammitScanFindsVirus() throws Exception {
-        MockMultipartFile testVirusFile = new MockMultipartFile(
-                "file",
-                "test-virus-file.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".getBytes());
-        when(clammitVirusScanner.virusDetected(testVirusFile)).thenReturn(true);
-        when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
-        when(fileValidationService.isAcceptedMimeType(testVirusFile)).thenReturn(true);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-                        .file(testVirusFile)
-                        .param("flow", "testFlow")
-                        .param("screen", "testUploadScreen")
-                        .param("inputName", "dropZoneTestInstance")
-                        .param("thumbDataURL", "base64string")
-                        .session(session)
-                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-                .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
-                .andExpect(content().string(
-                        "We are unable to process this file because a virus was detected. Please try another file."));
-    }
-
-    @Test
-    void shouldAllowUploadIfBlockIfUnreachableIsSetToFalse() throws Exception {
-        doNothing().when(cloudFileRepository).upload(any(), any());
-
-        MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
-                MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-        when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
-                new WebClientResponseException(500, "Failed!", null, null, null));
-        when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
-        when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-                        .file(testImage)
-                        .param("flow", "testFlow")
-                        .param("inputName", "dropZoneTestInstance")
-                        .param("thumbDataURL", "base64string")
-                        .param("screen", "testUploadScreen")
-                        .session(session)
-                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-                .andExpect(status().is(HttpStatus.OK.value()))
-                .andExpect(content().string(fileId.toString()));
-
-        verify(cloudFileRepository, times(1)).upload(any(), any());
-    }
-
-    @Test
-    void shouldSetFalseIfVirusScannerDidNotRun() throws Exception {
-        MockMultipartFile testImage = new MockMultipartFile("file", "someImage.jpg",
-                MediaType.IMAGE_JPEG_VALUE, "test".getBytes());
-        when(clammitVirusScanner.virusDetected(testImage)).thenThrow(
-                new WebClientResponseException(500, "Failed!", null, null, null));
-        doNothing().when(cloudFileRepository).upload(any(), any());
-        when(fileValidationService.isAcceptedMimeType(testImage)).thenReturn(true);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/file-upload")
-                        .file(testImage)
-                        .param("flow", "testFlow")
-                        .param("inputName", "dropZoneTestInstance")
-                        .param("thumbDataURL", "base64string")
-                        .param("screen", "testUploadScreen")
-                        .session(session)
-                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-                .andExpect(status().is(HttpStatus.OK.value()));
-
-        verify(userFileRepositoryService).save(userFileArgumentCaptor.capture());
-        assertThat(userFileArgumentCaptor.getValue().isVirusScanned()).isFalse();
-    }
-
-    @Test
     void shouldReturn413IfUploadedFileViolatesMaxFileSizeConstraint() throws Exception {
         MockMultipartFile testImage = new MockMultipartFile("file", "testFileSizeImage.jpg",
                 MediaType.IMAGE_JPEG_VALUE, new byte[(int) (FileUtils.ONE_MB + 1)]);
@@ -280,7 +209,6 @@ public class FileControllerTest extends AbstractMockMvcTest {
                 .repositoryPath("pathToS3")
                 .mimeType(".pdf")
                 .filesize(Float.valueOf("10"))
-                .virusScanned(false)
                 .build();
 
         @BeforeEach
