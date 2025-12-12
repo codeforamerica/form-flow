@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
         "form-flow.path=flows-config/test-upload-flow.yaml",
-        "form-flow.uploads.virus-scanning.enabled=false",
 }, webEnvironment = RANDOM_PORT)
 public class UploadJourneyTests extends AbstractBasePageTest {
 
