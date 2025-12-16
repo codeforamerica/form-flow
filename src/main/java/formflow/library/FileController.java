@@ -318,8 +318,8 @@ public class FileController extends FormFlowController {
             HttpServletRequest request
     ) {
         try {
-            log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId,
-                    dropZoneInstanceName);
+            log.info("POST delete (url: {}): flow: {} inputName: {} fileId: {}", request.getRequestURI().toLowerCase(), flow,
+                    dropZoneInstanceName, fileId);
 
             Submission submission = getSubmissionFromSession(httpSession, flow);
             if (submission == null) {
