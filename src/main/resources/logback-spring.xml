@@ -1,13 +1,29 @@
-<?xml version = "1.0" encoding = "UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>%boldCyan(%d{HH:mm:ss.SSS}) [%thread] %highlight(%-5level) %boldMagenta(%logger{36}) - %msg%n
-      </pattern>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+
+      <!-- Pattern for timestamp, thread, level, logger, message -->
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%ex{full}</pattern>
+
+      <!-- Use ShortenedThrowableConverter to truncate stack traces -->
+      <layout class="ch.qos.logback.classic.PatternLayout">
+        <throwableConverter class="ch.qos.logback.classic.pattern.ShortenedThrowableConverter">
+          <!-- Maximum nested exceptions to include -->
+          <maxDepthPerThrowable>10</maxDepthPerThrowable>
+          <!-- Maximum characters per exception -->
+          <maxLength>4000</maxLength>
+          <!-- Print root cause first -->
+          <rootCauseFirst>true</rootCauseFirst>
+        </throwableConverter>
+      </layout>
+
     </encoder>
   </appender>
 
   <root level="INFO">
     <appender-ref ref="console"/>
   </root>
+
 </configuration>
