@@ -3,22 +3,8 @@
 
   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-
-      <!-- Pattern for timestamp, thread, level, logger, message -->
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%ex{full}</pattern>
-
-      <!-- Use ShortenedThrowableConverter to truncate stack traces -->
-      <layout class="ch.qos.logback.classic.PatternLayout">
-        <throwableConverter class="ch.qos.logback.classic.pattern.ShortenedThrowableConverter">
-          <!-- Maximum nested exceptions to include -->
-          <maxDepthPerThrowable>10</maxDepthPerThrowable>
-          <!-- Maximum characters per exception -->
-          <maxLength>4000</maxLength>
-          <!-- Print root cause first -->
-          <rootCauseFirst>true</rootCauseFirst>
-        </throwableConverter>
-      </layout>
-
+      <!-- %ex{short,20} = short stack trace, max 20 lines -->
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%ex{short,20}</pattern>
     </encoder>
   </appender>
 
