@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
-    id "org.flywaydb.flyway" version "11.19.1"
+    id "org.flywaydb.flyway" version "11.20.0"
     id "com.github.jk1.dependency-license-report" version "3.0.1"
 }
 
