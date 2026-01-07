@@ -9,6 +9,6 @@ spring:
   session:
     store-type: jdbc
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
   jpa:
     open-in-view: false

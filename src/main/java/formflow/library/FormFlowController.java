@@ -247,6 +247,7 @@ public abstract class FormFlowController {
             }
 
             submissionMap.put(flow, submissionId);
+            session.removeAttribute(SUBMISSION_MAP_NAME);
             session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
             log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap.size());
         }

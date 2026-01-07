@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
-    id "org.flywaydb.flyway" version "11.19.0"
+    id "org.flywaydb.flyway" version "11.20.0"
     id "com.github.jk1.dependency-license-report" version "3.0.1"
 }
 
@@ -26,7 +26,7 @@ jacoco {
 }
 
 group = "org.codeforamerica.platform"
-version = "2.2.6-SNAPSHOT"
+version = "3.0.5-SNAPSHOT"
 ext.admin = System.getenv("SONATYPE_USERNAME")
 def localEnv = new Properties()
 if (file(".env").isFile()) {
@@ -64,7 +64,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.integration:spring-integration-ws:7.0.0'
+    implementation 'org.springframework.integration:spring-integration-ws:7.0.1'
     implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -72,12 +72,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.0.2-1'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.13.3'
-    implementation 'org.flywaydb:flyway-core:11.19.0'
-    implementation "org.flywaydb:flyway-database-postgresql:11.19.0"
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.14.1'
+    implementation 'org.flywaydb:flyway-core:11.20.0'
+    implementation "org.flywaydb:flyway-database-postgresql:11.20.0"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.40.7'
-    implementation 'com.smartystreets.api:smartystreets-java-sdk:4.2.0'
+    implementation 'software.amazon.awssdk:s3:2.41.3'
+    implementation 'com.smartystreets.api:smartystreets-java-sdk:4.6.1'
     implementation 'com.github.librepdf:openpdf:3.0.0'
     implementation 'org.yaml:snakeyaml:2.5'
     implementation 'com.google.crypto.tink:tink:1.20.0'
@@ -91,10 +91,10 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.jsoup:jsoup:1.21.2'
+    testImplementation 'org.jsoup:jsoup:1.22.1'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
     testImplementation 'io.github.bonigarcia:webdrivermanager:6.3.3'
     testImplementation 'org.awaitility:awaitility'

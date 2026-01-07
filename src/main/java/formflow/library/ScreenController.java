@@ -86,6 +86,10 @@ public class ScreenController extends FormFlowController {
     private final ShortCodeConfig shortCodeConfig;
     private final SubflowManager subflowManager;
 
+    private static final String SPRING_SESSION_ENTRY_TO_DELETE = "entryToDelete";
+    private static final String SPRING_SESSION_ERROR_MESSAGES = "errorMessages";
+    private static final String SPRING_SESSION_FORM_DATA_SUBMISSION = "formDataSubmission";
+
     /**
      * A controller to render any screen in flows, including subflows.
      *
@@ -701,7 +705,8 @@ public class ScreenController extends FormFlowController {
             Map<String, Object> entryToDelete = submission.getSubflowEntryByUuid(subflow, uuid);
 
             if (entryToDelete != null) {
-                httpSession.setAttribute("entryToDelete", entryToDelete);
+                httpSession.removeAttribute(SPRING_SESSION_ENTRY_TO_DELETE);
+                httpSession.setAttribute(SPRING_SESSION_ENTRY_TO_DELETE, entryToDelete);
             }
         }
 
@@ -1048,7 +1053,8 @@ public class ScreenController extends FormFlowController {
                 repeatFor.getSaveDataAs(), repeatForIterationUuid);
 
         if (entryToDelete != null) {
-            httpSession.setAttribute("entryToDelete", entryToDelete);
+            httpSession.removeAttribute(SPRING_SESSION_ENTRY_TO_DELETE);
+            httpSession.setAttribute(SPRING_SESSION_ENTRY_TO_DELETE, entryToDelete);
         }
 
         return new ModelAndView(new RedirectView(
@@ -1546,12 +1552,12 @@ public class ScreenController extends FormFlowController {
 
     private void handleErrors(HttpSession httpSession, Map<String, List<String>> errorMessages,
             FormSubmission formSubmission) {
+        httpSession.removeAttribute(SPRING_SESSION_ERROR_MESSAGES);
+        httpSession.removeAttribute(SPRING_SESSION_FORM_DATA_SUBMISSION);
+
         if (!errorMessages.isEmpty()) {
-            httpSession.setAttribute("errorMessages", errorMessages);
-            httpSession.setAttribute("formDataSubmission", formSubmission.getFormData());
-        } else {
-            httpSession.removeAttribute("errorMessages");
-            httpSession.removeAttribute("formDataSubmission");
+            httpSession.setAttribute(SPRING_SESSION_ERROR_MESSAGES, errorMessages);
+            httpSession.setAttribute(SPRING_SESSION_FORM_DATA_SUBMISSION, formSubmission.getFormData());
         }
     }
 

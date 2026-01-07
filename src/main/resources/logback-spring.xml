@@ -1,13 +1,15 @@
-<?xml version = "1.0" encoding = "UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>%boldCyan(%d{HH:mm:ss.SSS}) [%thread] %highlight(%-5level) %boldMagenta(%logger{36}) - %msg%n
-      </pattern>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <!-- %ex{short,20} = short stack trace, max 20 lines -->
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%ex{short,20}</pattern>
     </encoder>
   </appender>
 
   <root level="INFO">
     <appender-ref ref="console"/>
   </root>
+
 </configuration>

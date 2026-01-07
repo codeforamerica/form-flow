@@ -198,6 +198,7 @@ public class FileController extends FormFlowController {
             }
 
             userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
+            httpSession.removeAttribute(SESSION_USERFILES_KEY);
             httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
 
             if (convertUploadToPDF) {
@@ -318,8 +319,8 @@ public class FileController extends FormFlowController {
             HttpServletRequest request
     ) {
         try {
-            log.info("POST delete (url: {}): fileId: {} inputName: {}", request.getRequestURI().toLowerCase(), fileId,
-                    dropZoneInstanceName);
+            log.info("POST delete (url: {}): flow: {} inputName: {} fileId: {}", request.getRequestURI().toLowerCase(), flow,
+                    dropZoneInstanceName, fileId);
 
             Submission submission = getSubmissionFromSession(httpSession, flow);
             if (submission == null) {
@@ -364,6 +365,7 @@ public class FileController extends FormFlowController {
                 throw new IndexOutOfBoundsException("Session does not contain user file mapping.");
             }
             userFileMap.removeUserFileFromMap(flow, fileId);
+            httpSession.removeAttribute(SESSION_USERFILES_KEY);
             httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
 
             return new RedirectView(returnPath);
