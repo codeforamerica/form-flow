@@ -1,9 +1,11 @@
 package formflow.library.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import formflow.library.utilities.AbstractBasePageTest;
+import java.time.Duration;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Cookie;
@@ -21,8 +23,11 @@ public class DataInterceptorJourneyTest extends AbstractBasePageTest {
         // firstScreen
         testPage.enter("firstName", "Testy");
         testPage.clickContinue();
-        // nonFormPage
-        String currentSessionCookie = getCurrentSessionCookie();
+        // nonFormPage - wait for cookie to be available
+        String currentSessionCookie = await()
+                .atMost(Duration.ofSeconds(5))
+                .pollInterval(Duration.ofMillis(100))
+                .until(() -> getCurrentSessionCookie(), cookie -> cookie != null);
         assertThat(currentSessionCookie).isNotNull();
         deleteSessionCookie();
         assertThat(getCurrentSessionCookie()).isNull();
@@ -31,17 +36,20 @@ public class DataInterceptorJourneyTest extends AbstractBasePageTest {
     }
 
     protected String getCurrentSessionCookie() {
-        if (driver.manage().getCookieNamed("SESSION") == null) {
-            return null;
+        Cookie cookie = driver.manage().getCookieNamed("SESSION");
+        if (cookie == null) {
+            // Try JSESSIONID as fallback
+            cookie = driver.manage().getCookieNamed("JSESSIONID");
         }
-        return driver.manage().getCookieNamed("SESSION").getValue();
+        return cookie != null ? cookie.getValue() : null;
     }
 
     protected void deleteSessionCookie() {
-        System.out.println("SessionId before deletion: " + getCurrentSessionCookie());
         driver.manage().deleteCookieNamed("SESSION");
-        System.out.println("SessionId after deletion: " + getCurrentSessionCookie());
-        Set<Cookie> cookies = driver.manage().getCookies();
-        cookies.forEach(cookie -> System.out.println(cookie.getName() + ": " + cookie.getValue()));
+        // Also try deleting JSESSIONID if it exists
+        Cookie jsessionCookie = driver.manage().getCookieNamed("JSESSIONID");
+        if (jsessionCookie != null) {
+            driver.manage().deleteCookieNamed("JSESSIONID");
+        }
     }
 }
