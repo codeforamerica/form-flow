@@ -215,12 +215,28 @@ public class ScreenController extends FormFlowController {
 
         if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
             String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
+            // Ensure submission is in session before redirecting
+            if (submission.getId() != null) {
+                setSubmissionInSession(httpSession, submission, flow);
+            }
             return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
         }
 
         if (shouldRedirectToNextScreen(validatedUuid, repeatForIterationUuid, currentScreen, submission)) {
             String nextViewableScreen = getNextViewableScreen(flow, screen, validatedUuid, repeatForIterationUuid, submission);
             log.info("%s is not viewable, redirecting to %s".formatted(screen, nextViewableScreen));
+            
+            // Ensure submission is saved and in session before redirecting
+            // This prevents losing the submission if multiple pages are skipped
+            if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
+                submission.mergeUrlParamsWithData(query_params);
+            } else {
+                submission.setUrlParams(query_params);
+            }
+            submission.setFlow(flow);
+            submission = saveToRepository(submission);
+            setSubmissionInSession(httpSession, submission, flow);
+            
             if (validatedUuid != null && repeatForIterationUuid != null) {
                 return new ModelAndView(String.format("redirect:/flow/%s/%s/%s/%s", flow, nextViewableScreen, validatedUuid,
                         repeatForIterationUuid));
