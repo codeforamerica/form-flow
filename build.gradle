@@ -76,7 +76,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:11.20.2'
     implementation "org.flywaydb:flyway-database-postgresql:11.20.2"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.41.13'
+    implementation 'software.amazon.awssdk:s3:2.41.14'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:5.0.0'
     implementation 'com.github.librepdf:openpdf:3.0.0'
     implementation 'org.yaml:snakeyaml:2.5'
