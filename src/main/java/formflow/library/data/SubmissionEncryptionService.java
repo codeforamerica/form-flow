@@ -8,6 +8,7 @@ import com.google.crypto.tink.ConfigurationV0;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
+import formflow.library.exceptions.SubmissionDecryptionException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
@@ -161,11 +162,11 @@ public class SubmissionEncryptionService {
         }
     }
 
-    private String decryptString(String encryptedData) {
+    private String decryptString(String fieldName, String encryptedData) {
         try {
             return new String(encDec.decrypt(Hex.decodeHex(encryptedData.toCharArray()), null));
         } catch (GeneralSecurityException | DecoderException e) {
-            throw new RuntimeException(e);
+            throw new SubmissionDecryptionException("Unable to decrypt " + fieldName, e);
         }
     }
 
@@ -177,7 +178,7 @@ public class SubmissionEncryptionService {
             inputMap.put(fieldName, encryptString(value));
         } else {
             String value = (String) inputMap.remove(field.getName() + ENCRYPT_SUFFIX);
-            inputMap.put(fieldName, decryptString(value));
+            inputMap.put(fieldName, decryptString(fieldName, value));
         }
     }
 
