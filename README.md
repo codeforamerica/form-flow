@@ -3826,4 +3826,4 @@ This form flow library was created and is maintained by the Platform team at Cod
 
 ## License
 
-The gem is available under the terms of the [PolyForm Noncommercial License](https://polyformproject.org/licenses/noncommercial/1.0.0/). Do you need a different license? We can grant alternative licenses to our partners - get in touch at [partnerships@codeforamerica.org](mailto:partnerships@codeforamerica.org)
+This library is available under the terms of the [PolyForm Noncommercial License](https://polyformproject.org/licenses/noncommercial/1.0.0/). Do you need a different license? We can grant alternative licenses to our partners - get in touch at [partnerships@codeforamerica.org](mailto:partnerships@codeforamerica.org)
