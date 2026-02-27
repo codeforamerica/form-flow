@@ -79,7 +79,7 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.42.1'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:5.2.0'
     implementation 'com.github.librepdf:openpdf:3.0.1'
-    implementation 'org.yaml:snakeyaml:2.5'
+    implementation 'org.yaml:snakeyaml:2.6'
     implementation 'com.google.crypto.tink:tink:1.20.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.2.3'
