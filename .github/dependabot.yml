@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: "daily"
     ignore:
+      - dependency-name: "org.flywaydb:*"
+        update-types: ["version-update:semver-major"]
       - dependency-name: "com.amazonaws:aws-java-sdk-s3"
         update-types: ["version-update:semver-patch"]
   - package-ecosystem: "github-actions"
