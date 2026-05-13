@@ -7,7 +7,7 @@ updates:
     cooldown:
       default-days: 7
     ignore:
-      - dependency-name: "org.flywaydb.*"
+      - dependency-name: "org.flywaydb:*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "com.amazonaws:aws-java-sdk-s3"
         update-types: ["version-update:semver-patch"]
