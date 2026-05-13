@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '4.0.3'
+    id 'org.springframework.boot' version '4.0.5'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'java-library'
     id 'maven-publish'
@@ -8,7 +8,7 @@ plugins {
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
     id "org.flywaydb.flyway" version "11.20.3"
-    id "com.github.jk1.dependency-license-report" version "3.1.1"
+    id "com.github.jk1.dependency-license-report" version "3.1.2"
 }
 
 tasks.withType(Jar).configureEach {
@@ -64,8 +64,8 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.integration:spring-integration-ws:7.0.3'
-    implementation 'com.google.guava:guava:33.5.0-jre'
+    implementation 'org.springframework.integration:spring-integration-ws:7.0.4'
+    implementation 'com.google.guava:guava:33.6.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -76,14 +76,14 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:11.20.3'
     implementation "org.flywaydb:flyway-database-postgresql:11.20.3"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.42.4'
-    implementation 'com.smartystreets.api:smartystreets-java-sdk:5.2.0'
-    implementation 'com.github.librepdf:openpdf:3.0.2'
+    implementation 'software.amazon.awssdk:s3:2.44.2'
+    implementation 'com.smartystreets.api:smartystreets-java-sdk:6.0.0'
+    implementation 'com.github.librepdf:openpdf:3.0.4'
     implementation 'org.yaml:snakeyaml:2.6'
-    implementation 'com.google.crypto.tink:tink:1.20.0'
+    implementation 'com.google.crypto.tink:tink:1.21.0'
     implementation 'org.springframework.session:spring-session-jdbc'
-    implementation 'org.apache.tika:tika-core:3.2.3'
-    implementation 'commons-codec:commons-codec:1.21.0'
+    implementation 'org.apache.tika:tika-core:3.3.0'
+    implementation 'commons-codec:commons-codec:1.22.0'
     implementation 'org.apache.commons:commons-text:1.15.0'
 
     compileOnly 'org.projectlombok:lombok'
@@ -96,15 +96,15 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-flyway'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.jsoup:jsoup:1.22.1'
+    testImplementation 'org.jsoup:jsoup:1.22.2'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:6.3.3'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:6.3.4'
     testImplementation 'org.awaitility:awaitility'
     testImplementation 'org.seleniumhq.selenium:selenium-java'
     testImplementation 'org.postgresql:postgresql'
-    testImplementation 'org.projectlombok:lombok:1.18.42'
+    testImplementation 'org.projectlombok:lombok:1.18.46'
     testImplementation 'com.squareup.okhttp3:mockwebserver:5.3.2'
-    testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.83'
+    testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.84'
 }
 
 test {
