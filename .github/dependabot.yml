@@ -1,11 +1,13 @@
 version: 2
 updates:
-  - package-ecosystem: "gradle" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "gradle"
+    directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 7
     ignore:
-      - dependency-name: "org.flywaydb:*"
+      - dependency-name: "org.flywaydb.*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "com.amazonaws:aws-java-sdk-s3"
         update-types: ["version-update:semver-patch"]
@@ -13,3 +15,5 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
