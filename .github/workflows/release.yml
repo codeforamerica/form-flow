@@ -52,9 +52,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Update version
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          echo "Updating version in build.gradle to ${{ inputs.version }}"
-          sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
+          echo "Updating version in build.gradle to $VERSION"
+          sed -i 's/version = "\(.*\)"/version = "'"$VERSION"'"/' build.gradle
       - name: Build Gradle
         run: |
           chmod +x gradlew
@@ -82,10 +84,12 @@ jobs:
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
       - name: Confirm version ${{ inputs.version }} published to Sonatype
         timeout-minutes: 120
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/${{inputs.version}}"
+          until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/$VERSION"
           do
-            echo "Waiting for version ${{ inputs.version }} to be published to Sonatype..."
+            echo "Waiting for version $VERSION to be published to Sonatype..."
             sleep 30
           done
       - name: "Announce failure to release of ${{inputs.version}} to #platform-help"
@@ -112,7 +116,9 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PLATFORM_ROBOT_PAT }}
       - name: Create new snapshot version string
-        run: echo NEW_SNAPSHOT_VERSION=$(echo ${{ inputs.version }}  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
+        env:
+          VERSION: ${{ inputs.version }}
+        run: echo NEW_SNAPSHOT_VERSION=$(echo $VERSION  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
       - name: Update snapshot version
         run: sed -i 's/version = "\(.*\)"/version = "${{ env.NEW_SNAPSHOT_VERSION }}"/' build.gradle
       - name: Push snapshot update changes
