@@ -66,6 +66,7 @@ dependencyManagement {
         dependency 'org.apache.logging.log4j:log4j-core:2.25.5'
         dependency 'ch.qos.logback:logback-core:1.5.35'
         dependency 'ch.qos.logback:logback-classic:1.5.35'
+        dependency 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
     }
 }
 
@@ -93,10 +94,6 @@ dependencies {
     implementation 'org.apache.tika:tika-core:3.3.1'
     implementation 'commons-codec:commons-codec:1.22.0'
     implementation 'org.apache.commons:commons-text:1.15.0'
-
-    constraints {
-        implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
-    }
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -359,5 +356,12 @@ afterEvaluate {
         }
     } else {
         logger.warn("⚠️ License report task not found; skipping post-processing")
+    }
+}
+
+configurations.configureEach {
+    if (name == "compileClasspath" || name == "runtimeClasspath"
+            || name.endsWith("CompileClasspath") || name.endsWith("RuntimeClasspath")) {
+        resolutionStrategy.activateDependencyLocking()
     }
 }
