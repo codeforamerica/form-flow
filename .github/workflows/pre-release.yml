@@ -26,12 +26,14 @@ jobs:
         with:
           ref: ${{ inputs.refToRelease }}
       - name: Tag Version
+        env:
+          VERSION: ${{inputs.version}}
         run: |
-          echo Creating pre-release version: ${{inputs.version}}
+          echo Creating pre-release version: $VERSION
           git config --local user.email "platforms-robot@codeforamerica.org"
           git config --local user.name "CfA Platforms Robot"
-          git tag -a ${{inputs.version}} -m "Pre-release version ${{inputs.version}}"
-          git push origin ${{inputs.version}}
+          git tag -a $VERSION -m "Pre-release version $VERSION"
+          git push origin $VERSION
       - name: Draft Release
         uses: softprops/action-gh-release@v3
         with:
