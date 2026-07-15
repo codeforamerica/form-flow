@@ -64,8 +64,6 @@ repositories {
 dependencyManagement {
     dependencies {
         dependency 'org.apache.logging.log4j:log4j-core:2.25.5'
-        dependency 'ch.qos.logback:logback-core:1.5.35'
-        dependency 'ch.qos.logback:logback-classic:1.5.35'
     }
 }
 
@@ -359,5 +357,12 @@ afterEvaluate {
         }
     } else {
         logger.warn("⚠️ License report task not found; skipping post-processing")
+    }
+}
+
+configurations.configureEach {
+    if (name == "compileClasspath" || name == "runtimeClasspath"
+            || name.endsWith("CompileClasspath") || name.endsWith("RuntimeClasspath")) {
+        resolutionStrategy.activateDependencyLocking()
     }
 }
