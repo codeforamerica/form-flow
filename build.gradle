@@ -64,6 +64,9 @@ repositories {
 dependencyManagement {
     dependencies {
         dependency 'org.apache.logging.log4j:log4j-core:2.25.5'
+        dependency 'ch.qos.logback:logback-core:1.5.35'
+        dependency 'ch.qos.logback:logback-classic:1.5.35'
+        dependency 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
     }
 }
 
@@ -91,10 +94,6 @@ dependencies {
     implementation 'org.apache.tika:tika-core:3.3.1'
     implementation 'commons-codec:commons-codec:1.22.0'
     implementation 'org.apache.commons:commons-text:1.15.0'
-
-    constraints {
-        implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
-    }
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
