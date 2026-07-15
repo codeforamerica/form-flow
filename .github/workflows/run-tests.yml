@@ -57,7 +57,7 @@ jobs:
 
       - name: Announce failures on Slack
         if:  ${{ steps.test.conclusion == 'failure' }}
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         with:
           status: ${{ job.status }}
         env:

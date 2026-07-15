@@ -26,9 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Use faketty to allow for GPG signing
-        uses: Yuri6037/Action-FakeTTY@v1.1
+        uses: Yuri6037/Action-FakeTTY@1abc69c7d530815855caedcd73842bae5687c1a6 # v1.1
       - name: Hide sensitive inputs
-        uses: levibostian/action-hide-sensitive-inputs@v1
+        uses: levibostian/action-hide-sensitive-inputs@15951963797b16aa43fa0b093b45cd2db0319fdd # 1.2.0
         with:
           exclude_inputs: version
       - name: Checkout
@@ -73,7 +73,7 @@ jobs:
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.2.0
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
       - name: Publish package to Sonatype
         run: |
           ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
@@ -93,7 +93,7 @@ jobs:
             sleep 30
           done
       - name: "Announce failure to release of ${{inputs.version}} to #platform-help"
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         if: failure()
         with:
           status: ${{ job.status }}
@@ -122,7 +122,7 @@ jobs:
       - name: Update snapshot version
         run: sed -i 's/version = "\(.*\)"/version = "${{ env.NEW_SNAPSHOT_VERSION }}"/' build.gradle
       - name: Push snapshot update changes
-        uses: stefanzweifel/git-auto-commit-action@v7.2.0
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_user_name: cfa-platforms-robot
           commit_message: "Bump version to ${{env.NEW_SNAPSHOT_VERSION}}"
@@ -130,7 +130,7 @@ jobs:
           commit_author: CfA Platforms Robot <platforms-robot@codeforamerica.org>
           push_options: --force
       - name: Trigger starter-app snapshot upgrade on newly published version
-        uses: peter-evans/repository-dispatch@v4.0.1
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-version-bumped

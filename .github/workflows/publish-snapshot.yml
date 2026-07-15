@@ -32,7 +32,7 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.2.0
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
       - name: Create jar and Publish to Sonatype
         run: ./gradlew jar publish
         env:
@@ -41,14 +41,14 @@ jobs:
           GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
       - name: Trigger starter-app tests on newly published version
-        uses: peter-evans/repository-dispatch@v4.0.1
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-updated
           token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
       - name: Announce on Slack
         if: failure()
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         with:
           status: ${{ job.status }}
         env:
