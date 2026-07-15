@@ -85,7 +85,7 @@ public class FormFlowErrorController implements ErrorController {
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
+        
         String stackTrace = sw.toString();
         String[] lines = stackTrace.split("\\r?\\n");
 

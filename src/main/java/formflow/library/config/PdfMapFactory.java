@@ -55,7 +55,6 @@ public class PdfMapFactory implements FactoryBean<List<PdfMap>> {
             pdfMapConfigurationIterable.forEach(map -> pdfMap.add((PdfMap) map));
         } catch (IOException e) {
             log.error("Can't find the pdf map file: " + configPath, e);
-            e.printStackTrace();
         }
 
         return pdfMap;
