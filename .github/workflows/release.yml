@@ -144,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Announce successful release of ${{inputs.version}} to #platform-help"
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         with:
           status: ${{ job.status }}
           notification_title: "form-flow version ${{inputs.version}} released! :tada::platypus_roll::tada:"
