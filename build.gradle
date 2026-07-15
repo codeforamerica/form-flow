@@ -64,6 +64,8 @@ repositories {
 dependencyManagement {
     dependencies {
         dependency 'org.apache.logging.log4j:log4j-core:2.25.5'
+        dependency 'org.apache.logging.log4j:log4j-api:2.25.5'
+        dependency 'org.apache.logging.log4j:log4j-to-slf4j:2.25.5'
         dependency 'ch.qos.logback:logback-core:1.5.35'
         dependency 'ch.qos.logback:logback-classic:1.5.35'
         dependency 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
