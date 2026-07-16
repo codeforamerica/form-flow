@@ -91,7 +91,7 @@ dependencies {
     implementation 'com.smartystreets.api:smartystreets-java-sdk:7.1.0'
     implementation 'com.github.librepdf:openpdf:3.0.5'
     implementation 'org.yaml:snakeyaml:2.6'
-    implementation 'com.google.crypto.tink:tink:1.22.0'
+    implementation 'com.google.crypto.tink:tink:1.23.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:3.3.1'
     implementation 'commons-codec:commons-codec:1.22.0'
