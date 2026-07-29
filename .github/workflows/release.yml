@@ -115,14 +115,18 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.PLATFORM_ROBOT_PAT }}
-          persist-credentials: true
+          persist-credentials: false
       - name: Create new snapshot version string
         env:
           VERSION: ${{ inputs.version }}
         run: echo NEW_SNAPSHOT_VERSION=$(echo $VERSION  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
       - name: Update snapshot version
         run: sed -i 's/version = "\(.*\)"/version = "${{ env.NEW_SNAPSHOT_VERSION }}"/' build.gradle
+      - name: Configure git credentials for push
+        env:
+          GH_TOKEN: ${{ secrets.PLATFORM_ROBOT_PAT }}
+        run: |
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n "x-access-token:$GH_TOKEN" | base64 -w0)"
       - name: Push snapshot update changes
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
@@ -131,6 +135,9 @@ jobs:
           commit_user_email: platforms-robot@codeforamerica.org
           commit_author: CfA Platforms Robot <platforms-robot@codeforamerica.org>
           push_options: --force
+      - name: Remove temporary git credentials
+        if: always()
+        run: git config --local --unset-all http.https://github.com/.extraheader
       - name: Trigger starter-app snapshot upgrade on newly published version
         uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
