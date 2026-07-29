@@ -251,7 +251,7 @@ class LanguageSelector {
           if (mixpanel) {
             mixpanel.track('language-selector-click',);
           }
-          window.location.href = tgt.href;
+          this.navigateToMenuitem(tgt);
           break;
 
         case 'Esc':
@@ -301,6 +301,21 @@ class LanguageSelector {
     if (flag) {
       event.stopPropagation();
       event.preventDefault();
+    }
+  }
+
+  // Only navigate to same-origin destinations rendered by the server,
+  // guarding against javascript: URIs or cross-origin redirects.
+  navigateToMenuitem(tgt) {
+    var url;
+    try {
+      url = new URL(tgt.href, window.location.origin);
+    } catch (e) {
+      return;
+    }
+
+    if (url.origin === window.location.origin) {
+      window.location.href = url.href;
     }
   }
 
