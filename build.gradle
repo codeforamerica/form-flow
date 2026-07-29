@@ -71,6 +71,7 @@ dependencyManagement {
         dependency 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
         dependency 'io.netty:netty-codec-compression:4.2.16.Final'
         dependency 'io.netty:netty-codec-http2:4.2.16.Final'
+        dependency 'io.netty:netty-codec-http3:4.2.16.Final'
     }
 }
 
