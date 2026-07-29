@@ -66,10 +66,11 @@ dependencyManagement {
         dependency 'org.apache.logging.log4j:log4j-core:2.26.1'
         dependency 'org.apache.logging.log4j:log4j-api:2.26.1'
         dependency 'org.apache.logging.log4j:log4j-to-slf4j:2.26.1'
-        dependency 'ch.qos.logback:logback-core:1.5.35'
-        dependency 'ch.qos.logback:logback-classic:1.5.35'
+        dependency 'ch.qos.logback:logback-core:1.5.38'
+        dependency 'ch.qos.logback:logback-classic:1.5.38'
         dependency 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
         dependency 'io.netty:netty-codec-compression:4.2.16.Final'
+        dependency 'io.netty:netty-codec-dns:4.2.16.Final'
         dependency 'io.netty:netty-codec-http2:4.2.16.Final'
     }
 }
