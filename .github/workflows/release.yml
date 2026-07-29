@@ -36,6 +36,7 @@ jobs:
         with:
           ref: ${{ inputs.version }}
           fetch-depth: 0
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5.6.0
         with:
@@ -115,6 +116,7 @@ jobs:
           ref: main
           fetch-depth: 0
           token: ${{ secrets.PLATFORM_ROBOT_PAT }}
+          persist-credentials: true
       - name: Create new snapshot version string
         env:
           VERSION: ${{ inputs.version }}
