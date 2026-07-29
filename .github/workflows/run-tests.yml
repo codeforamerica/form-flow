@@ -68,7 +68,10 @@ jobs:
         continue-on-error: true
         if:  ${{ steps.test.conclusion == 'success' }}
         run: |
-           curl https://deepsource.io/cli | sh
+           set -e
+           curl -fsSL https://deepsource.io/cli -o deepsource-cli-install.sh
+           sha512sum -c .github/checksums/deepsource-cli-install.sha512
+           sh deepsource-cli-install.sh
            ./bin/deepsource report --analyzer test-coverage --key java --value-file ./build/reports/jacoco/test/jacocoTestReport.xml
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
