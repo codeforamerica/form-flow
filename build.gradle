@@ -70,11 +70,11 @@ dependencyManagement {
         dependency 'ch.qos.logback:logback-classic:1.6.1'
         dependency 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
         dependency 'tools.jackson.core:jackson-databind:3.2.1'
-        dependency 'io.netty:netty-codec-compression:4.2.16.Final'
-        dependency 'io.netty:netty-codec-dns:4.2.16.Final'
-        dependency 'io.netty:netty-codec-http:4.2.16.Final'
-        dependency 'io.netty:netty-codec-http2:4.2.16.Final'
-        dependency 'io.netty:netty-codec-http3:4.2.16.Final'
+        dependency 'io.netty:netty-codec-compression:4.2.17.Final'
+        dependency 'io.netty:netty-codec-dns:4.2.17.Final'
+        dependency 'io.netty:netty-codec-http:4.2.17.Final'
+        dependency 'io.netty:netty-codec-http2:4.2.17.Final'
+        dependency 'io.netty:netty-codec-http3:4.2.17.Final'
     }
 }
 
