@@ -77,12 +77,10 @@ dependencyManagement {
         dependency 'io.netty:netty-codec-http3:4.2.17.Final'
         dependency 'io.netty:netty-handler:4.2.17.Final'
         dependency 'org.springframework.integration:spring-integration-core:7.1.1'
-        dependency 'org.springframework.security:spring-security-core:7.1.1'
-        dependency 'org.springframework.security:spring-security-config:7.1.1'
-        dependency 'org.springframework.security:spring-security-web:7.1.1'
         dependency 'org.springframework.security:spring-security-crypto:7.1.1'
         dependency 'org.springframework:spring-webmvc:7.0.9'
         dependency 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
+        dependency 'org.apache.httpcomponents.client5:httpclient5:5.6.3'
 
     }
 }
