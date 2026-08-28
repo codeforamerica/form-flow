@@ -83,6 +83,7 @@ dependencyManagement {
         dependency 'org.springframework.security:spring-security-web:7.1.1'
         dependency 'org.springframework.security:spring-security-crypto:7.1.1'
         dependency 'org.springframework.integration:spring-integration-core:7.1.1'
+        dependency 'org.springframework:spring-beans:7.0.9'
         dependency 'org.springframework:spring-expression:7.0.9'
         dependency 'org.springframework:spring-webmvc:7.0.9'
         dependency 'org.springframework:spring-webflux:7.0.9'
