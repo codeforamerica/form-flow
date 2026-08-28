@@ -35,12 +35,74 @@ if (file(".env").isFile()) {
 def sonatypeUsername = localEnv.getProperty("SONATYPE_USERNAME") ?: System.getenv("SONATYPE_USERNAME")
 def sonatypePassword = localEnv.getProperty("SONATYPE_PASSWORD") ?: System.getenv("SONATYPE_PASSWORD")
 
+// Several metadata files appear at the same path in many of the dependency jars that get
+// repackaged into the fat jar below, and their contents must be concatenated rather than
+// dropped. With DuplicatesStrategy.EXCLUDE alone, only the first copy of each path survives.
+// Under Spring Boot 4 this silently disabled almost all auto-configuration for consuming
+// apps: each Boot module now ships its own META-INF/spring/...AutoConfiguration.imports
+// file, and only one of them made it into the published jar.
+def mergedJarMetadataDir = layout.buildDirectory.dir("mergedJarMetadata")
+
+tasks.register('mergeJarMetadata') {
+    inputs.files(configurations.runtimeClasspath)
+    outputs.dir(mergedJarMetadataDir)
+    doLast {
+        // key=comma-separated-values format; merged per key so duplicate keys across jars
+        // don't clobber each other
+        def isKeyValueFile = { String path ->
+            path == 'META-INF/spring.factories' || path == 'META-INF/spring/aot.factories'
+        }
+        // one-entry-per-line format; merged by concatenating unique lines
+        def isLineListFile = { String path ->
+            path.startsWith('META-INF/services/') ||
+                    (path.startsWith('META-INF/spring/') && path.endsWith('.imports'))
+        }
+        Map<String, Set<String>> mergedLines = [:].withDefault { new LinkedHashSet<String>() }
+        Map<String, Map<String, Set<String>>> mergedProperties =
+                [:].withDefault { [:].withDefault { new LinkedHashSet<String>() } }
+        configurations.runtimeClasspath.files.findAll { it.name.endsWith('.jar') }.each { jarFile ->
+            new java.util.zip.ZipFile(jarFile).withCloseable { zip ->
+                Collections.list(zip.entries()).findAll { !it.directory }.each { entry ->
+                    if (isKeyValueFile(entry.name)) {
+                        def properties = new Properties()
+                        zip.getInputStream(entry).withCloseable { properties.load(it) }
+                        properties.each { key, value ->
+                            mergedProperties[entry.name][key.toString()]
+                                    .addAll(value.toString().split(',')*.trim().findAll { it })
+                        }
+                    } else if (isLineListFile(entry.name)) {
+                        def lines = zip.getInputStream(entry).withCloseable { it.getText('UTF-8') }
+                                .readLines()*.trim().findAll { it && !it.startsWith('#') }
+                        mergedLines[entry.name].addAll(lines)
+                    }
+                }
+            }
+        }
+        def outputDir = mergedJarMetadataDir.get().asFile
+        outputDir.deleteDir()
+        def mergedContents = mergedLines.collectEntries { path, lines ->
+            [path, lines.join('\n') + '\n']
+        } + mergedProperties.collectEntries { path, entries ->
+            [path, entries.collect { key, values -> "${key}=${values.join(',')}" }.join('\n') + '\n']
+        }
+        mergedContents.each { path, content ->
+            def file = new File(outputDir, path)
+            file.parentFile.mkdirs()
+            file.text = content
+        }
+    }
+}
+
 jar {
     zip64 = true
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'mergeJarMetadata'
     manifest {
         attributes('Main-Class': 'formflow.library.ScreenController')
     }
+    // The merged metadata is added before the dependency zip trees so that, with
+    // DuplicatesStrategy.EXCLUDE, it wins over the individual per-jar copies.
+    from(mergedJarMetadataDir)
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
@@ -111,6 +173,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.1.0'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-71:3.15.4'
+    // In Spring Boot 4, Flyway and Spring Session auto-configuration moved out of
+    // spring-boot-autoconfigure into dedicated modules; include them so consuming apps keep
+    // getting FlywayAutoConfiguration and JdbcSessionAutoConfiguration as they did on Boot 3
+    implementation 'org.springframework.boot:spring-boot-flyway'
+    implementation 'org.springframework.boot:spring-boot-session-jdbc'
     implementation 'org.flywaydb:flyway-core:11.20.3'
     implementation "org.flywaydb:flyway-database-postgresql:11.20.3"
     implementation 'org.webjars.npm:dropzone:5.9.3'
