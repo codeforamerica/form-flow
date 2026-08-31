@@ -27,12 +27,13 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Set up JDK
-        uses: actions/setup-java@v5.4.0
+        uses: actions/setup-java@v5.7.0
         with:
           distribution: 'adopt'
           java-version: '21'
@@ -57,7 +58,7 @@ jobs:
 
       - name: Announce failures on Slack
         if:  ${{ steps.test.conclusion == 'failure' }}
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         with:
           status: ${{ job.status }}
         env:
@@ -67,7 +68,10 @@ jobs:
         continue-on-error: true
         if:  ${{ steps.test.conclusion == 'success' }}
         run: |
-           curl https://deepsource.io/cli | sh
+           set -e
+           curl -fsSL https://deepsource.io/cli -o deepsource-cli-install.sh
+           sha512sum -c .github/checksums/deepsource-cli-install.sha512
+           sh deepsource-cli-install.sh
            ./bin/deepsource report --analyzer test-coverage --key java --value-file ./build/reports/jacoco/test/jacocoTestReport.xml
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}

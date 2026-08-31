@@ -22,18 +22,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.refToRelease }}
+          persist-credentials: false
       - name: Tag Version
+        env:
+          VERSION: ${{inputs.version}}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo Creating pre-release version: ${{inputs.version}}
+          echo Creating pre-release version: $VERSION
           git config --local user.email "platforms-robot@codeforamerica.org"
           git config --local user.name "CfA Platforms Robot"
-          git tag -a ${{inputs.version}} -m "Pre-release version ${{inputs.version}}"
-          git push origin ${{inputs.version}}
+          git tag -a $VERSION -m "Pre-release version $VERSION"
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n "x-access-token:$GH_TOKEN" | base64 -w0)"
+          git push origin $VERSION
+          git config --local --unset-all http.https://github.com/.extraheader
       - name: Draft Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: ${{inputs.version}}
           generate_release_notes: true

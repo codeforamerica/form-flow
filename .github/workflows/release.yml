@@ -26,18 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Use faketty to allow for GPG signing
-        uses: Yuri6037/Action-FakeTTY@v1.1
+        uses: Yuri6037/Action-FakeTTY@1abc69c7d530815855caedcd73842bae5687c1a6 # v1.1
       - name: Hide sensitive inputs
-        uses: levibostian/action-hide-sensitive-inputs@v1
+        uses: levibostian/action-hide-sensitive-inputs@15951963797b16aa43fa0b093b45cd2db0319fdd # 1.2.0
         with:
           exclude_inputs: version
       - name: Checkout
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.version }}
           fetch-depth: 0
+          persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@v5.4.0
+        uses: actions/setup-java@v5.7.0
         with:
           distribution: 'adopt'
           java-version: '21'
@@ -52,9 +53,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Update version
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          echo "Updating version in build.gradle to ${{ inputs.version }}"
-          sed -i 's/version = "\(.*\)"/version = "${{ inputs.version }}"/' build.gradle
+          echo "Updating version in build.gradle to $VERSION"
+          sed -i 's/version = "\(.*\)"/version = "'"$VERSION"'"/' build.gradle
       - name: Build Gradle
         run: |
           chmod +x gradlew
@@ -71,7 +74,7 @@ jobs:
           echo "signing.gnupg.passphrase=${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}" >> ~/.gradle/gradle.properties
           echo "no-tty" >> ~/.gnupg/gpg.conf >> ~/.gradle/gradle.properties
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.2.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: Publish package to Sonatype
         run: |
           ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
@@ -82,14 +85,16 @@ jobs:
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
       - name: Confirm version ${{ inputs.version }} published to Sonatype
         timeout-minutes: 120
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/${{inputs.version}}"
+          until curl -s -f -o /dev/null "https://central.sonatype.com/artifact/org.codeforamerica.platform/form-flow/$VERSION"
           do
-            echo "Waiting for version ${{ inputs.version }} to be published to Sonatype..."
+            echo "Waiting for version $VERSION to be published to Sonatype..."
             sleep 30
           done
       - name: "Announce failure to release of ${{inputs.version}} to #platform-help"
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         if: failure()
         with:
           status: ${{ job.status }}
@@ -106,25 +111,35 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.hotfix == false }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.PLATFORM_ROBOT_PAT }}
+          persist-credentials: false
       - name: Create new snapshot version string
-        run: echo NEW_SNAPSHOT_VERSION=$(echo ${{ inputs.version }}  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
+        env:
+          VERSION: ${{ inputs.version }}
+        run: echo NEW_SNAPSHOT_VERSION=$(echo $VERSION  | awk -F. 'BEGIN{OFS="."} {$NF = $NF +1"-SNAPSHOT"}1') >> "$GITHUB_ENV"
       - name: Update snapshot version
         run: sed -i 's/version = "\(.*\)"/version = "${{ env.NEW_SNAPSHOT_VERSION }}"/' build.gradle
+      - name: Configure git credentials for push
+        env:
+          GH_TOKEN: ${{ secrets.PLATFORM_ROBOT_PAT }}
+        run: |
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n "x-access-token:$GH_TOKEN" | base64 -w0)"
       - name: Push snapshot update changes
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_user_name: cfa-platforms-robot
           commit_message: "Bump version to ${{env.NEW_SNAPSHOT_VERSION}}"
           commit_user_email: platforms-robot@codeforamerica.org
           commit_author: CfA Platforms Robot <platforms-robot@codeforamerica.org>
           push_options: --force
+      - name: Remove temporary git credentials
+        if: always()
+        run: git config --local --unset-all http.https://github.com/.extraheader
       - name: Trigger starter-app snapshot upgrade on newly published version
-        uses: peter-evans/repository-dispatch@v4.0.1
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-version-bumped
@@ -138,7 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Announce successful release of ${{inputs.version}} to #platform-help"
-        uses: ravsamhq/notify-slack-action@v2
+        uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
         with:
           status: ${{ job.status }}
           notification_title: "form-flow version ${{inputs.version}} released! :tada::platypus_roll::tada:"
