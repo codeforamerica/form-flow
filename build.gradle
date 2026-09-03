@@ -123,6 +123,8 @@ repositories {
     mavenCentral()
 }
 
+ext["tomcat.version"] = "11.0.25"
+
 dependencyManagement {
     dependencies {
         dependency 'org.apache.logging.log4j:log4j-core:2.26.1'
