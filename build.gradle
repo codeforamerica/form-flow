@@ -175,7 +175,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jetbrains:annotations:26.1.0'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-71:3.15.4'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-71:3.15.5'
     // In Spring Boot 4, Flyway and Spring Session auto-configuration moved out of
     // spring-boot-autoconfigure into dedicated modules; include them so consuming apps keep
     // getting FlywayAutoConfiguration and JdbcSessionAutoConfiguration as they did on Boot 3
