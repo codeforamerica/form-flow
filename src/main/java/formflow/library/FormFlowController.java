@@ -151,31 +151,59 @@ public abstract class FormFlowController {
      * @return The {@link Submission} object from the database or a new {@link Submission} object if one was not found
      */
     public Submission findOrCreateSubmission(HttpSession httpSession, String flow) {
-        // If session is null, we can't retrieve from it or synchronize on it
-        // Just create a new submission
+        // If session is null, we can't retrieve from it or look anything up in it.
+        // Just create a new submission.
         if (httpSession == null) {
             log.info("No session found for flow '{}', creating new Submission.", flow);
             return new Submission();
         }
-      
-        // Synchronize on the session to prevent race conditions when multiple threads
-        // check for, create, or manipulate the submission concurrently
-        synchronized (httpSession) {
-            Submission submission = null;
-            try {
-                submission = getSubmissionFromSession(httpSession, flow);
-                String submissionId = submission != null && submission.getId() != null ? submission.getId().toString() : "n/a";
-                log.info("Found submission: {} for session: {} ", submissionId, httpSession.getId());
-            } catch (ResponseStatusException e) {
-                log.info("Got a {} for flow {} with session {}", e.getStatusCode().value(), flow, httpSession.getId());
-                // it's ok to ignore this here, we'll create a new submission
+
+        Submission submission = findExistingSubmission(httpSession, flow);
+        if (submission != null) {
+            return submission;
+        }
+
+        // Nothing exists yet for this session/flow. Deciding to create one is a check-then-act
+        // operation, so every concurrent caller that could be racing to create the same submission
+        // has to be serialized - including callers on other app instances, since this library is
+        // typically deployed with a shared, database-backed HttpSession (e.g. Spring Session JDBC).
+        // A JVM-local `synchronized` block can't provide that: with Spring Session, the HttpSession
+        // object handed to a request is a new instance per request even for the same logical
+        // session, so synchronizing on it doesn't actually exclude concurrent requests from each
+        // other. A Postgres advisory lock, keyed by session id, does.
+        String lockKey = "submission-lock:" + httpSession.getId();
+        return submissionRepositoryService.withSubmissionLock(lockKey, () -> {
+            Submission existing = findExistingSubmission(httpSession, flow);
+            if (existing != null) {
+                return existing;
             }
 
-            if (submission == null) {
-                log.info("Submission not found in session for flow '{}', creating one.", flow);
-                submission = new Submission();
-            }
+            log.info("Submission not found in session for flow '{}', creating one.", flow);
+            Submission newSubmission = new Submission();
+            newSubmission.setFlow(flow);
+            newSubmission = saveToRepository(newSubmission);
+            setSubmissionInSession(httpSession, newSubmission, flow);
+            return newSubmission;
+        });
+    }
+
+    /**
+     * Looks up the {@link Submission} referenced by the session for the given flow, if any, without creating one.
+     *
+     * @param httpSession the {@link HttpSession} to look in
+     * @param flow        the flow to look up the submission for
+     * @return the {@link Submission} if one is referenced by the session, else null
+     */
+    private Submission findExistingSubmission(HttpSession httpSession, String flow) {
+        try {
+            Submission submission = getSubmissionFromSession(httpSession, flow);
+            String submissionId = submission != null && submission.getId() != null ? submission.getId().toString() : "n/a";
+            log.info("Found submission: {} for session: {} ", submissionId, httpSession.getId());
             return submission;
+        } catch (ResponseStatusException e) {
+            log.info("Got a {} for flow {} with session {}", e.getStatusCode().value(), flow, httpSession.getId());
+            // it's ok to ignore this here, we'll create a new submission
+            return null;
         }
     }
 
@@ -234,23 +262,20 @@ public abstract class FormFlowController {
             return;
         }
 
-        // Synchronize on the session to prevent race conditions when multiple threads
-        // modify the submission map concurrently. This ensures the read-modify-write
-        // operation is atomic.
-        synchronized (session) {
-            log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
-            Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
-            log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
+        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
+        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
 
-            if (submissionMap == null) {
-                submissionMap = new HashMap<>();
-            }
-
-            submissionMap.put(flow, submissionId);
-            session.removeAttribute(SUBMISSION_MAP_NAME);
-            session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
-            log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap.size());
+        if (submissionMap == null) {
+            submissionMap = new HashMap<>();
         }
+
+        submissionMap.put(flow, submissionId);
+        // A single setAttribute call, rather than removeAttribute followed by setAttribute, so a
+        // concurrent unsynchronized read (e.g. getSubmissionIdForFlow) can never observe the
+        // attribute as transiently absent.
+        session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
+        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap.size());
     }
 
     /**

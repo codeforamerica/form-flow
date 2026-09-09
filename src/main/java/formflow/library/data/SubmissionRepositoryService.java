@@ -4,12 +4,17 @@ import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCod
 import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType.alphanumeric;
 import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType.numeric;
 
+import com.google.common.hash.Hashing;
 import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.stereotype.Service;
@@ -28,6 +33,9 @@ public class SubmissionRepositoryService {
     SubmissionEncryptionService encryptionService;
 
     ShortCodeConfig shortCodeConfig;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public SubmissionRepositoryService(SubmissionRepository repository, SubmissionEncryptionService encryptionService,
             ShortCodeConfig shortCodeConfig) {
@@ -62,6 +70,26 @@ public class SubmissionRepositoryService {
         }
         // straight from the db will be encrypted, so decrypt first.
         return encryptionService.decrypt(savedSubmission);
+    }
+
+    /**
+     * Runs {@code action} while holding a Postgres transaction-scoped advisory lock keyed on {@code lockKey}. The lock is
+     * acquired via {@code pg_advisory_xact_lock}, so it is automatically released when the current transaction commits or
+     * rolls back, and it serializes concurrent callers across every JVM/instance sharing the same database, not just threads
+     * within this process.
+     *
+     * @param lockKey a string identifying the resource being protected, e.g. a session id + flow combination
+     * @param action  the action to run once the lock is held
+     * @param <T>     the type returned by {@code action}
+     * @return whatever {@code action} returns
+     */
+    @Transactional
+    public <T> T withSubmissionLock(String lockKey, Supplier<T> action) {
+        long lockId = Hashing.sha256().hashString(lockKey, StandardCharsets.UTF_8).asLong();
+        entityManager.createNativeQuery("SELECT pg_advisory_xact_lock(?1)")
+                .setParameter(1, lockId)
+                .getSingleResult();
+        return action.get();
     }
 
     /**
