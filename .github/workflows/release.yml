@@ -40,7 +40,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v6.0.0
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '21'
           cache: 'gradle'
       - name: Cache Gradle packages
