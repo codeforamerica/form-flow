@@ -1,6 +1,5 @@
 package formflow.library.controllers;
 
-import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +62,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
@@ -111,7 +110,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
@@ -173,14 +172,13 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Get the UUID for the iteration we just created
-        UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
+        UUID testSubflowLogicUUID = getSubmissionMapFromSession(session).get("testFlow");
         Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-        List<Map<String, Object>> subflowIterations = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterations = getSubflowEntries(submissionBeforeSubflowIsCompleted, "testSubflow");
         String uuidString = (String) subflowIterations.get(0).get("uuid");
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
@@ -235,14 +233,13 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Get the UUID for the iteration we just created
-        UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
+        UUID testSubflowLogicUUID = getSubmissionMapFromSession(session).get("testFlow");
         Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-        List<Map<String, Object>> subflowIterationsBeforeSubmit = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterationsBeforeSubmit = getSubflowEntries(submissionBeforeSubflowIsCompleted, "testSubflow");
         String uuidString = (String) subflowIterationsBeforeSubmit.get(0).get("uuid");
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
@@ -287,9 +284,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.isPresent()).isTrue();
         assertThat(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get().getSubmittedAt()).isNotNull();
 
-        List<Map<String, Object>> subflowIterationsAfterSubmit = (List<Map<String, Object>>) testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get()
-                .getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterationsAfterSubmit = getSubflowEntries(testFlowSubmissionAfterAttemptingToPostAfterSubmitted.get(), "testSubflow");
         Map<String, Object> subflowIteration = subflowIterationsAfterSubmit.get(0);
         assertThat(subflowIteration.get("textInputSubflow")).isEqualTo("textInputValue");
         assertThat(subflowIteration.get("numberInputSubflow")).isEqualTo("10");
@@ -311,9 +306,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
                 submissionMap.get("testFlow"));
         assertThat(testFlowSubmissionAfterAttemptingToEditAfterSubmitted.isPresent()).isTrue();
         assertThat(testFlowSubmissionAfterAttemptingToEditAfterSubmitted.get().getSubmittedAt()).isNotNull();
-        List<Map<String, Object>> subflowIterationsAfterEdit = (List<Map<String, Object>>) testFlowSubmissionAfterAttemptingToEditAfterSubmitted.get()
-                .getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterationsAfterEdit = getSubflowEntries(testFlowSubmissionAfterAttemptingToEditAfterSubmitted.get(), "testSubflow");
         Map<String, Object> subflowIterationAfterEdit = subflowIterationsAfterEdit.get(0);
         assertThat(subflowIterationAfterEdit.get("textInputSubflow")).isEqualTo("textInputValue");
         assertThat(subflowIterationAfterEdit.get("numberInputSubflow")).isEqualTo("10");
@@ -332,14 +325,13 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Get the UUID for the iteration we just created
-        UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
+        UUID testSubflowLogicUUID = getSubmissionMapFromSession(session).get("testFlow");
         Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-        List<Map<String, Object>> subflowIterationsBeforeSubmit = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterationsBeforeSubmit = getSubflowEntries(submissionBeforeSubflowIsCompleted, "testSubflow");
         String uuidString = (String) subflowIterationsBeforeSubmit.get(0).get("uuid");
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
@@ -386,10 +378,9 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Get the UUID for the iteration we just created
-        UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get("testFlow");
+        UUID testSubflowLogicUUID = getSubmissionMapFromSession(session).get("testFlow");
         Submission submissionBeforeSubflowIsCompleted = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-        List<Map<String, Object>> subflowIterationsBeforeSubmit = (List<Map<String, Object>>) submissionBeforeSubflowIsCompleted.getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterationsBeforeSubmit = getSubflowEntries(submissionBeforeSubflowIsCompleted, "testSubflow");
         String uuidString = (String) subflowIterationsBeforeSubmit.get(0).get("uuid");
 
         // Complete the subflow so we get a completed iteration
@@ -413,16 +404,14 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         assertThat(screenAfterSubflow).isEqualTo("/flow/testFlow/testReviewScreen");
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();
         assertThat(testFlowSubmission.get().getShortCode()).isNull();
 
         // Assert the subflow iteration is complete
-        List<Map<String, Object>> subflowIterationsBeforeSubmitting = (List<Map<String, Object>>) testFlowSubmission.get()
-                .getInputData()
-                .get("testSubflow");
+        List<Map<String, Object>> subflowIterationsBeforeSubmitting = getSubflowEntries(testFlowSubmission.get(), "testSubflow");
         Map<String, Object> subflowIteration = subflowIterationsBeforeSubmitting.get(0);
         assertThat(subflowIteration.get("iterationIsComplete")).isEqualTo(true);
 
@@ -468,7 +457,7 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
         );
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();

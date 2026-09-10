@@ -25,7 +25,9 @@ public class OneToManyPreparer implements DefaultSubmissionFieldPreparer {
                 .forEach(field ->
                         preppedFields.put(field, new CheckboxField(
                                         field,
-                                        (List<String>) submission.getInputData().get(field + "[]"),
+                                        ((List<?>) submission.getInputData().get(field + "[]")).stream()
+                                                .map(String.class::cast)
+                                                .toList(),
                                         null
                                 )
                         )

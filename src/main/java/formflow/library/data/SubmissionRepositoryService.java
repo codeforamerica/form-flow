@@ -6,7 +6,7 @@ import static formflow.library.config.submission.ShortCodeConfig.Config.ShortCod
 
 import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -99,11 +99,13 @@ public class SubmissionRepositoryService {
      * @param subflowName the subflow to remove the CSRF from, not null
      */
     public void removeSubflowCSRF(Submission submission, String subflowName) {
-        var subflowArr = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+        // Only remove-by-key here, so a wildcard cast - fully checked, no unchecked warning - is enough; no need
+        // for the concrete List<Map<String,Object>> type this data is actually stored as.
+        var subflowArr = (List<?>) submission.getInputData().get(subflowName);
 
         if (subflowArr != null) {
             for (var entry : subflowArr) {
-                entry.remove("_csrf");
+                ((Map<?, ?>) entry).remove("_csrf");
             }
         }
     }

@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfig
 
 import formflow.library.data.Submission;
 import formflow.library.data.SubmissionRepositoryService;
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -324,9 +325,27 @@ public abstract class AbstractMockMvcTest {
     }
 
     protected Map<String, Object> getMostRecentlyCreatedIterationData(MockHttpSession session, String flow, String subflow) {
-        UUID testSubflowLogicUUID = ((Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME)).get(flow);
+        UUID testSubflowLogicUUID = getSubmissionMapFromSession(session).get(flow);
         Submission submission = submissionRepositoryService.findById(testSubflowLogicUUID).get();
-        List<Map<String, Object>> iterationsAfterFirstPost = (List<Map<String, Object>>) submission.getInputData().get(subflow);
+        List<Map<String, Object>> iterationsAfterFirstPost = getSubflowEntries(submission, subflow);
         return iterationsAfterFirstPost.get(iterationsAfterFirstPost.size() - 1);
+    }
+
+    /**
+     * The flow-to-submissionId map stored in the session is read back as a raw {@code Object} - this is the one
+     * unavoidable unchecked cast behind every test that looks a submission id up by flow name.
+     */
+    @SuppressWarnings("unchecked")
+    protected Map<String, UUID> getSubmissionMapFromSession(HttpSession session) {
+        return (Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME);
+    }
+
+    /**
+     * Submission input data is stored as {@code Map<String, Object>}, so reading a subflow's list of iterations
+     * back out is an unavoidable unchecked cast - centralized here instead of repeated at every call site.
+     */
+    @SuppressWarnings("unchecked")
+    protected List<Map<String, Object>> getSubflowEntries(Submission submission, String subflowName) {
+        return (List<Map<String, Object>>) submission.getInputData().get(subflowName);
     }
 }

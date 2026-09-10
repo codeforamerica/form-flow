@@ -1,6 +1,5 @@
 package formflow.library.controllers;
 
-import static formflow.library.FormFlowController.SUBMISSION_MAP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -57,7 +56,7 @@ public class ScreenControllerShortCodeCreationPointTest extends AbstractMockMvcT
         );
 
         // Assert that the submissions submittedAt value is null before submitting
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         Optional<Submission> testFlowSubmission = submissionRepositoryService.findById(submissionMap.get("testFlow"));
         assertThat(testFlowSubmission.isPresent()).isTrue();
         assertThat(testFlowSubmission.get().getSubmittedAt()).isNull();

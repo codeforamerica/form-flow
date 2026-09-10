@@ -62,7 +62,11 @@ public class PdfMapSubflow {
                 String newKey = key + suffix;
 
                 if (value instanceof Map) {
-                    Map<String, Object> values = ((Map<String, Object>) value).entrySet().stream()
+                    // value's runtime type is only known to be `Map` (erased); the entry key/value types can't be
+                    // verified, so this cast is unavoidable given the Map<String, Object>-shaped config this reads from.
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> subflowFieldMap = (Map<String, Object>) value;
+                    Map<String, Object> values = subflowFieldMap.entrySet().stream()
                             .map(listEntry -> {
                                 // don't change the key name here, it's not necessary
                                 return (Map.entry(listEntry.getKey(), listEntry.getValue() + suffix));

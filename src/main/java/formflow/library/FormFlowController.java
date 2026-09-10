@@ -58,6 +58,19 @@ public abstract class FormFlowController {
     }
 
     /**
+     * Reads the flow-to-submission-id map out of the session. {@link HttpSession#getAttribute} returns
+     * {@code Object}, so this cast can't be checked by the compiler - centralized here instead of repeated at
+     * every call site.
+     *
+     * @param session the {@link HttpSession} to read the map from
+     * @return the flow-to-submission-id map, or null if not present
+     */
+    @SuppressWarnings("unchecked")
+    private static Map<String, UUID> getSubmissionMapFromSession(HttpSession session) {
+        return (Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME);
+    }
+
+    /**
      * Returns the {@link UUID} of the {@link Submission} associated with the given flow.
      *
      * @param session The {@link HttpSession} the user is in
@@ -72,7 +85,7 @@ public abstract class FormFlowController {
             throw new SessionExpiredException(msg);
         }
 
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         log.info("getSubmissionIdForFlow for session: {}, submissionMap size: {}, flow: {}", session.getId(), submissionMap != null ? submissionMap.size() : null, flow);
         if (submissionMap == null) {
             String msg = "The submission map was null when looking up the submission. It's likely the session expired.";
@@ -190,7 +203,7 @@ public abstract class FormFlowController {
             throw new SessionExpiredException(msg);
         }
 
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         log.info("getSubmissionFromSession for session: {}, submissionMap size: {}, flow: {}", session.getId(), submissionMap != null ? submissionMap.size() : null, flow);
         if (submissionMap == null) {
             String msg = "The submission map was null when looking up the submission. It's likely the session expired.";
@@ -228,7 +241,7 @@ public abstract class FormFlowController {
         }
 
         log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
 
         if (submissionMap == null) {

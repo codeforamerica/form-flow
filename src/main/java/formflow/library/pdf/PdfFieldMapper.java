@@ -69,10 +69,10 @@ public class PdfFieldMapper {
         Map<String, Object> pdfInputsMap = pdfMap.getAllFields();
         String submissionFieldName = input.getName();
 
-        Map<String, String> pdfFieldMap = (Map<String, String>) pdfInputsMap.get(submissionFieldName);
+        Map<?, ?> pdfFieldMap = (Map<?, ?>) pdfInputsMap.get(submissionFieldName);
 
         return input.getValue().stream()
-                .map(value -> new PdfField(pdfFieldMap.get(value), "Yes"))
+                .map(value -> new PdfField((String) pdfFieldMap.get(value), "Yes"))
                 .collect(Collectors.toList());
     }
 

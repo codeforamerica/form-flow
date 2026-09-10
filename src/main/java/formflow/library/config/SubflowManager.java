@@ -77,10 +77,11 @@ public class SubflowManager {
     }
 
     public boolean hasFinishedAllSubflowIterations(String currentSubflowName, Submission submission) {
-        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) submission.getInputData()
-                .get(currentSubflowName);
+        // Only read here, so a wildcard cast - fully checked, no unchecked warning - is enough.
+        List<?> currentSubflowData = (List<?>) submission.getInputData().get(currentSubflowName);
 
         return currentSubflowData.stream()
+                .map(iteration -> (Map<?, ?>) iteration)
                 .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
     }
 
@@ -132,10 +133,12 @@ public class SubflowManager {
     }
 
     public String getUuidOfIterationToUpdate(String referer, String subflowName, Submission submission) {
-        List<Map<String, Object>> subflowData = (List<Map<String, Object>>) submission.getInputData().get(subflowName);
+        // Only read here, so a wildcard cast - fully checked, no unchecked warning - is enough.
+        List<?> subflowData = (List<?>) submission.getInputData().get(subflowName);
 
         // Try to find the next incomplete iteration
-        Optional<Map<String, Object>> nextIteration = subflowData.stream()
+        var nextIteration = subflowData.stream()
+                .map(iteration -> (Map<?, ?>) iteration)
                 .filter(iteration -> Boolean.FALSE.equals(iteration.get(Submission.ITERATION_IS_COMPLETE_KEY)))
                 .findFirst();
 
@@ -146,7 +149,9 @@ public class SubflowManager {
         // If all iterations are complete, but referer includes a UUID, fallback to that UUID (likely back nav)
         if (isReferedFromSubflowIteration(referer)) {
             String refererUuid = extractUuidFromReferer(referer);
-            if (refererUuid != null && subflowData.stream().anyMatch(i -> refererUuid.equals(i.get("uuid")))) {
+            if (refererUuid != null && subflowData.stream()
+                    .map(iteration -> (Map<?, ?>) iteration)
+                    .anyMatch(i -> refererUuid.equals(i.get("uuid")))) {
                 return refererUuid; // back navigation – safe fallback
             }
         }
@@ -208,12 +213,22 @@ public class SubflowManager {
     }
 
     private List<HashMap<String, Object>> getSubflowData(Submission submission, String subflowName) {
-        return (List<HashMap<String, Object>>) submission.getInputData().getOrDefault(subflowName, new ArrayList<>());
+        // inputData is stored as Map<String, Object>; a subflow entry is only known to be a List, not
+        // specifically List<HashMap<String,Object>> - callers need that concrete type, though.
+        @SuppressWarnings("unchecked")
+        List<HashMap<String, Object>> subflowData =
+                (List<HashMap<String, Object>>) submission.getInputData().getOrDefault(subflowName, new ArrayList<>());
+        return subflowData;
     }
 
     private List<Map<String, Object>> getOrCreateSubflowData(Submission submission, String subflowName) {
-        return (List<Map<String, Object>>) submission.getInputData()
+        // inputData is stored as Map<String, Object>; a subflow entry is only known to be a List, not
+        // specifically List<Map<String,Object>> - callers mutate the result via add(), so it needs that
+        // concrete type.
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> subflowData = (List<Map<String, Object>>) submission.getInputData()
                 .computeIfAbsent(subflowName, k -> new ArrayList<Map<String, Object>>());
+        return subflowData;
     }
 
     private Map<String, Object> createSubflowIterationWithRelationship(String relationKey, Object relatedUuid) {
@@ -291,6 +306,10 @@ public class SubflowManager {
 
     private List<Map<String, Object>> updateSubflowRepeatForIterations(Map<String, Object> currentSubflowData,
             List<String> repeatForInputData, String saveAsInputName) {
+        // currentSubflowData is stored as Map<String, Object>; this value is only known to be a List, not
+        // specifically List<Map<String,Object>> - matched entries flow into newRepeatForIterations below, which
+        // needs that concrete type.
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> currentRepeatForIterations = (List<Map<String, Object>>) currentSubflowData.getOrDefault(
                 saveAsInputName, Collections.EMPTY_LIST);
         List<Map<String, Object>> newRepeatForIterations = new ArrayList<>();
@@ -322,15 +341,20 @@ public class SubflowManager {
     }
 
     public boolean hasFinishedAllIterations(String subflowDataKey, Map<String, Object> subflowIterationData) {
-        List<Map<String, Object>> currentSubflowData = (List<Map<String, Object>>) subflowIterationData.get(subflowDataKey);
+        // Only read here, so a wildcard cast - fully checked, no unchecked warning - is enough.
+        List<?> currentSubflowData = (List<?>) subflowIterationData.get(subflowDataKey);
 
         return currentSubflowData.stream()
+                .map(iteration -> (Map<?, ?>) iteration)
                 .allMatch(iteration -> iteration.get(Submission.ITERATION_IS_COMPLETE_KEY).equals(true));
     }
 
     public Map<String, Object> getRepeatForIteration(Map<String, Object> subflowData,
             String nestedSubflowKey, String nestedIterationId) {
 
+        // subflowData is stored as Map<String, Object>; this value is only known to be a List, not specifically
+        // List<Map<String,Object>>, and this method's return type requires that concrete type.
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> nestedIterations = (List<Map<String, Object>>) subflowData.getOrDefault(nestedSubflowKey,
                 Collections.EMPTY_LIST);
 
@@ -341,6 +365,9 @@ public class SubflowManager {
     }
 
     public Map<String, Object> getNextRepeatForIterationUuid(String inputKey, Map<String, Object> inputData) {
+        // inputData is stored as Map<String, Object>; this value is only known to be a List, not specifically
+        // List<Map<String,Object>>, and this method's return type requires that concrete type.
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> subflowData = (List<Map<String, Object>>) inputData.get(inputKey);
 
         // Try to find the next incomplete iteration
