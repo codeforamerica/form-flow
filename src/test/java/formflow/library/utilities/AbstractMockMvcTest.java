@@ -117,13 +117,6 @@ public abstract class AbstractMockMvcTest {
         return contents;
     }
 
-    @Deprecated // assumes `pageName` is within `testFlow` config
-    protected ResultActions postExpectingSuccess(String flowName, String pageName, Map<String, List<String>> params)
-            throws Exception {
-        String postUrl = getUrlForPageName(flowName, pageName);
-        return postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
-    }
-
     // Appends the id to the post URL
     protected ResultActions postToUrlExpectingSuccess(String postUrl, String redirectUrl,
             Map<String, List<String>> params, String uuid) throws Exception {
@@ -325,7 +318,8 @@ public abstract class AbstractMockMvcTest {
 
     protected FormScreen postAndFollowRedirect(String flowName, String pageName, Map<String, List<String>> params)
             throws Exception {
-        postExpectingSuccess(flowName, pageName, params);
+        String postUrl = getUrlForPageName(flowName, pageName);
+        postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
         return followRedirectsForPageName(flowName, pageName);
     }
 

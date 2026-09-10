@@ -149,7 +149,7 @@ public class FileController extends FormFlowController {
                 String message = messageSource.getMessage("upload-documents.this-file-is-too-large",
                         List.of(fileValidationService.getMaxFileSizeInMb()).toArray(),
                         locale);
-                return new ResponseEntity<>(message, HttpStatus.PAYLOAD_TOO_LARGE);
+                return new ResponseEntity<>(message, HttpStatus.CONTENT_TOO_LARGE);
             }
 
             String fileExtension = Files.getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
@@ -157,7 +157,7 @@ public class FileController extends FormFlowController {
                 try (PdfReader ignored = new PdfReader(file.getBytes())) {
                 } catch (BadPasswordException e) {
                     String message = messageSource.getMessage("upload-documents.error-password-protected", null, locale);
-                    return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+                    return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_CONTENT);
                 } catch (IOException e) {
                     String message = messageSource.getMessage("upload-documents.error-could-not-read-file", null, locale);
                     return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);

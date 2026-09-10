@@ -432,7 +432,8 @@ public class ScreenControllerTest extends AbstractMockMvcTest {
             params.put("validationOnState", List.of("NM"));
             params.put("validationOnZipCode", List.of("88201"));
 
-            postExpectingSuccess("testFlow", "testAddressValidation", params);
+            String postUrl = getUrlForPageName("testFlow", "testAddressValidation");
+            postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", params);
 
             verify(addressValidationService, times(1)).validate(any());
         }
