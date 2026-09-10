@@ -39,6 +39,17 @@ public class S3CloudFileRepository implements CloudFileRepository {
     private final String bucketName;
     private final S3Client s3Client;
 
+    /**
+     * Builds the S3 client this repository uses, either from the given access/secret key pair or from the default
+     * AWS credentials provider chain.
+     *
+     * @param accessKey             AWS access key; ignored if {@code useDefaultCredentials} is true
+     * @param secretKey             AWS secret key; ignored if {@code useDefaultCredentials} is true
+     * @param s3BucketName          the S3 bucket to store/retrieve/delete files in
+     * @param region                the AWS region the bucket is in
+     * @param useDefaultCredentials whether to use the default AWS credentials provider chain instead of the
+     *                              given access/secret key pair
+     */
     public S3CloudFileRepository(@Value("${form-flow.aws.access_key:}") String accessKey,
             @Value("${form-flow.aws.secret_key:}") String secretKey,
             @Value("${form-flow.aws.s3_bucket_name}") String s3BucketName,

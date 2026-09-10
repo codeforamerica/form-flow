@@ -301,6 +301,12 @@ public class Submission {
         inputData.remove(inputName + AddressParts.ZIPCODE + UNVALIDATED_FIELD_MARKER_VALIDATED);
     }
 
+    /**
+     * Sets this submission's short code. The short code is write-once: once set, it can't be changed.
+     *
+     * @param shortCode the short code to set
+     * @throws UnsupportedOperationException if this submission already has a short code
+     */
     public void setShortCode(String shortCode) {
         if (this.shortCode != null) {
             throw new UnsupportedOperationException("Cannot change shortCode for an existing submission");

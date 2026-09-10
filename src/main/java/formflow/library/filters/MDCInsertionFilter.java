@@ -21,6 +21,10 @@ import org.springframework.util.AntPathMatcher;
 @Component
 public class MDCInsertionFilter implements Filter {
 
+    /**
+     * The Ant-style path pattern used to extract the {@code flow} and {@code screen} path variables from an
+     * incoming request's URI, for inclusion in the MDC.
+     */
     public static final String PATH_FORMAT = "/flow/{flow}/{screen}";
 
     /**

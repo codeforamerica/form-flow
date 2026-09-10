@@ -42,6 +42,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileValidationService {
 
+    /**
+     * The number of bytes in a megabyte, used to convert the configured max file size (in MB) into bytes.
+     */
     public static final long MB_IN_BYTES = 1024 * 1024;
     private final Map<String, Set<MimeType>> FILE_EXT_MIME_TYPE_MAP = Map.ofEntries(
             Map.entry(".gif", Set.of(MediaType.IMAGE_GIF)),
@@ -67,6 +70,15 @@ public class FileValidationService {
     private final String JOIN_DELIMITER = ", ";
     private final long maxFileSize;
 
+    /**
+     * Builds the set of accepted file extensions/mime types from the application's configuration, intersected
+     * with the file types this service knows how to recognize.
+     *
+     * @param userProvidedFileTypes a comma-separated list of accepted file extensions (e.g. ".pdf,.jpg"),
+     *                              restricting the server's default supported list; if blank, all
+     *                              server-supported types are accepted
+     * @param maxFileSize           the maximum accepted file size, in megabytes
+     */
     public FileValidationService(
             @Value("${form-flow.uploads.accepted-file-types:''}") String userProvidedFileTypes,
             @Value("${form-flow.uploads.max-file-size}") Integer maxFileSize
@@ -164,14 +176,31 @@ public class FileValidationService {
         return String.join(JOIN_DELIMITER, ACCEPTED_FILE_EXTS);
     }
 
+    /**
+     * Returns true if the given multipart file is larger than the configured max file size.
+     *
+     * @param file the file to check
+     * @return true if the file exceeds the configured max file size, false otherwise
+     */
     public boolean isTooLarge(MultipartFile file) {
         return file.getSize() > (maxFileSize * MB_IN_BYTES);
     }
 
+    /**
+     * Returns true if the given file is larger than the configured max file size.
+     *
+     * @param file the file to check
+     * @return true if the file exceeds the configured max file size, false otherwise
+     */
     public boolean isTooLarge(File file) {
         return file.length() > (maxFileSize * MB_IN_BYTES);
     }
 
+    /**
+     * Returns the configured maximum accepted file size.
+     *
+     * @return the max file size, in megabytes
+     */
     public Long getMaxFileSizeInMb() {
         return maxFileSize;
     }

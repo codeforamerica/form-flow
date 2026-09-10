@@ -7,12 +7,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+/**
+ * Maps the library's internal {@link SubmissionField}s to the {@link PdfField}s an actual PDF form expects,
+ * using each flow's {@link PdfMap} configuration to translate a submission's input field names into the target
+ * PDF's own field names.
+ */
 @Component
 @Slf4j
 public class PdfFieldMapper {
 
     private final List<PdfMap> pdfMapConfigurations;
 
+    /**
+     * Creates a field mapper backed by every flow's PDF map configuration.
+     *
+     * @param pdfMapConfigurations every flow's {@link PdfMap} configuration, loaded from {@code pdf-map.yaml} files
+     */
     public PdfFieldMapper(List<PdfMap> pdfMapConfigurations) {
         this.pdfMapConfigurations = pdfMapConfigurations;
     }

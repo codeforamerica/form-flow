@@ -12,11 +12,19 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.csrf.CsrfToken;
 
+/**
+ * An {@link AccessDeniedHandler} that distinguishes a CSRF failure caused by an expired/missing session from a
+ * genuine CSRF mismatch: the former redirects (or, for AJAX requests, returns a 403 with a header) to the home
+ * screen with a "session expired" flag, while the latter falls back to Spring Security's default handling.
+ */
 @Slf4j
 public class SessionExpiredCSRFAccessDeniedHandler implements AccessDeniedHandler {
 
     private final AccessDeniedHandler defaultHandler;
 
+    /**
+     * Creates the handler, delegating genuine CSRF mismatches to a default {@link AccessDeniedHandlerImpl}.
+     */
     public SessionExpiredCSRFAccessDeniedHandler() {
         this.defaultHandler = new AccessDeniedHandlerImpl();
     }

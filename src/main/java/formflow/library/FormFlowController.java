@@ -17,18 +17,38 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * A parent controller class for form-flow controllers. Holds the shared dependencies (repositories, flow
+ * configuration, message source) every form-flow controller needs, and the common logic for finding, creating,
+ * and storing a flow's {@link Submission} in the {@link HttpSession}.
+ */
 @Slf4j
 public abstract class FormFlowController {
 
-    public static final String SUBMISSION_MAP_NAME = "submissionMap";
     /**
-     * A parent controller class for form-flow controllers
+     * The name of the {@link HttpSession} attribute under which the flow-name-to-submission-id map is stored.
      */
+    public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
+    /**
+     * Service used to load/save {@link Submission}s.
+     */
     protected final SubmissionRepositoryService submissionRepositoryService;
+    /**
+     * Service used to load/save the files a submission has uploaded.
+     */
     protected final UserFileRepositoryService userFileRepositoryService;
+    /**
+     * The configured flows for this application.
+     */
     protected final List<FlowConfiguration> flowConfigurations;
+    /**
+     * Form-flow-wide configuration properties (e.g. which flows lock a submission after it's submitted).
+     */
     protected final FormFlowConfigurationProperties formFlowConfigurationProperties;
+    /**
+     * Source for user-facing messages.
+     */
     protected final MessageSource messageSource;
 
     FormFlowController(SubmissionRepositoryService submissionRepositoryService,

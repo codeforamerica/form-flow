@@ -5,6 +5,11 @@ import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * One flow's PDF field mapping configuration, as loaded from a {@code pdf-map.yaml} file: which PDF template to
+ * fill, and how each of a submission's input fields, database-derived fields, and subflow fields map onto that
+ * PDF's own field names.
+ */
 @Data
 @AllArgsConstructor
 public class PdfMap {
@@ -21,16 +26,32 @@ public class PdfMap {
     public PdfMap() {
     }
 
+    /**
+     * Sets the mapping from submission input field names to PDF field names, and refreshes {@link #allFields}.
+     *
+     * @param inputFields the input field mapping
+     */
     public void setInputFields(Map<String, Object> inputFields) {
         this.inputFields = inputFields;
         updateAllFields();
     }
 
+    /**
+     * Sets the mapping from submission database-derived field names (e.g. {@code submittedAt}) to PDF field
+     * names, and refreshes {@link #allFields}.
+     *
+     * @param dbFields the database field mapping
+     */
     public void setDbFields(Map<String, Object> dbFields) {
         this.dbFields = dbFields;
         updateAllFields();
     }
 
+    /**
+     * Sets the subflow field mapping configuration, and refreshes {@link #allFields}.
+     *
+     * @param subflowInfo the subflow field mapping, keyed by subflow name
+     */
     public void setSubflowInfo(Map<String, PdfMapSubflow> subflowInfo) {
         this.subflowInfo = subflowInfo;
         updateAllFields();

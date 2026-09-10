@@ -3,11 +3,20 @@ package formflow.library.pdf;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+/**
+ * Provides access to every flow's {@link PdfMap}, as configured across the application's {@code pdf-map.yaml}
+ * file(s).
+ */
 @Component
 public class PdfMapConfiguration {
 
     private final List<PdfMap> maps;
 
+    /**
+     * Creates a configuration wrapping every flow's PDF field mapping.
+     *
+     * @param maps every flow's PDF field mapping configuration
+     */
     public PdfMapConfiguration(List<PdfMap> maps) {
         this.maps = maps;
     }

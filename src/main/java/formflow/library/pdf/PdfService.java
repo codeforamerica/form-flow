@@ -8,6 +8,10 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Generates a filled-in, flattened PDF for a submission by preparing its fields, mapping them onto a PDF
+ * template's own field names, and filling the template.
+ */
 @Service
 @Slf4j
 public class PdfService {
@@ -18,12 +22,12 @@ public class PdfService {
     private final PDFFormFiller pdfFormFiller;
 
     /**
-     * <b>PdfService</b> is a service that generates a byte[] of a flattened pdf.
+     * Creates a PDF service backed by the given collaborators.
      *
-     * @param submissionFieldPreparers Preparers
-     * @param pdfFieldMapper           Mapper
-     * @param pdfMapConfiguration      Configuration
-     * @param pdfFormFiller            Form Filler
+     * @param submissionFieldPreparers prepares a submission's fields for PDF generation
+     * @param pdfFieldMapper           maps prepared fields onto a PDF template's own field names
+     * @param pdfMapConfiguration      provides each flow's PDF field mapping configuration
+     * @param pdfFormFiller            fills a PDF template with the mapped field values
      */
     public PdfService(SubmissionFieldPreparers submissionFieldPreparers, PdfFieldMapper pdfFieldMapper,
             PdfMapConfiguration pdfMapConfiguration, PDFFormFiller pdfFormFiller) {

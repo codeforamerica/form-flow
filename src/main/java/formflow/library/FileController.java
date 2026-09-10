@@ -50,6 +50,12 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
+/**
+ * Handles uploading, downloading, and deleting the files a user attaches to a {@link Submission} (e.g. via a
+ * dropzone widget), including optionally converting uploads to PDF and tracking them both in the database (as
+ * {@link UserFile} records) and in the {@link HttpSession} (as a {@link UserFileMap}, so the client can render
+ * the current set of attached files without a round trip).
+ */
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -74,6 +80,22 @@ public class FileController extends FormFlowController {
     @Value("${form-flow.uploads.link-submissions-by-field:}")
     private String linkSubmissionsByField;
 
+    /**
+     * Wires up the repositories, services, and upload-related configuration this controller needs.
+     *
+     * @param userFileRepositoryService  service used to persist/query uploaded {@link UserFile} records
+     * @param cloudFileRepository        repository used to store/retrieve/delete the actual file bytes
+     * @param submissionRepositoryService service used to load/save the {@link Submission} a file belongs to
+     * @param flowConfigurations         the configured flows for this application
+     * @param formFlowConfigurationProperties form-flow-wide configuration properties
+     * @param messageSource              source for user-facing messages (e.g. upload error text)
+     * @param fileValidationService      service used to validate a file's size/mime type/PDF integrity
+     * @param fileConversionService      service used to convert an upload to PDF, if configured to do so
+     * @param maxFiles                   the maximum number of files a single submission may have attached
+     * @param prependShortCode           whether to prefix a submission's short code onto stored file paths
+     * @param linkSubmissionsByField     the name of an input field, if any, whose value links this submission's
+     *                                   files to a different submission's short code/id
+     */
     public FileController(
             UserFileRepositoryService userFileRepositoryService,
             CloudFileRepository cloudFileRepository,
@@ -103,7 +125,10 @@ public class FileController extends FormFlowController {
      * @param flow         The current flow name
      * @param inputName    The current inputName
      * @param thumbDataUrl The thumbnail URL generated from the upload
+     * @param screen       The current screen name, used to check whether the submission is locked
      * @param httpSession  The current HTTP session
+     * @param request      The HttpServletRequest, used for logging the request URI
+     * @param locale       The language the user's request should be handled in
      * @return ON SUCCESS: ResponseEntity with a body containing the id of a file. body.
      * <p>ON FAILURE: ResponseEntity with an error message and a status code.</p>
      */
@@ -301,11 +326,15 @@ public class FileController extends FormFlowController {
     }
 
     /**
+     * File delete endpoint. Removes the file (and any files converted from it) from cloud storage and the
+     * database, then updates the session's {@link UserFileMap} to no longer reference it.
+     *
      * @param fileId               The id of an uploaded file that should be deleted
      * @param returnPath           The path to the page that they came from
      * @param dropZoneInstanceName The drop zone instance used to get the user file name
      * @param flow                 The name of the current (active) flow
      * @param httpSession          The current HTTP session
+     * @param request              The HttpServletRequest, used for logging the request URI
      * @return ON SUCCESS: Returns a RedirectView to the returnPath
      * <p>ON FAILURE: Returns a RedirectView to the 'error' page</p>
      */
@@ -376,6 +405,9 @@ public class FileController extends FormFlowController {
     }
 
     /**
+     * File download endpoint for a single file. Streams the file's bytes back to the client after confirming the
+     * requested submission id matches the session's and that the file actually belongs to that submission.
+     *
      * @param submissionId The submissionId of the file to be downloaded
      * @param fileId       The UUID of the file to be downloaded.
      * @param flow         The name of the current (active) flow
@@ -445,6 +477,9 @@ public class FileController extends FormFlowController {
     }
 
     /**
+     * File download endpoint for all of a submission's files at once. Zips every {@link UserFile} belonging to
+     * the submission and streams the archive back to the client.
+     *
      * @param submissionId The submissionId of the all the files that you would like to download.
      * @param httpSession  The current HTTP session.
      * @param flow         The name of the current (active) flow

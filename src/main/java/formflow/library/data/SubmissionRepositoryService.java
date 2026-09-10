@@ -29,6 +29,13 @@ public class SubmissionRepositoryService {
 
     ShortCodeConfig shortCodeConfig;
 
+    /**
+     * Wires up the repository, encryption service, and short code config this service needs.
+     *
+     * @param repository        repository used to load/save {@link Submission} rows
+     * @param encryptionService service used to encrypt/decrypt a submission's sensitive fields
+     * @param shortCodeConfig   per-flow short code generation settings
+     */
     public SubmissionRepositoryService(SubmissionRepository repository, SubmissionEncryptionService encryptionService,
             ShortCodeConfig shortCodeConfig) {
         this.repository = repository;
@@ -75,6 +82,12 @@ public class SubmissionRepositoryService {
         return submission.map(value -> encryptionService.decrypt(value));
     }
 
+    /**
+     * Searches for a particular Submission by its short code.
+     *
+     * @param shortCode short code of the submission to look for, not null
+     * @return Optional containing the Submission if found, else empty
+     */
     public Optional<Submission> findByShortCode(String shortCode) {
         Optional<Submission> submission = repository.findSubmissionByShortCode(shortCode);
         return submission.map(value -> encryptionService.decrypt(value));
