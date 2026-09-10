@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -174,32 +176,56 @@ public class FileController extends FormFlowController {
             String uploadLocation = setFilePathName(submission, String.format(fileNamePath, flow, inputName, userFileId,
                     fileExtension));
 
+            // The cloud upload is deliberately outside the lock below - it's a slow network call, and holding a
+            // DB transaction (and its connection) open for that long would be bad under load.
             cloudFileRepository.upload(uploadLocation, file);
 
-            UserFile uploadedFile = UserFile.builder()
-                    .fileId(userFileId)
-                    .submission(submission)
-                    .originalName(file.getOriginalFilename())
-                    .repositoryPath(uploadLocation)
-                    .filesize((float) file.getSize())
-                    .mimeType(file.getContentType())
-                    .docTypeLabel(defaultDocType)
-                    .build();
+            Submission submissionForUpload = submission;
+            UserFile uploadedFile = submissionRepositoryService.withSubmissionLock("userfiles-lock:" + httpSession.getId(),
+                    () -> {
+                        // Re-check under the lock: two uploads racing past the check above could otherwise both
+                        // land here and both succeed, overshooting maxFiles. This is also what makes the
+                        // session's UserFileMap read-modify-write-back atomic against a concurrent upload/delete
+                        // in the same session.
+                        if (userFileRepositoryService.countOfUploadedFilesBySubmission(submissionForUpload) >= maxFiles) {
+                            return null;
+                        }
 
-            uploadedFile = userFileRepositoryService.save(uploadedFile);
-            log.info("Created new file with id: " + uploadedFile.getFileId());
+                        UserFile newFile = UserFile.builder()
+                                .fileId(userFileId)
+                                .submission(submissionForUpload)
+                                .originalName(file.getOriginalFilename())
+                                .repositoryPath(uploadLocation)
+                                .filesize((float) file.getSize())
+                                .mimeType(file.getContentType())
+                                .docTypeLabel(defaultDocType)
+                                .build();
+                        UserFile savedFile = userFileRepositoryService.save(newFile);
+                        log.info("Created new file with id: " + savedFile.getFileId());
 
-            UserFileMap userFileMap = null;
-            if (httpSession.getAttribute(SESSION_USERFILES_KEY) == null) {
-                userFileMap = new UserFileMap();
-            } else {
-                userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
-                        UserFileMap.class);
+                        UserFileMap userFileMap;
+                        Object existingUserFiles = httpSession.getAttribute(SESSION_USERFILES_KEY);
+                        try {
+                            userFileMap = existingUserFiles == null ? new UserFileMap()
+                                    : objectMapper.readValue((String) existingUserFiles, UserFileMap.class);
+                            userFileMap.addUserFileToMap(flow, inputName, savedFile, thumbDataUrl);
+                            // A single setAttribute call, rather than removeAttribute followed by setAttribute,
+                            // so a concurrent read can never observe the attribute as transiently absent.
+                            httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+
+                        return savedFile;
+                    });
+
+            if (uploadedFile == null) {
+                // Lost the re-check race - clean up the file we just uploaded to cloud storage before
+                // rejecting, so it doesn't become an orphaned, unreferenced object.
+                cloudFileRepository.delete(uploadLocation);
+                String message = messageSource.getMessage("upload-documents.error-maximum-number-of-files", null, locale);
+                return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
             }
-
-            userFileMap.addUserFileToMap(flow, inputName, uploadedFile, thumbDataUrl);
-            httpSession.removeAttribute(SESSION_USERFILES_KEY);
-            httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
 
             if (convertUploadToPDF) {
                 convertUploadedFileToPDF(file, flow, inputName, userFileId, submission);
@@ -207,6 +233,8 @@ public class FileController extends FormFlowController {
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
                     .body(uploadedFile.getFileId().toString());
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw e;
         } catch (Exception e) {
             if (e instanceof ResponseStatusException) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -358,17 +386,34 @@ public class FileController extends FormFlowController {
             cloudFileRepository.delete(file.getRepositoryPath());
             userFileRepositoryService.deleteById(file.getFileId());
 
-            UserFileMap userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
-                    UserFileMap.class);
-            if (userFileMap == null) {
-                log.error("User file map not set in session. Unable to update file information");
-                throw new IndexOutOfBoundsException("Session does not contain user file mapping.");
-            }
-            userFileMap.removeUserFileFromMap(flow, fileId);
-            httpSession.removeAttribute(SESSION_USERFILES_KEY);
-            httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
+            // Locked so a concurrent upload/delete in the same session can't race on this same
+            // read-modify-write and silently drop the other's change to the map.
+            submissionRepositoryService.withSubmissionLock("userfiles-lock:" + httpSession.getId(), () -> {
+                UserFileMap userFileMap;
+                try {
+                    userFileMap = objectMapper.readValue((String) httpSession.getAttribute(SESSION_USERFILES_KEY),
+                            UserFileMap.class);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                if (userFileMap == null) {
+                    log.error("User file map not set in session. Unable to update file information");
+                    throw new IndexOutOfBoundsException("Session does not contain user file mapping.");
+                }
+                userFileMap.removeUserFileFromMap(flow, fileId);
+                try {
+                    // A single setAttribute call, rather than removeAttribute followed by setAttribute, so a
+                    // concurrent read can never observe the attribute as transiently absent.
+                    httpSession.setAttribute(SESSION_USERFILES_KEY, objectMapper.writeValueAsString(userFileMap));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                return null;
+            });
 
             return new RedirectView(returnPath);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error occurred while deleting file", e);
             return new RedirectView("/error");
