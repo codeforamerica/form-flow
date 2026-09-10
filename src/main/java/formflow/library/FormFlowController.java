@@ -262,20 +262,24 @@ public abstract class FormFlowController {
             return;
         }
 
-        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
-        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
+        // Locked (not just an atomic setAttribute) so two different flows in the same session can't race on the
+        // shared map's read-modify-write and silently drop one flow's entry - the same reasoning as
+        // findOrCreateSubmission's lock, and the same lock key, so a create followed immediately by this call in
+        // the same session correctly serializes against each other too.
+        submissionRepositoryService.withSubmissionLock("submission-lock:" + session.getId(), () -> {
+            log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
+            Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+            log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
 
-        if (submissionMap == null) {
-            submissionMap = new HashMap<>();
-        }
-
-        submissionMap.put(flow, submissionId);
-        // A single setAttribute call, rather than removeAttribute followed by setAttribute, so a
-        // concurrent unsynchronized read (e.g. getSubmissionIdForFlow) can never observe the
-        // attribute as transiently absent.
-        session.setAttribute(SUBMISSION_MAP_NAME, submissionMap);
-        log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap.size());
+            Map<String, UUID> updatedMap = submissionMap == null ? new HashMap<>() : submissionMap;
+            updatedMap.put(flow, submissionId);
+            // A single setAttribute call, rather than removeAttribute followed by setAttribute, so a
+            // concurrent unsynchronized read (e.g. getSubmissionIdForFlow) can never observe the
+            // attribute as transiently absent.
+            session.setAttribute(SUBMISSION_MAP_NAME, updatedMap);
+            log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, updatedMap.size());
+            return null;
+        });
     }
 
     /**
