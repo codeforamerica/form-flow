@@ -23,6 +23,7 @@ public class CheckIndicatedContactMethodIsProvided implements Action {
         Map<String, List<String>> errorMessages = new java.util.HashMap<>(Collections.emptyMap());
 
         if (formSubmission.getFormData().containsKey(HOW_TO_CONTACT_YOU_INPUT)) {
+            @SuppressWarnings("unchecked")
             ArrayList<String> preferredContactMethods = (ArrayList<String>) formSubmission.getFormData()
                     .get(HOW_TO_CONTACT_YOU_INPUT);
             if (preferredContactMethods.contains("phone") && formSubmission.getFormData().get(PHONE_NUMBER_INPUT).equals("")) {

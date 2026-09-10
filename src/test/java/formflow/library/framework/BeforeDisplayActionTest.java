@@ -41,12 +41,14 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     void shouldSaveEncryptedSSN() throws Exception {
         // beforeSave
         String ssnInput = "111-00-1234";
-        postExpectingSuccess("testFlow", "inputs", Map.of("ssnInput", List.of(ssnInput)));
+        String postUrl = getUrlForPageName("testFlow", "inputs");
+        postToUrlExpectingSuccess(postUrl, postUrl + "/navigation", Map.of("ssnInput", List.of(ssnInput)));
         assertThat(submission.getInputData().get("ssnInputEncrypted")).isEqualTo("BBB-AA-BCDE");
         assertThat(submission.getInputData().get("ssnInput")).isNull();
 
         // beforeDisplay
         MvcResult result = getPageExpectingSuccess("testFlow", "inputs").andReturn();
+        @SuppressWarnings("unchecked")
         Map<String, String> inputData = (Map<String, String>) result.getModelAndView().getModel().get("inputData");
         assertThat(inputData.get("ssnInput")).isEqualTo(ssnInput);
         assertThat(inputData.get("ssnInputEncrypted")).isNull();
@@ -83,6 +85,7 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
 
         // beforeDisplay
         MvcResult result = getPageExpectingSuccess("testFlow", "pageWithSSNInput/" + subflowUuid + "/edit").andReturn();
+        @SuppressWarnings("unchecked")
         Map<String, String> subflowItem = (Map<String, String>) result.getModelAndView().getModel().get("currentSubflowItem");
         assertThat(subflowItem.get("ssnInput")).isEqualTo(ssnInput);
         assertThat(subflowItem.get("ssnInputEncrypted")).isNull();

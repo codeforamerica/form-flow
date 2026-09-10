@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class CalculateTotalBeforeSave implements Action {
 
     public void run(Submission submission, String id) {
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> subflow = (List<Map<String, Object>>) submission.getInputData()
                 .get("income");
         var totalIncome = subflow.stream()

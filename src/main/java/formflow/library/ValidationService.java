@@ -61,6 +61,14 @@ public class ValidationService {
         ValidationService.inputConfigPath = inputConfigPath;
     }
 
+    /**
+     * Returns the cache of flow-name to required-input-name mappings, computing and caching {@code flowName}'s
+     * entry first if it isn't already present. A field is considered required if it's annotated with
+     * {@code @NotNull}, {@code @NotEmpty}, or {@code @NotBlank} in the flow's inputs class.
+     *
+     * @param flowName the flow to compute/cache required inputs for, if not already cached
+     * @return the full cache of flow-name to required-input-name mappings (not just {@code flowName}'s entry)
+     */
     public static Map<String, Map<String, Boolean>> getRequiredInputs(String flowName) {
         if (!requiredInputs.containsKey(flowName)) {
             Class<?> flowClass;

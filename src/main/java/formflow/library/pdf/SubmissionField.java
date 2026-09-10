@@ -5,14 +5,25 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * Base type for a single field's data as prepared for filling in a submission's PDF, keyed by {@link #getName()}.
+ * Subtypes ({@link SingleField}, {@link DatabaseField}) add the actual value; this class holds the name/subflow
+ * iteration a field belongs to.
+ */
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 public abstract class SubmissionField {
 
+    /**
+     * The field's base name, before any subflow iteration suffix is applied by {@link #getName()}.
+     */
     @ToString.Include
     @EqualsAndHashCode.Include
     public String name = null;
+    /**
+     * The subflow iteration this field belongs to, or null if the field isn't part of a subflow.
+     */
     @ToString.Include
     @EqualsAndHashCode.Include
     @Getter

@@ -111,15 +111,19 @@ public class Submission {
         Map<String, Object> result = new HashMap<>();
         for (Map.Entry<String, Object> entry : origMap.entrySet()) {
             if (entry.getValue() instanceof List) {
-                List data = (List) entry.getValue();
-                if (data.size() == 0) {
+                List<?> data = (List<?>) entry.getValue();
+                if (data.isEmpty()) {
                     result.put(entry.getKey(), new ArrayList<>());
                 } else if (data.get(0) instanceof String) {
                     result.put(entry.getKey(), new ArrayList<>(data));
                 } else if (data.get(0) instanceof Map) {
-                    List<Map> newList = new ArrayList<>();
-                    for (Map element : (List<Map>) data) {
-                        newList.add(copyMap(element));
+                    List<Map<String, Object>> newList = new ArrayList<>();
+                    for (Object element : data) {
+                        // Each element is only known to be a Map (erased); its key/value types can't be
+                        // verified, but that's the same shape this data was written in.
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> mapElement = (Map<String, Object>) element;
+                        newList.add(copyMap(mapElement));
                     }
                     result.put(entry.getKey(), newList);
                 } else {
@@ -155,6 +159,9 @@ public class Submission {
             return null;
         }
 
+        // inputData is stored as Map<String, Object>; a subflow entry is only known to be a List, not
+        // specifically List<Map<String,Object>>, and this method's return type requires that concrete type.
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> subflow = (List<Map<String, Object>>) inputData.get(subflowName);
         Optional<Map<String, Object>> iteration = subflow.stream().filter(entry -> entry.get("uuid").equals(uuid)).findFirst();
 
@@ -196,6 +203,9 @@ public class Submission {
             Map<String, Object> formDataSubmission) {
 
         iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
+        // inputData is stored as Map<String, Object>; a subflow entry is only known to be a List, not
+        // specifically List<Map<String,Object>>, and this needs to remain mutable via set() below.
+        @SuppressWarnings("unchecked")
         var subflowArr = (List<Map<String, Object>>) inputData.get(subflowName);
         int indexToUpdate = subflowArr.indexOf(iterationToUpdate);
         subflowArr.set(indexToUpdate, formDataSubmission);
@@ -220,6 +230,9 @@ public class Submission {
         iterationToUpdate.forEach((key, value) -> formDataSubmission.merge(key, value, (newValue, OldValue) -> newValue));
 
         Map<String, Object> subflowEntry = getSubflowEntryByUuid(subflowName, subflowUuid);
+        // subflowEntry is stored as Map<String, Object>; this value is only known to be a List, not
+        // specifically List<Map<String,Object>>, and this needs to remain mutable via set() below.
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> repeatForIterations = (List<Map<String, Object>>) subflowEntry.getOrDefault(
                 repeatForSaveDataAsKey, Collections.EMPTY_LIST);
 
@@ -232,6 +245,9 @@ public class Submission {
 
             subflowEntry.put(repeatForSaveDataAsKey, repeatForIterations);
 
+            // inputData is stored as Map<String, Object>; a subflow entry is only known to be a List, not
+            // specifically List<Map<String,Object>>, and this needs to remain mutable via set() below.
+            @SuppressWarnings("unchecked")
             List<Map<String, Object>> subflowArr = (List<Map<String, Object>>) this.inputData.get(subflowName);
             int indexToUpdate = subflowArr.indexOf(subflowEntry);
             subflowArr.set(indexToUpdate, subflowEntry);
@@ -285,6 +301,12 @@ public class Submission {
         inputData.remove(inputName + AddressParts.ZIPCODE + UNVALIDATED_FIELD_MARKER_VALIDATED);
     }
 
+    /**
+     * Sets this submission's short code. The short code is write-once: once set, it can't be changed.
+     *
+     * @param shortCode the short code to set
+     * @throws UnsupportedOperationException if this submission already has a short code
+     */
     public void setShortCode(String shortCode) {
         if (this.shortCode != null) {
             throw new UnsupportedOperationException("Cannot change shortCode for an existing submission");
