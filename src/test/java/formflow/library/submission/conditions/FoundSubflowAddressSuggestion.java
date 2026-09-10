@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class FoundSubflowAddressSuggestion implements Condition {
 
     @Override
+    @SuppressWarnings("unchecked")
     public Boolean run(Submission submission, String uuid) {
         List<Map<String, Object>> subflowDataList = (List<Map<String, Object>>) submission.getInputData().get("testSubflow");
         Map<String, Object> theEntry = subflowDataList.get(0);

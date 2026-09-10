@@ -96,7 +96,12 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
 
         subflowMap.forEach((pdfSubflowName, pdfSubflow) -> {
             if (submission.getInputData().containsKey(pdfSubflowName)) {
-                subflowDataList.addAll((List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName));
+                // inputData is stored as Map<String, Object>; a subflow entry is only known to be a List, not
+                // specifically List<Map<String,Object>>.
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> subflowEntries =
+                        (List<Map<String, Object>>) submission.getInputData().get(pdfSubflowName);
+                subflowDataList.addAll(subflowEntries);
             }
 
             if (!subflowDataList.isEmpty()) {
@@ -130,7 +135,7 @@ public class SubflowFieldPreparer implements DefaultSubmissionFieldPreparer {
                         if (key.endsWith("[]")) {
                             // don't update the inner values.
                             preppedFields.put(newKey, new CheckboxField(key.replace("[]", ""),
-                                    (List<String>) value, atomInteger.get()));
+                                    ((List<?>) value).stream().map(String.class::cast).toList(), atomInteger.get()));
                         } else {
                             preppedFields.put(newKey, new SingleField(key, value.toString(), atomInteger.get()));
                         }

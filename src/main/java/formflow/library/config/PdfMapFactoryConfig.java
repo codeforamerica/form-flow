@@ -19,6 +19,11 @@ public class PdfMapFactoryConfig {
     public PdfMapFactoryConfig() {
     }
 
+    /**
+     * Bean for the factory that parses the configured PDF map file into {@link PdfMap} objects.
+     *
+     * @return the PDF map factory
+     */
     @Bean
     public PdfMapFactory pdfMapFactory() {
         return new PdfMapFactory();

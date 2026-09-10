@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * One subflow's PDF field mapping configuration within a {@link PdfMap}, as loaded from a {@code pdf-map.yaml}
+ * file: which of the subflow's input fields map to which PDF field names, expanded out per iteration up to
+ * {@link #totalIterations}.
+ */
 @Data
 @AllArgsConstructor
 public class PdfMapSubflow {
@@ -50,6 +55,8 @@ public class PdfMapSubflow {
      *          incomeSelf: INCOME_HAS_SELF_EMPLOYMENT_MEMBER
      *          incomeUnemployment: INCOME_HAS_UNEMPLOYMENT_MEMBER
      * </pre>
+     *
+     * @return the subflow's input fields, expanded per iteration and keyed by iteration-suffixed field name
      */
     public Map<String, Object> getFieldsForIterations() {
         Map<String, Object> iterationFields = new HashMap<>();
@@ -62,7 +69,11 @@ public class PdfMapSubflow {
                 String newKey = key + suffix;
 
                 if (value instanceof Map) {
-                    Map<String, Object> values = ((Map<String, Object>) value).entrySet().stream()
+                    // value's runtime type is only known to be `Map` (erased); the entry key/value types can't be
+                    // verified, so this cast is unavoidable given the Map<String, Object>-shaped config this reads from.
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> subflowFieldMap = (Map<String, Object>) value;
+                    Map<String, Object> values = subflowFieldMap.entrySet().stream()
                             .map(listEntry -> {
                                 // don't change the key name here, it's not necessary
                                 return (Map.entry(listEntry.getKey(), listEntry.getValue() + suffix));

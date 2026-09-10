@@ -53,6 +53,7 @@ public class PdfMapTest {
         assertThat(subflowFields.size()).isEqualTo(pdfMapSubflow.getTotalIterations() * pdfMapSubflow.getInputFields().size());
 
         assertThat(subflowFields.containsKey("incomeTypes_1")).isTrue();
+        @SuppressWarnings("unchecked")
         Map<String, String> incomeTypeFields = (Map<String, String>) subflowFields.get("incomeTypes_1");
         assertThat(incomeTypeFields.containsKey("incomeJob")).isTrue();
         assertThat(incomeTypeFields.get("incomeJob")).isEqualTo("APPLICANT_HAS_JOB_INCOME_1");

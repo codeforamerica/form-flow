@@ -20,6 +20,7 @@ public interface SubflowRelationshipFilter {
      * @param subflowDataToFilter The subflow data to be filtered. Note that this is a copy and will not modify the original data
      *                            in the submission. Filtering will only occur against the copy when setting up the data for the
      *                            subflow relationship.
+     * @param submission          the submission the subflow data belongs to, not null
      * @return The filtered subflow data.
      */
     default List<HashMap<String, Object>> filter(List<HashMap<String, Object>> subflowDataToFilter, Submission submission) {

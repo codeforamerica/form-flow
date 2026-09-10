@@ -94,6 +94,13 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
         }
     }
 
+    /**
+     * Validates that a flow with submission locking enabled also configures the {@code afterSubmitPages}
+     * landmark, since locking needs to know which screens remain viewable after submission.
+     *
+     * @param flowConfig the flow configuration to validate
+     * @throws FlowConfigurationException if the {@code afterSubmitPages} landmark isn't set
+     */
     protected void validateLandmarksAfterSubmitPages(FlowConfiguration flowConfig) {
         if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getAfterSubmitPages() == null) {
             throw new FlowConfigurationException("You have enabled submission locking for the flow " + flowConfig.getName() +
@@ -101,6 +108,14 @@ public class FlowsConfigurationFactory implements FactoryBean<List<FlowConfigura
         }
     }
 
+    /**
+     * Validates that a flow, when the session continuity interceptor is enabled, configures a {@code firstScreen}
+     * landmark that's an actual screen in the flow, since the interceptor needs it to redirect back to the start
+     * of the flow.
+     *
+     * @param flowConfig the flow configuration to validate
+     * @throws FlowConfigurationException if the {@code firstScreen} landmark isn't set, or isn't a real screen
+     */
     protected void validateLandmarksFirstScreen(FlowConfiguration flowConfig) {
         if (flowConfig.getLandmarks() == null || flowConfig.getLandmarks().getFirstScreen() == null) {
             throw new FlowConfigurationException(

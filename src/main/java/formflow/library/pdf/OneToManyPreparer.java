@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
+/**
+ * Built-in {@link DefaultSubmissionFieldPreparer} that maps a checkbox-set input field to a PDF field: for every
+ * map-valued entry in a {@code pdf-map.yaml} file's field configuration, looks up the matching {@code field + "[]"}
+ * list of selected values in the submission's input data and prepares it as a {@link CheckboxField}.
+ */
 @Component
 public class OneToManyPreparer implements DefaultSubmissionFieldPreparer {
 
@@ -25,7 +30,9 @@ public class OneToManyPreparer implements DefaultSubmissionFieldPreparer {
                 .forEach(field ->
                         preppedFields.put(field, new CheckboxField(
                                         field,
-                                        (List<String>) submission.getInputData().get(field + "[]"),
+                                        ((List<?>) submission.getInputData().get(field + "[]")).stream()
+                                                .map(String.class::cast)
+                                                .toList(),
                                         null
                                 )
                         )

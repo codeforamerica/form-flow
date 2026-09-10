@@ -83,7 +83,7 @@ public class UserFileRepositoryService {
      * Finds all the {@link UserFile}s associated with a {@link Submission}} where the conversionSourceFileId matches
      *
      * @param submission             the {@link Submission} for which the associated {@link UserFile}s are sought
-     * @param conversionSourceFileId
+     * @param conversionSourceFileId the {@link UserFile#fileId} of the original file these were converted from
      * @return {@link List} of associated {@link UserFile} objects
      */
     public List<UserFile> findAll(Submission submission, UUID conversionSourceFileId) {
@@ -104,13 +104,21 @@ public class UserFileRepositoryService {
      * Finds all the {@link UserFile}s associated with a {@link Submission}} ordered by the OriginalName field
      *
      * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
-     * @param mimeType
+     * @param mimeType   the mime type to match against
      * @return {@link List} of associated {@link UserFile} objects
      */
     public List<UserFile> findAllOrderByOriginalName(Submission submission, String mimeType) {
         return repository.findAllBySubmissionAndMimeTypeOrderByOriginalName(submission, mimeType);
     }
 
+    /**
+     * Finds all the converted {@link UserFile}s associated with a {@link Submission} where the mimeType matches, ordered by
+     * the OriginalName field
+     *
+     * @param submission the {@link Submission} for which the associated {@link UserFile}s are sought
+     * @param mimeType   the mime type to match against
+     * @return {@link List} of matching, converted {@link UserFile} objects, ordered by original file name
+     */
     public List<UserFile> findAllConvertedOrderByOriginalName(Submission submission, String mimeType) {
         return repository.findAllBySubmissionAndMimeTypeAndConversionSourceFileIdIsNotNullOrderByOriginalName(submission,
                 mimeType);

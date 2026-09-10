@@ -182,7 +182,7 @@ class SubmissionRepositoryServiceTest {
 
         submissionRepositoryService.removeSubflowCSRF(submission, "household");
 
-        var subflowEntry = (ArrayList<Map<String, Object>>) submission.getInputData().get("household");
+        var subflowEntry = getSubflowEntries(submission, "household");
         assertThat(subflowEntry.get(0).containsKey("_csrf")).isFalse();
         assertThat(subflowEntry.get(0).containsKey("foo")).isTrue();
     }
@@ -207,7 +207,7 @@ class SubmissionRepositoryServiceTest {
         assertThat(dbSubmission.getInputData().containsKey("ssnInput_encrypted")).isFalse();
         assertThat(dbSubmission.getInputData().get("ssnInput")).isEqualTo("123-45-6789");
 
-        Map<String, Object> subflowData = (Map) ((List) dbSubmission.getInputData().get("household")).get(0);
+        Map<String, Object> subflowData = getSubflowEntry(dbSubmission, "household", 0);
         assertThat(subflowData.containsKey("ssnInputSubflow")).isTrue();
         assertThat(subflowData.containsKey("ssnInputSubflow_encrypted")).isFalse();
         assertThat(subflowData.get("ssnInputSubflow")).isEqualTo("321-54-9876");
@@ -244,10 +244,8 @@ class SubmissionRepositoryServiceTest {
                 submission.getInputData().get("ssnInput"));
 
         // check subflow ssn field
-        Map<String, Object> resultHouseholdSubflow =
-                (Map<String, Object>) ((List) resultSubmission.getInputData().get("household")).get(0);
-        Map<String, Object> origHouseholdSubflow = (Map<String, Object>) ((List) submission.getInputData().get("household")).get(
-                0);
+        Map<String, Object> resultHouseholdSubflow = getSubflowEntry(resultSubmission, "household", 0);
+        Map<String, Object> origHouseholdSubflow = getSubflowEntry(submission, "household", 0);
         assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow_encrypted")).isTrue();
         assertThat(resultHouseholdSubflow.containsKey("ssnInputSubflow")).isFalse();
         assertThat(resultHouseholdSubflow.get("ssnInputSubflow_encrypted")).isNotEqualTo(
@@ -280,5 +278,18 @@ class SubmissionRepositoryServiceTest {
     private Submission saveAndReload(Submission submission) {
         Submission savedSubmission = submissionRepositoryService.save(submission);
         return submissionRepositoryService.findById(savedSubmission.getId()).orElseThrow();
+    }
+
+    /**
+     * Submission input data is stored as {@code Map<String, Object>}, so reading a subflow's list of iterations
+     * back out is an unavoidable unchecked cast - centralized here instead of repeated at every call site.
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getSubflowEntries(Submission submission, String subflowName) {
+        return (List<Map<String, Object>>) submission.getInputData().get(subflowName);
+    }
+
+    private Map<String, Object> getSubflowEntry(Submission submission, String subflowName, int index) {
+        return getSubflowEntries(submission, subflowName).get(index);
     }
 }
