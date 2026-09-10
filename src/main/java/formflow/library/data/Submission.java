@@ -297,6 +297,15 @@ public class Submission {
         this.shortCode = shortCode;
     }
 
+    /**
+     * Clears a short code that was set but failed to persist (e.g. it collided with a code a concurrent request just
+     * inserted), so short code generation can retry with a different candidate. Package-private: this is a retry
+     * seam for {@link SubmissionRepositoryService}, not a general-purpose way to change an already-persisted code.
+     */
+    void clearShortCodeAfterFailedSave() {
+        this.shortCode = null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

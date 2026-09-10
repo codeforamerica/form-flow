@@ -17,8 +17,14 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.RandomStringGenerator;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Service to retrieve and store {@link formflow.library.data.Submission} objects in the database.
@@ -27,6 +33,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Slf4j
 public class SubmissionRepositoryService {
+
+    /**
+     * The database's UNIQUE constraint on short_code is the real arbiter of uniqueness across concurrent app
+     * instances - existsByShortCode alone can't prevent two instances from both passing the check for the same
+     * code. This bounds how many times generateAndSetUniqueShortCode retries after a genuine collision before
+     * giving up, so a misconfigured (too-small) code space can't loop forever.
+     */
+    private static final int MAX_SHORT_CODE_ATTEMPTS = 50;
 
     SubmissionRepository repository;
 
@@ -37,11 +51,20 @@ public class SubmissionRepositoryService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * A single failed save (e.g. a short code collision) marks the enclosing Postgres transaction as aborted -
+     * every subsequent statement in it fails until rollback. Each short-code attempt needs its own independent
+     * transaction so one collision doesn't poison the retries that follow it.
+     */
+    private final TransactionTemplate requiresNewTransactionTemplate;
+
     public SubmissionRepositoryService(SubmissionRepository repository, SubmissionEncryptionService encryptionService,
-            ShortCodeConfig shortCodeConfig) {
+            ShortCodeConfig shortCodeConfig, PlatformTransactionManager transactionManager) {
         this.repository = repository;
         this.encryptionService = encryptionService;
         this.shortCodeConfig = shortCodeConfig;
+        this.requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
+        this.requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     private static String generateRandomCode(int length, ShortCodeType type) {
@@ -162,7 +185,8 @@ public class SubmissionRepositoryService {
      *
      * @param submission the {@link formflow.library.ScreenController} for which the short code will be generated and saved
      */
-    public synchronized void generateAndSetUniqueShortCode(Submission submission) {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void generateAndSetUniqueShortCode(Submission submission) {
 
         if (submission.getShortCode() != null) {
             log.debug("Unable to create short code for submission {} because one already exists.", submission.getId());
@@ -179,6 +203,7 @@ public class SubmissionRepositoryService {
 
         // If there is no short code for this submission in the database, generate one
         int codeLength = config.getCodeLength();
+        int attempts = 0;
         do {
             String newCode = switch (config.getCodeType()) {
                 case alphanumeric -> generateRandomCode(codeLength, alphanumeric);
@@ -198,16 +223,40 @@ public class SubmissionRepositoryService {
                 newCode = newCode + config.getSuffix();
             }
 
+            attempts++;
             boolean exists = repository.existsByShortCode(newCode);
             if (!exists) {
                 // If the newly generated code isn't already in the database being used by a prior submission
-                // set this submission's shortcode, and persist it
-                submission.setShortCode(newCode);
-                save(submission);
-                log.info("Created short code {} for submission {}", newCode, submission.getId());
+                // set this submission's shortcode, and persist it. Each attempt runs in its own fresh
+                // transaction (PROPAGATION_REQUIRES_NEW): a Postgres constraint violation aborts the whole
+                // enclosing transaction, so retrying in the same transaction as a failed attempt would just
+                // fail every statement after it with "current transaction is aborted."
+                String candidateCode = newCode;
+                try {
+                    requiresNewTransactionTemplate.executeWithoutResult(status -> {
+                        submission.setShortCode(candidateCode);
+                        save(submission);
+                    });
+                    log.info("Created short code {} for submission {}", candidateCode, submission.getId());
+                } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+                    // A concurrent request/instance won the race and inserted this same code between our
+                    // exists-check and our save - existsByShortCode alone can't prevent that across instances.
+                    // The unique constraint is the real arbiter; reset and try another candidate. Save's
+                    // explicit entityManager.flush() means the violation surfaces as Hibernate's raw
+                    // ConstraintViolationException here rather than Spring's translated
+                    // DataIntegrityViolationException - caught for both, in case that ever changes.
+                    log.warn("Short code {} collided with a concurrently-created submission for {}; retrying.",
+                            candidateCode, submission.getId());
+                    submission.clearShortCodeAfterFailedSave();
+                }
             } else {
                 log.warn("Confirmation code {} already exists", newCode);
             }
-        } while (submission.getShortCode() == null);
+        } while (submission.getShortCode() == null && attempts < MAX_SHORT_CODE_ATTEMPTS);
+
+        if (submission.getShortCode() == null) {
+            log.error("Unable to generate a unique short code for submission {} after {} attempts", submission.getId(),
+                    attempts);
+        }
     }
 }
