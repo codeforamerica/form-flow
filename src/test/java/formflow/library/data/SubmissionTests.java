@@ -64,12 +64,20 @@ public class SubmissionTests {
         formData.put("keepMe", "keep-me-value");
         submission.mergeFormDataWithRepeatForSubflowIterationData("repeatForSubflow",
                 "outer-repeat-for-uuid-1", "saveDataAsName", repeatForEntry1, formData);
-        List<Map<String, Object>> repeatForSubflow = (List<Map<String, Object>>) submission.getInputData()
-                .get("repeatForSubflow");
+        List<Map<String, Object>> repeatForSubflow = getSubflowEntries(submission, "repeatForSubflow");
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> saveDataAsName = (List<Map<String, Object>>) repeatForSubflow.get(0).get("saveDataAsName");
         assertThat(saveDataAsName.getFirst().containsKey("_csrf")).isFalse();
         assertThat(saveDataAsName.getFirst().get("keepMe")).isEqualTo("keep-me-value");
         assertThat(saveDataAsName.getFirst().get("foo")).isEqualTo("bar");
     }
 
+    /**
+     * Submission input data is stored as {@code Map<String, Object>}, so reading a subflow's list of iterations
+     * back out is an unavoidable unchecked cast - centralized here instead of repeated at every call site.
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getSubflowEntries(Submission submission, String subflowName) {
+        return (List<Map<String, Object>>) submission.getInputData().get(subflowName);
+    }
 }

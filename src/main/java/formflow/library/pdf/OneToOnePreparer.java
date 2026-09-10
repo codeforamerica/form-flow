@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
+/**
+ * Built-in {@link DefaultSubmissionFieldPreparer} that maps a single input field directly to a single PDF field:
+ * for every string-valued entry in a {@code pdf-map.yaml} file's field configuration, looks up the matching value
+ * in the submission's input data and prepares it as a {@link SingleField}.
+ */
 @Component
 public class OneToOnePreparer implements DefaultSubmissionFieldPreparer {
 

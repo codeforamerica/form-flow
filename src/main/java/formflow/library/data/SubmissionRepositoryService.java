@@ -10,7 +10,7 @@ import formflow.library.config.submission.ShortCodeConfig.Config.ShortCodeType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,6 +58,15 @@ public class SubmissionRepositoryService {
      */
     private final TransactionTemplate requiresNewTransactionTemplate;
 
+    /**
+     * Wires up the repository, encryption service, and short code config this service needs.
+     *
+     * @param repository        repository used to load/save {@link Submission} rows
+     * @param encryptionService service used to encrypt/decrypt a submission's sensitive fields
+     * @param shortCodeConfig   per-flow short code generation settings
+     * @param transactionManager transaction manager used to run each short-code save attempt in its own
+     *                            independent transaction
+     */
     public SubmissionRepositoryService(SubmissionRepository repository, SubmissionEncryptionService encryptionService,
             ShortCodeConfig shortCodeConfig, PlatformTransactionManager transactionManager) {
         this.repository = repository;
@@ -130,6 +139,12 @@ public class SubmissionRepositoryService {
         return submission.map(value -> encryptionService.decrypt(value));
     }
 
+    /**
+     * Searches for a particular Submission by its short code.
+     *
+     * @param shortCode short code of the submission to look for, not null
+     * @return Optional containing the Submission if found, else empty
+     */
     public Optional<Submission> findByShortCode(String shortCode) {
         Optional<Submission> submission = repository.findSubmissionByShortCode(shortCode);
         return submission.map(value -> encryptionService.decrypt(value));
@@ -154,11 +169,13 @@ public class SubmissionRepositoryService {
      * @param subflowName the subflow to remove the CSRF from, not null
      */
     public void removeSubflowCSRF(Submission submission, String subflowName) {
-        var subflowArr = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
+        // Only remove-by-key here, so a wildcard cast - fully checked, no unchecked warning - is enough; no need
+        // for the concrete List<Map<String,Object>> type this data is actually stored as.
+        var subflowArr = (List<?>) submission.getInputData().get(subflowName);
 
         if (subflowArr != null) {
             for (var entry : subflowArr) {
-                entry.remove("_csrf");
+                ((Map<?, ?>) entry).remove("_csrf");
             }
         }
     }

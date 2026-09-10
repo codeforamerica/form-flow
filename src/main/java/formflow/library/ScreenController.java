@@ -612,9 +612,10 @@ public class ScreenController extends FormFlowController {
             RepeatFor repeatFor = subflowRelationship.get().getRepeatFor();
             String inputNameKey = repeatFor.getInputName();
             if (formSubmission.getFormData().containsKey(inputNameKey + "[]")) {
+                List<?> rawValues = (List<?>) formSubmission.getFormData().getOrDefault(inputNameKey + "[]", List.of());
                 subflowManager.addRepeatForIterationData(submission, currentScreen.getSubflow(), iterationUuid,
                         repeatFor.getSaveDataAs(),
-                        (List) formSubmission.getFormData().getOrDefault(inputNameKey + "[]", List.of()));
+                        rawValues.stream().map(String.class::cast).toList());
             }
         }
 
@@ -625,6 +626,9 @@ public class ScreenController extends FormFlowController {
                 submission.getInputData().put(subflowName, new ArrayList<Map<String, Object>>());
             }
             if (isNewIteration) {
+                // Submission stores subflow data as Map<String, Object>; the runtime type of a subflow entry is
+                // only known to be a List, not specifically List<Map<String,Object>>.
+                @SuppressWarnings("unchecked")
                 ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData()
                         .get(subflowName);
                 formSubmission.getFormData().put("uuid", iterationUuid);
@@ -759,6 +763,9 @@ public class ScreenController extends FormFlowController {
 
         var existingInputData = submission.getInputData();
         if (existingInputData.containsKey(subflow)) {
+            // Submission stores subflow data as Map<String, Object>; the runtime type of a subflow entry is only
+            // known to be a List, not specifically List<Map<String,Object>>.
+            @SuppressWarnings("unchecked")
             var subflowArr = (ArrayList<Map<String, Object>>) existingInputData.get(subflow);
             Optional<Map<String, Object>> entryToDelete = subflowArr.stream()
                     .filter(entry -> entry.get("uuid").equals(uuid)).findFirst();
@@ -1115,6 +1122,9 @@ public class ScreenController extends FormFlowController {
         Map<String, Object> subflowIterationData = submission.getSubflowEntryByUuid(subflow, uuid);
 
         if (subflowIterationData.containsKey(repeatFor.getSaveDataAs())) {
+            // Submission stores subflow data as Map<String, Object>; the runtime type of a repeatFor entry is
+            // only known to be a List, not specifically List<Map<String,Object>>.
+            @SuppressWarnings("unchecked")
             List<Map<String, Object>> repeatForIterationData = (List<Map<String, Object>>) subflowIterationData.get(
                     repeatFor.getSaveDataAs());
             Optional<Map<String, Object>> entryToDelete = repeatForIterationData.stream()
@@ -1475,8 +1485,11 @@ public class ScreenController extends FormFlowController {
         // Merge form data that was submitted, with already existing inputData
         // This helps in the case of errors, so all the current data is on the page
         if (formDataSubmissionExists) {
-            FormSubmission formSubmission = new FormSubmission(
-                    (Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+            // Session attributes are stored as Object; this is only ever written as a Map<String, Object> by this
+            // library, but the compiler can't verify that.
+            @SuppressWarnings("unchecked")
+            Map<String, Object> formDataSubmission = (Map<String, Object>) httpSession.getAttribute("formDataSubmission");
+            FormSubmission formSubmission = new FormSubmission(formDataSubmission);
             if (subflowName != null && uuid != null && !uuid.isBlank()) {
                 // there is existing data to merge with
                 submission.mergeFormDataWithSubflowIterationData(subflowName, submission.getSubflowEntryByUuid(subflowName, uuid),
@@ -1530,7 +1543,12 @@ public class ScreenController extends FormFlowController {
                                 repeatForIterationUuid);
 
                         if (formDataSubmissionExists && repeatForIteration != null) {
-                            repeatForIteration.putAll((Map<String, Object>) httpSession.getAttribute("formDataSubmission"));
+                            // Session attributes are stored as Object; this is only ever written as a
+                            // Map<String, Object> by this library, but the compiler can't verify that.
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> formDataSubmission =
+                                    (Map<String, Object>) httpSession.getAttribute("formDataSubmission");
+                            repeatForIteration.putAll(formDataSubmission);
                         }
                         model.put("repeatForIteration", repeatForIteration);
 
@@ -1580,8 +1598,12 @@ public class ScreenController extends FormFlowController {
         String subflowName = getValidatedFlowConfigurationByName(flow).getSubflows().entrySet().stream()
                 .filter(entry -> screen.equals(entry.getValue().getDeleteConfirmationScreen()))
                 .toList().getFirst().getKey();
-        ArrayList<Map<String, Object>> subflow = (ArrayList<Map<String, Object>>) submission.getInputData().get(subflowName);
-        if (subflow == null || subflow.stream().noneMatch(entry -> entry.get("uuid").equals(uuid))) {
+        // Only read here (never mutated), so a wildcard cast - fully checked, no unchecked warning - is enough;
+        // no need for the concrete List<Map<String,Object>> type this data is actually stored as.
+        List<?> subflow = (List<?>) submission.getInputData().get(subflowName);
+        if (subflow == null || subflow.stream()
+                .map(entry -> (Map<?, ?>) entry)
+                .noneMatch(entry -> entry.get("uuid").equals(uuid))) {
             model.put("noEntryToDelete", true);
             model.put("reviewScreen", getValidatedFlowConfigurationByName(flow).getSubflows().get(subflowName).getReviewScreen());
             if (subflow == null) {
@@ -1702,9 +1724,10 @@ public class ScreenController extends FormFlowController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        List<Map<String, Object>> repeatForIterationsData = (List<Map<String, Object>>) subflowIterationData.get(
-                repeatForSaveDataAs);
+        // Only read here (never mutated), so a wildcard cast - fully checked, no unchecked warning - is enough.
+        List<?> repeatForIterationsData = (List<?>) subflowIterationData.get(repeatForSaveDataAs);
         return repeatForIterationsData.stream()
+                .map(nestedSubflow -> (Map<?, ?>) nestedSubflow)
                 .anyMatch(nestedSubflow -> nestedSubflow.get("uuid").equals(repeatForIterationUuid));
     }
 

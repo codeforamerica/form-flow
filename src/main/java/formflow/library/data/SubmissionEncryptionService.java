@@ -114,6 +114,10 @@ public class SubmissionEncryptionService {
                     for (var element : possibleSubflows) {
                         // check for subflows
                         if (element instanceof Map) {
+                            // element's runtime type is only known to be Map (erased); its key/value types can't
+                            // be verified, and containsEncryptionField/replaceValue need the concrete type below
+                            // to mutate it in place.
+                            @SuppressWarnings("unchecked")
                             Map<String, Object> subflow = (Map<String, Object>) element;
                             if (containsEncryptionField(direction, field, subflow)) {
                                 replaceValue(field, subflow, direction);

@@ -33,6 +33,12 @@ public class FlowConfiguration {
         return flow.get(screenName);
     }
 
+    /**
+     * Sets the flow's screen-name to {@link ScreenNavigationConfiguration} map, also stamping each
+     * configuration with its own screen name (since the YAML/properties source only has the name as the map key).
+     *
+     * @param screenMap the screen-name to navigation-configuration map for this flow
+     */
     public void setFlow(Map<String, ScreenNavigationConfiguration> screenMap) {
         flow = screenMap.entrySet().stream()
                 .map(entry -> {

@@ -48,8 +48,8 @@ public class BeforeSaveActionTest extends AbstractMockMvcTest {
 
     @Test
     void shouldSaveFormattedDate() throws Exception {
-        postExpectingSuccess("testFlow",
-                "inputs",
+        String postUrl = getUrlForPageName("testFlow", "inputs");
+        postToUrlExpectingSuccess(postUrl, postUrl + "/navigation",
                 Map.of(
                         "dateMonth", List.of("1"),
                         "dateDay", List.of("2"),

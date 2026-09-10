@@ -175,7 +175,7 @@ public class FileControllerTest extends AbstractMockMvcTest {
                         .param("screen", "testUploadScreen")
                         .session(session)
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-                .andExpect(status().is(HttpStatus.PAYLOAD_TOO_LARGE.value()))
+                .andExpect(status().is(HttpStatus.CONTENT_TOO_LARGE.value()))
                 .andExpect(content().string("This file is too large and cannot be uploaded (max size: 1 MB)"));
     }
 

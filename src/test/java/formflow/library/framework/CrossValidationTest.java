@@ -48,8 +48,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
     @Test
     void shouldAcceptEmailWithPreference() throws Exception {
-        postExpectingSuccess("testFlow",
-                "contactInfoPreference",
+        String postUrl = getUrlForPageName("testFlow", "contactInfoPreference");
+        postToUrlExpectingSuccess(postUrl, postUrl + "/navigation",
                 Map.of(
                         "email", List.of("foo@bar.com"),
                         "howToContactYou[]", List.of("email"))
@@ -66,8 +66,8 @@ public class CrossValidationTest extends AbstractMockMvcTest {
 
     @Test
     void shouldAcceptPhoneNumberWithPreference() throws Exception {
-        postExpectingSuccess("testFlow",
-                "contactInfoPreference",
+        String postUrl = getUrlForPageName("testFlow", "contactInfoPreference");
+        postToUrlExpectingSuccess(postUrl, postUrl + "/navigation",
                 Map.of(
                         "phoneNumber", List.of("223-456-7891"),
                         "howToContactYou", List.of("phone"))

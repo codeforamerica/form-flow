@@ -210,7 +210,7 @@ public class InputsTest extends AbstractMockMvcTest {
             @Test
             void removesPreviousSuggestionWhenGoingBackAndEnteringInvalidAddress() throws Exception {
                 String inputName = "validationOn";
-                HashMap<String, ValidatedAddress> testMap = new HashMap();
+                HashMap<String, ValidatedAddress> testMap = new HashMap<>();
                 testMap.put(inputName, null);
                 when(addressValidationService.validate(any())).thenReturn(testMap);
 

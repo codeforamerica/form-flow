@@ -49,8 +49,8 @@ public class SubmissionEncryptionServiceTest {
     @Test
     void encryptStringFieldInSubflow() {
         Submission encryptedSubmission = service.encrypt(submission);
-        var encryptedSubflow = ((List<Map<String, Object>>) encryptedSubmission.getInputData().get("subflowA")).get(0);
-        var originalSubflow = ((List<Map<String, Object>>) submission.getInputData().get("subflowA")).get(0);
+        var encryptedSubflow = getFirstSubflowEntry(encryptedSubmission, "subflowA");
+        var originalSubflow = getFirstSubflowEntry(submission, "subflowA");
 
         assertThat(encryptedSubflow.containsKey("ssnInputSubflow" + service.ENCRYPT_SUFFIX)).isTrue();
         assertThat(encryptedSubflow.containsKey("ssnInputSubflow")).isFalse();
@@ -75,11 +75,20 @@ public class SubmissionEncryptionServiceTest {
         Submission encryptedSubmission = service.encrypt(submission);
         Submission decryptedSubmission = service.decrypt(encryptedSubmission);
 
-        var decryptedSubflow = ((List<Map<String, Object>>) decryptedSubmission.getInputData().get("subflowA")).get(0);
-        var originalSubflow = ((List<Map<String, Object>>) submission.getInputData().get("subflowA")).get(0);
+        var decryptedSubflow = getFirstSubflowEntry(decryptedSubmission, "subflowA");
+        var originalSubflow = getFirstSubflowEntry(submission, "subflowA");
 
         assertThat(decryptedSubflow.containsKey("ssnInputSubflow")).isTrue();
         assertThat(decryptedSubflow.containsKey("ssnInputSubflow" + service.ENCRYPT_SUFFIX)).isFalse();
         assertThat(decryptedSubflow.get("ssnInputSubflow")).isEqualTo(originalSubflow.get("ssnInputSubflow"));
+    }
+
+    /**
+     * Submission input data is stored as {@code Map<String, Object>}, so reading a subflow's first iteration back
+     * out is an unavoidable unchecked cast - centralized here instead of repeated at every call site.
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getFirstSubflowEntry(Submission submission, String subflowName) {
+        return ((List<Map<String, Object>>) submission.getInputData().get(subflowName)).get(0);
     }
 }

@@ -6,6 +6,10 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * Orchestrates every {@link DefaultSubmissionFieldPreparer} and {@link SubmissionFieldPreparer} bean in the
+ * application context to build the full set of {@link SubmissionField}s used to fill in a submission's PDF.
+ */
 @Slf4j
 @Component
 public class SubmissionFieldPreparers {
@@ -17,6 +21,14 @@ public class SubmissionFieldPreparers {
     private final PdfMapConfiguration pdfMapConfiguration;
 
 
+    /**
+     * Creates a preparer orchestrator backed by the given collaborators.
+     *
+     * @param defaultPreparers    the library's built-in field preparers, run first
+     * @param customPreparers     a consuming application's custom field preparers, run after (and able to
+     *                            override fields produced by) the default preparers
+     * @param pdfMapConfiguration provides the {@link PdfMap} for a given flow
+     */
     public SubmissionFieldPreparers(List<DefaultSubmissionFieldPreparer> defaultPreparers,
             List<SubmissionFieldPreparer> customPreparers,
             PdfMapConfiguration pdfMapConfiguration) {

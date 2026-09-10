@@ -17,18 +17,38 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * A parent controller class for form-flow controllers. Holds the shared dependencies (repositories, flow
+ * configuration, message source) every form-flow controller needs, and the common logic for finding, creating,
+ * and storing a flow's {@link Submission} in the {@link HttpSession}.
+ */
 @Slf4j
 public abstract class FormFlowController {
 
-    public static final String SUBMISSION_MAP_NAME = "submissionMap";
     /**
-     * A parent controller class for form-flow controllers
+     * The name of the {@link HttpSession} attribute under which the flow-name-to-submission-id map is stored.
      */
+    public static final String SUBMISSION_MAP_NAME = "submissionMap";
 
+    /**
+     * Service used to load/save {@link Submission}s.
+     */
     protected final SubmissionRepositoryService submissionRepositoryService;
+    /**
+     * Service used to load/save the files a submission has uploaded.
+     */
     protected final UserFileRepositoryService userFileRepositoryService;
+    /**
+     * The configured flows for this application.
+     */
     protected final List<FlowConfiguration> flowConfigurations;
+    /**
+     * Form-flow-wide configuration properties (e.g. which flows lock a submission after it's submitted).
+     */
     protected final FormFlowConfigurationProperties formFlowConfigurationProperties;
+    /**
+     * Source for user-facing messages.
+     */
     protected final MessageSource messageSource;
 
     FormFlowController(SubmissionRepositoryService submissionRepositoryService,
@@ -58,6 +78,19 @@ public abstract class FormFlowController {
     }
 
     /**
+     * Reads the flow-to-submission-id map out of the session. {@link HttpSession#getAttribute} returns
+     * {@code Object}, so this cast can't be checked by the compiler - centralized here instead of repeated at
+     * every call site.
+     *
+     * @param session the {@link HttpSession} to read the map from
+     * @return the flow-to-submission-id map, or null if not present
+     */
+    @SuppressWarnings("unchecked")
+    private static Map<String, UUID> getSubmissionMapFromSession(HttpSession session) {
+        return (Map<String, UUID>) session.getAttribute(SUBMISSION_MAP_NAME);
+    }
+
+    /**
      * Returns the {@link UUID} of the {@link Submission} associated with the given flow.
      *
      * @param session The {@link HttpSession} the user is in
@@ -72,7 +105,7 @@ public abstract class FormFlowController {
             throw new SessionExpiredException(msg);
         }
 
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         log.info("getSubmissionIdForFlow for session: {}, submissionMap size: {}, flow: {}", session.getId(), submissionMap != null ? submissionMap.size() : null, flow);
         if (submissionMap == null) {
             // Submission map being null is normal for a new session (first screen)
@@ -223,7 +256,7 @@ public abstract class FormFlowController {
             throw new SessionExpiredException(msg);
         }
 
-        Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+        Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
         log.info("getSubmissionFromSession for session: {}, submissionMap size: {}, flow: {}", session.getId(), submissionMap != null ? submissionMap.size() : null, flow);
         if (submissionMap == null) {
             // Submission map being null is normal for a new session
@@ -268,7 +301,7 @@ public abstract class FormFlowController {
         // the same session correctly serializes against each other too.
         submissionRepositoryService.withSubmissionLock("submission-lock:" + session.getId(), () -> {
             log.info("setSubmissionInSession session: {}, submission: {}, flow: {}", session.getId(), submissionId, flow);
-            Map<String, UUID> submissionMap = (Map) session.getAttribute(SUBMISSION_MAP_NAME);
+            Map<String, UUID> submissionMap = getSubmissionMapFromSession(session);
             log.info("setSubmissionInSession session: {}, submission: {}, flow: {}, map size: {}", session.getId(), submissionId, flow, submissionMap != null ? submissionMap.size() : null);
 
             Map<String, UUID> updatedMap = submissionMap == null ? new HashMap<>() : submissionMap;

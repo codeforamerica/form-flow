@@ -40,6 +40,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Converts an uploaded file to PDF, when {@code form-flow.uploads.file-conversion.convert-to-pdf} is enabled.
+ * Supports converting images (PNG/JPEG/GIF/BMP) and common office document/archive formats (detected via Apache
+ * Tika, not the file's declared content type) into one or more PDF files.
+ */
 @Slf4j
 @Service
 public class FileConversionService {
@@ -74,6 +79,9 @@ public class FileConversionService {
     @Value("${form-flow.uploads.file-conversion.allow-pdf-modification:false}")
     private boolean allowPdfModification;
 
+    /**
+     * Default constructor. Initializes the Apache Tika instance used to detect a file's actual mime type.
+     */
     public FileConversionService() {
         tikaFileValidator = new Tika();
     }
@@ -115,6 +123,14 @@ public class FileConversionService {
         return new File(modifiedPDFPath);
     }
 
+    /**
+     * Converts the given file to one or more PDF files, based on its actual (Tika-detected) mime type. Images
+     * convert to a single one-page PDF; office documents/archives may expand into multiple PDF files.
+     *
+     * @param file the file to convert
+     * @return the converted PDF file(s), or an empty set if the file's mime type isn't convertible or conversion
+     * fails
+     */
     public Set<MultipartFile> convertFileToPDF(MultipartFile file) {
         try {
             MimeType fileMimeType = MimeType.valueOf(tikaFileValidator.detect(file.getInputStream()));
