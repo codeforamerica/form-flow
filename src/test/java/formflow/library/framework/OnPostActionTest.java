@@ -35,7 +35,7 @@ public class OnPostActionTest extends AbstractMockMvcTest {
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
         UUID submissionUUID = UUID.randomUUID();
-        submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
+        submission = Submission.builder().id(submissionUUID).version(0L).inputData(new HashMap<>()).build();
         setFlowInfoInSession(session, "testFlow", submission.getId());
         super.setUp();
         when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));

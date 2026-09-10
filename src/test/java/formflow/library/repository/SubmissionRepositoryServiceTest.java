@@ -1,6 +1,7 @@
 package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.Submission;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -282,6 +284,24 @@ class SubmissionRepositoryServiceTest {
         assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
         assertThat(updatedSubmission.getUpdatedAt()).isBefore(OffsetDateTime.now());
         assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
+    }
+
+    @Test
+    void savingAStaleCopyOfAnUpdatedSubmissionThrowsAnOptimisticLockingException() {
+        Submission submission = new Submission();
+        submission.setFlow("testFlow");
+        Submission saved = submissionRepositoryService.save(submission);
+
+        // Two independent reads of the same row, e.g. two concurrent editors of the same submission.
+        Submission firstCopy = submissionRepositoryService.findById(saved.getId()).orElseThrow();
+        Submission secondCopy = submissionRepositoryService.findById(saved.getId()).orElseThrow();
+
+        firstCopy.setInputData(Map.of("key", "first update"));
+        submissionRepositoryService.save(firstCopy);
+
+        secondCopy.setInputData(Map.of("key", "second, stale update"));
+        assertThatThrownBy(() -> submissionRepositoryService.save(secondCopy))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 
     @Test

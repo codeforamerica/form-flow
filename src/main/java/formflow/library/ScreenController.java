@@ -454,14 +454,17 @@ public class ScreenController extends FormFlowController {
                     )
             );
             submission.setSubmittedAt(OffsetDateTime.now());
-
-            if (config != null && config.isCreateShortCodeAtSubmission()) {
-                submissionRepositoryService.generateAndSetUniqueShortCode(submission);
-            }
         }
 
         actionManager.handleBeforeSaveAction(currentScreen, submission);
         submission = saveToRepository(submission);
+
+        // Short code generation saves internally, so it has to run after saveToRepository - otherwise the
+        // saveToRepository call above would be passed a submission that's stale relative to what short code
+        // generation just persisted, and fail its own optimistic-lock check.
+        if (submitSubmission && config != null && config.isCreateShortCodeAtSubmission()) {
+            submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+        }
 
         if (config != null && config.isCreateShortCodeAtCreation()) {
             submissionRepositoryService.generateAndSetUniqueShortCode(submission);

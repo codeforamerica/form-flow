@@ -45,8 +45,10 @@ public class LockedSubmissionRedirectTest extends AbstractMockMvcTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        UUID submissionUUID = UUID.randomUUID();
-        submission = Submission.builder().id(submissionUUID).urlParams(new HashMap<>()).inputData(new HashMap<>()).build();
+        // Persisted for real (rather than fabricating an id) so this submission has a real version:
+        // submissionRepositoryService is a spy here, so later saves in the request flow hit real Hibernate.
+        submission = submissionRepositoryService.save(
+                Submission.builder().flow("testFlow").urlParams(new HashMap<>()).inputData(new HashMap<>()).build());
         // this sets up flow info in the session to get passed along later on.
         setFlowInfoInSession(session, "testFlow", submission.getId());
         super.setUp();

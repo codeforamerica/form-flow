@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,6 +76,9 @@ public class Submission {
     @Setter(AccessLevel.NONE)
     @Column(name = "short_code")
     private String shortCode;
+    @Version
+    @Column(name = "version")
+    private Long version;
 
     /**
      * Creates a new <code>Submission</code> with empty content
@@ -99,6 +103,7 @@ public class Submission {
         newSubmission.setUpdatedAt(origSubmission.getUpdatedAt());
         newSubmission.setSubmittedAt(origSubmission.getSubmittedAt());
         newSubmission.setId(origSubmission.getId());
+        newSubmission.setVersion(origSubmission.getVersion());
 
         newSubmission.setShortCode(origSubmission.getShortCode());
 

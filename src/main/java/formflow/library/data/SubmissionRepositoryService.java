@@ -65,6 +65,10 @@ public class SubmissionRepositoryService {
     public Submission save(Submission submission) {
         var newRecord = submission.getId() == null;
         Submission savedSubmission = repository.save(encryptionService.encrypt(submission));
+        // Hibernate can defer the UPDATE (and the resulting version bump) until the transaction
+        // flushes. Force it now so the version we read below - and hand back to the caller - is
+        // never stale relative to what's actually in the database.
+        entityManager.flush();
         if (newRecord) {
             log.info("created submission id: " + savedSubmission.getId());
         }

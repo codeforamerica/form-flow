@@ -35,7 +35,7 @@ public class CrossValidationTest extends AbstractMockMvcTest {
     public void setUp() throws Exception {
         UUID submissionUUID = UUID.randomUUID();
         mockMvc = MockMvcBuilders.standaloneSetup(screenController).build();
-        submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
+        submission = Submission.builder().id(submissionUUID).version(0L).inputData(new HashMap<>()).build();
         setFlowInfoInSession(session, "testFlow", submission.getId());
         super.setUp();
         when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
