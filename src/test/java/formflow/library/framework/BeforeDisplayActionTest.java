@@ -30,11 +30,15 @@ public class BeforeDisplayActionTest extends AbstractMockMvcTest {
     @BeforeEach
     public void setUp() throws Exception {
         UUID submissionUUID = UUID.randomUUID();
-        submission = Submission.builder().id(submissionUUID).inputData(new HashMap<>()).build();
+        submission = Submission.builder().id(submissionUUID).version(0L).inputData(new HashMap<>()).build();
         setFlowInfoInSession(session, "testFlow", submission.getId());
         super.setUp();
         when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
         when(submissionRepositoryService.save(any())).thenReturn(submission);
+        when(submissionRepositoryService.withSubmissionLock(any(), any())).thenAnswer(invocation -> {
+            java.util.function.Supplier<?> action = invocation.getArgument(1);
+            return action.get();
+        });
     }
 
     @Test
