@@ -8,6 +8,11 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * Built-in {@link DefaultSubmissionFieldPreparer} that prepares {@link DatabaseField}s from a submission's own
+ * metadata - {@code submittedAt}, {@code submissionId}, {@code createdAt}, {@code updatedAt}, and {@code flow} -
+ * for whichever of those keys are configured under {@code dbFields} in a {@code pdf-map.yaml} file.
+ */
 @Component
 @Slf4j
 public class DatabaseFieldPreparer implements DefaultSubmissionFieldPreparer {

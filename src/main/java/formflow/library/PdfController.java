@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Handles downloading the filled-out PDF version of a {@link Submission}.
+ */
 @Controller
 @EnableAutoConfiguration
 @Slf4j
@@ -33,6 +36,16 @@ public class PdfController extends FormFlowController {
 
     private final PdfService pdfService;
 
+    /**
+     * Wires up the repositories, services, and flow configuration this controller needs.
+     *
+     * @param messageSource                    source for user-facing messages
+     * @param pdfService                       service used to generate the filled-out PDF and its file name
+     * @param submissionRepositoryService      service used to load the {@link Submission} to generate a PDF for
+     * @param userFileRepositoryService         service used to load/save the files a submission has uploaded
+     * @param flowConfigurations               the configured flows for this application
+     * @param formFlowConfigurationProperties  form-flow-wide configuration properties
+     */
     public PdfController(MessageSource messageSource, PdfService pdfService,
             SubmissionRepositoryService submissionRepositoryService,
             UserFileRepositoryService userFileRepositoryService,

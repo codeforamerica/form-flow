@@ -21,6 +21,9 @@ public class UserFileMap {
     // flow -> inputName -> fileId -> file info
     private Map<String, Map<String, Map<UUID, Map<String, String>>>> userFileMap;
 
+    /**
+     * Creates a new, empty file map.
+     */
     public UserFileMap() {
         userFileMap = new HashMap<>();
     }

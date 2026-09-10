@@ -26,13 +26,30 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @ConditionalOnProperty(name = "form-flow.session-continuity-interceptor.enabled", havingValue = "true")
 public class SessionContinuityInterceptor implements HandlerInterceptor, Ordered {
 
+    /**
+     * The Ant-style path pattern used to extract the {@code flow} and {@code screen} path variables from a
+     * regular screen request's URI.
+     */
     public static final String FLOW_PATH_FORMAT = ScreenController.FLOW + "/" + ScreenController.FLOW_SCREEN_PATH;
+    /**
+     * The Ant-style path pattern used to extract the {@code flow} and {@code screen} path variables from a
+     * screen's {@code /navigation} request URI.
+     */
     public static final String NAVIGATION_FLOW_PATH_FORMAT = FLOW_PATH_FORMAT + "/navigation";
 
     private static final String REDIRECT_URL = "/";
 
+    /**
+     * The configured flows for this application, used to look up each flow's first screen so requests for any
+     * other screen without a valid submission can be redirected.
+     */
     public List<FlowConfiguration> flowConfigurations;
 
+    /**
+     * Creates the interceptor.
+     *
+     * @param flowConfigurations the configured flows for this application
+     */
     public SessionContinuityInterceptor(List<FlowConfiguration> flowConfigurations) {
         this.flowConfigurations = flowConfigurations;
     }

@@ -13,6 +13,12 @@ import org.springframework.context.annotation.Configuration;
 public class AddressValidationServiceConfiguration {
 
     /**
+     * Default constructor.
+     */
+    public AddressValidationServiceConfiguration() {
+    }
+
+    /**
      * Creates the default SmartyStreets address validation service bean. This bean is only created if no other
      * AddressValidationService bean exists.
      *
