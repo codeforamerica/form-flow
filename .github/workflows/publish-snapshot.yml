@@ -42,12 +42,20 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           GPG_SIGNING_KEY: ${{ secrets.PLATFORM_ROBOT_GPG_PRIVATE_KEY }}
           GPG_SIGNING_PASSPHRASE: ${{ secrets.PLATFORM_ROBOT_GPG_PASSPHRASE }}
+      - name: Generate token for starter-app dispatch
+        id: starter_app_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: codeforamerica
+          repositories: form-flow-starter-app
       - name: Trigger starter-app tests on newly published version
         uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: codeforamerica/form-flow-starter-app
           event-type: form-flow-snapshot-updated
-          token: ${{ secrets.STARTER_APP_GITHUB_PAT }}
+          token: ${{ steps.starter_app_token.outputs.token }}
       - name: Announce on Slack
         if: failure()
         uses: ravsamhq/notify-slack-action@be814b201e233b2dc673608aa46e5447c8ab13f2 # 2.5.0
