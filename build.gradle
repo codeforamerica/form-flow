@@ -133,7 +133,7 @@ dependencyManagement {
         dependency 'org.apache.logging.log4j:log4j-to-slf4j:2.26.1'
         dependency 'ch.qos.logback:logback-core:1.6.4'
         dependency 'ch.qos.logback:logback-classic:1.6.4'
-        dependency 'com.fasterxml.jackson.core:jackson-core:2.21.7'
+        dependency 'com.fasterxml.jackson.core:jackson-core:2.22.3'
         dependency 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
         dependency 'tools.jackson.core:jackson-core:3.1.7'
         dependency 'tools.jackson.core:jackson-databind:3.2.3'
