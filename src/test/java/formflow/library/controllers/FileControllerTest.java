@@ -97,6 +97,10 @@ public class FileControllerTest extends AbstractMockMvcTest {
             userFile.setFileId(fileId);
             return userFile;
         });
+        when(submissionRepositoryService.withSubmissionLock(any(), any())).thenAnswer(invocation -> {
+            java.util.function.Supplier<?> action = invocation.getArgument(1);
+            return action.get();
+        });
 
         setFlowInfoInSession(session, "testFlow", submission.getId());
         super.setUp();
