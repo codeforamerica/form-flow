@@ -28,7 +28,7 @@ jobs:
       - name: Use faketty to allow for GPG signing
         uses: Yuri6037/Action-FakeTTY@1abc69c7d530815855caedcd73842bae5687c1a6 # v1.1
       - name: Hide sensitive inputs
-        uses: levibostian/action-hide-sensitive-inputs@15951963797b16aa43fa0b093b45cd2db0319fdd # 1.2.0
+        uses: levibostian/action-hide-sensitive-inputs@39cfbde19b3251728d2357dd0648172d1202c1ee # 1.2.1
         with:
           exclude_inputs: version
       - name: Checkout
