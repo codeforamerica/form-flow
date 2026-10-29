@@ -28,7 +28,7 @@ jobs:
       - name: Use faketty to allow for GPG signing
         uses: Yuri6037/Action-FakeTTY@1abc69c7d530815855caedcd73842bae5687c1a6 # v1.1
       - name: Hide sensitive inputs
-        uses: levibostian/action-hide-sensitive-inputs@15951963797b16aa43fa0b093b45cd2db0319fdd # 1.2.0
+        uses: levibostian/action-hide-sensitive-inputs@39cfbde19b3251728d2357dd0648172d1202c1ee # 1.2.1
         with:
           exclude_inputs: version
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@v6.0.1
+        uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -124,7 +124,7 @@ jobs:
         run: sed -i 's/version = "\(.*\)"/version = "${{ env.NEW_SNAPSHOT_VERSION }}"/' build.gradle
       - name: Generate token for snapshot version bump PR
         id: version_bump_token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -147,7 +147,7 @@ jobs:
           author: CfA Platforms Robot <platforms-robot@codeforamerica.org>
       - name: Generate token for starter-app dispatch
         id: starter_app_token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}

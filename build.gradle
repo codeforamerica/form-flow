@@ -123,20 +123,24 @@ repositories {
     mavenCentral()
 }
 
+// Override the Spring Framework version from the Spring Boot BOM so every module
+// (core, aop, tx, test, ...) moves together; mixing versions causes NoSuchMethodErrors.
+ext['spring-framework.version'] = '7.0.10'
+
 dependencyManagement {
     dependencies {
-        dependency 'org.apache.tomcat.embed:tomcat-embed-core:11.0.26'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-el:11.0.26'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:11.0.26'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-core:11.0.27'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-el:11.0.27'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:11.0.27'
         dependency 'org.apache.logging.log4j:log4j-core:2.26.1'
         dependency 'org.apache.logging.log4j:log4j-api:2.26.1'
         dependency 'org.apache.logging.log4j:log4j-to-slf4j:2.26.1'
         dependency 'ch.qos.logback:logback-core:1.6.5'
         dependency 'ch.qos.logback:logback-classic:1.6.5'
-        dependency 'com.fasterxml.jackson.core:jackson-core:2.22.3'
-        dependency 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
-        dependency 'tools.jackson.core:jackson-core:3.2.3'
-        dependency 'tools.jackson.core:jackson-databind:3.2.3'
+        dependency 'com.fasterxml.jackson.core:jackson-core:2.22.4'
+        dependency 'com.fasterxml.jackson.core:jackson-databind:2.22.4'
+        dependency 'tools.jackson.core:jackson-core:3.2.4'
+        dependency 'tools.jackson.core:jackson-databind:3.2.4'
         dependency 'io.netty:netty-codec-compression:4.2.19.Final'
         dependency 'io.netty:netty-codec-dns:4.2.19.Final'
         dependency 'io.netty:netty-codec-http:4.2.19.Final'
@@ -151,19 +155,13 @@ dependencyManagement {
         dependency 'org.springframework.security:spring-security-web:7.1.1'
         dependency 'org.springframework.security:spring-security-crypto:7.1.1'
         dependency 'org.springframework.integration:spring-integration-core:7.1.1'
-        dependency 'org.springframework:spring-core:7.0.9'
-        dependency 'org.springframework:spring-beans:7.0.9'
-        dependency 'org.springframework:spring-context:7.0.9'
-        dependency 'org.springframework:spring-expression:7.0.9'
-        dependency 'org.springframework:spring-web:7.0.9'
-        dependency 'org.springframework:spring-webmvc:7.0.9'
-        dependency 'org.springframework:spring-webflux:7.0.9'
-        dependency 'org.springframework:spring-messaging:7.0.9'
         dependency 'org.springframework.data:spring-data-jpa:4.1.1'
         dependency 'org.apache.httpcomponents.core5:httpcore5:5.4.4'
         dependency 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.4'
         dependency 'org.apache.httpcomponents.client5:httpclient5:5.6.5'
         dependency 'io.projectreactor:reactor-core:3.8.7'
+        dependency 'com.aayushatharva.brotli4j:brotli4j:1.24.0'
+        dependency 'com.aayushatharva.brotli4j:service:1.24.0'
     }
 }
 
@@ -187,11 +185,11 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:11.20.3'
     implementation "org.flywaydb:flyway-database-postgresql:11.20.3"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.55.14'
+    implementation 'software.amazon.awssdk:s3:2.57.2'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:7.3.0'
     implementation 'com.github.librepdf:openpdf:3.0.5'
     implementation 'org.yaml:snakeyaml:2.7'
-    implementation 'com.google.crypto.tink:tink:1.23.0'
+    implementation 'com.google.crypto.tink:tink:1.24.0'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.apache.tika:tika-core:4.1.0'
     implementation 'commons-codec:commons-codec:1.23.0'
