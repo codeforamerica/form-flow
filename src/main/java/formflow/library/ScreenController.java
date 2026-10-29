@@ -215,12 +215,28 @@ public class ScreenController extends FormFlowController {
 
         if (shouldRedirectDueToLockedSubmission(screen, submission, flow)) {
             String lockedSubmissionRedirectUrl = getLockedSubmissionRedirectUrl(flow, redirectAttributes, locale);
+            // Ensure submission is in session before redirecting
+            if (submission.getId() != null) {
+                setSubmissionInSession(httpSession, submission, flow);
+            }
             return new ModelAndView("redirect:" + lockedSubmissionRedirectUrl);
         }
 
         if (shouldRedirectToNextScreen(validatedUuid, repeatForIterationUuid, currentScreen, submission)) {
             String nextViewableScreen = getNextViewableScreen(flow, screen, validatedUuid, repeatForIterationUuid, submission);
             log.info("%s is not viewable, redirecting to %s".formatted(screen, nextViewableScreen));
+            
+            // Ensure submission is saved and in session before redirecting
+            // This prevents losing the submission if multiple pages are skipped
+            if ((submission.getUrlParams() != null) && (!submission.getUrlParams().isEmpty())) {
+                submission.mergeUrlParamsWithData(query_params);
+            } else {
+                submission.setUrlParams(query_params);
+            }
+            submission.setFlow(flow);
+            submission = saveToRepository(submission);
+            setSubmissionInSession(httpSession, submission, flow);
+            
             if (validatedUuid != null && repeatForIterationUuid != null) {
                 return new ModelAndView(String.format("redirect:/flow/%s/%s/%s/%s", flow, nextViewableScreen, validatedUuid,
                         repeatForIterationUuid));
@@ -438,14 +454,17 @@ public class ScreenController extends FormFlowController {
                     )
             );
             submission.setSubmittedAt(OffsetDateTime.now());
-
-            if (config != null && config.isCreateShortCodeAtSubmission()) {
-                submissionRepositoryService.generateAndSetUniqueShortCode(submission);
-            }
         }
 
         actionManager.handleBeforeSaveAction(currentScreen, submission);
         submission = saveToRepository(submission);
+
+        // Short code generation saves internally, so it has to run after saveToRepository - otherwise the
+        // saveToRepository call above would be passed a submission that's stale relative to what short code
+        // generation just persisted, and fail its own optimistic-lock check.
+        if (submitSubmission && config != null && config.isCreateShortCodeAtSubmission()) {
+            submissionRepositoryService.generateAndSetUniqueShortCode(submission);
+        }
 
         if (config != null && config.isCreateShortCodeAtCreation()) {
             submissionRepositoryService.generateAndSetUniqueShortCode(submission);
