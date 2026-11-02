@@ -97,7 +97,6 @@ Table of Contents
     * [Application Configuration](#application-configuration)
         * [Disabling a Flow](#disabling-a-flow)
         * [Locking the Submission for a Flow Once It Has Been Submitted](#locking-the-submission-for-a-flow-once-it-has-been-submitted)
-        * [Design System](#design-system)
         * [File Upload Properties](#file-upload-properties)
         * [Error Properties](#error-properties)
         * [Actuator Endpoints](#actuator-endpoints)
@@ -129,18 +128,6 @@ Table of Contents
         * [Setup Platform Flavored Google Styles for Java](#setup-platform-flavored-google-styles-for-java)
         * [Testing](#testing)
     * [Setup Fake Filler (Optional - Recommended for Chrome &amp; Firefox)](#setup-fake-filler-optional---recommended-for-chrome--firefox)
-* [Gradle tasks](#gradle-tasks)
-    * [checkForNpm](#checkForNpm)
-    * [npmInstall](#npmInstall)
-    * [moveNodeModulesToGenerated](#moveNodeModulesToGenerated)
-    * [moveUSWDSImagesToGenerated](#moveUSWDSImagesToGenerated)
-    * [compileSass](#compileSass)
-    * [compileJs](#compileJs)
-    * [watchCompileSass](#watchCompileSass)
-    * [watchCompileJs](#watchCompileJs)
-    * [cleanGenerated](#cleanGenerated)
-    * [clean](#clean)
-    * [processResources](#processResources)
 * [How to contribute](#how-to-contribute)
     * [Maintainer information](#maintainer-information)
 
@@ -3175,30 +3162,6 @@ The default message can be overwritten by placing a message string with the
 key `general.locked-submission`
 and your desired value in your application's `messages.properties` file.
 
-### Design System
-
-We are moving towards using a [custom theme](https://codeforamerica.github.io/uswds/dist/) of
-the [US Web Design System (USWDS)](https://designsystem.digital.gov/). Enabling this
-property will set template resolution to use USWDS styling in place of our default design system. The USWDS
-template location will become the default for your application, pulling USWDS styles, templates and
-fragments
-in place of our default ones. The USWDS file path will be `/resources/cfa-uswds-templates/`. You can
-override templates and fragments in this path by placing a file with the same name and path in your
-application. For example, placing a file at `/resources/cfa-uswds-templates/fragments/example.html`
-would override the fragment with the same name in the USWDS fragments folder.
-
-You can view all the USWDS templates and fragments in
-the [USWDS templates folder](https://github.com/codeforamerica/form-flow/tree/main/src/main/resources/cfa-uswds-templates).
-
-When using `cfa-uswds`, we also enable several Gradle tasks that compile Sass and Javascript in the
-starter application. These tasks will automatically run when building/starting the application
-locally. You can learn more about the [Gradle tasks in the section below](#gradle-tasks).
-
-| Property                       | Default | Description                                                                                                                          |
-|--------------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `form-flow.design-system.name` | none    | Can use `cfa-uswds` to enable the CfA USWDS design system assets and templates. Otherwise our default assets and templates are used. |
-|
-
 ### File Upload Properties
 
 | Property                                | Default                                                    | Description                                                                                                                           |
@@ -3704,118 +3667,6 @@ or [Fake Filler for FireFox](https://addons.mozilla.org/en-US/firefox/addon/fake
 - Click
   on [Keyboard Shortcuts (chrome)](chrome-extension://bnjjngeaknajbdcgpfkgnonkmififhfo/options.html#/keyboard-shortcuts)
   to choose the shortcut you want to use to fill out the page.
-
-# Gradle tasks
-
-This documentation is for custom tasks written in
-the [Starter Application's `build.gradle`](https://github.com/codeforamerica/form-flow-starter-app/blob/main/build.gradle).
-
-## checkForNpm
-
-- **Description**: Check if `npm` is accessible and install it if not.
-- **Usage**:
-  ```
-  ./gradlew checkForNpm
-  ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system
-  application
-  property is set.
-
-## npmInstall
-
-- **Description**: Install frontend dependencies using `npm`.
-- **Usage**:
-  ```
-  ./gradlew npmInstall
-  ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system
-  application
-  property is set.
-
-## moveNodeModulesToGenerated
-
-- **Description**: Move Node Modules into Generated so that Spring Boot can use the assets.
-- **Usage**:
-  ```
-  ./gradlew moveNodeModulesToGenerated
-  ```
-  This task will automatically run in the `build` process if `cfa-uswds` design system application
-  property is set.
-
-## moveUSWDSImagesToGenerated
-
-- **Description**: Move USWDS images into generated folder for Spring Boot to use it.
-- **Usage**:
-  ```
-  ./gradlew moveUSWDSImagesToGenerated
-  ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system
-  application
-  property is set.
-
-## compileSass
-
-- **Description**: Compile Sass files into CSS.
-- **Usage**:
-  ```
-  ./gradlew compileSass
-  ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system
-  application
-  property is set.
-
-## compileJs
-
-- **Description**: Compile CommonJS into JavaScript.
-- **Usage**:
-  ```
-  ./gradlew compileJs
-  ```
-  This task will automatically run in the `build` process if the `cfa-uswds` design system
-  application
-  property is set.
-
-## watchCompileSass
-
-- **Description**: Infinite task to watch and recompile changes with SCSS.
-- **Usage**:
-  ```
-  ./gradlew watchCompileSass
-  ```
-  You will want to have this task run in a separate terminal as it will continue to run until you
-  terminate it.
-
-## watchCompileJs
-
-- **Description**: Infinite task to watch and recompile changes with JavaScript.
-- **Usage**:
-  ```
-  ./gradlew watchCompileJs
-  ```
-  You will want to have this task run in a separate terminal as it will continue to run until you
-  terminate it.
-
-## cleanGenerated
-
-- **Description**: Deletes the 'generated' directory.
-- **Usage**:
-  ```
-  ./gradlew cleanGenerated
-  ```
-
-## clean
-
-- **Description**: When `cfa-uswds` is set, the standard `clean` task will also delete `generated/`
-  and `node_modules/`
-- **Usage**:
-  ```
-  ./gradlew clean
-  ```
-
-## processResources
-
-- **Description**: When `cfa-uswds` is set, when building the application, this task will
-  call `compileSass` and `compileJS`.
 
 # How to contribute
 
