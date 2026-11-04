@@ -162,6 +162,8 @@ dependencyManagement {
         dependency 'io.projectreactor:reactor-core:3.8.8'
         dependency 'com.aayushatharva.brotli4j:brotli4j:1.24.0'
         dependency 'com.aayushatharva.brotli4j:service:1.24.0'
+        dependency 'net.minidev:json-smart:2.6.1'
+        dependency 'net.minidev:accessors-smart:2.6.1'
     }
 }
 
@@ -185,7 +187,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:11.20.3'
     implementation "org.flywaydb:flyway-database-postgresql:11.20.3"
     implementation 'org.webjars.npm:dropzone:5.9.3'
-    implementation 'software.amazon.awssdk:s3:2.57.5'
+    implementation 'software.amazon.awssdk:s3:2.57.3'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:7.3.0'
     implementation 'com.github.librepdf:openpdf:3.0.5'
     implementation 'org.yaml:snakeyaml:2.7'
