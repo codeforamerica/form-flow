@@ -162,6 +162,7 @@ dependencyManagement {
         dependency 'io.projectreactor:reactor-core:3.8.8'
         dependency 'com.aayushatharva.brotli4j:brotli4j:1.24.0'
         dependency 'com.aayushatharva.brotli4j:service:1.24.0'
+        dependency 'net.minidev:accessors-smart:2.6.1'
     }
 }
 
