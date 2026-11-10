@@ -142,7 +142,7 @@ dependencyManagement {
         dependency 'tools.jackson.core:jackson-core:3.2.4'
         dependency 'tools.jackson.core:jackson-databind:3.2.4'
         dependency 'io.netty:netty-codec-compression:4.2.19.Final'
-        dependency 'io.netty:netty-codec-dns:4.2.19.Final'
+        dependency 'io.netty:netty-codec-dns:4.2.20.Final'
         dependency 'io.netty:netty-codec-http:4.2.20.Final'
         dependency 'io.netty:netty-codec-http2:4.2.19.Final'
         dependency 'io.netty:netty-codec-http3:4.2.19.Final'
