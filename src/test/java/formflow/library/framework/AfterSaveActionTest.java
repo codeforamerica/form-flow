@@ -46,6 +46,11 @@ public class AfterSaveActionTest extends AbstractMockMvcTest {
 
         super.setUp();
         when(submissionRepositoryService.findById(any())).thenReturn(Optional.of(submission));
+        when(submissionRepositoryService.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(submissionRepositoryService.withSubmissionLock(any(), any())).thenAnswer(invocation -> {
+            java.util.function.Supplier<?> action = invocation.getArgument(1);
+            return action.get();
+        });
     }
 
     @Test
