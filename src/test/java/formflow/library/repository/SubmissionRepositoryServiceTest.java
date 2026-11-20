@@ -1,6 +1,7 @@
 package formflow.library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import formflow.library.config.submission.ShortCodeConfig;
 import formflow.library.data.Submission;
@@ -10,15 +11,23 @@ import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -273,6 +282,72 @@ class SubmissionRepositoryServiceTest {
         assertThat(updatedSubmission.getUpdatedAt()).isNotNull();
         assertThat(updatedSubmission.getUpdatedAt()).isBefore(OffsetDateTime.now());
         assertThat(updatedSubmission.getUpdatedAt()).isNotEqualTo(savedSubmission.getUpdatedAt());
+    }
+
+    @Test
+    void savingAStaleCopyOfAnUpdatedSubmissionThrowsAnOptimisticLockingException() {
+        Submission submission = new Submission();
+        submission.setFlow("testFlow");
+        Submission saved = submissionRepositoryService.save(submission);
+
+        // Two independent reads of the same row, e.g. two concurrent editors of the same submission.
+        Submission firstCopy = submissionRepositoryService.findById(saved.getId()).orElseThrow();
+        Submission secondCopy = submissionRepositoryService.findById(saved.getId()).orElseThrow();
+
+        firstCopy.setInputData(Map.of("key", "first update"));
+        submissionRepositoryService.save(firstCopy);
+
+        secondCopy.setInputData(Map.of("key", "second, stale update"));
+        assertThatThrownBy(() -> submissionRepositoryService.save(secondCopy))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
+    }
+
+    @Test
+    void withSubmissionLockSerializesConcurrentTransactionsOnTheSameKey() throws Exception {
+        String lockKey = "test-lock-" + UUID.randomUUID();
+        List<Instant> enterTimes = Collections.synchronizedList(new ArrayList<>());
+        List<Instant> exitTimes = Collections.synchronizedList(new ArrayList<>());
+        CountDownLatch startLatch = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Runnable task = () -> {
+            try {
+                startLatch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            // Each thread calls a fresh @Transactional method invocation through the Spring proxy,
+            // so each gets its own transaction/connection - simulating two separate app instances
+            // sharing the same database rather than two threads sharing one connection.
+            submissionRepositoryService.withSubmissionLock(lockKey, () -> {
+                enterTimes.add(Instant.now());
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                exitTimes.add(Instant.now());
+                return null;
+            });
+        };
+
+        try {
+            Future<?> first = executor.submit(task);
+            Future<?> second = executor.submit(task);
+            startLatch.countDown();
+            first.get(10, TimeUnit.SECONDS);
+            second.get(10, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertThat(enterTimes).hasSize(2);
+        assertThat(exitTimes).hasSize(2);
+        enterTimes.sort(Comparator.naturalOrder());
+        exitTimes.sort(Comparator.naturalOrder());
+        // the second caller can't have entered its critical section until the first one released
+        // the lock by exiting (i.e. their [enter, exit] windows don't overlap).
+        assertThat(enterTimes.get(1)).isAfterOrEqualTo(exitTimes.get(0));
     }
 
     private Submission saveAndReload(Submission submission) {
