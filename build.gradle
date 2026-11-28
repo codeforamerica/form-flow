@@ -125,7 +125,7 @@ repositories {
 
 // Override the Spring Framework version from the Spring Boot BOM so every module
 // (core, aop, tx, test, ...) moves together; mixing versions causes NoSuchMethodErrors.
-ext['spring-framework.version'] = '7.0.10'
+ext['spring-framework.version'] = '7.0.11'
 
 dependencyManagement {
     dependencies {
