@@ -1,6 +1,7 @@
 package formflow.library.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,6 +74,10 @@ public class PdfControllerTest extends AbstractMockMvcTest {
 
         when(pdfService.getFilledOutPDF(submission)).thenReturn(filledPdfByteArray);
         when(submissionRepositoryService.findById(submissionId)).thenReturn(Optional.of(submission));
+        when(submissionRepositoryService.withSubmissionLock(any(), any())).thenAnswer(invocation -> {
+            java.util.function.Supplier<?> action = invocation.getArgument(1);
+            return action.get();
+        });
         super.setUp();
     }
 
